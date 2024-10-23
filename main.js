@@ -1,11 +1,21 @@
-GenerateWorld();
+let lastFrameTime = performance.now();
 
-setInterval(()=> {
-    Update();
+function gameLoop() {
+    const currentFrameTime = performance.now();
+    const deltaTime = (currentFrameTime - lastFrameTime) / 1000;
+    
+    updateGame(deltaTime);
+
     Draw();
     DrawChunks(chunks);
-}, 1000/60);
 
+    lastFrameTime = currentFrameTime;
 
-function Update() {
+    requestAnimationFrame(gameLoop);
 }
+
+function updateGame(deltaTime) {
+    camera.update(deltaTime);
+}
+
+requestAnimationFrame(gameLoop);

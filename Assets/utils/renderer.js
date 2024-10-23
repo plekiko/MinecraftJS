@@ -20,7 +20,7 @@ function Draw() {
 }
 
 function DrawChunks(chunks) {
-    const currentChunk = camera.getCurrentChunkIndex();
+    const currentChunk = camera.getCurrentChunkIndex(chunks);
 
     for(let i = -RENDER_DISTANCE; i < RENDER_DISTANCE; i++) {
         if(currentChunk + i < 0)
@@ -31,21 +31,23 @@ function DrawChunks(chunks) {
     }
 }
 
-function DrawChunk(chunk, index) {
+function DrawChunk(chunk) {
     DrawBlocks(chunk.walls, chunk.x);
     DrawBlocks(chunk.blocks, chunk.x);
 
     if(drawingChunkBorders)
-        DrawChunkLine(chunk, index);
+        DrawChunkLine(chunk);
 }
 
-function DrawChunkLine(chunk, index) {
+function DrawChunkLine(chunk) {
     const chunkX = chunk.x;
     ctx.strokeStyle = "red";
     ctx.beginPath();
     ctx.moveTo(chunkX - camera.x, 0);
     ctx.lineTo(chunkX - camera.x, CHUNK_HEIGHT * BLOCK_SIZE);
     ctx.stroke();
+
+    const index = chunk.x / CHUNK_WIDTH / BLOCK_SIZE;
 
     // Draw Text for chunk Index
     ctx.fillStyle = "black";

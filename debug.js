@@ -30,7 +30,6 @@ function CameraLogic() {
     if (Math.abs(camera.velocity.y) < deceleration) camera.velocity.y = 0;
 
     // Update camera position based on velocity
-    camera.x += camera.velocity.x;
-    camera.y += camera.velocity.y;
+    camera.update(1);
 }
 

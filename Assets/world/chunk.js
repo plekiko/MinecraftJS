@@ -6,6 +6,7 @@ class Chunk {
         this.walls = [];
         this.width = width;
         this.height = CHUNK_HEIGHT;
+        this.generated = false;
         this.generateChunk();
     }
 

@@ -41,31 +41,36 @@ function PrintNoiseOutput() {
 }
 
 function GenerateWorld() {
-    console.time("Chunks generated in");
+    // console.time("Chunks generated in");
 
-    // PrintNoiseOutput();
-
-    for (let i = 0; i < 50; i++) {
-        // Get the temperature from the noise map for this chunk
-        const temp = worldTemperatureNoiseMap.getNoise(i);
-
-        // Determine the biome based on the temperature
-        const biome = getBiomeForTemperature(temp);
-
-        const newChunk = new Chunk(i * CHUNK_WIDTH * BLOCK_SIZE, CHUNK_WIDTH, biome);
-
-        // Create and push the chunk with the determined biome
-        chunks.push(newChunk);
+    const currentChunkIndex = camera.getCurrentChunkIndex(chunks);
+    
+    // Generate chunks within the visible range of the camera
+    for (let i = currentChunkIndex - RENDER_DISTANCE; i < currentChunkIndex + RENDER_DISTANCE; i++) {
+        const chunkExists = chunks.some(chunk => chunk.x === i * CHUNK_WIDTH * BLOCK_SIZE);
+        
+        if (!chunkExists) {
+            const temp = worldTemperatureNoiseMap.getNoise(i);
+            const biome = getBiomeForTemperature(temp);
+            console.log(i + " is " + temp + " so is a " + biome.name)
+            const newChunk = new Chunk(i * CHUNK_WIDTH * BLOCK_SIZE, CHUNK_WIDTH, biome);
+            
+            // Add the new chunk to the array
+            chunks.push(newChunk);
+        }
     }
 
-    // Post generation
+    // Post generation (trees, caves, bedrock)
     chunks.forEach(chunk => {
-        chunk.generateCaves();
-        chunk.generateTrees();
-        chunk.generateBedrock();
+        if (!chunk.generated) { // Ensure generation logic only happens once per chunk
+            chunk.generateCaves();
+            chunk.generateTrees();
+            chunk.generateBedrock();
+            chunk.generated = true; // Mark chunk as fully generated
+        }
     });
 
-    console.timeEnd("Chunks generated in");
+    // console.timeEnd("Chunks generated in");
 }
 
 function getBiomeForTemperature(temp) {
