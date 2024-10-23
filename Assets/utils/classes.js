@@ -214,3 +214,19 @@ function RandomRange(min, max) {
 function AngleToVector(angle) {
     return new Vector2(Math.cos(angle), Math.sin(angle));
 }
+
+class Camera {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.velocity = new Vector2()
+    }
+
+    getWorldX() {
+        return this.x + CANVAS.width/2;
+    }
+
+    getCurrentChunkIndex() {
+        return Math.floor(this.getWorldX() / CHUNK_WIDTH / BLOCK_SIZE);
+    }
+}

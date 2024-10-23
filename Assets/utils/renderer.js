@@ -7,11 +7,7 @@ ctx.imageSmoothingEnabled = false;
 
 let drawingChunkBorders = true;
 
-const camera = {
-    x: 0,
-    y: 0,
-    velocity: new Vector2()
-};
+const camera = new Camera(0, 0);
 
 function DrawBackground() {
     ctx.fillStyle = "aqua";
@@ -24,8 +20,7 @@ function Draw() {
 }
 
 function DrawChunks(chunks) {
-    const worldCameraXPos = camera.x + CANVAS.width/2;
-    const currentChunk = Math.round(worldCameraXPos / CHUNK_WIDTH / BLOCK_SIZE);
+    const currentChunk = camera.getCurrentChunkIndex();
 
     for(let i = -RENDER_DISTANCE; i < RENDER_DISTANCE; i++) {
         if(currentChunk + i < 0)
@@ -34,7 +29,6 @@ function DrawChunks(chunks) {
             continue;
         DrawChunk(chunks[currentChunk + i], currentChunk + i);
     }
-
 }
 
 function DrawChunk(chunk, index) {
