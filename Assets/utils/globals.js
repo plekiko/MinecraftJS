@@ -1,0 +1,5 @@
+const RENDER_DISTANCE = 4;
+const CHUNK_WIDTH = 16;
+const CHUNK_HEIGHT = 100;
+const BLOCK_SIZE = 16;
+const CAVES_THRESHOLD = 4;

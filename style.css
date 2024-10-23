@@ -1,0 +1,22 @@
+* {
+    margin: 0;
+}
+
+#canvas {
+    image-rendering: crisp-edges; /* Firefox */
+    image-rendering: -moz-crisp-edges; /* Firefox */
+    image-rendering: -webkit-optimize-contrast; /* Safari */
+    image-rendering: pixelated; /* Chrome and modern browsers */
+    image-rendering: -o-crisp-edges; /* Older Opera browsers */
+    image-rendering: optimizeSpeed; /* Optional fallback for older browsers */
+  }
+  
+
+body {
+    background-color: black;
+}
+
+@font-face {
+    font-family: 'Pixel';
+    src: url('Assets/fonts/minecraft-font/MinecraftRegular-Bmg3.otf');
+}
