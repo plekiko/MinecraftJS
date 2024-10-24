@@ -1,5 +1,6 @@
 const RENDER_DISTANCE = 3;
 const CHUNK_WIDTH = 16;
-const CHUNK_HEIGHT = 100;
-const BLOCK_SIZE = 8;
+const CHUNK_HEIGHT = 200 / 2;
+const BLOCK_SIZE = 16;
 const CAVES_THRESHOLD = 4;
+const TERRAIN_HEIGHT = 60 / 2;

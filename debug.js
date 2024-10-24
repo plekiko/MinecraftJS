@@ -11,6 +11,7 @@ function UpdateDebug() {
 function HandleInput() {
     if (input.isKeyPressed("KeyB")) drawingChunkBorders = !drawingChunkBorders;
     if (input.isKeyPressed("KeyN")) drawCamera = !drawCamera;
+    if (input.isKeyPressed("KeyH")) drawHeight = !drawHeight;
 }
 
 function CameraLogic() {

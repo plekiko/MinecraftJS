@@ -3,7 +3,8 @@ class Chunk {
         x = 0,
         width = 8,
         biome = Biomes.Planes,
-        pendingBlocks = new Map()
+        pendingBlocks = new Map(),
+        worldGrassNoiseMap = new Noise()
     ) {
         this.biome = biome;
         this.x = x;
@@ -13,6 +14,8 @@ class Chunk {
         this.height = CHUNK_HEIGHT;
         this.generated = false;
         this.pendingBlocks = pendingBlocks;
+        this.grassNoiseMap = worldGrassNoiseMap;
+
         this.generateChunk();
     }
 
@@ -34,16 +37,16 @@ class Chunk {
     }
 
     getHeight(x) {
-        const worldX = this.getWorldX(x);
-        const heightFirstPass = this.biome.heightNoise.getNoise(worldX, 0, 0);
+        const worldX = this.x / BLOCK_SIZE + x;
+        const heightFirstPass = this.biome.heightNoise.getNoise(worldX, 0);
         const heightSecondPass = this.biome.heightNoise.getNoise(
-            worldX + 10000,
-            10000,
-            0,
-            2
+            worldX,
+            100000
         );
+
         const heightRaw = (heightFirstPass + heightSecondPass) / 2;
-        return Math.round(this.biome.heightNoise.min + heightRaw);
+
+        return Math.floor(this.biome.heightNoise.min + heightRaw);
     }
 
     getWorldX(x) {
@@ -66,7 +69,8 @@ class Chunk {
 
     generateHeight() {
         for (let x = 0; x < this.width; x++) {
-            const height = this.getHeight(x * 16);
+            const height = this.getHeight(x);
+
             for (let y = height; y > 0; y--) {
                 if (y > height - this.biome.secondLayerWidth) {
                     this.setBlockType(x, y, this.biome.secondLayer);
@@ -87,6 +91,7 @@ class Chunk {
 
     generateTrees() {
         if (!this.biome.treeType) return;
+        if (this.biome.treeType.length == 0) return;
         for (
             let i = this.x;
             i < this.x + CHUNK_WIDTH * BLOCK_SIZE;
@@ -95,6 +100,20 @@ class Chunk {
             const noiseOutput = worldTreeNoiseMap.getNoise(i);
             if (noiseOutput >= this.biome.treeThreshold) {
                 this.spawnTree(this.getLocalX(i, this));
+            }
+        }
+    }
+
+    generateGrass() {
+        if (this.biome.grassType.length == 0) return;
+        for (let x = 0; x < CHUNK_WIDTH; x++) {
+            if (this.grassNoiseMap.getNoise(this.getWorldX(x)) >= 1) {
+                const y = this.findGroundLevel(x);
+                const randomGrass =
+                    this.biome.grassType[
+                        RandomRange(0, this.biome.grassType.length)
+                    ];
+                this.setBlockType(x, y, randomGrass);
             }
         }
     }
@@ -112,7 +131,8 @@ class Chunk {
                 blockAtPos == Blocks.GrassBlock ||
                 blockAtPos == Blocks.SnowedGrassBlock ||
                 blockAtPos == Blocks.Sand ||
-                blockAtPos == Blocks.Cactus
+                blockAtPos == Blocks.Cactus ||
+                blockAtPos == Blocks.Podzol
             ) {
                 return y + 1; // Place tree one block above ground
             }
@@ -170,6 +190,7 @@ class Chunk {
 
             targetChunk.setBlockType(localX, localY, blockType);
         } else {
+            if (blockType == BlockType.Air) return;
             // Buffer the block to place it once the chunk is generated
             const chunkX =
                 Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *

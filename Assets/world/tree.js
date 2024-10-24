@@ -137,6 +137,40 @@ const Trees = Object.freeze({
         ],
     ]),
 
+    BigSpruce: new Tree([
+        [
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [Blocks.SpruceLog, Blocks.SpruceLog],
+            [
+                Blocks.SpruceLeaves,
+                Blocks.SpruceLeaves,
+                Blocks.SpruceLeaves,
+                Blocks.SpruceLeaves,
+                Blocks.SpruceLeaves,
+                Blocks.SpruceLeaves,
+            ],
+            [
+                Blocks.SpruceLeaves,
+                Blocks.SpruceLeaves,
+                Blocks.SpruceLeaves,
+                Blocks.SpruceLeaves,
+            ],
+            [Blocks.SpruceLeaves, Blocks.SpruceLeaves],
+        ],
+    ]),
+
     Acacia: new Tree([
         [
             [Blocks.AcaciaLog],

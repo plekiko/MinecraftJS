@@ -2,6 +2,19 @@
     margin: 0;
 }
 
+body {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-image: url("Assets/sprites/misc/End_Poem_background.webp");
+
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 #canvas {
     image-rendering: crisp-edges; /* Firefox */
     image-rendering: -moz-crisp-edges; /* Firefox */
@@ -9,14 +22,13 @@
     image-rendering: pixelated; /* Chrome and modern browsers */
     image-rendering: -o-crisp-edges; /* Older Opera browsers */
     image-rendering: optimizeSpeed; /* Optional fallback for older browsers */
-  }
-  
 
-body {
-    background-color: black;
+    box-shadow: 0 0 20px black;
+
+    border-radius: 5px;
 }
 
 @font-face {
-    font-family: 'Pixel';
-    src: url('Assets/fonts/minecraft-font/MinecraftRegular-Bmg3.otf');
+    font-family: "Pixel";
+    src: url("Assets/fonts/minecraft-font/MinecraftRegular-Bmg3.otf");
 }

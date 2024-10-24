@@ -254,3 +254,8 @@ class Camera {
         GenerateWorld();
     }
 }
+
+// Helper function for linear interpolation (LERP)
+function lerp(a, b, t) {
+    return a + (b - a) * t;
+}
