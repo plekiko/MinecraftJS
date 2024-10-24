@@ -1,5 +1,10 @@
 class Chunk {
-    constructor(x = 0, width = 8, biome = Biomes.Planes) {
+    constructor(
+        x = 0,
+        width = 8,
+        biome = Biomes.Planes,
+        pendingBlocks = new Map()
+    ) {
         this.biome = biome;
         this.x = x;
         this.blocks = [];
@@ -7,6 +12,7 @@ class Chunk {
         this.width = width;
         this.height = CHUNK_HEIGHT;
         this.generated = false;
+        this.pendingBlocks = pendingBlocks;
         this.generateChunk();
     }
 
@@ -23,20 +29,39 @@ class Chunk {
     }
 
     generateChunk() {
-        this.generateArray();  // Initialize blocks
+        this.generateArray(); // Initialize blocks
         this.generateHeight(); // Generate terrain height
     }
 
     getHeight(x) {
         const worldX = this.getWorldX(x);
         const heightFirstPass = this.biome.heightNoise.getNoise(worldX, 0, 0);
-        const heightSecondPass = this.biome.heightNoise.getNoise(worldX + 10000, 10000, 0, 2);
+        const heightSecondPass = this.biome.heightNoise.getNoise(
+            worldX + 10000,
+            10000,
+            0,
+            2
+        );
         const heightRaw = (heightFirstPass + heightSecondPass) / 2;
         return Math.round(this.biome.heightNoise.min + heightRaw);
     }
 
     getWorldX(x) {
         return this.x + x;
+    }
+
+    applyBufferedBlocks() {
+        const chunkX = this.x; // The x position of this chunk in world space
+        if (pendingBlocks.has(chunkX)) {
+            const blocksToPlace = pendingBlocks.get(chunkX);
+            blocksToPlace.forEach((block) => {
+                // console.log("Placed buffered " + block.blockType.name + " at " + block.x + " - " + block.y);
+
+                this.setBlockTypeAtPosition(block.x, block.y, block.blockType);
+            });
+            // Once the blocks are placed, remove them from the buffer
+            pendingBlocks.delete(chunkX);
+        }
     }
 
     generateHeight() {
@@ -62,7 +87,11 @@ class Chunk {
 
     generateTrees() {
         if (!this.biome.treeType) return;
-        for (let i = this.x; i < this.x + CHUNK_WIDTH * BLOCK_SIZE; i += BLOCK_SIZE) {
+        for (
+            let i = this.x;
+            i < this.x + CHUNK_WIDTH * BLOCK_SIZE;
+            i += BLOCK_SIZE
+        ) {
             const noiseOutput = worldTreeNoiseMap.getNoise(i);
             if (noiseOutput >= this.biome.treeThreshold) {
                 this.spawnTree(this.getLocalX(i, this));
@@ -71,7 +100,7 @@ class Chunk {
     }
 
     spawnTree(x) {
-        const y = this.findGroundLevel(x);  // Find valid ground level
+        const y = this.findGroundLevel(x); // Find valid ground level
         const randomTree = this.getRandomTreeFromBiome(); // Pick a random tree
         this.spawnTreeAt(randomTree, x, y); // Spawn the tree at the position
     }
@@ -79,7 +108,12 @@ class Chunk {
     findGroundLevel(x) {
         for (let y = this.height - 1; y >= 0; y--) {
             const blockAtPos = this.getBlockType(x, y);
-            if (blockAtPos == Blocks.GrassBlock || blockAtPos == Blocks.SnowedGrassBlock || blockAtPos == Blocks.Sand || blockAtPos == Blocks.Cactus) {
+            if (
+                blockAtPos == Blocks.GrassBlock ||
+                blockAtPos == Blocks.SnowedGrassBlock ||
+                blockAtPos == Blocks.Sand ||
+                blockAtPos == Blocks.Cactus
+            ) {
                 return y + 1; // Place tree one block above ground
             }
         }
@@ -89,8 +123,15 @@ class Chunk {
     generateCaves() {
         for (let y = 0; y < CHUNK_HEIGHT; y++) {
             for (let x = 0; x < CHUNK_WIDTH; x++) {
-                const noiseValue = worldCaveNoiseMap.getNoise(x + this.x / BLOCK_SIZE, y);
-                if (y <= this.biome.heightNoise.min * 1.5 ? noiseValue <= CAVES_THRESHOLD : noiseValue <= CAVES_THRESHOLD * 0.5) {
+                const noiseValue = worldCaveNoiseMap.getNoise(
+                    x + this.x / BLOCK_SIZE,
+                    y
+                );
+                if (
+                    y <= this.biome.heightNoise.min * 1.5
+                        ? noiseValue <= CAVES_THRESHOLD
+                        : noiseValue <= CAVES_THRESHOLD * 0.5
+                ) {
                     this.setBlockType(x, y, Blocks.Air); // Create cave openings
                 }
             }
@@ -110,8 +151,12 @@ class Chunk {
             const layerWidth = tree[i].length;
             for (let j = 0; j < layerWidth; j++) {
                 const block = tree[i][j];
-                const worldX = this.x + (x * BLOCK_SIZE) - Math.floor(layerWidth / 2) * BLOCK_SIZE + (j * BLOCK_SIZE);
-                const worldY = (y * BLOCK_SIZE) + (i * BLOCK_SIZE);
+                const worldX =
+                    this.x +
+                    x * BLOCK_SIZE -
+                    Math.floor(layerWidth / 2) * BLOCK_SIZE +
+                    j * BLOCK_SIZE;
+                const worldY = y * BLOCK_SIZE + i * BLOCK_SIZE;
                 this.setBlockTypeAtPosition(worldX, worldY, block);
             }
         }
@@ -122,14 +167,27 @@ class Chunk {
         if (targetChunk && worldY < targetChunk.height * BLOCK_SIZE) {
             const localX = this.getLocalX(worldX, targetChunk);
             const localY = worldY / BLOCK_SIZE;
+
             targetChunk.setBlockType(localX, localY, blockType);
         } else {
-            console.log(`Failed to place block at worldX: ${worldX}, worldY: ${worldY}`);
+            // Buffer the block to place it once the chunk is generated
+            const chunkX =
+                Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
+                CHUNK_WIDTH *
+                BLOCK_SIZE;
+            if (!pendingBlocks.has(chunkX)) {
+                pendingBlocks.set(chunkX, []);
+            }
+            pendingBlocks.get(chunkX).push({ x: worldX, y: worldY, blockType });
+            // console.log(`Buffered block at worldX: ${worldX}, worldY: ${worldY}`);
         }
     }
 
     getChunkForBlock(worldX) {
-        const chunkX = Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) * CHUNK_WIDTH * BLOCK_SIZE;
+        const chunkX =
+            Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
+            CHUNK_WIDTH *
+            BLOCK_SIZE;
         return chunks.get(chunkX); // Use the Map to get the chunk by its x-coordinate
     }
 
@@ -166,8 +224,10 @@ class Chunk {
         const tryAddToQueue = (x, y) => {
             const key = `${x},${y}`;
             if (
-                x >= 0 && x < this.width &&
-                y >= 0 && y < this.height &&
+                x >= 0 &&
+                x < this.width &&
+                y >= 0 &&
+                y < this.height &&
                 !visited.has(key) &&
                 this.getBlockType(x, y) === Blocks.Air
             ) {

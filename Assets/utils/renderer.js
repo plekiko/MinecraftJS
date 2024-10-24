@@ -6,6 +6,7 @@ CANVAS.height = 800;
 ctx.imageSmoothingEnabled = false;
 
 let drawingChunkBorders = true;
+let drawCamera = true;
 
 const camera = new Camera(0, 0);
 
@@ -17,9 +18,6 @@ function DrawBackground() {
 
 function Draw() {
     DrawBackground();
-
-    ctx.fillStyle = "black";
-    ctx.fillRect(CANVAS.width/2, CANVAS.height/2, 10, 10);
 }
 
 function DrawChunks(chunksMap) {
@@ -36,12 +34,23 @@ function DrawChunks(chunksMap) {
     }
 }
 
+function DrawCamera() {
+    ctx.fillStyle = "white";
+    ctx.fillRect(CANVAS.width / 2 - 2, CANVAS.height / 2 - 2, 14, 14);
+    ctx.fillStyle = "black";
+    ctx.fillRect(CANVAS.width / 2, CANVAS.height / 2, 10, 10);
+}
+
 function DrawChunk(chunk) {
     DrawBlocks(chunk.walls, chunk.x);
     DrawBlocks(chunk.blocks, chunk.x);
 
-    if(drawingChunkBorders)
-        DrawChunkLine(chunk);
+    DrawLate(chunk);
+}
+
+function DrawLate(chunk) {
+    if (drawingChunkBorders) DrawChunkLine(chunk);
+    if (drawCamera) DrawCamera();
 }
 
 function DrawChunkLine(chunk) {
@@ -56,12 +65,14 @@ function DrawChunkLine(chunk) {
 
     // Draw Text for chunk Index
     ctx.fillStyle = "black";
-    ctx.font = "20px Pixel";
-    const txt = `${index} - ${chunk.biome.name}\nTemp: ${Math.round(worldTemperatureNoiseMap.getNoise(index))}`;
-    var lines = txt.split('\n');
+    ctx.font = "15px Pixel";
+    const txt = `${index} - ${chunk.biome.name}\nTemp: ${Math.round(
+        worldTemperatureNoiseMap.getNoise(index)
+    )}`;
+    var lines = txt.split("\n");
 
     for (var i = 0; i < lines.length; i++)
-        ctx.fillText(lines[i], chunkX - camera.x + 10, 20 + i*20, 9999);
+        ctx.fillText(lines[i], chunkX - camera.x + 10, 15 + i * 15, 9999);
 }
 
 function DrawBlocks(blocks, xOffset) {
@@ -71,10 +82,10 @@ function DrawBlocks(blocks, xOffset) {
             const block = blocks[i][j];
 
             // j corresponds to the x position (horizontal)
-            const worldX = j * BLOCK_SIZE;  // Use j for x (horizontal)
+            const worldX = j * BLOCK_SIZE; // Use j for x (horizontal)
 
             // i corresponds to the y position (vertical)
-            const worldY = i * BLOCK_SIZE;  // Use i for y (vertical)
+            const worldY = i * BLOCK_SIZE; // Use i for y (vertical)
 
             // Draw the block at the calculated 2D position
             DrawBlockAtPosition(block, worldX + xOffset, worldY);

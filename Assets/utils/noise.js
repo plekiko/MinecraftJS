@@ -6,8 +6,12 @@ class Noise {
     }
 
     getNoise(x, y = 0, z = 0, intensityAmplifier = 1) {
-        const noiseRaw = (tooloud.Perlin.noise(x * this.scale, y * this.scale, z * this.scale));
-        
+        const noiseRaw = tooloud.Perlin.noise(
+            x * this.scale,
+            y * this.scale,
+            z * this.scale
+        );
+
         return noiseRaw * (this.intensity * intensityAmplifier) + this.min;
     }
 }
