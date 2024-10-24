@@ -219,45 +219,25 @@ class Camera {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.speed = 1;
-        this.velocity = new Vector2()
+        this.velocity = new Vector2();
     }
 
     getWorldX() {
-        return this.x + CANVAS.width/2;
+        return this.x + CANVAS.width / 2; // Calculate the world X position of the camera
     }
 
-    getCurrentChunkIndex(chunks) {
-        chunks.sort((a, b) => a.x - b.x);
-
+    getCurrentChunkIndex() {
         const worldX = this.getWorldX(); // Get the current world X position of the camera
-
-        // Perform binary search to find the chunk
-        let left = 0;
-        let right = chunks.length - 1;
-
-        while (left <= right) {
-            const mid = Math.floor((left + right) / 2);
-            const chunk = chunks[mid];
-            const chunkStart = chunk.x; // Start of the chunk
-            const chunkEnd = chunk.x + chunk.width * BLOCK_SIZE; // End of the chunk
-
-            if (worldX >= chunkStart && worldX < chunkEnd) {
-                return mid; // We found the chunk containing the worldX
-            } else if (worldX < chunkStart) {
-                right = mid - 1; // Search in the left half
-            } else {
-                left = mid + 1; // Search in the right half
-            }
-        }
-
-        return -1; // If no chunk is found, return -1 (handle errors if needed)
+        const chunkIndex = Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)); // Calculate the chunk index
+        return chunkIndex;
     }
 
     update(deltaTime) {
-        this.x += (this.velocity.x * this.speed) * deltaTime;
-        this.y += (this.velocity.y * this.speed) * deltaTime;
+        // Update camera position based on velocity
+        this.x += this.velocity.x * deltaTime;
+        this.y += this.velocity.y * deltaTime;
 
+        // Trigger world generation when the camera moves
         GenerateWorld();
     }
 }

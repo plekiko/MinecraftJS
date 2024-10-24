@@ -17,17 +17,22 @@ function DrawBackground() {
 
 function Draw() {
     DrawBackground();
+
+    ctx.fillStyle = "black";
+    ctx.fillRect(CANVAS.width/2, CANVAS.height/2, 10, 10);
 }
 
-function DrawChunks(chunks) {
-    const currentChunk = camera.getCurrentChunkIndex(chunks);
+function DrawChunks(chunksMap) {
+    const currentChunkX = camera.getCurrentChunkIndex(); // Get the x position of the current chunk
 
-    for(let i = -RENDER_DISTANCE; i < RENDER_DISTANCE; i++) {
-        if(currentChunk + i < 0)
-            continue;
-        if(currentChunk + i >= chunks.length)
-            continue;
-        DrawChunk(chunks[currentChunk + i], currentChunk + i);
+    for (let i = -RENDER_DISTANCE; i <= RENDER_DISTANCE; i++) {
+        const chunkX = (currentChunkX + i) * CHUNK_WIDTH * BLOCK_SIZE; // Calculate the x position of the chunk to render
+        // console.log(chunkX + " is " + chunksMap.has(chunkX));
+
+        if (chunksMap.has(chunkX)) {
+            const chunk = chunksMap.get(chunkX); // Retrieve the chunk from the Map using its x position
+            DrawChunk(chunk, chunkX); // Draw the chunk
+        }
     }
 }
 

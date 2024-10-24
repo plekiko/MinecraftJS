@@ -1,4 +1,4 @@
-const chunks = [];
+const chunks = new Map();
 
 tooloud.Perlin.setSeed(Math.floor(Math.random() * 10000));
 
@@ -41,27 +41,25 @@ function PrintNoiseOutput() {
 }
 
 function GenerateWorld() {
-    // console.time("Chunks generated in");
+    const currentChunkIndex = camera.getCurrentChunkIndex();
 
-    const currentChunkIndex = camera.getCurrentChunkIndex(chunks);
-    
     // Generate chunks within the visible range of the camera
-    for (let i = currentChunkIndex - RENDER_DISTANCE; i < currentChunkIndex + RENDER_DISTANCE; i++) {
-        const chunkExists = chunks.some(chunk => chunk.x === i * CHUNK_WIDTH * BLOCK_SIZE);
-        
-        if (!chunkExists) {
+    for (let i = currentChunkIndex - RENDER_DISTANCE; i <= currentChunkIndex + RENDER_DISTANCE; i++) {
+        const chunkX = i * CHUNK_WIDTH * BLOCK_SIZE; // Calculate the chunk's x position
+
+        // Check if the chunk already exists at this x position in the Map
+        if (!chunks.has(chunkX)) {
             const temp = worldTemperatureNoiseMap.getNoise(i);
             const biome = getBiomeForTemperature(temp);
-            console.log(i + " is " + temp + " so is a " + biome.name)
-            const newChunk = new Chunk(i * CHUNK_WIDTH * BLOCK_SIZE, CHUNK_WIDTH, biome);
+            const newChunk = new Chunk(chunkX, CHUNK_WIDTH, biome);
             
-            // Add the new chunk to the array
-            chunks.push(newChunk);
+            // Add the new chunk to the Map, keyed by its x position
+            chunks.set(chunkX, newChunk);
         }
     }
 
     // Post generation (trees, caves, bedrock)
-    chunks.forEach(chunk => {
+    chunks.forEach((chunk) => {
         if (!chunk.generated) { // Ensure generation logic only happens once per chunk
             chunk.generateCaves();
             chunk.generateTrees();
@@ -69,9 +67,9 @@ function GenerateWorld() {
             chunk.generated = true; // Mark chunk as fully generated
         }
     });
-
-    // console.timeEnd("Chunks generated in");
 }
+
+
 
 function getBiomeForTemperature(temp) {
     // Iterate through the available biomes and find one that matches the temperature range
