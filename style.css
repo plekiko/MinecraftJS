@@ -1,3 +1,7 @@
+:root {
+    --drawMouse: none;
+}
+
 * {
     margin: 0;
 }
@@ -13,6 +17,8 @@ body {
 
     background-repeat: no-repeat;
     background-size: cover;
+
+    cursor: var(--drawMouse);
 }
 
 #canvas {

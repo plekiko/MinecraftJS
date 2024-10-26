@@ -212,13 +212,18 @@ class Chunk {
         return chunks.get(chunkX); // Use the Map to get the chunk by its x-coordinate
     }
 
-    getLocalX(worldX, targetChunk) {
+    getLocalX(worldX, targetChunk = this) {
         return (worldX - targetChunk.x) / BLOCK_SIZE; // Scale the position to the block grid using BLOCK_SIZE
     }
 
-    getBlockType(x, y) {
-        y = this.calculateY(y);
+    getBlockType(x, y, calculated = true) {
+        if (calculated) y = this.calculateY(y);
         return this.blocks[y][x].blockType;
+    }
+
+    getBlock(x, y, calculated = true) {
+        if (calculated) y = this.calculateY(y);
+        return this.blocks[y][x];
     }
 
     setBlockType(x, y, blockType, blocks = this.blocks) {

@@ -51,6 +51,14 @@ class InputHandler {
         }
     }
 
+    isLeftMouseButtonPressed() {
+        if (this.mouse.leftMouseDown) {
+            this.mouse.leftMouseDown = false;
+            return true;
+        }
+        return false;
+    }
+
     _handleMouseUp() {
         this.mouse.leftMouseDown = false;
     }
@@ -76,6 +84,19 @@ class InputHandler {
         return { ...this.mouse.position };
     }
 
+    getMousePositionOnBlockGrid() {
+        const pos = this.getMousePosition();
+
+        const gridX =
+            Math.floor((pos.x + camera.x) / BLOCK_SIZE) * BLOCK_SIZE -
+            Math.floor(camera.x);
+        const gridY =
+            Math.floor((pos.y + camera.y) / BLOCK_SIZE) * BLOCK_SIZE -
+            Math.floor(camera.y);
+
+        return new Vector2(Math.floor(gridX), Math.floor(gridY));
+    }
+
     isLeftMouseDown() {
         return this.mouse.leftMouseDown;
     }
@@ -86,7 +107,7 @@ const trackedKeys = [
     "KeyA",
     "KeyB",
     "KeyC",
-    "KeyD",
+    "68",
     "KeyE",
     "KeyF",
     "KeyG",
@@ -134,6 +155,8 @@ const trackedKeys = [
     "AltRight",
     "Tab",
     "Backspace",
+    "Minus",
+    "Equal",
 ];
 
 // Create an instance of the InputHandler with the keys you want to track

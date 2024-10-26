@@ -1,6 +1,8 @@
 const CANVAS = document.getElementById("canvas");
 const ctx = CANVAS.getContext("2d");
 
+var r = document.querySelector(":root");
+
 CANVAS.width = 1600;
 CANVAS.height = 900;
 ctx.imageSmoothingEnabled = false;
@@ -8,6 +10,7 @@ ctx.imageSmoothingEnabled = false;
 let drawingChunkBorders = true;
 let drawCamera = false;
 let drawHeight = false;
+let drawDebugMouseBlock = true;
 
 const camera = new Camera(0, 0);
 
@@ -53,6 +56,8 @@ function DrawLate(chunk) {
     if (drawingChunkBorders) DrawChunkLine(chunk);
     if (drawCamera) DrawCamera();
     if (drawHeight) DrawHeight();
+    if (drawDebugMouseBlock) DrawDebugMouseBlock();
+    else r.style.setProperty("--drawMouse", "default");
 }
 
 function DrawChunkLine(chunk) {
@@ -152,4 +157,20 @@ function DrawBlockAtPosition(block, x, y) {
     block.transform.position.y = y - camera.y;
 
     block.draw(ctx);
+}
+
+function DrawDebugMouseBlock() {
+    r.style.setProperty("--drawMouse", "none");
+
+    const mouseX = input.getMousePositionOnBlockGrid().x;
+    const mouseY = input.getMousePositionOnBlockGrid().y;
+
+    const topLeftX = mouseX;
+    const topLeftY = mouseY;
+
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+
+    // Draw the hollow square
+    ctx.strokeRect(topLeftX, topLeftY, BLOCK_SIZE, BLOCK_SIZE);
 }

@@ -68,6 +68,7 @@ class Square {
         this.specialType = -1;
         this.outline = 0;
         this.dark = dark;
+        this.drawOffset = 0;
 
         this.transform.size.x = BLOCK_SIZE;
         this.transform.size.y = BLOCK_SIZE;
@@ -105,7 +106,7 @@ class Square {
         if (this.outline > 0) {
             ctx.fillStyle = "white";
             ctx.fillRect(
-                -this.transform.size.x / 2 - this.outline,
+                -this.transform.size.x / 2 - this.outline + this.drawOffset,
                 -this.transform.size.y / 2 - this.outline,
                 this.transform.size.x + this.outline * 2,
                 this.transform.size.y + this.outline * 2
@@ -118,7 +119,7 @@ class Square {
         if (this.img) {
             ctx.drawImage(
                 this.img,
-                -this.transform.size.x / 2,
+                -this.transform.size.x / 2 + this.drawOffset,
                 -this.transform.size.y / 2,
                 this.img.width * this.spriteScale,
                 this.img.height * this.spriteScale
@@ -129,7 +130,7 @@ class Square {
                 ctx.globalAlpha = 0.5;
                 ctx.fillStyle = "black";
                 ctx.fillRect(
-                    -this.transform.size.x / 2,
+                    -this.transform.size.x / 2 + this.drawOffset,
                     -this.transform.size.y / 2,
                     this.transform.size.x,
                     this.transform.size.y
@@ -139,7 +140,7 @@ class Square {
         } else {
             // Fallback to drawing a rectangle if no image
             ctx.fillRect(
-                -this.transform.size.x / 2,
+                -this.transform.size.x / 2 + this.drawOffset,
                 -this.transform.size.y / 2,
                 this.transform.size.x,
                 this.transform.size.y
@@ -233,11 +234,20 @@ class Camera {
         this.y = y;
         this.velocity = new Vector2();
         this.speed = 3;
+        this.zoom = 1;
     }
 
     getWorldX() {
         return this.x + CANVAS.width / 2; // Calculate the world X position of the camera
     }
+
+    getWorldY() {
+        return this.y + CANVAS.height / 2;
+    }
+
+    zoomIn() {}
+
+    zoomOut() {}
 
     getCurrentChunkIndex() {
         const worldX = this.getWorldX(); // Get the current world X position of the camera

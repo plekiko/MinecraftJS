@@ -4,14 +4,28 @@ setInterval(() => {
 
 function UpdateDebug() {
     HandleInput();
-
+    HandleDebugging();
     CameraLogic();
+}
+
+function HandleDebugging() {
+    if (drawDebugMouseBlock) PrintBlockLogic();
 }
 
 function HandleInput() {
     if (input.isKeyPressed("KeyB")) drawingChunkBorders = !drawingChunkBorders;
     if (input.isKeyPressed("KeyN")) drawCamera = !drawCamera;
     if (input.isKeyPressed("KeyH")) drawHeight = !drawHeight;
+    if (input.isKeyPressed("KeyM")) drawDebugMouseBlock = !drawDebugMouseBlock;
+}
+
+function PrintBlockLogic() {
+    if (input.isLeftMouseButtonPressed()) {
+        const mousePos = input.getMousePositionOnBlockGrid();
+        const block = GetBlockAtWorldPosition(mousePos.x, mousePos.y);
+
+        console.log(block);
+    }
 }
 
 function CameraLogic() {

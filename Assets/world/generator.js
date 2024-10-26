@@ -3,6 +3,8 @@ const pendingBlocks = new Map();
 
 tooloud.Perlin.setSeed(Math.floor(Math.random() * 10000));
 
+const worldGrassNoiseMap = new Noise(550, 0.2, 1);
+
 const worldTemperatureNoiseMap = new Noise(
     30, // Scale (size)
     40, // Intensity
@@ -26,8 +28,6 @@ const worldCaveNoiseMap = new Noise(
     10, // Intensity
     5
 );
-
-const worldGrassNoiseMap = new Noise(550, 0.2, 1);
 
 function PrintNoiseOutput(noise, count = 100) {
     // Initialize variables to track min and max
@@ -65,7 +65,7 @@ function GenerateWorld() {
             const temp = worldTemperatureNoiseMap.getNoise(i, 2000);
             const wetness = worldWetnessNoiseMap.getNoise(i, 1000);
 
-            const biome = getBiomeForNoise(temp, wetness);
+            const biome = GetBiomeForNoise(temp, wetness);
 
             const newChunk = new Chunk(
                 chunkX,
@@ -102,7 +102,7 @@ function GetChunkByIndex(index) {
     return chunks.get(chunkX);
 }
 
-function getBiomeForNoise(temp, wetness) {
+function GetBiomeForNoise(temp, wetness) {
     // console.log(`Checking biome for temp: ${temp}, wetness: ${wetness}`); // Debugging log
 
     // Iterate through the available biomes and find one that matches both the temperature and wetness range
@@ -129,4 +129,63 @@ function getBiomeForNoise(temp, wetness) {
     // console.log("No match found, returning Planes.");
     // Default case: if no biome matches, return the default "Planes" biome
     return Biomes.Planes;
+}
+
+function GetBlockAtWorldPosition(worldX, worldY) {
+    // Remove camera influence from world coordinates to get the correct world position
+    const adjustedWorldX = worldX + camera.x;
+    const adjustedWorldY = worldY + camera.y;
+
+    const targetChunk = GetChunkForBlock(adjustedWorldX, chunks);
+
+    if (targetChunk && adjustedWorldY < CHUNK_HEIGHT * BLOCK_SIZE) {
+        const localX = targetChunk.getLocalX(Math.floor(adjustedWorldX));
+        const localY = Math.floor(adjustedWorldY / BLOCK_SIZE);
+
+        return targetChunk.getBlock(localX, localY, false);
+    } else {
+        return null;
+    }
+}
+
+function SetBlockTypeAtPosition(worldX, worldY, blockType) {
+    const targetChunk = GetChunkForBlock(worldX, chunks);
+    const BLOCK_SIZE = 16; // Set your block size value
+    const CHUNK_WIDTH = 8; // Set your chunk width value
+
+    if (targetChunk && worldY < targetChunk.height * BLOCK_SIZE) {
+        const localX = GetLocalX(worldX, targetChunk, BLOCK_SIZE);
+        const localY = worldY / BLOCK_SIZE;
+
+        targetChunk.setBlockType(localX, localY, blockType);
+    } else {
+        if (blockType === BlockType.Air) return;
+
+        // Buffer the block to place it once the chunk is generated
+        const chunkX =
+            Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
+            CHUNK_WIDTH *
+            BLOCK_SIZE;
+
+        if (!pendingBlocks.has(chunkX)) {
+            pendingBlocks.set(chunkX, []);
+        }
+        pendingBlocks.get(chunkX).push({ x: worldX, y: worldY, blockType });
+    }
+}
+
+function GetChunkForBlock(worldX, chunks) {
+    const chunkX =
+        Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
+        CHUNK_WIDTH *
+        BLOCK_SIZE;
+    return chunks.get(chunkX); // Assuming chunks is a Map of chunks by x-coordinate
+}
+
+function getBlockScreenPosition(blockWorldX, blockWorldY, camera) {
+    // Calculate the block’s screen X and Y positions based on the camera offset
+    const screenX = blockWorldX - camera.x + CANVAS.width / 2;
+    const screenY = blockWorldY - camera.y + CANVAS.height / 2;
+
+    return new Vector2(screenX, screenY);
 }
