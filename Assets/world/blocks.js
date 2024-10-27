@@ -1,150 +1,225 @@
 const Blocks = Object.freeze({
-    Air: new BlockType({ name: "Air", hardness: -1 }),
-    GrassBlock: new BlockType({
+    Air: 0,
+    GrassBlock: 1,
+    Dirt: 2,
+    Podzol: 3,
+    Stone: 4,
+    Bedrock: 5,
+    Sand: 6,
+    SandStone: 7,
+    SnowedGrassBlock: 8,
+    Cactus: 9,
+    OakLog: 10,
+    OakLeaves: 11,
+    SpruceLog: 12,
+    SpruceLeaves: 13,
+    AcaciaLog: 14,
+    AcaciaLeaves: 15,
+    BirchLog: 16,
+    BirchLeaves: 17,
+    Grass: 18,
+    TallGrass: 19,
+    DeadBush: 20,
+    Fern: 21,
+    FlowerTulipRed: 22,
+    FlowerTulipWhite: 23,
+    FlowerTulipPink: 24,
+    FlowerTulipOrange: 25,
+    FlowerRose: 26,
+    FlowerBlueOrchid: 27,
+    FlowerDandelion: 28,
+    FlowerDaisy: 29,
+    FlowerAllium: 30,
+    Water: 31,
+});
+
+const blockTypes = [
+    new BlockType({ blockId: 0, name: "Air" }),
+    new BlockType({
+        blockId: 1,
         sprite: "grass_side",
         name: "Grass Block",
         hardness: 1.2,
     }),
-    Dirt: new BlockType({ sprite: "dirt", name: "Dirt", hardness: 1 }),
-    Podzol: new BlockType({
+    new BlockType({ blockId: 2, sprite: "dirt", name: "Dirt", hardness: 1 }),
+    new BlockType({
+        blockId: 3,
         sprite: "dirt_podzol_side",
         name: "Podzol",
         hardness: 1,
     }),
-    Stone: new BlockType({ sprite: "stone", name: "Stone", hardness: 8 }),
-    Bedrock: new BlockType({
+    new BlockType({ blockId: 4, sprite: "stone", name: "Stone", hardness: 8 }),
+    new BlockType({
+        blockId: 5,
         sprite: "bedrock",
         name: "Bedrock",
         hardness: -1,
     }),
-    Sand: new BlockType({ sprite: "sand", name: "Sand", hardness: 1.3 }),
-    SandStone: new BlockType({
+    new BlockType({ blockId: 6, sprite: "sand", name: "Sand", hardness: 1.3 }),
+    new BlockType({
+        blockId: 7,
         sprite: "sandstone_normal",
         name: "Sand Stone",
         hardness: 7,
     }),
-    SnowedGrassBlock: new BlockType({
+    new BlockType({
+        blockId: 8,
         sprite: "grass_side_snowed",
         name: "Snowed Grass",
         hardness: 2,
     }),
-    Cactus: new BlockType({
+    new BlockType({
+        blockId: 9,
         sprite: "cactus_side",
         name: "Cactus",
         hardness: 1.5,
     }),
-    OakLog: new BlockType({ sprite: "log_oak", name: "Oak Log", hardness: 3 }),
-    OakLeaves: new BlockType({
+    new BlockType({
+        blockId: 10,
+        sprite: "log_oak",
+        name: "Oak Log",
+        hardness: 3,
+    }),
+    new BlockType({
+        blockId: 11,
         sprite: "leaves_oak_opaque",
         name: "Oak Leaves",
         hardness: 0.6,
     }),
-    SpruceLog: new BlockType({
+    new BlockType({
+        blockId: 12,
         sprite: "log_spruce",
         name: "Spruce Log",
         hardness: 3,
     }),
-    SpruceLeaves: new BlockType({
+    new BlockType({
+        blockId: 13,
         sprite: "leaves_spruce_opaque",
         name: "Spruce Leaves",
         hardness: 0.6,
     }),
-    AcaciaLog: new BlockType({
+    new BlockType({
+        blockId: 14,
         sprite: "log_acacia",
         name: "Acacia Log",
         hardness: 3,
     }),
-    AcaciaLeaves: new BlockType({
+    new BlockType({
+        blockId: 15,
         sprite: "leaves_acacia_opaque",
         name: "Acacia Leaves",
         hardness: 0.6,
     }),
-    BirchLog: new BlockType({
+    new BlockType({
+        blockId: 16,
         sprite: "log_birch",
         name: "Birch Log",
         hardness: 3,
     }),
-    BirchLeaves: new BlockType({
+    new BlockType({
+        blockId: 17,
         sprite: "leaves_birch_opaque",
         name: "Birch Leaves",
         hardness: 0.6,
     }),
-    Grass: new BlockType({
+    new BlockType({
+        blockId: 18,
         sprite: "grass",
         name: "Grass",
         hardness: 0,
         grassOffset: true,
     }),
-    TallGrass: new BlockType({
+    new BlockType({
+        blockId: 19,
         sprite: "tallgrass",
         name: "Tall Grass",
         hardness: 0,
         grassOffset: true,
     }),
-    DeadBush: new BlockType({
+    new BlockType({
+        blockId: 20,
         sprite: "deadbush",
         name: "Dead Bush",
         hardness: 0,
         grassOffset: true,
     }),
-    Fern: new BlockType({
+    new BlockType({
+        blockId: 21,
         sprite: "fern",
         name: "Fern",
         hardness: 0,
         grassOffset: true,
     }),
-    FlowerTulipRed: new BlockType({
+    new BlockType({
+        blockId: 22,
         sprite: "flower_tulip_red",
         name: "Red Tulip",
         hardness: 0,
         grassOffset: true,
     }),
-    FlowerTulipWhite: new BlockType({
+    new BlockType({
+        blockId: 23,
         sprite: "flower_tulip_white",
         name: "White Tulip",
         hardness: 0,
         grassOffset: true,
     }),
-    FlowerTulipPink: new BlockType({
+    new BlockType({
+        blockId: 24,
         sprite: "flower_tulip_pink",
         name: "Pink Tulip",
         hardness: 0,
         grassOffset: true,
     }),
-    FlowerTulipOrange: new BlockType({
+    new BlockType({
+        blockId: 25,
         sprite: "flower_tulip_orange",
         name: "Orange Tulip",
         hardness: 0,
         grassOffset: true,
     }),
-    FlowerRose: new BlockType({
+    new BlockType({
+        blockId: 26,
         sprite: "flower_rose",
         name: "Rose",
         hardness: 0,
         grassOffset: true,
     }),
-    FlowerBlueOrchid: new BlockType({
+    new BlockType({
+        blockId: 27,
         sprite: "flower_blue_orchid",
         name: "Blue Orchid",
         hardness: 0,
         grassOffset: true,
     }),
-    FlowerDandelion: new BlockType({
+    new BlockType({
+        blockId: 28,
         sprite: "flower_dandelion",
         name: "Dandelion",
         hardness: 0,
         grassOffset: true,
     }),
-    FlowerDaisy: new BlockType({
+    new BlockType({
+        blockId: 29,
         sprite: "flower_oxeye_daisy",
         name: "Daisy",
         hardness: 0,
         grassOffset: true,
     }),
-    FlowerAllium: new BlockType({
+    new BlockType({
+        blockId: 30,
         sprite: "flower_allium",
         name: "Allium",
         hardness: 0,
         grassOffset: true,
     }),
-});
+    new BlockType({
+        blockId: 31,
+        sprite: "water_still",
+        name: "Water",
+        animationSpeed: 0.2,
+        fluid: true,
+    }),
+];
+
+const blockMap = new Map(blockTypes.map((block) => [block.blockId, block]));

@@ -107,7 +107,7 @@ const trackedKeys = [
     "KeyA",
     "KeyB",
     "KeyC",
-    "68",
+    "KeyD",
     "KeyE",
     "KeyF",
     "KeyG",

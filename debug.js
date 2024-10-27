@@ -17,6 +17,10 @@ function HandleInput() {
     if (input.isKeyPressed("KeyN")) drawCamera = !drawCamera;
     if (input.isKeyPressed("KeyH")) drawHeight = !drawHeight;
     if (input.isKeyPressed("KeyM")) drawDebugMouseBlock = !drawDebugMouseBlock;
+    if (input.isKeyPressed("KeyF")) drawFileSize = !drawFileSize;
+    if (input.isKeyPressed("KeyO")) SaveWorld();
+    if (input.isKeyPressed("KeyP")) LoadWorld();
+    if (input.isKeyPressed("KeyR")) RegenerateWorld();
 }
 
 function PrintBlockLogic() {
@@ -24,6 +28,7 @@ function PrintBlockLogic() {
         const mousePos = input.getMousePositionOnBlockGrid();
         const block = GetBlockAtWorldPosition(mousePos.x, mousePos.y);
 
+        console.log(mousePos.x + " - " + mousePos.y);
         console.log(block);
     }
 }

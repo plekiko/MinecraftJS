@@ -10,13 +10,17 @@ ctx.imageSmoothingEnabled = false;
 let drawingChunkBorders = true;
 let drawCamera = false;
 let drawHeight = false;
-let drawDebugMouseBlock = true;
+let drawDebugMouseBlock = false;
+let drawFileSize = true;
 
-const camera = new Camera(0, 0);
+const camera = new Camera(0, CHUNK_HEIGHT * 2);
 
 function DrawBackground() {
-    ctx.fillStyle = "aqua";
+    const gradient = ctx.createLinearGradient(0, CANVAS.height, 0, 0); // Bottom to top gradient
+    gradient.addColorStop(0, "#D47147"); // Bottom color
+    gradient.addColorStop(1, "#74B3FF"); // Top color
 
+    ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 }
 
@@ -58,14 +62,20 @@ function DrawLate(chunk) {
     if (drawHeight) DrawHeight();
     if (drawDebugMouseBlock) DrawDebugMouseBlock();
     else r.style.setProperty("--drawMouse", "default");
+    if (drawFileSize) DrawExpectedFileSize();
 }
 
 function DrawChunkLine(chunk) {
     const chunkX = chunk.x;
     ctx.strokeStyle = "red";
     ctx.beginPath();
+
+    ctx.moveTo(0, 0 - camera.y);
+    ctx.lineTo(CANVAS.width, 0 - camera.y);
+
     ctx.moveTo(chunkX - camera.x, 0);
     ctx.lineTo(chunkX - camera.x, CANVAS.height);
+
     ctx.stroke();
 
     DrawChunkStats(chunk, chunkX);
@@ -76,13 +86,44 @@ function DrawChunkStats(chunk, chunkX) {
 
     ctx.fillStyle = "black";
     ctx.font = "15px Pixel";
-    const txt = `${index} - ${chunk.biome.name}\nTemp: ${Math.floor(
-        worldTemperatureNoiseMap.getNoise(index, 2000)
-    )}\nWetness: ${Math.floor(worldWetnessNoiseMap.getNoise(index, 1000))}`;
-    var lines = txt.split("\n");
 
-    for (var i = 0; i < lines.length; i++)
+    // Base text with biome details
+    let txt = `${index} - ${chunk.biome.name}\nTemp: ${Math.floor(
+        worldTemperatureNoiseMap.getNoise(index, 20000)
+    )}\nWetness: ${Math.floor(
+        worldWetnessNoiseMap.getNoise(index, 10000)
+    )}\nMountains: ${Math.floor(
+        worldMountainsNoiseMap.getNoise(index, 30000)
+    )}\nHeight: ${chunk.biome.heightNoise.scale * 1000} - ${
+        chunk.biome.heightNoise.intensity
+    }`;
+
+    // Append "Next to" information only if previousBiome is different
+    if (
+        chunk.previousChunk &&
+        chunk.previousChunk.biome.name !== chunk.biome.name
+    ) {
+        txt += `\nNext to: ${chunk.previousChunk.biome.name}`;
+    }
+
+    // Split text by lines for rendering
+    const lines = txt.split("\n");
+
+    // Render each line of text
+    for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i], chunkX - camera.x + 10, 15 + i * 15, 9999);
+    }
+}
+
+function DrawExpectedFileSize() {
+    ctx.fillStyle = "black";
+    ctx.font = "15px Pixel";
+
+    ctx.fillText(
+        "File size: " + (chunks.size * CHUNK_FILE_SIZE + 5) + "kB",
+        10,
+        CANVAS.height - 10
+    );
 }
 
 function DrawHeight() {
@@ -122,9 +163,9 @@ function DrawHeight() {
 
         // Move to the next point on the canvas and draw the line
         if (x === 0) {
-            ctx.moveTo(screenX + 10, screenY + 650 - camera.y); // Move to the first block's position with offset
+            ctx.moveTo(screenX + 10, screenY - TERRAIN_HEIGHT - 100 - camera.y); // Move to the first block's position with offset
         } else {
-            ctx.lineTo(screenX + 10, screenY + 650 - camera.y); // Draw a line to the next block's height
+            ctx.lineTo(screenX + 10, screenY - TERRAIN_HEIGHT - 100 - camera.y); // Draw a line to the next block's height
         }
     }
 

@@ -38,13 +38,6 @@ class Vector2 {
     }
 }
 
-class Sprite {
-    constructor(url, size) {
-        this.url = url;
-        this.size = size;
-    }
-}
-
 class Transform {
     constructor(position = new Vector2(), size = new Vector2()) {
         this.position = position;
@@ -65,13 +58,14 @@ class Square {
         this.alpha = alpha;
         this.img = null;
         this.spriteScale = spriteScale;
-        this.specialType = -1;
         this.outline = 0;
         this.dark = dark;
-        this.drawOffset = 0;
+        this.fluidSprite = false;
 
         this.transform.size.x = BLOCK_SIZE;
         this.transform.size.y = BLOCK_SIZE;
+
+        this.frameRate = null;
 
         if (!sprite) return;
 
@@ -84,6 +78,9 @@ class Square {
 
         this.img = new Image();
         this.img.src = "Assets/sprites/" + sprite;
+
+        if (this.img)
+            if (this.isAnimated()) this.frameCount = this.img.height / 16;
     }
 
     draw(ctx) {
@@ -116,7 +113,7 @@ class Square {
         }
 
         // Draw the main object (image or fallback rect)
-        if (this.img) {
+        if (this.img && (!this.frameCount || this.frameCount == 0)) {
             ctx.drawImage(
                 this.img,
                 -this.transform.size.x / 2 + this.drawOffset,
@@ -137,17 +134,39 @@ class Square {
                 );
                 ctx.globalAlpha = this.alpha;
             }
-        } else {
-            // Fallback to drawing a rectangle if no image
-            ctx.fillRect(
-                -this.transform.size.x / 2 + this.drawOffset,
-                -this.transform.size.y / 2,
-                this.transform.size.x,
-                this.transform.size.y
-            );
+        }
+
+        if (this.img && this.frameCount > 0) {
+            this.drawAnimation(ctx);
         }
 
         ctx.restore(); // Restore the context to its original state
+    }
+
+    drawAnimation() {
+        const frameHeight = 16;
+
+        const offset = this.fluidSprite ? BLOCK_SIZE / 8 : 0;
+
+        const effectiveFrame =
+            Math.floor(globalFrame * this.frameRate) % this.frameCount;
+        const frameY = effectiveFrame * frameHeight;
+
+        ctx.drawImage(
+            this.img,
+            0, // X position in the image (always 0 in a vertical strip)
+            frameY, // Y position based on frame index
+            16, // Width of a single frame
+            frameHeight, // Height of a single frame
+            -this.transform.size.x / 2 + this.drawOffset,
+            -this.transform.size.y / 2 + offset,
+            this.img.width * this.spriteScale,
+            frameHeight * this.spriteScale - offset
+        );
+    }
+
+    isAnimated() {
+        return this.img.height > 16;
     }
 }
 
@@ -234,7 +253,6 @@ class Camera {
         this.y = y;
         this.velocity = new Vector2();
         this.speed = 3;
-        this.zoom = 1;
     }
 
     getWorldX() {
@@ -265,7 +283,15 @@ class Camera {
     }
 }
 
-// Helper function for linear interpolation (LERP)
 function lerp(a, b, t) {
     return a + (b - a) * t;
+}
+
+function easeInOut(t) {
+    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function lerpEaseInOut(a, b, t) {
+    const easedT = easeInOut(t);
+    return a + (b - a) * easedT;
 }

@@ -5,11 +5,11 @@ class Noise {
         this.min = min;
     }
 
-    getNoise(x, y = 0) {
+    getNoise(x, y = 0, multiplier = 1) {
         // Tooloud is used to generate noise based on scaled inputs
         const noiseRaw = tooloud.Perlin.noise(
-            x * this.scale,
-            y * this.scale,
+            x * this.scale * multiplier,
+            y * this.scale * multiplier,
             0
         );
 
@@ -19,6 +19,7 @@ class Noise {
 }
 
 const NoisePresets = Object.freeze({
-    Flat: new Noise(100, 5, TERRAIN_HEIGHT),
-    SmallHills: new Noise(100, 10, TERRAIN_HEIGHT),
+    Flat: new Noise(7, 10, TERRAIN_HEIGHT),
+    SmallHills: new Noise(5, 35, TERRAIN_HEIGHT),
+    Mountains: new Noise(1.5, 120, TERRAIN_HEIGHT + 10),
 });

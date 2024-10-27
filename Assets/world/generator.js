@@ -1,20 +1,21 @@
-const chunks = new Map();
-const pendingBlocks = new Map();
+let chunks = new Map();
+let pendingBlocks = new Map();
 
-tooloud.Perlin.setSeed(Math.floor(Math.random() * 10000));
+let seed = Math.floor(Math.random() * 1000000);
+tooloud.Perlin.setSeed(seed);
 
 const worldGrassNoiseMap = new Noise(550, 0.2, 1);
 
 const worldTemperatureNoiseMap = new Noise(
     30, // Scale (size)
-    40, // Intensity
-    20
+    60, // Intensity
+    30
 );
 
 const worldWetnessNoiseMap = new Noise(
     30, // Scale (size)
-    40, // Intensity
-    20
+    60, // Intensity
+    30
 );
 
 const worldTreeNoiseMap = new Noise(
@@ -29,6 +30,12 @@ const worldCaveNoiseMap = new Noise(
     5
 );
 
+const worldMountainsNoiseMap = new Noise(
+    30, // Scale (size)
+    60, // Intensity
+    30
+);
+
 function PrintNoiseOutput(noise, count = 100) {
     // Initialize variables to track min and max
     let minValue = Infinity;
@@ -36,7 +43,7 @@ function PrintNoiseOutput(noise, count = 100) {
 
     // Print noise values and track min/max
     for (let i = 0; i < count; i++) {
-        const noiseValue = noise.getNoise(i, 0, 0);
+        const noiseValue = noise.getNoise(i, 0);
         console.log(`Mapped noise value: ${i} - ${noiseValue}`);
 
         // Update min and max
@@ -49,6 +56,14 @@ function PrintNoiseOutput(noise, count = 100) {
     console.log("Maximum Noise Value:", maxValue);
 }
 
+function RegenerateWorld() {
+    let seed = Math.floor(Math.random() * 10000);
+    tooloud.Perlin.setSeed(seed);
+
+    pendingBlocks = new Map();
+    chunks = new Map();
+}
+
 function GenerateWorld() {
     const currentChunkIndex = camera.getCurrentChunkIndex();
 
@@ -58,38 +73,59 @@ function GenerateWorld() {
         i <= currentChunkIndex + RENDER_DISTANCE;
         i++
     ) {
-        const chunkX = i * CHUNK_WIDTH * BLOCK_SIZE; // Calculate the chunk's x position
+        const chunkX = i * CHUNK_WIDTH * BLOCK_SIZE;
 
-        // Check if the chunk already exists at this x position in the Map
         if (!chunks.has(chunkX)) {
-            const temp = worldTemperatureNoiseMap.getNoise(i, 2000);
-            const wetness = worldWetnessNoiseMap.getNoise(i, 1000);
+            const oldChunkData = getNeighborBiomeData(i, currentChunkIndex);
 
-            const biome = GetBiomeForNoise(temp, wetness);
-
-            const newChunk = new Chunk(
-                chunkX,
-                CHUNK_WIDTH,
-                biome,
-                pendingBlocks,
-                worldGrassNoiseMap
-            );
-
-            // Add the new chunk to the Map, keyed by its x position
-            chunks.set(chunkX, newChunk);
-
-            newChunk.applyBufferedBlocks();
+            generateChunk(i, chunkX, oldChunkData);
         }
     }
 
-    // Post generation (trees, caves, bedrock)
+    postProcessChunks();
+}
+
+function calculateChunkBiome(chunkIndex) {
+    const temp = worldTemperatureNoiseMap.getNoise(chunkIndex, 20000);
+    const wetness = worldWetnessNoiseMap.getNoise(chunkIndex, 10000);
+    const mountains = worldMountainsNoiseMap.getNoise(chunkIndex, 30000);
+    return GetBiomeForNoise(temp, wetness, mountains);
+}
+
+function getNeighborBiomeData(currentIndex, cameraIndex) {
+    const neighborIndex =
+        currentIndex < cameraIndex ? currentIndex + 1 : currentIndex - 1;
+    const neighborChunkX = neighborIndex * CHUNK_WIDTH * BLOCK_SIZE;
+    const neighborBiome = calculateChunkBiome(neighborIndex);
+
+    return { x: neighborChunkX, biome: neighborBiome };
+}
+
+function generateChunk(chunkIndex, chunkX, oldChunkData) {
+    const biome = calculateChunkBiome(chunkIndex);
+
+    const newChunk = new Chunk(
+        chunkX,
+        CHUNK_WIDTH,
+        biome,
+        oldChunkData,
+        pendingBlocks,
+        worldGrassNoiseMap
+    );
+
+    chunks.set(chunkX, newChunk);
+    newChunk.applyBufferedBlocks();
+}
+
+function postProcessChunks() {
     chunks.forEach((chunk) => {
         if (!chunk.generated) {
-            chunk.generateCaves();
-            chunk.generateGrass();
+            chunk.generateWater();
             chunk.generateTrees();
+            chunk.generateGrass();
             chunk.generateBedrock();
-            chunk.generated = true; // Mark chunk as fully generated
+            chunk.updateChunk();
+            chunk.generated = true;
         }
     });
 }
@@ -102,7 +138,7 @@ function GetChunkByIndex(index) {
     return chunks.get(chunkX);
 }
 
-function GetBiomeForNoise(temp, wetness) {
+function GetBiomeForNoise(temp, wetness, mountains) {
     // console.log(`Checking biome for temp: ${temp}, wetness: ${wetness}`); // Debugging log
 
     // Iterate through the available biomes and find one that matches both the temperature and wetness range
@@ -119,7 +155,9 @@ function GetBiomeForNoise(temp, wetness) {
             temp >= biome.minTemp &&
             temp <= biome.maxTemp && // Temperature check
             wetness >= biome.minWet &&
-            wetness <= biome.maxWet // Wetness check
+            wetness <= biome.maxWet && // Wetness check
+            mountains >= biome.minMount &&
+            mountains <= biome.maxMount
         ) {
             // console.log(`Matched biome: ${biome.name}`);
             return biome;
@@ -154,7 +192,7 @@ function SetBlockTypeAtPosition(worldX, worldY, blockType) {
     const CHUNK_WIDTH = 8; // Set your chunk width value
 
     if (targetChunk && worldY < targetChunk.height * BLOCK_SIZE) {
-        const localX = GetLocalX(worldX, targetChunk, BLOCK_SIZE);
+        const localX = targetChunk.getLocalX(worldX);
         const localY = worldY / BLOCK_SIZE;
 
         targetChunk.setBlockType(localX, localY, blockType);
@@ -180,12 +218,4 @@ function GetChunkForBlock(worldX, chunks) {
         CHUNK_WIDTH *
         BLOCK_SIZE;
     return chunks.get(chunkX); // Assuming chunks is a Map of chunks by x-coordinate
-}
-
-function getBlockScreenPosition(blockWorldX, blockWorldY, camera) {
-    // Calculate the block’s screen X and Y positions based on the camera offset
-    const screenX = blockWorldX - camera.x + CANVAS.width / 2;
-    const screenY = blockWorldY - camera.y + CANVAS.height / 2;
-
-    return new Vector2(screenX, screenY);
 }

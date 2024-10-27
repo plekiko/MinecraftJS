@@ -16,6 +16,12 @@ function gameLoop() {
 
 function updateGame(deltaTime) {
     camera.update(deltaTime);
+
+    animateFrame();
+}
+
+function animateFrame() {
+    globalFrame++;
 }
 
 requestAnimationFrame(gameLoop);

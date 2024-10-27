@@ -9,9 +9,11 @@ class Biome {
         grassType = [Blocks.Grass, Blocks.TallGrass],
         treeThreshold = 55,
         minTemp = 0,
-        maxTemp = 100,
-        minWet = 100,
-        maxWet = 0
+        maxTemp = 60,
+        minWet = 60,
+        maxWet = 0,
+        minMount = 0,
+        maxMount = 60
     ) {
         this.name = name;
         this.heightNoise = heightNoise;
@@ -25,6 +27,8 @@ class Biome {
         this.maxTemp = maxTemp;
         this.minWet = minWet;
         this.maxWet = maxWet;
+        this.minMount = minMount;
+        this.maxMount = maxMount;
     }
 }
 
@@ -41,7 +45,9 @@ const Biomes = Object.freeze({
         10, // Minimum temperature
         25, // Maximum temperature
         0, // Minimum wetness
-        10 // Maximum wetness
+        10, // Maximum wetness
+        0, // Min Mountain
+        50 // Max Mountain
     ),
     Desert: new Biome(
         "Desert", // Name
@@ -55,7 +61,9 @@ const Biomes = Object.freeze({
         25, // Minimum temperature
         999, // Maximum temperature
         0, // Minimum wetness
-        10 // Maximum wetness
+        10, // Maximum wetness
+        0, // Min Mountain
+        50 // Max Mountain
     ),
     Tundra: new Biome(
         "Tundra", // Name
@@ -69,7 +77,9 @@ const Biomes = Object.freeze({
         -999, // Minimum temperature
         10, // Maximum temperature
         0, // Minimum wetness
-        999 // Maximum wetness
+        999, // Maximum wetness
+        0, // Min Mountain
+        50 // Max Mountain
     ),
     Taiga: new Biome(
         "Taiga", // Name
@@ -83,11 +93,13 @@ const Biomes = Object.freeze({
         10, // Minimum temperature
         20, // Maximum temperature
         10, // Minimum wetness
-        30 // Maximum wetness
+        30, // Maximum wetness
+        0, // Min Mountain
+        50 // Max Mountain
     ),
     Shrubland: new Biome(
         "Shrubland", // Name
-        NoisePresets.Flat, // Terrain
+        NoisePresets.SmallHills, // Terrain
         Blocks.GrassBlock, // Top layer
         Blocks.Dirt, // Second layer
         4, // Second layer width
@@ -97,7 +109,9 @@ const Biomes = Object.freeze({
         20, // Minimum temperature
         30, // Maximum temperature
         10, // Minimum wetness
-        20 // Maximum wetness
+        20, // Maximum wetness
+        0, // Min Mountain
+        50 // Max Mountain
     ),
     Savanna: new Biome(
         "Savanna", // Name
@@ -111,11 +125,13 @@ const Biomes = Object.freeze({
         30, // Minimum temperature
         999, // Maximum temperature
         10, // Minimum wetness
-        20 // Maximum wetness
+        20, // Maximum wetness
+        0, // Min Mountain
+        50 // Max Mountain
     ),
     Forest: new Biome(
         "Forest", // Name
-        NoisePresets.Flat, // Terrain
+        NoisePresets.SmallHills, // Terrain
         Blocks.GrassBlock, // Top layer
         Blocks.Dirt, // Second layer
         4, // Second layer width
@@ -134,11 +150,13 @@ const Biomes = Object.freeze({
         20, // Minimum temperature
         30, // Maximum temperature
         20, // Minimum wetness
-        30 // Maximum wetness
+        30, // Maximum wetness
+        0, // Min Mountain
+        50 // Max Mountain
     ),
     SeasonalForest: new Biome(
         "Seasonal Forest", // Name
-        NoisePresets.Flat, // Terrain
+        NoisePresets.SmallHills, // Terrain
         Blocks.GrassBlock, // Top layer
         Blocks.Dirt, // Second layer
         4, // Second layer width
@@ -160,7 +178,9 @@ const Biomes = Object.freeze({
         30, // Minimum temperature
         999, // Maximum temperature
         20, // Minimum wetness
-        30 // Maximum wetness
+        30, // Maximum wetness
+        0, // Min Mountain
+        50 // Max Mountain
     ),
     Swamp: new Biome(
         "Swamp", // Name
@@ -174,11 +194,13 @@ const Biomes = Object.freeze({
         10, // Minimum temperature
         30, // Maximum temperature
         30, // Minimum wetness
-        999 // Maximum wetness
+        999, // Maximum wetness
+        0, // Min Mountain
+        50 // Max Mountain
     ),
     RainForest: new Biome(
         "Rain Forest", // Name
-        NoisePresets.Flat, // Terrain
+        NoisePresets.SmallHills, // Terrain
         Blocks.GrassBlock, // Top layer
         Blocks.Dirt, // Second layer
         4, // Second layer width
@@ -188,6 +210,24 @@ const Biomes = Object.freeze({
         30, // Minimum temperature
         999, // Maximum temperature
         30, // Minimum wetness
-        999 // Maximum wetness
+        999, // Maximum wetness
+        0, // Min Mountain
+        50 // Max Mountain
+    ),
+    Mountain: new Biome(
+        "Mountain", // Name
+        NoisePresets.Mountains, // Terrain
+        Blocks.Stone, // Top layer
+        Blocks.Stone, // Second layer
+        4, // Second layer width
+        [], // Tree types
+        [Blocks.Grass, Blocks.TallGrass], // Grass types
+        6, // Tree threshold
+        0, // Minimum temperature
+        999, // Maximum temperature
+        0, // Minimum wetness
+        999, // Maximum wetness
+        50, // Min Mountain
+        999 // Max Mountain
     ),
 });

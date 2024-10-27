@@ -77,13 +77,7 @@ const Trees = Object.freeze({
             [Blocks.OakLog], // Trunk (middle)
             [Blocks.OakLog], // Trunk (middle)
             [Blocks.OakLog], // Trunk (middle)
-            [
-                Blocks.OakLeaves,
-                Blocks.OakLeaves,
-                Blocks.OakLog,
-                Blocks.OakLeaves,
-                Blocks.OakLeaves,
-            ], // Leaf layer 1
+            [Blocks.OakLog], // Leaf layer 1
             [
                 Blocks.OakLeaves,
                 Blocks.OakLeaves,

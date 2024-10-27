@@ -3,16 +3,19 @@ class Chunk {
         x = 0,
         width = 8,
         biome = Biomes.Planes,
+        previousChunk = null,
         pendingBlocks = new Map(),
-        worldGrassNoiseMap = new Noise()
+        worldGrassNoiseMap = new Noise(),
+        generated = false
     ) {
         this.biome = biome;
+        this.previousChunk = previousChunk;
         this.x = x;
         this.blocks = [];
         this.walls = [];
         this.width = width;
         this.height = CHUNK_HEIGHT;
-        this.generated = false;
+        this.generated = generated;
         this.pendingBlocks = pendingBlocks;
         this.grassNoiseMap = worldGrassNoiseMap;
 
@@ -25,28 +28,92 @@ class Chunk {
             this.blocks[y] = [];
             this.walls[y] = [];
             for (let x = 0; x < this.width; x++) {
-                this.blocks[y][x] = new Block(Blocks.Air); // Set default as air block
-                this.walls[y][x] = new Block(Blocks.Air, true);
+                this.blocks[y][x] = new Block(x, y, Blocks.Air); // Set default as air block
+                this.walls[y][x] = new Block(x, y, Blocks.Air, true);
             }
         }
     }
 
     generateChunk() {
+        if (this.generated) return;
         this.generateArray(); // Initialize blocks
         this.generateHeight(); // Generate terrain height
     }
 
     getHeight(x) {
         const worldX = this.x / BLOCK_SIZE + x;
-        const heightFirstPass = this.biome.heightNoise.getNoise(worldX, 0);
-        const heightSecondPass = this.biome.heightNoise.getNoise(
-            worldX,
-            100000
-        );
 
-        const heightRaw = (heightFirstPass + heightSecondPass) / 2;
+        // Get the height noise of the current biome
+        let heightNoise = this.biome.heightNoise;
 
-        return Math.floor(this.biome.heightNoise.min + heightRaw);
+        // Check if previousChunk exists and has a different biome height noise
+        if (
+            this.previousChunk &&
+            this.previousChunk.biome.heightNoise !== this.biome.heightNoise
+        ) {
+            // Retrieve the height noise of the previous chunk's biome
+            let previousHeightNoise = this.previousChunk.biome.heightNoise;
+
+            // Calculate blend factor as a gradual transition from 0 (left) to 1 (right)
+            let blendFactor = x / (CHUNK_WIDTH - 1); // 0 to 1 across chunk width
+
+            // Reverse blend factor if moving left
+            if (this.x < this.previousChunk.x) {
+                blendFactor = 1 - blendFactor;
+            }
+
+            // Calculate blended noise outputs directly for each layer
+            const heightFirstPass = lerpEaseInOut(
+                previousHeightNoise.getNoise(worldX, 0),
+                heightNoise.getNoise(worldX, 0),
+                blendFactor
+            );
+            const heightSecondPass = lerpEaseInOut(
+                previousHeightNoise.getNoise(worldX, 100000, 3),
+                heightNoise.getNoise(worldX, 100000, 3),
+                blendFactor
+            );
+            const heightThirdPass = lerpEaseInOut(
+                previousHeightNoise.getNoise(worldX, 500000, 5),
+                heightNoise.getNoise(worldX, 500000, 5),
+                blendFactor
+            );
+            const heightFourthPass = lerpEaseInOut(
+                previousHeightNoise.getNoise(worldX, 1000000, 7),
+                heightNoise.getNoise(worldX, 1000000, 7),
+                blendFactor
+            );
+
+            const lerpedMin = lerpEaseInOut(
+                previousHeightNoise.min,
+                heightNoise.min,
+                blendFactor
+            );
+
+            const heightRaw =
+                (heightFirstPass +
+                    heightSecondPass +
+                    heightThirdPass +
+                    heightFourthPass) /
+                4;
+
+            return Math.floor(lerpedMin + heightRaw);
+        } else {
+            // No blending needed, use the current biome's noise directly
+            const heightFirstPass = heightNoise.getNoise(worldX, 0);
+            const heightSecondPass = heightNoise.getNoise(worldX, 100000, 3);
+            const heightThirdPass = heightNoise.getNoise(worldX, 500000, 5);
+            const heightFourthPass = heightNoise.getNoise(worldX, 1000000, 7);
+
+            const heightRaw =
+                (heightFirstPass +
+                    heightSecondPass +
+                    heightThirdPass +
+                    heightFourthPass) /
+                4;
+
+            return Math.floor(heightNoise.min + heightRaw);
+        }
     }
 
     getWorldX(x) {
@@ -79,8 +146,84 @@ class Chunk {
                     this.setBlockType(x, y, Blocks.Stone, this.walls);
                 }
             }
-            this.setBlockType(x, height, this.biome.topLayer); // Topmost layer (grass/sand/etc.)
+            this.setBlockType(x, height, this.biome.topLayer);
         }
+    }
+
+    generateWater() {
+        const maxWaterLevel = TERRAIN_HEIGHT + WATER_LEVEL; // Calculate max water height
+
+        for (let x = 0; x < this.width; x++) {
+            const terrainHeight = this.getHeight(x); // Get terrain height at this x
+
+            // Loop from one level above the terrain up to the max water level
+            for (let y = terrainHeight + 1; y <= maxWaterLevel; y++) {
+                const blockType = this.getBlockType(x, y);
+
+                // Place water only if the block is air (empty)
+                if (blockType === Blocks.Air) {
+                    this.setBlockType(x, y, Blocks.Water);
+                }
+
+                if (
+                    this.getDown(x, y) &&
+                    this.getDown(x, y).blockType == this.biome.topLayer
+                )
+                    this.setBlockType(x, y - 1, Blocks.Sand);
+                if (
+                    this.getLeft(x, y) &&
+                    this.getLeft(x, y).blockType == this.biome.topLayer
+                )
+                    this.setBlockType(x - 1, y, Blocks.Sand);
+                if (
+                    this.getRight(x, y) &&
+                    this.getRight(x, y).blockType == this.biome.topLayer
+                )
+                    this.setBlockType(x + 1, y, Blocks.Sand);
+            }
+        }
+    }
+
+    updateChunk() {
+        this.updateWater();
+    }
+
+    updateWater() {
+        this.getAllBlocks(Blocks.Water).forEach((water) => {
+            const upBlock = this.getUp(water.x, water.y);
+            if (upBlock && upBlock.blockType === Blocks.Air) {
+                water.fluidSprite = true;
+            }
+        });
+    }
+
+    getAllBlocks(blockType) {
+        const returnBlocks = [];
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const block = this.blocks[y][x];
+                if (block.blockType === blockType) returnBlocks.push(block);
+            }
+        }
+
+        return returnBlocks;
+    }
+
+    getDown(x, y) {
+        return this.getBlock(x, y - 1); // Block below
+    }
+
+    getUp(x, y) {
+        y = this.calculateY(y);
+        return this.getBlock(x, y + 1); // Block above
+    }
+
+    getLeft(x, y) {
+        return this.getBlock(x - 1, y); // Block to the left
+    }
+
+    getRight(x, y) {
+        return this.getBlock(x + 1, y); // Block to the right
     }
 
     generateBedrock() {
@@ -105,10 +248,12 @@ class Chunk {
     }
 
     generateGrass() {
+        if (!this.biome.grassType) return;
         if (this.biome.grassType.length == 0) return;
         for (let x = 0; x < CHUNK_WIDTH; x++) {
             if (this.grassNoiseMap.getNoise(this.getWorldX(x)) >= 1) {
                 const y = this.findGroundLevel(x);
+                if (this.getBlockType(x, y) != Blocks.Air) continue;
                 const randomGrass =
                     this.biome.grassType[
                         RandomRange(0, this.biome.grassType.length)
@@ -120,6 +265,7 @@ class Chunk {
 
     spawnTree(x) {
         const y = this.findGroundLevel(x); // Find valid ground level
+        if (this.getBlockType(x, y) != Blocks.Air) return;
         const randomTree = this.getRandomTreeFromBiome(); // Pick a random tree
         this.spawnTreeAt(randomTree, x, y); // Spawn the tree at the position
     }
@@ -131,7 +277,6 @@ class Chunk {
                 blockAtPos == Blocks.GrassBlock ||
                 blockAtPos == Blocks.SnowedGrassBlock ||
                 blockAtPos == Blocks.Sand ||
-                blockAtPos == Blocks.Cactus ||
                 blockAtPos == Blocks.Podzol
             ) {
                 return y + 1; // Place tree one block above ground
@@ -218,11 +363,16 @@ class Chunk {
 
     getBlockType(x, y, calculated = true) {
         if (calculated) y = this.calculateY(y);
+        if (!this.blocks[y]) return null;
         return this.blocks[y][x].blockType;
     }
 
     getBlock(x, y, calculated = true) {
         if (calculated) y = this.calculateY(y);
+
+        if (!this.blocks[y]) return null;
+        if (!this.blocks[y][x]) return null;
+
         return this.blocks[y][x];
     }
 
