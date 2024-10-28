@@ -31,6 +31,8 @@ const Blocks = Object.freeze({
     FlowerDaisy: 29,
     FlowerAllium: 30,
     Water: 31,
+    JungleLog: 32,
+    JungleLeaves: 33
 });
 
 const blockTypes = [
@@ -220,6 +222,18 @@ const blockTypes = [
         animationSpeed: 0.2,
         fluid: true,
     }),
+    new BlockType({
+        blockId: 32,
+        sprite: "log_jungle",
+        name: "Jungle Log",
+        hardness: 3,
+    }),
+    new BlockType({
+        blockId: 33,
+        sprite: "leaves_jungle_opaque",
+        name: "Jungle Leaves",
+        hardness: 0.6
+    })
 ];
 
 const blockMap = new Map(blockTypes.map((block) => [block.blockId, block]));

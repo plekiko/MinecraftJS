@@ -151,7 +151,7 @@ class Chunk {
     }
 
     generateWater() {
-        const maxWaterLevel = TERRAIN_HEIGHT + WATER_LEVEL; // Calculate max water height
+        const maxWaterLevel = TERRAIN_HEIGHT + this.biome.waterLevel; // Calculate max water height
 
         for (let x = 0; x < this.width; x++) {
             const terrainHeight = this.getHeight(x); // Get terrain height at this x

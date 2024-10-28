@@ -1,4 +1,19 @@
 let lastFrameTime = performance.now();
+let fpsDisplay = 0;
+
+function calculateFPS(currentFrameTime) {
+    if (!calculateFPS.lastUpdate) calculateFPS.lastUpdate = currentFrameTime;
+    if (!calculateFPS.frameCount) calculateFPS.frameCount = 0;
+
+    calculateFPS.frameCount++;
+    if (currentFrameTime - calculateFPS.lastUpdate >= 1000) {
+        fpsDisplay = calculateFPS.frameCount;
+        calculateFPS.frameCount = 0;
+        calculateFPS.lastUpdate = currentFrameTime;
+    }
+
+    return fpsDisplay;
+}
 
 function gameLoop() {
     const currentFrameTime = performance.now();
@@ -6,17 +21,14 @@ function gameLoop() {
 
     updateGame(deltaTime);
 
-    Draw();
-    DrawChunks(chunks);
+    Draw(chunks, calculateFPS(currentFrameTime));
 
     lastFrameTime = currentFrameTime;
-
     requestAnimationFrame(gameLoop);
 }
 
 function updateGame(deltaTime) {
     camera.update(deltaTime);
-
     animateFrame();
 }
 

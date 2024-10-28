@@ -12,6 +12,9 @@ let drawCamera = false;
 let drawHeight = false;
 let drawDebugMouseBlock = false;
 let drawFileSize = true;
+let drawFps = true;
+
+let fps;
 
 const camera = new Camera(0, CHUNK_HEIGHT * 2);
 
@@ -24,8 +27,11 @@ function DrawBackground() {
     ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 }
 
-function Draw() {
+function Draw(chunks, frames) {
+    fps = frames;
+
     DrawBackground();
+    DrawChunks(chunks);
 }
 
 function DrawChunks(chunksMap) {
@@ -63,6 +69,7 @@ function DrawLate(chunk) {
     if (drawDebugMouseBlock) DrawDebugMouseBlock();
     else r.style.setProperty("--drawMouse", "default");
     if (drawFileSize) DrawExpectedFileSize();
+    if (drawFps) DrawFps();
 }
 
 function DrawChunkLine(chunk) {
@@ -79,6 +86,13 @@ function DrawChunkLine(chunk) {
     ctx.stroke();
 
     DrawChunkStats(chunk, chunkX);
+}
+
+function DrawFps() {
+    ctx.fillStyle = "black";
+    ctx.font = "20px Pixel";
+
+    ctx.fillText(fps, CANVAS.width - 40, CANVAS.height - 10);
 }
 
 function DrawChunkStats(chunk, chunkX) {

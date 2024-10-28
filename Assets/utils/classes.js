@@ -274,9 +274,11 @@ class Camera {
     }
 
     update(deltaTime) {
+        const calculatedSpeed = input.isKeyDown("ShiftLeft") ? this.speed * 2 : this.speed;
+
         // Update camera position based on velocity
-        this.x += this.velocity.x * this.speed * deltaTime;
-        this.y += this.velocity.y * this.speed * deltaTime;
+        this.x += this.velocity.x * calculatedSpeed * deltaTime;
+        this.y += this.velocity.y * calculatedSpeed * deltaTime;
 
         // Trigger world generation when the camera moves
         GenerateWorld();

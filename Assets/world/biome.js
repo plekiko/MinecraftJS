@@ -1,5 +1,5 @@
 class Biome {
-    constructor(
+    constructor({
         name,
         heightNoise = new Noise(),
         topLayer = Blocks.GrassBlock,
@@ -13,8 +13,9 @@ class Biome {
         minWet = 60,
         maxWet = 0,
         minMount = 0,
-        maxMount = 60
-    ) {
+        maxMount = 60,
+        waterLevel = WATER_LEVEL,
+    } = {}) {
         this.name = name;
         this.heightNoise = heightNoise;
         this.topLayer = topLayer;
@@ -29,205 +30,197 @@ class Biome {
         this.maxWet = maxWet;
         this.minMount = minMount;
         this.maxMount = maxMount;
+        this.waterLevel = waterLevel;
     }
 }
 
 const Biomes = Object.freeze({
-    Planes: new Biome(
-        "Planes", // Name
-        NoisePresets.Flat, // Terrain
-        Blocks.GrassBlock, // Top layer
-        Blocks.Dirt, // Second layer
-        4, // Second layer width
-        [Trees.Oak, Trees.Birch], // Tree types
-        [Blocks.Grass, Blocks.TallGrass], // Grass types
-        7, // Tree threshold
-        10, // Minimum temperature
-        25, // Maximum temperature
-        0, // Minimum wetness
-        10, // Maximum wetness
-        0, // Min Mountain
-        50 // Max Mountain
-    ),
-    Desert: new Biome(
-        "Desert", // Name
-        NoisePresets.SmallHills, // Terrain
-        Blocks.Sand, // Top layer
-        Blocks.SandStone, // Second layer
-        4, // Second layer width
-        [Trees.Cactus], // Tree type
-        [Blocks.DeadBush], // Grass types
-        6, // Tree threshold
-        25, // Minimum temperature
-        999, // Maximum temperature
-        0, // Minimum wetness
-        10, // Maximum wetness
-        0, // Min Mountain
-        50 // Max Mountain
-    ),
-    Tundra: new Biome(
-        "Tundra", // Name
-        NoisePresets.Flat, // Terrain
-        Blocks.SnowedGrassBlock, // Top layer
-        Blocks.Dirt, // Second layer
-        4, // Second layer width
-        [Trees.Spruce], // Tree type
-        [], // Grass types
-        8, // Tree threshold
-        -999, // Minimum temperature
-        10, // Maximum temperature
-        0, // Minimum wetness
-        999, // Maximum wetness
-        0, // Min Mountain
-        50 // Max Mountain
-    ),
-    Taiga: new Biome(
-        "Taiga", // Name
-        NoisePresets.Flat, // Terrain
-        Blocks.Podzol, // Top layer
-        Blocks.Dirt, // Second layer
-        4, // Second layer width
-        [Trees.Spruce, Trees.BigSpruce], // Tree type
-        [Blocks.Grass, Blocks.TallGrass, Blocks.Fern], // Grass types
-        6.5, // Tree threshold
-        10, // Minimum temperature
-        20, // Maximum temperature
-        10, // Minimum wetness
-        30, // Maximum wetness
-        0, // Min Mountain
-        50 // Max Mountain
-    ),
-    Shrubland: new Biome(
-        "Shrubland", // Name
-        NoisePresets.SmallHills, // Terrain
-        Blocks.GrassBlock, // Top layer
-        Blocks.Dirt, // Second layer
-        4, // Second layer width
-        [Trees.Oak, Trees.Birch], // Tree types
-        [Blocks.Grass, Blocks.TallGrass], // Grass types
-        7, // Tree threshold
-        20, // Minimum temperature
-        30, // Maximum temperature
-        10, // Minimum wetness
-        20, // Maximum wetness
-        0, // Min Mountain
-        50 // Max Mountain
-    ),
-    Savanna: new Biome(
-        "Savanna", // Name
-        NoisePresets.Flat, // Terrain
-        Blocks.GrassBlock, // Top layer
-        Blocks.Dirt, // Second layer
-        4, // Second layer width
-        [Trees.Acacia], // Tree types
-        [Blocks.Grass, Blocks.TallGrass], // Grass types
-        7, // Tree threshold
-        30, // Minimum temperature
-        999, // Maximum temperature
-        10, // Minimum wetness
-        20, // Maximum wetness
-        0, // Min Mountain
-        50 // Max Mountain
-    ),
-    Forest: new Biome(
-        "Forest", // Name
-        NoisePresets.SmallHills, // Terrain
-        Blocks.GrassBlock, // Top layer
-        Blocks.Dirt, // Second layer
-        4, // Second layer width
-        [Trees.Oak], // Tree types
-        [
-            Blocks.Grass,
-            Blocks.TallGrass,
-            Blocks.Grass,
-            Blocks.TallGrass,
-            Blocks.Grass,
-            Blocks.TallGrass,
-            Blocks.FlowerRose,
-            Blocks.FlowerBlueOrchid,
-        ], // Grass types
-        6, // Tree threshold
-        20, // Minimum temperature
-        30, // Maximum temperature
-        20, // Minimum wetness
-        30, // Maximum wetness
-        0, // Min Mountain
-        50 // Max Mountain
-    ),
-    SeasonalForest: new Biome(
-        "Seasonal Forest", // Name
-        NoisePresets.SmallHills, // Terrain
-        Blocks.GrassBlock, // Top layer
-        Blocks.Dirt, // Second layer
-        4, // Second layer width
-        [Trees.Oak], // Tree types
-        [
-            Blocks.Grass,
-            Blocks.TallGrass,
-            Blocks.FlowerAllium,
-            Blocks.FlowerBlueOrchid,
-            Blocks.FlowerDaisy,
-            Blocks.FlowerDandelion,
-            Blocks.FlowerRose,
-            Blocks.FlowerTulipOrange,
-            Blocks.FlowerTulipPink,
-            Blocks.FlowerTulipRed,
-            Blocks.FlowerTulipWhite,
-        ], // Grass types
-        6.5, // Tree threshold
-        30, // Minimum temperature
-        999, // Maximum temperature
-        20, // Minimum wetness
-        30, // Maximum wetness
-        0, // Min Mountain
-        50 // Max Mountain
-    ),
-    Swamp: new Biome(
-        "Swamp", // Name
-        NoisePresets.Flat, // Terrain
-        Blocks.GrassBlock, // Top layer
-        Blocks.Dirt, // Second layer
-        4, // Second layer width
-        [Trees.Oak], // Tree types
-        [Blocks.Grass, Blocks.TallGrass], // Grass types
-        8, // Tree threshold
-        10, // Minimum temperature
-        30, // Maximum temperature
-        30, // Minimum wetness
-        999, // Maximum wetness
-        0, // Min Mountain
-        50 // Max Mountain
-    ),
-    RainForest: new Biome(
-        "Rain Forest", // Name
-        NoisePresets.SmallHills, // Terrain
-        Blocks.GrassBlock, // Top layer
-        Blocks.Dirt, // Second layer
-        4, // Second layer width
-        [Trees.Oak], // Tree types
-        [Blocks.Grass, Blocks.TallGrass], // Grass types
-        6, // Tree threshold
-        30, // Minimum temperature
-        999, // Maximum temperature
-        30, // Minimum wetness
-        999, // Maximum wetness
-        0, // Min Mountain
-        50 // Max Mountain
-    ),
-    Mountain: new Biome(
-        "Mountain", // Name
-        NoisePresets.Mountains, // Terrain
-        Blocks.Stone, // Top layer
-        Blocks.Stone, // Second layer
-        4, // Second layer width
-        [], // Tree types
-        [Blocks.Grass, Blocks.TallGrass], // Grass types
-        6, // Tree threshold
-        0, // Minimum temperature
-        999, // Maximum temperature
-        0, // Minimum wetness
-        999, // Maximum wetness
-        50, // Min Mountain
-        999 // Max Mountain
-    ),
+    Planes: new Biome({
+        name: "Planes",
+        heightNoise: NoisePresets.Flat,
+        topLayer: Blocks.GrassBlock,
+        secondLayer: Blocks.Dirt,
+        secondLayerWidth: 4,
+        treeType: [Trees.Oak, Trees.Birch],
+        grassType: [Blocks.Grass, Blocks.TallGrass],
+        treeThreshold: 7,
+        minTemp: 10,
+        maxTemp: 25,
+        minWet: 0,
+        maxWet: 10,
+        minMount: 0,
+        maxMount: 50
+    }),
+    Desert: new Biome({
+        name: "Desert",
+        heightNoise: NoisePresets.SmallHills,
+        topLayer: Blocks.Sand,
+        secondLayer: Blocks.SandStone,
+        secondLayerWidth: 4,
+        treeType: [Trees.Cactus],
+        grassType: [Blocks.DeadBush],
+        treeThreshold: 6,
+        minTemp: 25,
+        maxTemp: Infinity,
+        minWet: 0,
+        maxWet: 10,
+        minMount: 0,
+        maxMount: 50
+    }),
+    Tundra: new Biome({
+        name: "Tundra",
+        heightNoise: NoisePresets.Flat,
+        topLayer: Blocks.SnowedGrassBlock,
+        secondLayer: Blocks.Dirt,
+        secondLayerWidth: 4,
+        treeType: [Trees.Spruce],
+        grassType: [],
+        treeThreshold: 8,
+        minTemp: -Infinity,
+        maxTemp: 10,
+        minWet: 0,
+        maxWet: Infinity,
+        minMount: 0,
+        maxMount: 50
+    }),
+    Taiga: new Biome({
+        name: "Taiga",
+        heightNoise: NoisePresets.Flat,
+        topLayer: Blocks.Podzol,
+        secondLayer: Blocks.Dirt,
+        secondLayerWidth: 4,
+        treeType: [Trees.Spruce, Trees.BigSpruce],
+        grassType: [Blocks.Grass, Blocks.TallGrass, Blocks.Fern],
+        treeThreshold: 6.5,
+        minTemp: 10,
+        maxTemp: 20,
+        minWet: 10,
+        maxWet: 30,
+        minMount: 0,
+        maxMount: 50
+    }),
+    Shrubland: new Biome({
+        name: "Shrubland",
+        heightNoise: NoisePresets.SmallHills,
+        topLayer: Blocks.GrassBlock,
+        secondLayer: Blocks.Dirt,
+        secondLayerWidth: 4,
+        treeType: [Trees.Oak, Trees.Birch],
+        grassType: [Blocks.Grass, Blocks.TallGrass],
+        treeThreshold: 7,
+        minTemp: 20,
+        maxTemp: 30,
+        minWet: 10,
+        maxWet: 20,
+        minMount: 0,
+        maxMount: 50
+    }),
+    Savanna: new Biome({
+        name: "Savanna",
+        heightNoise: NoisePresets.Flat,
+        topLayer: Blocks.GrassBlock,
+        secondLayer: Blocks.Dirt,
+        secondLayerWidth: 4,
+        treeType: [Trees.Acacia],
+        grassType: [Blocks.Grass, Blocks.TallGrass, Blocks.DeadBush],
+        treeThreshold: 7,
+        minTemp: 30,
+        maxTemp: Infinity,
+        minWet: 10,
+        maxWet: 20,
+        minMount: 0,
+        maxMount: 50
+    }),
+    Forest: new Biome({
+        name: "Forest",
+        heightNoise: NoisePresets.SmallHills,
+        topLayer: Blocks.GrassBlock,
+        secondLayer: Blocks.Dirt,
+        secondLayerWidth: 4,
+        treeType: [Trees.Oak],
+        grassType: [
+            Blocks.Grass, Blocks.TallGrass, Blocks.Grass,
+            Blocks.TallGrass, Blocks.Grass, Blocks.TallGrass,
+            Blocks.FlowerRose, Blocks.FlowerBlueOrchid
+        ],
+        treeThreshold: 6,
+        minTemp: 20,
+        maxTemp: 30,
+        minWet: 20,
+        maxWet: 30,
+        minMount: 0,
+        maxMount: 50
+    }),
+    SeasonalForest: new Biome({
+        name: "Seasonal Forest",
+        heightNoise: NoisePresets.SmallHills,
+        topLayer: Blocks.GrassBlock,
+        secondLayer: Blocks.Dirt,
+        secondLayerWidth: 4,
+        treeType: [Trees.Oak],
+        grassType: [
+            Blocks.Grass, Blocks.TallGrass,
+            Blocks.FlowerAllium, Blocks.FlowerBlueOrchid,
+            Blocks.FlowerDaisy, Blocks.FlowerDandelion,
+            Blocks.FlowerRose, Blocks.FlowerTulipOrange,
+            Blocks.FlowerTulipPink, Blocks.FlowerTulipRed,
+            Blocks.FlowerTulipWhite
+        ],
+        treeThreshold: 6.5,
+        minTemp: 30,
+        maxTemp: Infinity,
+        minWet: 20,
+        maxWet: 30,
+        minMount: 0,
+        maxMount: 50
+    }),
+    Swamp: new Biome({
+        name: "Swamp",
+        heightNoise: NoisePresets.Flat,
+        topLayer: Blocks.GrassBlock,
+        secondLayer: Blocks.Dirt,
+        secondLayerWidth: 4,
+        treeType: [Trees.Oak],
+        grassType: [Blocks.Grass, Blocks.TallGrass],
+        treeThreshold: 7,
+        minTemp: 10,
+        maxTemp: 30,
+        minWet: 30,
+        maxWet: Infinity,
+        minMount: 0,
+        maxMount: 50,
+        waterLevel: 20
+    }),
+    RainForest: new Biome({
+        name: "Rain Forest",
+        heightNoise: NoisePresets.SmallHills,
+        topLayer: Blocks.GrassBlock,
+        secondLayer: Blocks.Dirt,
+        secondLayerWidth: 4,
+        treeType: [Trees.BigJungle],
+        grassType: [Blocks.Grass, Blocks.TallGrass],
+        treeThreshold: 6,
+        minTemp: 30,
+        maxTemp: Infinity,
+        minWet: 30,
+        maxWet: Infinity,
+        minMount: 0,
+        maxMount: 50
+    }),
+    Mountain: new Biome({
+        name: "Mountain",
+        heightNoise: NoisePresets.Mountains,
+        topLayer: Blocks.Stone,
+        secondLayer: Blocks.Stone,
+        secondLayerWidth: 4,
+        treeType: [],
+        grassType: [Blocks.Grass, Blocks.TallGrass],
+        treeThreshold: 6,
+        minTemp: 0,
+        maxTemp: Infinity,
+        minWet: 0,
+        maxWet: Infinity,
+        minMount: 50,
+        maxMount: Infinity
+    })
 });
