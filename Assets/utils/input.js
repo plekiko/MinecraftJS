@@ -8,8 +8,10 @@ class InputHandler {
         });
         this.mouse = {
             leftMouseDown: false,
+            rightMouseDown: false,
             position: { x: 0, y: 0 },
         };
+        this.scroll = { deltaX: 0, deltaY: 0 }; // Store scroll delta
         this._initializeEventListeners();
     }
 
@@ -21,10 +23,15 @@ class InputHandler {
         document.addEventListener("mousedown", (event) =>
             this._handleMouseDown(event)
         );
-        document.addEventListener("mouseup", () => this._handleMouseUp());
+        document.addEventListener("mouseup", (event) =>
+            this._handleMouseUp(event)
+        );
         document.addEventListener("mousemove", (event) =>
             this._handleMouseMove(event)
         );
+        document.addEventListener("wheel", (event) =>
+            this._handleScroll(event)
+        ); // Listen for scroll events
     }
 
     _handleKeyDown(event) {
@@ -48,7 +55,27 @@ class InputHandler {
     _handleMouseDown(event) {
         if (event.button === 0) {
             this.mouse.leftMouseDown = true;
+        } else if (event.button === 2) {
+            this.mouse.rightMouseDown = true;
         }
+    }
+
+    _handleMouseUp(event) {
+        if (event.button === 0) {
+            this.mouse.leftMouseDown = false;
+        } else if (event.button === 2) {
+            this.mouse.rightMouseDown = false;
+        }
+    }
+
+    _handleMouseMove(event) {
+        this.mouse.position.x = event.clientX;
+        this.mouse.position.y = event.clientY;
+    }
+
+    _handleScroll(event) {
+        this.scroll.deltaX = event.deltaX;
+        this.scroll.deltaY = event.deltaY;
     }
 
     isLeftMouseButtonPressed() {
@@ -59,13 +86,12 @@ class InputHandler {
         return false;
     }
 
-    _handleMouseUp() {
-        this.mouse.leftMouseDown = false;
-    }
-
-    _handleMouseMove(event) {
-        this.mouse.position.x = event.clientX;
-        this.mouse.position.y = event.clientY;
+    isRightMouseButtonPressed() {
+        if (this.mouse.rightMouseDown) {
+            this.mouse.rightMouseDown = false;
+            return true;
+        }
+        return false;
     }
 
     isKeyDown(keyCode) {
@@ -99,6 +125,17 @@ class InputHandler {
 
     isLeftMouseDown() {
         return this.mouse.leftMouseDown;
+    }
+
+    isRightMouseDown() {
+        return this.mouse.rightMouseDown;
+    }
+
+    getScrollDelta() {
+        const scrollDelta = { ...this.scroll };
+        this.scroll.deltaX = 0;
+        this.scroll.deltaY = 0;
+        return scrollDelta;
     }
 }
 
@@ -157,6 +194,7 @@ const trackedKeys = [
     "Backspace",
     "Minus",
     "Equal",
+    "Backquote",
 ];
 
 // Create an instance of the InputHandler with the keys you want to track

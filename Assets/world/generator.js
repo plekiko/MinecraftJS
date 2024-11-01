@@ -1,7 +1,9 @@
 let chunks = new Map();
 let pendingBlocks = new Map();
 
-let seed = Math.floor(Math.random() * 1000000);
+// let seed = Math.floor(Math.random() * 1000000);
+let seed = 0;
+
 tooloud.Perlin.setSeed(seed);
 
 const worldGrassNoiseMap = new Noise(550, 0.2, 1);
@@ -117,9 +119,14 @@ function generateChunk(chunkIndex, chunkX, oldChunkData) {
     newChunk.applyBufferedBlocks();
 }
 
+function GetChunk(worldX) {
+    return chunks.has(worldX) ? chunks.get(worldX) : null;
+}
+
 function postProcessChunks() {
     chunks.forEach((chunk) => {
         if (!chunk.generated) {
+            // chunk.generateCaves();
             chunk.generateWater();
             chunk.generateTrees();
             chunk.generateGrass();
@@ -169,12 +176,17 @@ function GetBiomeForNoise(temp, wetness, mountains) {
     return Biomes.Planes;
 }
 
-function GetBlockAtWorldPosition(worldX, worldY) {
+function GetBlockAtWorldPosition(worldX, worldY, adjust = true) {
     // Remove camera influence from world coordinates to get the correct world position
-    const adjustedWorldX = worldX + camera.x;
-    const adjustedWorldY = worldY + camera.y;
+    let adjustedWorldX = worldX;
+    let adjustedWorldY = worldY;
 
-    const targetChunk = GetChunkForBlock(adjustedWorldX, chunks);
+    if (adjust) {
+        adjustedWorldX = worldX + camera.x;
+        adjustedWorldY = worldY + camera.y;
+    }
+
+    const targetChunk = GetChunkForX(adjustedWorldX);
 
     if (targetChunk && adjustedWorldY < CHUNK_HEIGHT * BLOCK_SIZE) {
         const localX = targetChunk.getLocalX(Math.floor(adjustedWorldX));
@@ -187,35 +199,16 @@ function GetBlockAtWorldPosition(worldX, worldY) {
 }
 
 function SetBlockTypeAtPosition(worldX, worldY, blockType) {
-    const targetChunk = GetChunkForBlock(worldX, chunks);
-    const BLOCK_SIZE = 16; // Set your block size value
-    const CHUNK_WIDTH = 8; // Set your chunk width value
+    const block = GetBlockAtWorldPosition(worldX, worldY);
 
-    if (targetChunk && worldY < targetChunk.height * BLOCK_SIZE) {
-        const localX = targetChunk.getLocalX(worldX);
-        const localY = worldY / BLOCK_SIZE;
+    if (!block) return;
 
-        targetChunk.setBlockType(localX, localY, blockType);
-    } else {
-        if (blockType === BlockType.Air) return;
-
-        // Buffer the block to place it once the chunk is generated
-        const chunkX =
-            Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
-            CHUNK_WIDTH *
-            BLOCK_SIZE;
-
-        if (!pendingBlocks.has(chunkX)) {
-            pendingBlocks.set(chunkX, []);
-        }
-        pendingBlocks.get(chunkX).push({ x: worldX, y: worldY, blockType });
-    }
+    block.setBlockType(blockType);
 }
 
-function GetChunkForBlock(worldX, chunks) {
+function GetChunkForX(worldX) {
     const chunkX =
         Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
-        CHUNK_WIDTH *
-        BLOCK_SIZE;
-    return chunks.get(chunkX); // Assuming chunks is a Map of chunks by x-coordinate
+        (CHUNK_WIDTH * BLOCK_SIZE);
+    return chunks.get(chunkX);
 }

@@ -253,35 +253,61 @@ class Camera {
         this.y = y;
         this.velocity = new Vector2();
         this.speed = 3;
+
+        this.lerpTimeX = 0;
+        this.lerpTimeY = 0;
+        this.lerpSpeed = 1;
     }
 
-    getWorldX() {
-        return this.x + CANVAS.width / 2; // Calculate the world X position of the camera
+    getWorldX(x) {
+        return x + CANVAS.width / 2; // Calculate the world X position of the camera
     }
 
-    getWorldY() {
-        return this.y + CANVAS.height / 2;
+    getWorldY(y) {
+        return y - CANVAS.height / 2;
     }
-
-    zoomIn() {}
-
-    zoomOut() {}
 
     getCurrentChunkIndex() {
-        const worldX = this.getWorldX(); // Get the current world X position of the camera
+        let worldX = this.getWorldX(this.x);
         const chunkIndex = Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)); // Calculate the chunk index
         return chunkIndex;
     }
 
-    update(deltaTime) {
-        const calculatedSpeed = input.isKeyDown("ShiftLeft") ? this.speed * 2 : this.speed;
+    update(deltaTime, player) {
+        if (!player) {
+            const calculatedSpeed = input.isKeyDown("ShiftLeft")
+                ? this.speed * 2
+                : this.speed;
 
-        // Update camera position based on velocity
-        this.x += this.velocity.x * calculatedSpeed * deltaTime;
-        this.y += this.velocity.y * calculatedSpeed * deltaTime;
+            // Update camera position based on velocity
+            this.x += this.velocity.x * calculatedSpeed * deltaTime;
+            this.y += this.velocity.y * calculatedSpeed * deltaTime;
+        } else {
+            this.followPlayer(deltaTime);
+        }
 
         // Trigger world generation when the camera moves
         GenerateWorld();
+    }
+
+    followPlayer(deltaTime) {
+        // const increment = deltaTime * this.lerpSpeed;
+
+        // let targetX = player.position.x - CANVAS.width / 2;
+        // let targetY = this.getWorldY(player.position.y);
+
+        // this.x = lerp(this.x, targetX, increment);
+        // this.y = lerp(this.y, targetY, increment);
+
+        this.x = player.position.x - CANVAS.width / 2;
+        this.y = this.getWorldY(player.position.y);
+
+        // if (Math.abs(this.x - targetX) < 0.1) {
+        //     this.x = targetX;
+        // }
+        // if (Math.abs(this.y - targetY) < 0.1) {
+        //     this.y = targetY;
+        // }
     }
 }
 
@@ -296,4 +322,27 @@ function easeInOut(t) {
 function lerpEaseInOut(a, b, t) {
     const easedT = easeInOut(t);
     return a + (b - a) * easedT;
+}
+
+function easeIn(t) {
+    return t * t * t; // Cubic ease-in
+}
+
+function easeOut(t) {
+    return 1 - Math.pow(1 - t, 3); // Cubic ease-out
+}
+
+function lerpEaseIn(a, b, t) {
+    const easedT = easeIn(t);
+    return a + (b - a) * easedT;
+}
+
+function lerpEaseOut(a, b, t) {
+    const easedT = easeOut(t);
+    return a + (b - a) * easedT;
+}
+
+function playSound(sound) {
+    const audio = new Audio("Assets/audio/sfx/" + sound);
+    audio.cloneNode(true).play();
 }

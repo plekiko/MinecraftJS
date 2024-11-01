@@ -28,8 +28,8 @@ class Chunk {
             this.blocks[y] = [];
             this.walls[y] = [];
             for (let x = 0; x < this.width; x++) {
-                this.blocks[y][x] = new Block(x, y, Blocks.Air); // Set default as air block
-                this.walls[y][x] = new Block(x, y, Blocks.Air, true);
+                this.blocks[y][x] = new Block(x, y, Blocks.Air, this.x); // Set default as air block
+                this.walls[y][x] = new Block(x, y, Blocks.Air, this.x, true);
             }
         }
     }
@@ -190,10 +190,7 @@ class Chunk {
 
     updateWater() {
         this.getAllBlocks(Blocks.Water).forEach((water) => {
-            const upBlock = this.getUp(water.x, water.y);
-            if (upBlock && upBlock.blockType === Blocks.Air) {
-                water.fluidSprite = true;
-            }
+            water.setBlockType(Blocks.Water);
         });
     }
 

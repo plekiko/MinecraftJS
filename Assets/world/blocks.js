@@ -32,11 +32,11 @@ const Blocks = Object.freeze({
     FlowerAllium: 30,
     Water: 31,
     JungleLog: 32,
-    JungleLeaves: 33
+    JungleLeaves: 33,
 });
 
 const blockTypes = [
-    new BlockType({ blockId: 0, name: "Air" }),
+    new BlockType({ blockId: 0, name: "Air", collision: false }),
     new BlockType({
         blockId: 1,
         sprite: "grass_side",
@@ -130,6 +130,7 @@ const blockTypes = [
         name: "Grass",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 19,
@@ -137,6 +138,7 @@ const blockTypes = [
         name: "Tall Grass",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 20,
@@ -144,6 +146,7 @@ const blockTypes = [
         name: "Dead Bush",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 21,
@@ -151,6 +154,7 @@ const blockTypes = [
         name: "Fern",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 22,
@@ -158,6 +162,7 @@ const blockTypes = [
         name: "Red Tulip",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 23,
@@ -165,6 +170,7 @@ const blockTypes = [
         name: "White Tulip",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 24,
@@ -172,6 +178,7 @@ const blockTypes = [
         name: "Pink Tulip",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 25,
@@ -179,6 +186,7 @@ const blockTypes = [
         name: "Orange Tulip",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 26,
@@ -186,6 +194,7 @@ const blockTypes = [
         name: "Rose",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 27,
@@ -193,6 +202,7 @@ const blockTypes = [
         name: "Blue Orchid",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 28,
@@ -200,6 +210,7 @@ const blockTypes = [
         name: "Dandelion",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 29,
@@ -207,6 +218,7 @@ const blockTypes = [
         name: "Daisy",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 30,
@@ -214,6 +226,7 @@ const blockTypes = [
         name: "Allium",
         hardness: 0,
         grassOffset: true,
+        collision: false,
     }),
     new BlockType({
         blockId: 31,
@@ -232,8 +245,8 @@ const blockTypes = [
         blockId: 33,
         sprite: "leaves_jungle_opaque",
         name: "Jungle Leaves",
-        hardness: 0.6
-    })
+        hardness: 0.6,
+    }),
 ];
 
 const blockMap = new Map(blockTypes.map((block) => [block.blockId, block]));

@@ -49,7 +49,7 @@ const Biomes = Object.freeze({
         minWet: 0,
         maxWet: 10,
         minMount: 0,
-        maxMount: 50
+        maxMount: 50,
     }),
     Desert: new Biome({
         name: "Desert",
@@ -65,7 +65,7 @@ const Biomes = Object.freeze({
         minWet: 0,
         maxWet: 10,
         minMount: 0,
-        maxMount: 50
+        maxMount: 50,
     }),
     Tundra: new Biome({
         name: "Tundra",
@@ -81,7 +81,7 @@ const Biomes = Object.freeze({
         minWet: 0,
         maxWet: Infinity,
         minMount: 0,
-        maxMount: 50
+        maxMount: 50,
     }),
     Taiga: new Biome({
         name: "Taiga",
@@ -97,7 +97,7 @@ const Biomes = Object.freeze({
         minWet: 10,
         maxWet: 30,
         minMount: 0,
-        maxMount: 50
+        maxMount: 50,
     }),
     Shrubland: new Biome({
         name: "Shrubland",
@@ -113,7 +113,7 @@ const Biomes = Object.freeze({
         minWet: 10,
         maxWet: 20,
         minMount: 0,
-        maxMount: 50
+        maxMount: 50,
     }),
     Savanna: new Biome({
         name: "Savanna",
@@ -129,7 +129,7 @@ const Biomes = Object.freeze({
         minWet: 10,
         maxWet: 20,
         minMount: 0,
-        maxMount: 50
+        maxMount: 50,
     }),
     Forest: new Biome({
         name: "Forest",
@@ -139,9 +139,14 @@ const Biomes = Object.freeze({
         secondLayerWidth: 4,
         treeType: [Trees.Oak],
         grassType: [
-            Blocks.Grass, Blocks.TallGrass, Blocks.Grass,
-            Blocks.TallGrass, Blocks.Grass, Blocks.TallGrass,
-            Blocks.FlowerRose, Blocks.FlowerBlueOrchid
+            Blocks.Grass,
+            Blocks.TallGrass,
+            Blocks.Grass,
+            Blocks.TallGrass,
+            Blocks.Grass,
+            Blocks.TallGrass,
+            Blocks.FlowerRose,
+            Blocks.FlowerBlueOrchid,
         ],
         treeThreshold: 6,
         minTemp: 20,
@@ -149,7 +154,7 @@ const Biomes = Object.freeze({
         minWet: 20,
         maxWet: 30,
         minMount: 0,
-        maxMount: 50
+        maxMount: 50,
     }),
     SeasonalForest: new Biome({
         name: "Seasonal Forest",
@@ -159,12 +164,17 @@ const Biomes = Object.freeze({
         secondLayerWidth: 4,
         treeType: [Trees.Oak],
         grassType: [
-            Blocks.Grass, Blocks.TallGrass,
-            Blocks.FlowerAllium, Blocks.FlowerBlueOrchid,
-            Blocks.FlowerDaisy, Blocks.FlowerDandelion,
-            Blocks.FlowerRose, Blocks.FlowerTulipOrange,
-            Blocks.FlowerTulipPink, Blocks.FlowerTulipRed,
-            Blocks.FlowerTulipWhite
+            Blocks.Grass,
+            Blocks.TallGrass,
+            Blocks.FlowerAllium,
+            Blocks.FlowerBlueOrchid,
+            Blocks.FlowerDaisy,
+            Blocks.FlowerDandelion,
+            Blocks.FlowerRose,
+            Blocks.FlowerTulipOrange,
+            Blocks.FlowerTulipPink,
+            Blocks.FlowerTulipRed,
+            Blocks.FlowerTulipWhite,
         ],
         treeThreshold: 6.5,
         minTemp: 30,
@@ -172,7 +182,7 @@ const Biomes = Object.freeze({
         minWet: 20,
         maxWet: 30,
         minMount: 0,
-        maxMount: 50
+        maxMount: 50,
     }),
     Swamp: new Biome({
         name: "Swamp",
@@ -189,7 +199,7 @@ const Biomes = Object.freeze({
         maxWet: Infinity,
         minMount: 0,
         maxMount: 50,
-        waterLevel: 20
+        waterLevel: 20,
     }),
     RainForest: new Biome({
         name: "Rain Forest",
@@ -205,7 +215,7 @@ const Biomes = Object.freeze({
         minWet: 30,
         maxWet: Infinity,
         minMount: 0,
-        maxMount: 50
+        maxMount: 50,
     }),
     Mountain: new Biome({
         name: "Mountain",
@@ -221,6 +231,6 @@ const Biomes = Object.freeze({
         minWet: 0,
         maxWet: Infinity,
         minMount: 50,
-        maxMount: Infinity
-    })
+        maxMount: Infinity,
+    }),
 });

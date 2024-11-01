@@ -31,6 +31,8 @@ function PrintBlockLogic() {
 
         console.log(mousePos.x + " - " + mousePos.y);
         console.log(block);
+
+        // block.setBlockType(Blocks.OakLog);
     }
 }
 

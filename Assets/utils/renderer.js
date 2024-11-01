@@ -14,9 +14,15 @@ let drawDebugMouseBlock = false;
 let drawFileSize = true;
 let drawFps = true;
 
+let cursorInRange = false;
+
+let hotbar = null;
+
 let fps;
 
 const camera = new Camera(0, CHUNK_HEIGHT * 2);
+
+r.style.setProperty("--drawMouse", "none");
 
 function DrawBackground() {
     const gradient = ctx.createLinearGradient(0, CANVAS.height, 0, 0); // Bottom to top gradient
@@ -32,6 +38,27 @@ function Draw(chunks, frames) {
 
     DrawBackground();
     DrawChunks(chunks);
+    DrawEntities();
+    AfterDraw();
+}
+
+function DrawEntities() {
+    entities.forEach((entity) => {
+        entity.draw(ctx, camera);
+    });
+}
+
+function DrawBreakAndPlaceCursor(inRange = false) {
+    const mouseX = input.getMousePositionOnBlockGrid().x;
+    const mouseY = input.getMousePositionOnBlockGrid().y;
+
+    const topLeftX = mouseX;
+    const topLeftY = mouseY;
+
+    ctx.strokeStyle = inRange ? "black" : "red";
+    ctx.lineWidth = 2;
+
+    ctx.strokeRect(topLeftX, topLeftY, BLOCK_SIZE, BLOCK_SIZE);
 }
 
 function DrawChunks(chunksMap) {
@@ -67,9 +94,105 @@ function DrawLate(chunk) {
     if (drawCamera) DrawCamera();
     if (drawHeight) DrawHeight();
     if (drawDebugMouseBlock) DrawDebugMouseBlock();
-    else r.style.setProperty("--drawMouse", "default");
     if (drawFileSize) DrawExpectedFileSize();
     if (drawFps) DrawFps();
+}
+
+function AfterDraw() {
+    if (player) {
+        DrawUI();
+        if (player.windowOpen) DrawCursor();
+    }
+}
+
+function DrawUI() {
+    DrawBreakAndPlaceCursor(cursorInRange);
+    DrawHotbar();
+    DrawInventory();
+    DrawInventoryHoldItem();
+    DrawInventoryHoverTitle();
+}
+
+function DrawInventory() {
+    if (!player.windowOpen) return;
+
+    // Black Background
+    ctx.fillStyle = "rgb(0, 0, 0, .6)";
+    ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
+
+    const inventoryUI = drawImage(
+        "Assets/sprites/gui/inventory.png",
+        CANVAS.width / 2,
+        CANVAS.height / 6,
+        3.5
+    );
+
+    DrawInventoryItems(inventoryUI);
+}
+
+function DrawInventoryItems(inventoryUI) {
+    for (let y = 0; y < player.inventory.items.length; y++) {
+        for (let x = 0; x < player.inventory.items[y].length; x++) {
+            const item = player.inventory.items[y][x];
+
+            if (item.count <= 0) continue;
+            if (!item.blockId && !item.itemId) continue;
+
+            const slotX = inventoryUI.x + 32 + x * 63;
+            const slotY = y != 3 ? inventoryUI.y + 298 + y * 63 : 651;
+
+            player.inventory.inventoryUI = inventoryUI;
+
+            // Draw the sprite
+            if (item.blockId) {
+                drawImage(
+                    "Assets/sprites/blocks/" +
+                        GetBlock(item.blockId).sprite +
+                        ".png",
+                    slotX,
+                    slotY,
+                    3,
+                    false
+                );
+            }
+
+            if (item.count <= 1) continue;
+
+            // Draw the count
+            drawText(item.count, slotX + 55, slotY + 50, 30);
+        }
+    }
+}
+
+function DrawInventoryHoldItem() {
+    if (!player.windowOpen) return;
+
+    const holdingItem = player.inventory.holdingItem;
+    const mousePos = input.getMousePosition();
+
+    let image = null;
+
+    if (!holdingItem) return;
+
+    if (holdingItem.blockId) {
+        image = drawImage(
+            "Assets/sprites/blocks/" +
+                GetBlock(holdingItem.blockId).sprite +
+                ".png",
+            mousePos.x,
+            mousePos.y,
+            2.5,
+            false
+        );
+    }
+
+    if (holdingItem.count <= 1) return;
+
+    drawText(
+        holdingItem.count,
+        image.x + image.sizeX + 5,
+        image.y + image.sizeY + 3
+    );
 }
 
 function DrawChunkLine(chunk) {
@@ -88,6 +211,28 @@ function DrawChunkLine(chunk) {
     DrawChunkStats(chunk, chunkX);
 }
 
+function DrawCursor() {
+    drawImage(
+        "Assets/sprites/misc/cursor.png",
+        input.getMousePosition().x,
+        input.getMousePosition().y,
+        1,
+        false
+    );
+}
+
+function mouseOverPosition(x, y, sizeX, sizeY) {
+    const mousePos = input.getMousePosition();
+
+    const isOver =
+        mousePos.x >= x &&
+        mousePos.x <= x + sizeX &&
+        mousePos.y >= y &&
+        mousePos.y <= y + sizeY;
+
+    return isOver;
+}
+
 function DrawFps() {
     ctx.fillStyle = "black";
     ctx.font = "20px Pixel";
@@ -96,6 +241,7 @@ function DrawFps() {
 }
 
 function DrawChunkStats(chunk, chunkX) {
+    ctx.textAlign = "left";
     const index = chunk.x / CHUNK_WIDTH / BLOCK_SIZE;
 
     ctx.fillStyle = "black";
@@ -132,6 +278,7 @@ function DrawChunkStats(chunk, chunkX) {
 function DrawExpectedFileSize() {
     ctx.fillStyle = "black";
     ctx.font = "15px Pixel";
+    ctx.textAlign = "left";
 
     ctx.fillText(
         "File size: " + (chunks.size * CHUNK_FILE_SIZE + 5) + "kB",
@@ -228,4 +375,59 @@ function DrawDebugMouseBlock() {
 
     // Draw the hollow square
     ctx.strokeRect(topLeftX, topLeftY, BLOCK_SIZE, BLOCK_SIZE);
+}
+
+function DrawHotbar() {
+    if (!hotbar) return;
+
+    hotbar.draw(ctx);
+}
+
+function DrawInventoryHoverTitle() {
+    if (!player.windowOpen) return;
+    if (!player.inventory.hoverItem) return;
+
+    const mousePos = input.getMousePosition();
+
+    const hoverInventoryItem = player.inventory.hoverItem;
+
+    let title = hoverInventoryItem.blockId
+        ? GetBlock(hoverInventoryItem.blockId).name
+        : "";
+
+    drawText(title, mousePos.x + 20, mousePos.y - 5, 25, true, "left");
+}
+
+function drawText(text, x, y, size = 25, shadow = true, textAlign = "right") {
+    if (shadow) {
+        ctx.fillStyle = "rgb(0, 0, 0, .7)";
+        ctx.font = size + "px Pixel";
+        ctx.textAlign = textAlign;
+
+        ctx.fillText(text, x + 3, y + 3);
+    }
+
+    ctx.fillStyle = "white";
+    ctx.font = size + "px Pixel";
+
+    ctx.fillText(text, x, y);
+}
+
+function drawImage(url, x = 0, y = 0, scale = 1, center = true) {
+    img = new Image();
+    img.src = url;
+    ctx.drawImage(
+        img,
+        center ? x - (img.width / 2) * scale : x,
+        y,
+        img.width * scale,
+        img.height * scale
+    );
+
+    return {
+        x: center ? x - (img.width / 2) * scale : x,
+        y: y,
+        sizeX: img.width * scale,
+        sizeY: img.height * scale,
+    };
 }
