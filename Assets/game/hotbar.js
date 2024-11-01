@@ -31,11 +31,17 @@ class Hotbar {
     }
 
     handleSelected() {
-        if (this.inventory.items[3][this.currentSlot].blockId) {
+        if (this.inventory.items[3][this.currentSlot].item.blockId) {
             this.inventory.selectedBlock =
-                this.inventory.items[3][this.currentSlot].blockId;
+                this.inventory.items[3][this.currentSlot].item.blockId;
         } else {
             this.inventory.selectedBlock = null;
+        }
+        if (this.inventory.items[3][this.currentSlot].item.itemId != null) {
+            this.inventory.selectedItem =
+                this.inventory.items[3][this.currentSlot].item.itemId;
+        } else {
+            this.inventory.selectedItem = null;
         }
 
         this.inventory.currentSlot = this.currentSlot;
@@ -43,10 +49,15 @@ class Hotbar {
 
     drawItems() {
         for (let i = 0; i < this.inventory.items[3].length; i++) {
-            const item = this.inventory.items[3][i];
+            const item = this.inventory.items[3][i].item;
             if (item.blockId !== null) {
                 this.drawBlock(item.blockId, i);
                 this.drawCount(item.count, i);
+            } else {
+                if (item.itemId != null) {
+                    this.drawItem(item.itemId, i);
+                    this.drawCount(item.count, i);
+                }
             }
         }
     }
@@ -55,6 +66,12 @@ class Hotbar {
         const block = GetBlock(blockId);
 
         this.drawInSlot("blocks/" + block.sprite + ".png", slot);
+    }
+
+    drawItem(itemId, slot) {
+        const item = GetItem(itemId);
+
+        this.drawInSlot("items/" + item.sprite + ".png", slot);
     }
 
     drawCount(count, slot) {

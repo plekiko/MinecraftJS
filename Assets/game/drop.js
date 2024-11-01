@@ -1,11 +1,15 @@
 class Drop extends Entity {
     constructor({ x, y, blockId = null, itemId = null, count = 1 }) {
+        const spritePath =
+            "Assets/sprites/" +
+            (blockId
+                ? "blocks/" + GetBlock(blockId).sprite
+                : "items/" + GetItem(itemId).sprite) +
+            ".png";
         super({
             position: new Vector2(x, y),
             hitbox: new Vector2(BLOCK_SIZE / 1.5, BLOCK_SIZE / 1.5),
-            sprite: blockId
-                ? "Assets/sprites/blocks/" + GetBlock(blockId).sprite + ".png"
-                : null,
+            sprite: spritePath,
             bouncing: true,
             type: EntityTypes.Drop,
         });
@@ -15,6 +19,12 @@ class Drop extends Entity {
         this.blockId = blockId;
         this.itemId = itemId;
         this.count = count;
+
+        this.isReady = false;
+
+        setTimeout(() => {
+            this.isReady = true;
+        }, 1500);
     }
 
     collisionLogic() {

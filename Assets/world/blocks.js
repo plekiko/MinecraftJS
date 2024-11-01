@@ -33,6 +33,7 @@ const Blocks = Object.freeze({
     Water: 31,
     JungleLog: 32,
     JungleLeaves: 33,
+    OakPlanks: 34,
 });
 
 const blockTypes = [
@@ -245,6 +246,12 @@ const blockTypes = [
         blockId: 33,
         sprite: "leaves_jungle_opaque",
         name: "Jungle Leaves",
+        hardness: 0.6,
+    }),
+    new BlockType({
+        blockId: 34,
+        sprite: "planks_oak",
+        name: "Oak Planks",
         hardness: 0.6,
     }),
 ];

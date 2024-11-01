@@ -4,7 +4,7 @@ class Player extends Entity {
         health = 20,
         abilities = {
             flying: false,
-            instaBuild: true,
+            instaBuild: false,
             mayBuild: true,
             mayFly: true,
             walkSpeed: 6,
@@ -39,6 +39,9 @@ class Player extends Entity {
 
         this.windowOpen = false;
 
+        this.breakingStage = 0;
+        this.breakingTime = 0;
+
         this.hoverBlock = null;
     }
 
@@ -49,6 +52,7 @@ class Player extends Entity {
         this.flyingToggleLogic(deltaTime);
         this.collisionLogic();
         this.toggleLogic();
+        this.dropLogic();
 
         if (this.windowOpen) this.inventory.update(deltaTime);
     }
@@ -64,6 +68,18 @@ class Player extends Entity {
 
     closeInventory() {
         this.windowOpen = false;
+
+        if (this.inventory.holdingItem) this.dropCurrentInventoryHolding();
+
+        const leftOver = this.inventory.closeInventory();
+
+        if (leftOver) {
+            leftOver.forEach((item) => {
+                this.drop(item);
+            });
+        }
+
+        this.inventory.clearSlot(this.inventory.craftingOutputSlot);
     }
 
     collisionLogic() {
@@ -78,14 +94,18 @@ class Player extends Entity {
     }
 
     pickupDrop(drop) {
+        if (!drop.isReady) return;
+
         let left = 0;
 
-        if (drop.blockId) {
-            // Add Block to Inventory
-            left += this.inventory.addItem(
-                new InventoryItem({ blockId: drop.blockId, count: drop.count })
-            );
-        }
+        // Add Block to Inventory
+        left += this.inventory.addItem(
+            new InventoryItem({
+                blockId: drop.blockId,
+                itemId: drop.itemId,
+                count: drop.count,
+            })
+        );
 
         if (left != drop.count) playSound("pop.ogg");
 
@@ -95,6 +115,25 @@ class Player extends Entity {
         }
 
         removeEntity(drop);
+    }
+
+    drop(item, count = item.count) {
+        entities.push(
+            new Drop({
+                x: this.position.x + RandomRange(0, BLOCK_SIZE / 3),
+                y: this.position.y,
+                blockId: item.blockId,
+                itemId: item.itemId,
+                count: count,
+            })
+        );
+    }
+
+    dropCurrentInventoryHolding() {
+        const item = this.inventory.holdingItem;
+        this.drop(item);
+
+        this.inventory.holdingItem = null;
     }
 
     flyingToggleLogic(deltaTime) {
@@ -109,6 +148,10 @@ class Player extends Entity {
         if (this.windowOpen) return;
 
         if (input.isLeftMouseDown()) this.breakingLogic(deltaTime);
+        else {
+            this.breakingTime = 0;
+            this.breakingStage = 0;
+        }
         if (input.isRightMouseDown()) this.placingLogic(deltaTime);
     }
 
@@ -131,13 +174,73 @@ class Player extends Entity {
         );
     }
 
+    dropLogic() {
+        if (!input.isKeyPressed("KeyQ")) return;
+
+        if (this.windowOpen) {
+            if (this.inventory.holdingItem) {
+                this.drop(this.inventory.holdingItem);
+                this.inventory.holdingItem = null;
+            } else {
+                if (this.inventory.hoverItem) {
+                    this.drop(this.inventory.hoverItem, 1);
+                    this.inventory.removeItem(
+                        this.inventory.hoverSlot.y,
+                        this.inventory.hoverSlot.x,
+                        1,
+                        this.inventory.hoverSlot.array
+                    );
+                }
+            }
+            return;
+        }
+
+        if (
+            !this.inventory.selectedBlock &&
+            this.inventory.selectedItem == null
+        )
+            return;
+
+        this.drop(this.inventory.items[3][this.inventory.currentSlot].item, 1);
+
+        this.inventory.removeItem(
+            3,
+            this.inventory.currentSlot,
+            1,
+            this.inventory.items
+        );
+    }
+
     breakingLogic(deltaTime) {
-        if (!this.abilities.mayBuild) return;
-        if (this.hoverBlock.blockType === Blocks.Air) return;
+        if (
+            !this.abilities.mayBuild ||
+            this.hoverBlock.blockType === Blocks.Air
+        ) {
+            this.breakingTime = 0;
+            this.breakingStage = 0;
+            return;
+        }
 
         if (this.abilities.instaBuild) {
             this.hoverBlock.breakBlock(true);
             return;
+        }
+
+        const currentBlockHardness = GetBlock(
+            this.hoverBlock.blockType
+        ).hardness;
+
+        this.breakingTime += deltaTime;
+
+        this.breakingStage = Math.floor(
+            Math.min(10, (this.breakingTime / currentBlockHardness) * 10)
+        );
+
+        // Check if block should be broken
+        if (this.breakingTime >= currentBlockHardness) {
+            this.hoverBlock.breakBlock(true);
+            this.breakingTime = 0;
+            this.breakingStage = 0;
         }
     }
 

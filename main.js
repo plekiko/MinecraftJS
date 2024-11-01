@@ -11,8 +11,6 @@ if (SPAWN_PLAYER) {
     hotbar = new Hotbar(player.inventory);
 }
 
-entities.push(new Drop({ x: 1200, y: 100, blockId: Blocks.GrassBlock }));
-
 function calculateFPS(currentFrameTime) {
     if (!calculateFPS.lastUpdate) calculateFPS.lastUpdate = currentFrameTime;
     if (!calculateFPS.frameCount) calculateFPS.frameCount = 0;

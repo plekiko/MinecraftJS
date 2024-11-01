@@ -7,11 +7,11 @@ CANVAS.width = 1600;
 CANVAS.height = 900;
 ctx.imageSmoothingEnabled = false;
 
-let drawingChunkBorders = true;
+let drawingChunkBorders = false;
 let drawCamera = false;
 let drawHeight = false;
 let drawDebugMouseBlock = false;
-let drawFileSize = true;
+let drawFileSize = false;
 let drawFps = true;
 
 let cursorInRange = false;
@@ -56,7 +56,7 @@ function DrawBreakAndPlaceCursor(inRange = false) {
     const topLeftY = mouseY;
 
     ctx.strokeStyle = inRange ? "black" : "red";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1;
 
     ctx.strokeRect(topLeftX, topLeftY, BLOCK_SIZE, BLOCK_SIZE);
 }
@@ -107,6 +107,7 @@ function AfterDraw() {
 
 function DrawUI() {
     DrawBreakAndPlaceCursor(cursorInRange);
+    DrawDestroyStage();
     DrawHotbar();
     DrawInventory();
     DrawInventoryHoldItem();
@@ -133,58 +134,80 @@ function DrawInventory() {
 function DrawInventoryItems(inventoryUI) {
     for (let y = 0; y < player.inventory.items.length; y++) {
         for (let x = 0; x < player.inventory.items[y].length; x++) {
-            const item = player.inventory.items[y][x];
-
-            if (item.count <= 0) continue;
-            if (!item.blockId && !item.itemId) continue;
-
-            const slotX = inventoryUI.x + 32 + x * 63;
-            const slotY = y != 3 ? inventoryUI.y + 298 + y * 63 : 651;
-
-            player.inventory.inventoryUI = inventoryUI;
-
-            // Draw the sprite
-            if (item.blockId) {
-                drawImage(
-                    "Assets/sprites/blocks/" +
-                        GetBlock(item.blockId).sprite +
-                        ".png",
-                    slotX,
-                    slotY,
-                    3,
-                    false
-                );
-            }
-
-            if (item.count <= 1) continue;
-
-            // Draw the count
-            drawText(item.count, slotX + 55, slotY + 50, 30);
+            DrawInventorySlot(player.inventory.items[y][x]);
         }
     }
+
+    DrawCraftingSlots(inventoryUI);
+}
+
+function DrawCraftingSlots(inventoryUI) {
+    for (let y = 0; y < player.inventory.craftingSlots.length; y++) {
+        for (let x = 0; x < player.inventory.craftingSlots[y].length; x++) {
+            DrawInventorySlot(player.inventory.craftingSlots[y][x]);
+        }
+    }
+
+    // Draw Output
+    const outputSlot = player.inventory.craftingOutputSlot;
+    DrawInventorySlot(outputSlot);
+}
+
+function DrawInventorySlot(slot) {
+    const item = slot.item;
+
+    if (item.count <= 0) return;
+    if (!item.blockId && item.itemId === null) return;
+
+    const slotX = slot.position.x;
+    const slotY = slot.position.y;
+
+    const spritePath =
+        "Assets/sprites/" +
+        (item.blockId
+            ? "blocks/" + GetBlock(item.blockId).sprite
+            : "items/" + GetItem(item.itemId).sprite) +
+        ".png";
+
+    // Draw the sprite
+    drawImage(spritePath, slotX, slotY, 3, false);
+
+    if (item.count <= 1) return;
+
+    // Draw the count
+    drawText(item.count, slotX + 55, slotY + 50, 30);
+}
+
+function DrawDestroyStage() {
+    if (player.breakingStage == 0 || player.breakingStage > 10) return;
+
+    drawImage(
+        "Assets/sprites/blocks/destroy_stage_" +
+            (player.breakingStage - 1) +
+            ".png",
+        input.getMousePositionOnBlockGrid().x,
+        input.getMousePositionOnBlockGrid().y,
+        BLOCK_SIZE / 16,
+        false
+    );
 }
 
 function DrawInventoryHoldItem() {
     if (!player.windowOpen) return;
-
     const holdingItem = player.inventory.holdingItem;
+    if (!holdingItem) return;
     const mousePos = input.getMousePosition();
 
     let image = null;
 
-    if (!holdingItem) return;
+    const spritePath =
+        "Assets/sprites/" +
+        (holdingItem.blockId
+            ? "blocks/" + GetBlock(holdingItem.blockId).sprite
+            : "items/" + GetItem(holdingItem.itemId).sprite) +
+        ".png";
 
-    if (holdingItem.blockId) {
-        image = drawImage(
-            "Assets/sprites/blocks/" +
-                GetBlock(holdingItem.blockId).sprite +
-                ".png",
-            mousePos.x,
-            mousePos.y,
-            2.5,
-            false
-        );
-    }
+    image = drawImage(spritePath, mousePos.x, mousePos.y, 2.5, false);
 
     if (holdingItem.count <= 1) return;
 
@@ -236,8 +259,9 @@ function mouseOverPosition(x, y, sizeX, sizeY) {
 function DrawFps() {
     ctx.fillStyle = "black";
     ctx.font = "20px Pixel";
+    ctx.textAlign = "right";
 
-    ctx.fillText(fps, CANVAS.width - 40, CANVAS.height - 10);
+    ctx.fillText(fps, CANVAS.width - 10, CANVAS.height - 10);
 }
 
 function DrawChunkStats(chunk, chunkX) {
@@ -386,6 +410,11 @@ function DrawHotbar() {
 function DrawInventoryHoverTitle() {
     if (!player.windowOpen) return;
     if (!player.inventory.hoverItem) return;
+    if (
+        !player.inventory.hoverItem.blockId &&
+        player.inventory.hoverItem.itemId == null
+    )
+        return;
 
     const mousePos = input.getMousePosition();
 
@@ -393,7 +422,7 @@ function DrawInventoryHoverTitle() {
 
     let title = hoverInventoryItem.blockId
         ? GetBlock(hoverInventoryItem.blockId).name
-        : "";
+        : GetItem(hoverInventoryItem.itemId).name;
 
     drawText(title, mousePos.x + 20, mousePos.y - 5, 25, true, "left");
 }
