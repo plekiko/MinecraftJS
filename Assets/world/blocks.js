@@ -45,6 +45,7 @@ const blockTypes = [
         hardness: 1.2,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shovel,
     }),
     new BlockType({
         blockId: 2,
@@ -53,6 +54,7 @@ const blockTypes = [
         hardness: 1,
         breakSound: Sounds.Break_Gravel,
         breakingSound: Sounds.Breaking_Gravel,
+        toolType: ToolType.Shovel,
     }),
     new BlockType({
         blockId: 3,
@@ -61,6 +63,7 @@ const blockTypes = [
         hardness: 1,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shovel,
     }),
     new BlockType({
         blockId: 4,
@@ -69,6 +72,7 @@ const blockTypes = [
         hardness: 8,
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
     }),
     new BlockType({
         blockId: 5,
@@ -85,6 +89,7 @@ const blockTypes = [
         hardness: 1.3,
         breakSound: Sounds.Break_Sand,
         breakingSound: Sounds.Breaking_Sand,
+        toolType: ToolType.Shovel,
     }),
     new BlockType({
         blockId: 7,
@@ -93,6 +98,7 @@ const blockTypes = [
         hardness: 7,
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
     }),
     new BlockType({
         blockId: 8,
@@ -101,6 +107,7 @@ const blockTypes = [
         hardness: 2,
         breakSound: Sounds.Break_Snow,
         breakingSound: Sounds.Breaking_Snow,
+        toolType: ToolType.Shovel,
     }),
     new BlockType({
         blockId: 9,
@@ -115,6 +122,7 @@ const blockTypes = [
         sprite: "log_oak",
         name: "Oak Log",
         hardness: 3,
+        toolType: ToolType.Axe,
     }),
     new BlockType({
         blockId: 11,
@@ -123,12 +131,14 @@ const blockTypes = [
         hardness: 0.6,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
     }),
     new BlockType({
         blockId: 12,
         sprite: "log_spruce",
         name: "Spruce Log",
         hardness: 3,
+        toolType: ToolType.Axe,
     }),
     new BlockType({
         blockId: 13,
@@ -137,12 +147,14 @@ const blockTypes = [
         hardness: 0.6,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
     }),
     new BlockType({
         blockId: 14,
         sprite: "log_acacia",
         name: "Acacia Log",
         hardness: 3,
+        toolType: ToolType.Axe,
     }),
     new BlockType({
         blockId: 15,
@@ -151,12 +163,14 @@ const blockTypes = [
         hardness: 0.6,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
     }),
     new BlockType({
         blockId: 16,
         sprite: "log_birch",
         name: "Birch Log",
         hardness: 3,
+        toolType: ToolType.Axe,
     }),
     new BlockType({
         blockId: 17,
@@ -165,6 +179,7 @@ const blockTypes = [
         hardness: 0.6,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
     }),
     new BlockType({
         blockId: 18,
@@ -175,6 +190,7 @@ const blockTypes = [
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
     }),
     new BlockType({
         blockId: 19,
@@ -185,6 +201,7 @@ const blockTypes = [
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
     }),
     new BlockType({
         blockId: 20,
@@ -195,6 +212,7 @@ const blockTypes = [
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
     }),
     new BlockType({
         blockId: 21,
@@ -205,6 +223,7 @@ const blockTypes = [
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
     }),
     new BlockType({
         blockId: 22,
@@ -300,6 +319,7 @@ const blockTypes = [
         blockId: 31,
         sprite: "water_still",
         name: "Water",
+        hardness: -2,
         animationSpeed: 0.2,
         fluid: true,
     }),
@@ -308,6 +328,7 @@ const blockTypes = [
         sprite: "log_jungle",
         name: "Jungle Log",
         hardness: 3,
+        toolType: ToolType.Axe,
     }),
     new BlockType({
         blockId: 33,
@@ -316,12 +337,14 @@ const blockTypes = [
         hardness: 0.6,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
     }),
     new BlockType({
         blockId: 34,
         sprite: "planks_oak",
         name: "Oak Planks",
         hardness: 2.6,
+        toolType: ToolType.Axe,
     }),
 ];
 

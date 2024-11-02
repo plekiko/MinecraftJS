@@ -32,14 +32,16 @@ class Hotbar {
 
     handleSelected() {
         if (this.inventory.items[3][this.currentSlot].item.blockId) {
-            this.inventory.selectedBlock =
-                this.inventory.items[3][this.currentSlot].item.blockId;
+            this.inventory.selectedBlock = GetBlock(
+                this.inventory.items[3][this.currentSlot].item.blockId
+            );
         } else {
             this.inventory.selectedBlock = null;
         }
         if (this.inventory.items[3][this.currentSlot].item.itemId != null) {
-            this.inventory.selectedItem =
-                this.inventory.items[3][this.currentSlot].item.itemId;
+            this.inventory.selectedItem = GetItem(
+                this.inventory.items[3][this.currentSlot].item.itemId
+            );
         } else {
             this.inventory.selectedItem = null;
         }
@@ -94,6 +96,7 @@ class Hotbar {
     }
 
     handleSelecting() {
+        if (chat.inChat) return;
         const scrollDelta = input.getScrollDelta();
 
         if (scrollDelta.deltaY < 0) this.currentSlot--;

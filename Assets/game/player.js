@@ -39,6 +39,8 @@ class Player extends Entity {
 
         this.windowOpen = false;
 
+        this.canMove = true;
+
         this.breakingStage = 0;
         this.breakingTime = 0;
         this.lastBreakSoundTime = 0;
@@ -68,16 +70,19 @@ class Player extends Entity {
     }
 
     toggleLogic() {
+        if (chat.inChat) return;
         if (input.isKeyPressed("KeyE"))
             this.windowOpen ? this.closeInventory() : this.openInventory();
     }
 
     openInventory() {
         this.windowOpen = true;
+        this.canMove = false;
     }
 
     closeInventory() {
         this.windowOpen = false;
+        this.canMove = true;
 
         if (this.inventory.holdingItem) this.dropCurrentInventoryHolding();
 
@@ -169,7 +174,7 @@ class Player extends Entity {
         if (!this.checkBlockForPlacing()) return;
         if (!this.inventory.selectedBlock) return;
 
-        this.hoverBlock.setBlockType(this.inventory.selectedBlock);
+        this.hoverBlock.setBlockType(this.inventory.selectedBlock.blockId);
 
         this.hoverBlock.playBreakSound();
 
@@ -186,6 +191,7 @@ class Player extends Entity {
     }
 
     dropLogic() {
+        if (!this.canMove) return;
         if (!input.isKeyPressed("KeyQ")) return;
 
         if (this.windowOpen) {
@@ -231,7 +237,7 @@ class Player extends Entity {
     breakingLogic(deltaTime) {
         if (
             !this.abilities.mayBuild ||
-            this.hoverBlock.blockType === Blocks.Air
+            GetBlock(this.hoverBlock.blockType).hardness < 0
         ) {
             this.resetBreaking();
             return;
@@ -242,9 +248,20 @@ class Player extends Entity {
             return;
         }
 
-        const currentBlockHardness = GetBlock(
-            this.hoverBlock.blockType
-        ).hardness;
+        const block = GetBlock(this.hoverBlock.blockType);
+
+        let currentBlockHardness = block.hardness;
+
+        // set hardness to tooltype
+        if (
+            this.inventory.selectedItem &&
+            this.inventory.selectedItem.toolType &&
+            block.toolType === this.inventory.selectedItem.toolType
+        ) {
+            // is correct tool
+            currentBlockHardness -= this.inventory.selectedItem.toolLevel / 2;
+            if (currentBlockHardness < 0) currentBlockHardness = 0;
+        }
 
         const soundInterval = 0.2;
         this.breakingTime += deltaTime;
@@ -272,6 +289,7 @@ class Player extends Entity {
         this.velocity.x = 0;
 
         if (this.windowOpen) return;
+        if (!this.canMove) return;
 
         this.handleHorizontalMovement();
         this.handleJump();

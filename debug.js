@@ -1,6 +1,6 @@
-setInterval(() => {
-    UpdateDebug();
-}, 1000 / 60);
+// setInterval(() => {
+//     UpdateDebug();
+// }, 1000 / 60);
 
 function UpdateDebug() {
     HandleInput();
@@ -13,6 +13,7 @@ function HandleDebugging() {
 }
 
 function HandleInput() {
+    if (player && !player.canMove) return;
     if (input.isKeyPressed("KeyB")) drawingChunkBorders = !drawingChunkBorders;
     if (input.isKeyPressed("KeyN")) drawCamera = !drawCamera;
     if (input.isKeyPressed("KeyH")) drawHeight = !drawHeight;
@@ -37,6 +38,8 @@ function PrintBlockLogic() {
 }
 
 function CameraLogic() {
+    if (player) return;
+
     const maxSpeed = 15;
     const acceleration = 1;
     const deceleration = 1;

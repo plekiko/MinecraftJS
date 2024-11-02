@@ -195,6 +195,9 @@ const trackedKeys = [
     "Minus",
     "Equal",
     "Backquote",
+    "Slash",
+    "Backslash",
+    "Period",
 ];
 
 // Create an instance of the InputHandler with the keys you want to track

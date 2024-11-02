@@ -11,6 +11,8 @@ class BlockType {
         collision = true,
         breakSound = Sounds.Break_Wood,
         breakingSound = Sounds.Breaking_Wood,
+
+        toolType = ToolType.Nothing,
     } = {}) {
         this.blockId = blockId;
         this.sprite = sprite;
@@ -23,8 +25,19 @@ class BlockType {
         this.collision = collision;
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
+
+        this.toolType = toolType;
     }
 }
+
+const ToolType = Object.freeze({
+    Nothing: 0,
+    Pickaxe: 1,
+    Axe: 2,
+    Shovel: 3,
+    Shears: 4,
+    Hoe: 5,
+});
 
 class Metadata {}
 

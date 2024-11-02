@@ -112,6 +112,7 @@ function DrawUI() {
     DrawInventory();
     DrawInventoryHoldItem();
     DrawInventoryHoverTitle();
+    chat.draw(ctx);
 }
 
 function DrawInventory() {
@@ -428,10 +429,11 @@ function DrawInventoryHoverTitle() {
 }
 
 function drawText(text, x, y, size = 25, shadow = true, textAlign = "right") {
+    ctx.textAlign = textAlign;
+
     if (shadow) {
         ctx.fillStyle = "rgb(0, 0, 0, .7)";
         ctx.font = size + "px Pixel";
-        ctx.textAlign = textAlign;
 
         ctx.fillText(text, x + 3, y + 3);
     }

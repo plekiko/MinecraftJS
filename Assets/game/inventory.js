@@ -38,7 +38,7 @@ class Inventory {
 
                 this.items[y][x] = new InventorySlot({
                     position: position,
-                    item: new InventoryItem(/*{ blockId: 34, count: 64 }*/),
+                    item: new InventoryItem(),
                 });
             }
         }

@@ -1,6 +1,8 @@
 let lastFrameTime = performance.now();
 let fpsDisplay = 0;
 
+const chat = new Chat();
+
 if (SPAWN_PLAYER) {
     player = new Player({
         position: new Vector2(40 * BLOCK_SIZE, 20 * BLOCK_SIZE),
@@ -43,9 +45,13 @@ function updateGame(deltaTime) {
         entity.update(deltaTime);
     });
 
+    UpdateDebug();
+
     if (player) cursorBlockLogic();
 
     if (hotbar) hotbar.update(deltaTime);
+
+    if (chat) chat.update(deltaTime);
 
     animateFrame();
 
