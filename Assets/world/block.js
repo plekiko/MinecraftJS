@@ -9,6 +9,8 @@ class BlockType {
         fluid = false,
         drag = 1,
         collision = true,
+        breakSound = Sounds.Break_Wood,
+        breakingSound = Sounds.Breaking_Wood,
     } = {}) {
         this.blockId = blockId;
         this.sprite = sprite;
@@ -19,6 +21,8 @@ class BlockType {
         this.fluid = fluid;
         this.drag = drag;
         this.collision = collision;
+        this.breakSound = breakSound;
+        this.breakingSound = breakingSound;
     }
 }
 
@@ -69,9 +73,20 @@ class Block extends Square {
     }
 
     breakBlock(drop = false) {
+        if (this.blockType === Blocks.Air) return;
         if (drop) this.dropBlock();
 
+        this.playBreakSound();
+
         this.setBlockType(Blocks.Air);
+    }
+
+    playBreakSound() {
+        const soundArray = GetBlock(this.blockType).breakSound;
+
+        if (!soundArray) return;
+
+        PlayRandomSoundFromArray({ array: soundArray });
     }
 
     dropBlock() {

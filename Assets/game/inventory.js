@@ -209,7 +209,6 @@ class Inventory {
                     item.itemId === newItem.itemId &&
                     item.count < 64
                 ) {
-                    console.log("yo");
                     const availableSpace = 64 - item.count;
                     const toAdd = Math.min(remainingCount, availableSpace);
                     item.count += toAdd;
@@ -375,15 +374,6 @@ class Inventory {
                     }
                     if (!isMatch) break;
                 }
-
-                console.log(
-                    this.areAllOtherSlotsEmpty(
-                        startRow,
-                        startCol,
-                        patternRows,
-                        patternCols
-                    )
-                );
 
                 // Ensure all other slots outside the pattern area are empty
                 if (

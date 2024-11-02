@@ -41,8 +41,10 @@ class Player extends Entity {
 
         this.breakingStage = 0;
         this.breakingTime = 0;
+        this.lastBreakSoundTime = 0;
 
         this.hoverBlock = null;
+        this.oldHoverBlock = null;
     }
 
     update(deltaTime) {
@@ -53,8 +55,16 @@ class Player extends Entity {
         this.collisionLogic();
         this.toggleLogic();
         this.dropLogic();
+        this.hoverBlockLogic();
 
         if (this.windowOpen) this.inventory.update(deltaTime);
+    }
+
+    hoverBlockLogic() {
+        if (this.oldHoverBlock != this.hoverBlock) {
+            this.oldHoverBlock = this.hoverBlock;
+            this.resetBreaking();
+        }
     }
 
     toggleLogic() {
@@ -149,8 +159,7 @@ class Player extends Entity {
 
         if (input.isLeftMouseDown()) this.breakingLogic(deltaTime);
         else {
-            this.breakingTime = 0;
-            this.breakingStage = 0;
+            this.resetBreaking();
         }
         if (input.isRightMouseDown()) this.placingLogic(deltaTime);
     }
@@ -161,6 +170,8 @@ class Player extends Entity {
         if (!this.inventory.selectedBlock) return;
 
         this.hoverBlock.setBlockType(this.inventory.selectedBlock);
+
+        this.hoverBlock.playBreakSound();
 
         if (this.abilities.instaBuild) return;
 
@@ -211,13 +222,18 @@ class Player extends Entity {
         );
     }
 
+    resetBreaking() {
+        this.breakingTime = 0;
+        this.breakingStage = 0;
+        this.lastBreakSoundTime = 0;
+    }
+
     breakingLogic(deltaTime) {
         if (
             !this.abilities.mayBuild ||
             this.hoverBlock.blockType === Blocks.Air
         ) {
-            this.breakingTime = 0;
-            this.breakingStage = 0;
+            this.resetBreaking();
             return;
         }
 
@@ -230,7 +246,16 @@ class Player extends Entity {
             this.hoverBlock.blockType
         ).hardness;
 
+        const soundInterval = 0.2;
         this.breakingTime += deltaTime;
+
+        if (this.breakingTime >= this.lastBreakSoundTime + soundInterval) {
+            this.lastBreakSoundTime = this.breakingTime;
+            PlayRandomSoundFromArray({
+                array: GetBlock(this.hoverBlock.blockType).breakingSound,
+                volume: 0.2,
+            });
+        }
 
         this.breakingStage = Math.floor(
             Math.min(10, (this.breakingTime / currentBlockHardness) * 10)
@@ -239,8 +264,7 @@ class Player extends Entity {
         // Check if block should be broken
         if (this.breakingTime >= currentBlockHardness) {
             this.hoverBlock.breakBlock(true);
-            this.breakingTime = 0;
-            this.breakingStage = 0;
+            this.resetBreaking();
         }
     }
 
