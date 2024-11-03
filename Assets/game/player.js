@@ -39,6 +39,8 @@ class Player extends Entity {
 
         this.windowOpen = false;
 
+        this.wasSwimming = false;
+
         this.canMove = true;
 
         this.breakingStage = 0;
@@ -50,6 +52,7 @@ class Player extends Entity {
     }
 
     update(deltaTime) {
+        this.interactLogic();
         this.movementLogic(deltaTime);
         this.breakingAndPlacingLogic(deltaTime);
         this.updateEntity(deltaTime);
@@ -60,6 +63,27 @@ class Player extends Entity {
         this.hoverBlockLogic();
 
         if (this.windowOpen) this.inventory.update(deltaTime);
+    }
+
+    interactLogic() {
+        if (!this.hoverBlock) return;
+
+        if (!input.isRightMouseButtonPressed()) return;
+
+        const block = GetBlock(this.hoverBlock.blockType);
+
+        if (!block.specialType) return;
+
+        switch (block.specialType) {
+            case SpecialType.CraftingTable:
+                this.openCraftingTable();
+                break;
+        }
+    }
+
+    openCraftingTable() {
+        this.inventory.craftingTable = true;
+        this.openInventory();
     }
 
     hoverBlockLogic() {
@@ -78,6 +102,8 @@ class Player extends Entity {
     openInventory() {
         this.windowOpen = true;
         this.canMove = false;
+
+        this.inventory.refreshInventory();
     }
 
     closeInventory() {
@@ -95,6 +121,8 @@ class Player extends Entity {
         }
 
         this.inventory.clearSlot(this.inventory.craftingOutputSlot);
+
+        this.inventory.craftingTable = false;
     }
 
     collisionLogic() {
@@ -184,10 +212,24 @@ class Player extends Entity {
     }
 
     checkBlockForPlacing() {
-        return (
-            this.hoverBlock.blockType === Blocks.Air ||
-            GetBlock(this.hoverBlock.blockType).fluid
+        const isAir = this.hoverBlock.blockType === Blocks.Air;
+        const isFluid = GetBlock(this.hoverBlock.blockType).fluid;
+
+        const mousePos = new Vector2(
+            input.getMousePositionOnBlockGrid().x + Math.floor(camera.x),
+            input.getMousePositionOnBlockGrid().y + Math.floor(camera.y)
         );
+
+        const isCollidingWithPlayer = isColliding(
+            new Vector2(this.position.x, this.position.y),
+            new Vector2(this.hitbox.x, this.hitbox.y),
+            new Vector2(mousePos.x, mousePos.y),
+            new Vector2(BLOCK_SIZE, BLOCK_SIZE)
+        );
+
+        // chat.message(mousePos.x + " " + this.position.x);
+
+        return (isAir || isFluid) && !isCollidingWithPlayer;
     }
 
     dropLogic() {
@@ -244,7 +286,7 @@ class Player extends Entity {
         }
 
         if (this.abilities.instaBuild) {
-            this.hoverBlock.breakBlock(true);
+            this.hoverBlock.breakBlock(false);
             return;
         }
 
@@ -252,10 +294,11 @@ class Player extends Entity {
 
         let currentBlockHardness = block.hardness;
 
+        const selectedTool = this.inventory.selectedItem?.toolType;
+
         // set hardness to tooltype
         if (
-            this.inventory.selectedItem &&
-            this.inventory.selectedItem.toolType &&
+            selectedTool &&
             block.toolType === this.inventory.selectedItem.toolType
         ) {
             // is correct tool
@@ -269,7 +312,7 @@ class Player extends Entity {
         if (this.breakingTime >= this.lastBreakSoundTime + soundInterval) {
             this.lastBreakSoundTime = this.breakingTime;
             PlayRandomSoundFromArray({
-                array: GetBlock(this.hoverBlock.blockType).breakingSound,
+                array: block.breakingSound,
                 volume: 0.2,
             });
         }
@@ -280,7 +323,12 @@ class Player extends Entity {
 
         // Check if block should be broken
         if (this.breakingTime >= currentBlockHardness) {
-            this.hoverBlock.breakBlock(true);
+            const shouldDrop = block.dropWithoutTool
+                ? true
+                : selectedTool
+                ? selectedTool == block.toolType
+                : false;
+            this.hoverBlock.breakBlock(shouldDrop);
             this.resetBreaking();
         }
     }
@@ -327,7 +375,14 @@ class Player extends Entity {
     }
 
     handleSwimming() {
+        if (this.wasSwimming && !this.swimming) {
+            // Exited Water
+            this.velocity.y = -200;
+            this.wasSwimming = false;
+        }
         if (!this.swimming) return;
+
+        this.wasSwimming = true;
 
         // Swim upwards or sink slowly
         this.velocity.y =

@@ -10,3 +10,18 @@ const RecipeType = Object.freeze({
     Shapeless: 0,
     Shaped: 1,
 });
+
+class RecipeItem {
+    constructor({
+        blockId = null,
+        itemId = null,
+        blockCategory = null,
+        count = 1,
+    } = {}) {
+        this.blockId = blockId;
+        this.itemId = itemId;
+        this.blockCategory = blockCategory;
+
+        this.count = count;
+    }
+}

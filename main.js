@@ -1,7 +1,7 @@
 let lastFrameTime = performance.now();
 let fpsDisplay = 0;
 
-const chat = new Chat();
+chat = new Chat();
 
 if (SPAWN_PLAYER) {
     player = new Player({

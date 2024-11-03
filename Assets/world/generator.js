@@ -1,8 +1,8 @@
 let chunks = new Map();
 let pendingBlocks = new Map();
 
-// let seed = Math.floor(Math.random() * 1000000);
-let seed = 0;
+let seed = Math.floor(Math.random() * 1000000);
+// let seed = 0;
 
 tooloud.Perlin.setSeed(seed);
 

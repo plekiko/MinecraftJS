@@ -13,6 +13,12 @@ class BlockType {
         breakingSound = Sounds.Breaking_Wood,
 
         toolType = ToolType.Nothing,
+        dropWithoutTool = true,
+        category = null,
+
+        drop = blockId,
+
+        specialType = null,
     } = {}) {
         this.blockId = blockId;
         this.sprite = sprite;
@@ -27,8 +33,23 @@ class BlockType {
         this.breakingSound = breakingSound;
 
         this.toolType = toolType;
+        this.dropWithoutTool = dropWithoutTool;
+        this.category = category;
+
+        this.drop = drop;
+
+        this.specialType = specialType;
     }
 }
+
+const SpecialType = Object.freeze({
+    CraftingTable: 1,
+});
+
+const BlockCategory = Object.freeze({
+    Logs: 1,
+    Planks: 2,
+});
 
 const ToolType = Object.freeze({
     Nothing: 0,
@@ -37,6 +58,7 @@ const ToolType = Object.freeze({
     Shovel: 3,
     Shears: 4,
     Hoe: 5,
+    Sword: 6,
 });
 
 class Metadata {}
@@ -110,7 +132,7 @@ class Block extends Square {
                     camera.x +
                     RandomRange(0, BLOCK_SIZE / 3),
                 y: this.transform.position.y + camera.y + BLOCK_SIZE / 4,
-                blockId: this.blockType,
+                blockId: GetBlock(this.blockType).drop,
             })
         );
     }

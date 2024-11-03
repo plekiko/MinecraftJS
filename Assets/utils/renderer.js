@@ -33,6 +33,25 @@ function DrawBackground() {
     ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 }
 
+function mouseOverPosition(x, y, sizeX, sizeY) {
+    const mousePos = input.getMousePosition();
+    return (
+        mousePos.x >= x &&
+        mousePos.x <= x + sizeX &&
+        mousePos.y >= y &&
+        mousePos.y <= y + sizeY
+    );
+}
+
+function isColliding(pos1, size1, pos2, size2) {
+    return (
+        pos1.x < pos2.x + size2.x &&
+        pos1.x + size1.x > pos2.x &&
+        pos1.y < pos2.y + size2.y &&
+        pos1.y + size1.y > pos2.y
+    );
+}
+
 function Draw(chunks, frames) {
     fps = frames;
 
@@ -52,13 +71,23 @@ function DrawBreakAndPlaceCursor(inRange = false) {
     const mouseX = input.getMousePositionOnBlockGrid().x;
     const mouseY = input.getMousePositionOnBlockGrid().y;
 
-    const topLeftX = mouseX;
-    const topLeftY = mouseY;
-
     ctx.strokeStyle = inRange ? "black" : "red";
     ctx.lineWidth = 1;
 
-    ctx.strokeRect(topLeftX, topLeftY, BLOCK_SIZE, BLOCK_SIZE);
+    ctx.strokeRect(mouseX, mouseY, BLOCK_SIZE, BLOCK_SIZE);
+
+    if (player.inventory.selectedBlock) {
+        drawImage(
+            "Assets/sprites/blocks/" +
+                player.inventory.selectedBlock.sprite +
+                ".png",
+            mouseX,
+            mouseY,
+            BLOCK_SIZE / 16,
+            false,
+            0.5
+        );
+    }
 }
 
 function DrawChunks(chunksMap) {
@@ -110,73 +139,13 @@ function DrawUI() {
     DrawDestroyStage();
     DrawHotbar();
     DrawInventory();
-    DrawInventoryHoldItem();
-    DrawInventoryHoverTitle();
     chat.draw(ctx);
 }
 
 function DrawInventory() {
     if (!player.windowOpen) return;
 
-    // Black Background
-    ctx.fillStyle = "rgb(0, 0, 0, .6)";
-    ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
-
-    const inventoryUI = drawImage(
-        "Assets/sprites/gui/inventory.png",
-        CANVAS.width / 2,
-        CANVAS.height / 6,
-        3.5
-    );
-
-    DrawInventoryItems(inventoryUI);
-}
-
-function DrawInventoryItems(inventoryUI) {
-    for (let y = 0; y < player.inventory.items.length; y++) {
-        for (let x = 0; x < player.inventory.items[y].length; x++) {
-            DrawInventorySlot(player.inventory.items[y][x]);
-        }
-    }
-
-    DrawCraftingSlots(inventoryUI);
-}
-
-function DrawCraftingSlots(inventoryUI) {
-    for (let y = 0; y < player.inventory.craftingSlots.length; y++) {
-        for (let x = 0; x < player.inventory.craftingSlots[y].length; x++) {
-            DrawInventorySlot(player.inventory.craftingSlots[y][x]);
-        }
-    }
-
-    // Draw Output
-    const outputSlot = player.inventory.craftingOutputSlot;
-    DrawInventorySlot(outputSlot);
-}
-
-function DrawInventorySlot(slot) {
-    const item = slot.item;
-
-    if (item.count <= 0) return;
-    if (!item.blockId && item.itemId === null) return;
-
-    const slotX = slot.position.x;
-    const slotY = slot.position.y;
-
-    const spritePath =
-        "Assets/sprites/" +
-        (item.blockId
-            ? "blocks/" + GetBlock(item.blockId).sprite
-            : "items/" + GetItem(item.itemId).sprite) +
-        ".png";
-
-    // Draw the sprite
-    drawImage(spritePath, slotX, slotY, 3, false);
-
-    if (item.count <= 1) return;
-
-    // Draw the count
-    drawText(item.count, slotX + 55, slotY + 50, 30);
+    player.inventory.draw(ctx);
 }
 
 function DrawDestroyStage() {
@@ -190,32 +159,6 @@ function DrawDestroyStage() {
         input.getMousePositionOnBlockGrid().y,
         BLOCK_SIZE / 16,
         false
-    );
-}
-
-function DrawInventoryHoldItem() {
-    if (!player.windowOpen) return;
-    const holdingItem = player.inventory.holdingItem;
-    if (!holdingItem) return;
-    const mousePos = input.getMousePosition();
-
-    let image = null;
-
-    const spritePath =
-        "Assets/sprites/" +
-        (holdingItem.blockId
-            ? "blocks/" + GetBlock(holdingItem.blockId).sprite
-            : "items/" + GetItem(holdingItem.itemId).sprite) +
-        ".png";
-
-    image = drawImage(spritePath, mousePos.x, mousePos.y, 2.5, false);
-
-    if (holdingItem.count <= 1) return;
-
-    drawText(
-        holdingItem.count,
-        image.x + image.sizeX + 5,
-        image.y + image.sizeY + 3
     );
 }
 
@@ -408,26 +351,6 @@ function DrawHotbar() {
     hotbar.draw(ctx);
 }
 
-function DrawInventoryHoverTitle() {
-    if (!player.windowOpen) return;
-    if (!player.inventory.hoverItem) return;
-    if (
-        !player.inventory.hoverItem.blockId &&
-        player.inventory.hoverItem.itemId == null
-    )
-        return;
-
-    const mousePos = input.getMousePosition();
-
-    const hoverInventoryItem = player.inventory.hoverItem;
-
-    let title = hoverInventoryItem.blockId
-        ? GetBlock(hoverInventoryItem.blockId).name
-        : GetItem(hoverInventoryItem.itemId).name;
-
-    drawText(title, mousePos.x + 20, mousePos.y - 5, 25, true, "left");
-}
-
 function drawText(text, x, y, size = 25, shadow = true, textAlign = "right") {
     ctx.textAlign = textAlign;
 
@@ -444,9 +367,12 @@ function drawText(text, x, y, size = 25, shadow = true, textAlign = "right") {
     ctx.fillText(text, x, y);
 }
 
-function drawImage(url, x = 0, y = 0, scale = 1, center = true) {
+function drawImage(url, x = 0, y = 0, scale = 1, center = true, opacity = 1) {
     img = new Image();
     img.src = url;
+
+    ctx.globalAlpha = opacity;
+
     ctx.drawImage(
         img,
         center ? x - (img.width / 2) * scale : x,
@@ -454,6 +380,8 @@ function drawImage(url, x = 0, y = 0, scale = 1, center = true) {
         img.width * scale,
         img.height * scale
     );
+
+    ctx.globalAlpha = 1;
 
     return {
         x: center ? x - (img.width / 2) * scale : x,

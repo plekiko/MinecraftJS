@@ -5,17 +5,35 @@ class Inventory {
         this.items = [];
         this.craftingSlots = [];
 
+        this.craftingOutputPosition = {
+            x: this.inventoryUI.x + 508,
+            y: this.inventoryUI.y + 130,
+        };
         this.craftingOutputSlot = new InventorySlot({
             position: {
-                x: this.inventoryUI.x + 508,
-                y: this.inventoryUI.y + 130,
+                ...this.craftingOutputPosition,
             },
             item: new InventoryItem(),
         });
 
+        this.craftingPosition = {
+            x: this.inventoryUI.x + 312,
+            y: this.inventoryUI.y + 95,
+        };
+
         this.selectedBlock = null;
         this.selectedItem = null;
         this.currentSlot = 0;
+
+        this.craftingTable = false;
+        this.craftingTableOutputPosition = {
+            x: this.inventoryUI.x + 437,
+            y: this.inventoryUI.y + 127,
+        };
+        this.craftingTablePosition = {
+            x: this.inventoryUI.x + 109,
+            y: this.inventoryUI.y + 64,
+        };
 
         this.lastHoveredSlot = { x: null, y: null };
 
@@ -46,13 +64,18 @@ class Inventory {
         this.createCraftingArray();
     }
 
-    createCraftingArray() {
-        for (let y = 0; y < 2; y++) {
+    createCraftingArray(range = 2) {
+        this.craftingSlots = [];
+        const basePosition = this.craftingTable
+            ? this.craftingTablePosition
+            : this.craftingPosition;
+
+        for (let y = 0; y < range; y++) {
             this.craftingSlots[y] = [];
-            for (let x = 0; x < 2; x++) {
+            for (let x = 0; x < range; x++) {
                 const position = {
-                    x: this.inventoryUI.x + 312 + x * 63,
-                    y: this.inventoryUI.y + 95 + y * 63,
+                    x: basePosition.x + x * 63,
+                    y: basePosition.y + y * 63,
                 };
 
                 this.craftingSlots[y][x] = new InventorySlot({
@@ -63,12 +86,10 @@ class Inventory {
         }
     }
 
-    // Helper method to check if a slot is hovered over
     isSlotHovered(x, y) {
-        return this.mouseOverPosition(x, y, 16 * 3, 16 * 3);
+        return mouseOverPosition(x, y, 16 * 3, 16 * 3);
     }
 
-    // Logic for right-click item spreading
     handleRightClickSpread(item, x, y) {
         if (
             input.isRightMouseDown() &&
@@ -109,6 +130,14 @@ class Inventory {
         return leftOver.length > 0 ? leftOver : null;
     }
 
+    refreshInventory() {
+        this.craftingOutputSlot.position = this.craftingOutputPosition;
+        if (this.craftingTable)
+            this.craftingOutputSlot.position = this.craftingTableOutputPosition;
+
+        this.createCraftingArray(this.craftingTable ? 3 : 2);
+    }
+
     // Logic for picking up half the item stack
     handleRightClickGetHalf(item, x, y, array) {
         if (
@@ -147,13 +176,26 @@ class Inventory {
             // Pick up the clicked item if holdingItem is empty
             this.holdingItem = structuredClone(item);
         } else if (
-            this.holdingItem.blockId === item.blockId ||
+            this.holdingItem.blockId === item.blockId &&
             this.holdingItem.itemId === item.itemId
         ) {
             // If holdingItem and clicked item are the same type, combine counts if below limit
             if (this.holdingItem.count + item.count <= 64) {
                 this.holdingItem.count += item.count;
             }
+        }
+
+        if (this.holdingItem && !array && item) {
+            if (
+                this.holdingItem.blockId &&
+                this.holdingItem.blockId != item.blockId
+            )
+                return;
+            if (
+                this.holdingItem.itemId != null &&
+                this.holdingItem.itemId != item.itemId
+            )
+                return;
         }
 
         // Check if interacting with crafting output slot to complete crafting
@@ -197,7 +239,12 @@ class Inventory {
         let remainingCount = newItem.count;
 
         remainingCount = this.addToExistingStack(newItem, remainingCount);
-        return this.addToEmptySlot(newItem, remainingCount);
+
+        if (remainingCount > 0) {
+            remainingCount = this.addToEmptySlot(newItem, remainingCount);
+        }
+
+        return remainingCount;
     }
 
     addToExistingStack(newItem, remainingCount) {
@@ -322,52 +369,58 @@ class Inventory {
 
     isShapelessMatch(inputItem) {
         const slots = this.craftingSlots.flat();
-        const inputCounts = {};
+        const nonEmptySlots = slots.filter((slot) => slot.item.count > 0);
 
-        // Set up inputCounts for a single item instead of an array
-        inputCounts[inputItem.blockId] = inputItem.count;
+        // If inputItem is an array, handle multiple items in a shapeless recipe
+        const recipeItems = Array.isArray(inputItem) ? inputItem : [inputItem];
 
-        // Check each slot and decrease count as items are found
-        for (const slot of slots) {
-            const item = slot.item;
+        // Ensure the number of non-empty slots matches the number of recipe items
+        if (nonEmptySlots.length !== recipeItems.length) return false;
 
-            // If the slot has an item that doesn't match the input requirement, return false
-            if (item.blockId && !inputCounts[item.blockId]) return false;
+        // Check if each recipe item has a matching slot item
+        return recipeItems.every((recipeItem) =>
+            nonEmptySlots.some((slot) => this.isMatch(slot.item, recipeItem))
+        );
+    }
 
-            if (item.blockId && inputCounts[item.blockId]) {
-                inputCounts[item.blockId] -= item.count;
-                if (inputCounts[item.blockId] <= 0)
-                    delete inputCounts[item.blockId];
-            }
-        }
+    isMatch(slotItem, patternItem) {
+        // Retrieve the category of slotItem using GetBlock if it has a blockId
+        const slotCategory = slotItem.blockId
+            ? GetBlock(slotItem.blockId).category
+            : null;
 
-        // All required items should be found and their counts met with no extra items
-        return Object.keys(inputCounts).length === 0;
+        if (slotItem.count == 0 && patternItem.count == 0) return true;
+
+        // Direct match on blockId, itemId, or blockCategory
+        return (
+            (patternItem.blockId && slotItem.blockId === patternItem.blockId) ||
+            (patternItem.itemId != null &&
+                slotItem.itemId === patternItem.itemId) ||
+            (patternItem.blockCategory &&
+                slotCategory === patternItem.blockCategory)
+        );
     }
 
     isShapedMatch(inputPattern) {
         const rows = this.craftingSlots.length;
         const cols = this.craftingSlots[0].length;
 
-        // Get dimensions of the input pattern
         const patternRows = inputPattern.length;
         const patternCols = inputPattern[0].length;
 
-        // Loop through the crafting grid, looking for a matching pattern alignment
         for (let startRow = 0; startRow <= rows - patternRows; startRow++) {
             for (let startCol = 0; startCol <= cols - patternCols; startCol++) {
-                // Assume this is a potential match until proven otherwise
                 let isMatch = true;
 
-                // Check if items in the pattern match the items in the crafting grid starting at startRow, startCol
+                // Check if the items in the pattern match the crafting grid from startRow, startCol
                 for (let row = 0; row < patternRows; row++) {
                     for (let col = 0; col < patternCols; col++) {
                         const patternItem = inputPattern[row][col];
                         const slot =
                             this.craftingSlots[startRow + row][startCol + col];
 
-                        // If the pattern expects an item here, but the slot doesn't match, mark as non-matching
-                        if (!this.isSlotMatch(slot, patternItem)) {
+                        // If the slot doesn't match the pattern, mark as non-matching
+                        if (!this.isMatch(slot.item, patternItem)) {
                             isMatch = false;
                             break;
                         }
@@ -417,12 +470,27 @@ class Inventory {
     }
 
     isSlotMatch(slot, patternItem) {
-        if (!patternItem && !slot.item) return true; // Empty slot and empty pattern match
-        if (!patternItem || !slot.item) return false; // Only one is empty
+        // If both patternItem and slot item are empty, consider it a match
+        if (!patternItem && !slot.item) return true;
 
+        // If pattern expects an empty slot (count 0), ensure the slot is empty
+        if (patternItem.count === 0) return slot.item.count === 0;
+
+        // If pattern item has a count but slot item is empty, return false
+        if (slot.item.count === 0) return false;
+
+        console.log(patternItem);
+        console.log(slot.item);
+
+        // Direct match based on blockId, itemId, or blockCategory
         return (
-            slot.item.blockId === patternItem.blockId &&
-            slot.item.count >= patternItem.count
+            (patternItem.blockId &&
+                slot.item.blockId === patternItem.blockId) ||
+            (patternItem.itemId != null &&
+                slot.item.itemId === patternItem.itemId) ||
+            (patternItem.blockCategory &&
+                slot.item.blockCategory ===
+                    GetBlock(patternItem.blockId).category)
         );
     }
 
@@ -442,7 +510,7 @@ class Inventory {
     }
 
     areAllCraftingSlotsEmpty() {
-        return this.craftingSlots.flat().every((slot) => slot.item.count === 0);
+        return this.craftingSlots.flat().every((slot) => slot.isEmpty());
     }
 
     mouseOverSlot(x, y, array, overWriteItem = null) {
@@ -536,14 +604,113 @@ class Inventory {
         }
     }
 
-    mouseOverPosition(x, y, sizeX, sizeY) {
-        const mousePos = input.getMousePosition();
-        return (
-            mousePos.x >= x &&
-            mousePos.x <= x + sizeX &&
-            mousePos.y >= y &&
-            mousePos.y <= y + sizeY
+    draw(ctx) {
+        // Black Background
+        ctx.fillStyle = "rgb(0, 0, 0, .6)";
+        ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
+
+        const path = this.craftingTable ? "crafting_table" : "inventory";
+
+        const inventoryUI = drawImage(
+            "Assets/sprites/gui/" + path + ".png",
+            CANVAS.width / 2,
+            CANVAS.height / 6,
+            3.5
         );
+
+        this.drawItems(inventoryUI);
+        this.drawItems();
+        this.drawHoldItem();
+        this.drawHoverTitle();
+    }
+
+    drawItems(inventoryUI) {
+        for (let y = 0; y < this.items.length; y++) {
+            for (let x = 0; x < this.items[y].length; x++) {
+                this.drawSlot(this.items[y][x]);
+            }
+        }
+
+        this.drawCraftingSlots(inventoryUI);
+    }
+
+    drawHoverTitle() {
+        if (!player.windowOpen) return;
+        if (!this.hoverItem) return;
+        if (!this.hoverItem.blockId && this.hoverItem.itemId == null) return;
+
+        const mousePos = input.getMousePosition();
+
+        const hoverInventoryItem = this.hoverItem;
+
+        let title = hoverInventoryItem.blockId
+            ? GetBlock(hoverInventoryItem.blockId).name
+            : GetItem(hoverInventoryItem.itemId).name;
+
+        drawText(title, mousePos.x + 20, mousePos.y - 5, 25, true, "left");
+    }
+
+    drawHoldItem() {
+        if (!player.windowOpen) return;
+        const holdingItem = this.holdingItem;
+        if (!holdingItem) return;
+        const mousePos = input.getMousePosition();
+
+        let image = null;
+
+        const spritePath =
+            "Assets/sprites/" +
+            (holdingItem.blockId
+                ? "blocks/" + GetBlock(holdingItem.blockId).sprite
+                : "items/" + GetItem(holdingItem.itemId).sprite) +
+            ".png";
+
+        image = drawImage(spritePath, mousePos.x, mousePos.y, 2.5, false);
+
+        if (holdingItem.count <= 1) return;
+
+        drawText(
+            holdingItem.count,
+            image.x + image.sizeX + 5,
+            image.y + image.sizeY + 3
+        );
+    }
+
+    drawCraftingSlots(inventoryUI) {
+        for (let y = 0; y < this.craftingSlots.length; y++) {
+            for (let x = 0; x < this.craftingSlots[y].length; x++) {
+                this.drawSlot(this.craftingSlots[y][x]);
+            }
+        }
+
+        // Draw Output
+        const outputSlot = this.craftingOutputSlot;
+        this.drawSlot(outputSlot);
+    }
+
+    drawSlot(slot) {
+        const item = slot.item;
+
+        if (item.count <= 0) return;
+        if (!item.blockId && item.itemId === null) return;
+
+        const slotX = slot.position.x;
+        const slotY = slot.position.y;
+
+        const spritePath =
+            "Assets/sprites/" +
+            (item.blockId
+                ? "blocks/" + GetBlock(item.blockId).sprite
+                : "items/" + GetItem(item.itemId).sprite) +
+            ".png";
+
+        // Draw the sprite
+        drawImage(spritePath, slotX, slotY, 3, false);
+
+        if (item.count <= 1) return;
+
+        // Draw the count
+        drawText(item.count, slotX + 55, slotY + 50, 30);
     }
 }
 
@@ -551,5 +718,9 @@ class InventorySlot {
     constructor({ position = { x: 0, y: 0 }, item = new InventoryItem() }) {
         this.position = position;
         this.item = item;
+    }
+
+    isEmpty() {
+        return this.item.itemId != null && !this.item.blockId;
     }
 }

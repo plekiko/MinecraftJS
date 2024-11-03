@@ -11,3 +11,5 @@ const INTERACT_DISTANCE = 4;
 
 const SPAWN_PLAYER = true;
 let globalFrame = 0;
+
+let chat = null;

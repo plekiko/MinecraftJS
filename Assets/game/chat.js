@@ -3,6 +3,7 @@ class Chat {
         this.inChat = false;
         this.messages = [];
         this.chatLog = [];
+        this.tempMessages = [];
         this.currentMessage = "";
 
         this.cursorBlinkTime = 0;
@@ -10,9 +11,13 @@ class Chat {
 
         this.maxLenght = 50;
 
+        this.messageDuration = 8000;
+
         this.historyIndex = 0;
 
         this.viewHistory = 10;
+
+        this.loadLog();
     }
 
     openChat() {
@@ -36,7 +41,7 @@ class Chat {
             return;
         }
 
-        this.chatLog.push(this.currentMessage);
+        this.addToLog(this.currentMessage);
 
         if (this.currentMessage.startsWith("/", 0)) {
             this.doCheat(
@@ -45,9 +50,31 @@ class Chat {
             message = "";
         }
 
-        this.message(message);
+        this.message(message, "Player");
 
         this.closeChat();
+    }
+
+    addToLog(message) {
+        this.chatLog.push(message);
+
+        this.saveLog();
+    }
+
+    saveLog() {
+        localStorage.setItem("log", JSON.stringify(this.chatLog));
+    }
+
+    loadLog() {
+        const loadedLog = JSON.parse(localStorage.getItem("log"));
+        if (loadedLog) this.chatLog = loadedLog;
+    }
+
+    clearLog() {
+        this.chatLog = [];
+        this.saveLog();
+
+        this.message("Cleared chat history");
     }
 
     isValidText(text) {
@@ -61,12 +88,20 @@ class Chat {
 
         if (messageArray[0] == "give") this.give(messageArray);
         if (messageArray[0] == "clear") this.clear();
+        if (messageArray[0] == "clearlog") this.clearLog();
     }
 
-    message(message) {
+    message(message, sender = "Server") {
         if (!this.isValidText(message)) return;
 
-        this.messages.push(message);
+        const messageWithSender = `[${sender}] ${message}`;
+
+        this.messages.push(messageWithSender);
+
+        this.tempMessages.push({
+            text: messageWithSender,
+            timestamp: Date.now(),
+        });
     }
 
     give(messageArray) {
@@ -106,7 +141,11 @@ class Chat {
             player.inventory.addItem(inventoryItem);
 
             this.message(
-                `Gave ${count} ${category}.${itemName} to the player.`
+                `Gave ${count} ${
+                    category === "Blocks"
+                        ? GetBlock(item).name
+                        : GetItem(item).name
+                } to the player.`
             );
         } else {
             this.message(`Item ${messageArray[1]} not found.`);
@@ -119,12 +158,27 @@ class Chat {
     }
 
     draw(ctx) {
-        if (!this.inChat) return;
+        if (!this.inChat) {
+            const maxMessages = Math.min(
+                this.viewHistory,
+                this.tempMessages.length
+            );
+            for (let i = 0; i < maxMessages; i++) {
+                drawText(
+                    this.tempMessages[this.tempMessages.length - 1 - i].text, // Reverse order
+                    17,
+                    CANVAS.height - 60 - i * 30,
+                    30,
+                    true,
+                    "left"
+                );
+            }
+            return;
+        }
 
         ctx.fillStyle = "rgb(0, 0, 0, .6)";
         ctx.fillRect(10, CANVAS.height - 50, 1000, 40);
 
-        // Append "_" to currentMessage if showCursor is true
         const messageToDisplay =
             this.currentMessage + (this.showCursor ? "_" : "");
 
@@ -144,6 +198,13 @@ class Chat {
                 "left"
             );
         }
+    }
+
+    updateTempMessages() {
+        const now = Date.now();
+        this.tempMessages = this.tempMessages.filter(
+            (msg) => now - msg.timestamp < this.messageDuration
+        );
     }
 
     historyCycle() {
@@ -234,6 +295,8 @@ class Chat {
                 this.showCursor = !this.showCursor;
                 this.cursorBlinkTime = 0;
             }
+        } else {
+            this.updateTempMessages();
         }
     }
 }
