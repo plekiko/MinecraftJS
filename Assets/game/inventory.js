@@ -155,56 +155,77 @@ class Inventory {
     handleLeftClickItemInteraction(item, x, y, array) {
         if (!input.isLeftMouseButtonPressed()) return;
 
-        // Move item if holdingItem is already set and array is specified
+        // Specific handling for the crafting output slot
+        if (item === this.craftingOutputSlot.item) {
+            const maxStackSize = this.getStackSize(item);
+            const isSameType =
+                this.holdingItem &&
+                this.holdingItem.blockId === item.blockId &&
+                this.holdingItem.itemId === item.itemId;
+
+            // Calculate combined count only if holding the same item type
+            const combinedCount = isSameType
+                ? this.holdingItem.count + this.craftingOutputSlot.item.count
+                : this.craftingOutputSlot.item.count;
+
+            // Check if we can add the crafting output to holdingItem without exceeding max stack size
+            if (
+                this.holdingItem &&
+                isSameType &&
+                combinedCount <= maxStackSize
+            ) {
+                this.holdingItem.count = combinedCount;
+                this.clearItem(item);
+                this.craftingComplete();
+            } else if (!this.holdingItem) {
+                // If not already holding an item, pick up the crafting output directly
+                this.holdingItem = structuredClone(item);
+                this.clearItem(item);
+                this.craftingComplete();
+            }
+            return; // Return here to prevent further interaction logic with crafting slot
+        }
+
+        // If we are holding an item, attempt to place it in the specified item slot
         if (this.holdingItem && array) {
             this.movingLogic(item);
             return;
         }
 
-        // If item is empty or count is 0, no interaction is needed
+        // Exit if the item has no count or identifiers
         if (item.count <= 0 || (!item.blockId && item.itemId === null)) return;
 
+        // Pick up the entire item if interacting with a specified array
         if (array) {
-            // Remove item from the specified array and set it as holdingItem
             this.holdingItem = structuredClone(item);
             this.removeItem(y, x, item.count, array);
             return;
         }
 
-        // Handle interaction when no array is defined
+        // If we're not holding an item, pick up the item in the current slot
         if (!this.holdingItem) {
-            // Pick up the clicked item if holdingItem is empty
             this.holdingItem = structuredClone(item);
-        } else if (
+        }
+        // If holding an item of the same type, attempt to combine them
+        else if (
             this.holdingItem.blockId === item.blockId &&
             this.holdingItem.itemId === item.itemId
         ) {
-            // If holdingItem and clicked item are the same type, combine counts if below limit
-            if (this.holdingItem.count + item.count <= 64) {
-                this.holdingItem.count += item.count;
+            const maxStackSize = this.getStackSize(item);
+            const combinedCount = this.holdingItem.count + item.count;
+
+            if (combinedCount <= maxStackSize) {
+                this.holdingItem.count = combinedCount;
+                this.clearItem(item);
+            } else {
+                this.holdingItem.count = maxStackSize;
+                item.count = combinedCount - maxStackSize;
             }
         }
+    }
 
-        if (this.holdingItem && !array && item) {
-            if (
-                this.holdingItem.blockId &&
-                this.holdingItem.blockId != item.blockId
-            )
-                return;
-            if (
-                this.holdingItem.itemId != null &&
-                this.holdingItem.itemId != item.itemId
-            )
-                return;
-        }
-
-        // Check if interacting with crafting output slot to complete crafting
-        if (item === this.craftingOutputSlot.item) {
-            this.craftingComplete();
-        }
-
-        // Clear the clicked item slot
-        this.clearItem(item);
+    getStackSize(item) {
+        return item.itemId ? GetItem(item.itemId).stackSize : 64;
     }
 
     craftingComplete() {
@@ -254,9 +275,9 @@ class Inventory {
                 if (
                     item.blockId === newItem.blockId &&
                     item.itemId === newItem.itemId &&
-                    item.count < 64
+                    item.count < this.getStackSize(item)
                 ) {
-                    const availableSpace = 64 - item.count;
+                    const availableSpace = this.getStackSize(item) - item.count;
                     const toAdd = Math.min(remainingCount, availableSpace);
                     item.count += toAdd;
                     remainingCount -= toAdd;
@@ -543,7 +564,7 @@ class Inventory {
         if (
             this.holdingItem &&
             this.holdingItem.count > 0 &&
-            item.count < 64 &&
+            item.count < this.getStackSize(item) &&
             ((item.blockId === null && item.itemId == null) ||
                 (item.blockId === this.holdingItem.blockId &&
                     item.itemId === this.holdingItem.itemId))
@@ -591,7 +612,7 @@ class Inventory {
             item.blockId === this.holdingItem.blockId &&
             item.itemId === this.holdingItem.itemId
         ) {
-            const maxStackSize = 64;
+            const maxStackSize = this.getStackSize(item);
             const totalCount = item.count + this.holdingItem.count;
 
             item.count = Math.min(totalCount, maxStackSize);

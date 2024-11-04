@@ -3,9 +3,11 @@ class Item {
         itemId = 0,
         name = "New Item",
         sprite = "",
-        stackable = true,
+        stackSize = 64,
         toolType = ToolType.Nothing,
         toolLevel = 0,
+        heldInHand = false,
+        baseDamage = 0,
     }) {
         this.itemId = itemId;
         this.name = name;
@@ -14,7 +16,11 @@ class Item {
         this.toolType = toolType;
         this.toolLevel = toolLevel;
 
-        this.stackable = stackable;
+        this.baseDamage = baseDamage;
+
+        this.stackSize = stackSize;
+
+        this.heldInHand = heldInHand;
     }
 }
 

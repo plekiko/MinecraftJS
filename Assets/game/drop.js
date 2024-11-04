@@ -27,13 +27,34 @@ class Drop extends Entity {
         }, 1500);
     }
 
+    getStackSize() {
+        if (this.itemId != null) return GetItem(this.itemId).stackSize;
+
+        return 64;
+    }
+
     collisionLogic() {
         const other = this.entityCollision();
 
-        if (!other.type === EntityTypes.Drop) return;
-        if (other.blockId && other.blockId == this.blockId) {
-            this.count += other.count;
-            removeEntity(other);
+        if (other.type !== EntityTypes.Drop) return;
+
+        const isSameBlock = other.blockId && other.blockId === this.blockId;
+        const isSameItem = other.itemId != null && other.itemId === this.itemId;
+
+        if (isSameBlock || isSameItem) {
+            const maxStackSize = this.getStackSize();
+            const combinedCount = this.count + other.count;
+
+            if (combinedCount <= maxStackSize) {
+                this.count = combinedCount;
+                removeEntity(other);
+            } else {
+                const remainingSpace = maxStackSize - this.count;
+                this.count += remainingSpace;
+                other.count -= remainingSpace;
+
+                if (other.count <= 0) removeEntity(other);
+            }
         }
     }
 
