@@ -6,7 +6,7 @@ class Player extends Entity {
             flying: false,
             instaBuild: false,
             mayBuild: true,
-            mayFly: true,
+            mayFly: false,
             walkSpeed: 6,
             jumpForce: 8.5,
         },
@@ -21,8 +21,9 @@ class Player extends Entity {
     }) {
         super({
             position: position,
-            hitbox: new Vector2(0.8 * BLOCK_SIZE, 1.8 * BLOCK_SIZE),
+            hitbox: new Vector2(0.4 * BLOCK_SIZE, 1.8 * BLOCK_SIZE),
             type: EntityTypes.Player,
+            body: new Body({ parts: playerBody }),
         });
 
         this.health = health;
@@ -61,8 +62,14 @@ class Player extends Entity {
         this.toggleLogic();
         this.dropLogic();
         this.hoverBlockLogic();
+        this.setHoldItem();
 
         if (this.windowOpen) this.inventory.update(deltaTime);
+    }
+
+    setHoldItem() {
+        this.holdItem =
+            this.inventory.items[3][this.inventory.currentSlot].item;
     }
 
     interactLogic() {
@@ -343,8 +350,23 @@ class Player extends Entity {
         this.handleJump();
         this.handleSwimming();
         this.handleFlying();
+        this.lookAtCursor();
 
         // this.applyDeltaTime(deltaTime);
+    }
+
+    lookAtCursor() {
+        const mousePosition = input.getMousePosition();
+
+        const partX = this.position.x + this.offset.x - camera.x;
+        const partY = this.position.y + this.offset.y - camera.y;
+
+        const rotation = this.rotateToPoint(mousePosition, {
+            x: partX,
+            y: partY,
+        });
+
+        this.lookDirection = rotation;
     }
 
     handleHorizontalMovement() {

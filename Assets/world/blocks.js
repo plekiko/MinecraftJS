@@ -413,6 +413,8 @@ const blockTypes = [
         sprite: "cobblestone",
         name: "Cobblestone",
         hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
     }),

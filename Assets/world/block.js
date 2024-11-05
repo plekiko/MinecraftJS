@@ -9,6 +9,7 @@ class BlockType {
         fluid = false,
         drag = 1,
         collision = true,
+
         breakSound = Sounds.Break_Wood,
         breakingSound = Sounds.Breaking_Wood,
 

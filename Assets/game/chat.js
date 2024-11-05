@@ -85,30 +85,96 @@ class Chat {
 
     doCheat(message) {
         const messageArray = message.split(" ");
+        const cheat = messageArray[0];
 
-        if (messageArray[0] == "give") this.give(messageArray);
-        if (messageArray[0] == "clear") this.clear();
-        if (messageArray[0] == "clearlog") this.clearLog();
+        switch (cheat) {
+            case "give":
+                this.give(messageArray);
+                break;
+            case "clear":
+                this.clear();
+                break;
+            case "clearlog":
+                this.clearLog();
+                break;
+            case "gamemode":
+                this.gamemode(messageArray);
+                break;
+        }
+    }
+
+    gamemode(messageArray) {
+        if (!messageArray[1]) {
+            this.invalidCommand("/gamemode <Gamemode>");
+            return;
+        }
+        if (!player) {
+            this.message("No player found.");
+            return;
+        }
+
+        const gamemode = messageArray[1];
+
+        switch (gamemode) {
+            // Survival
+            case "0":
+                player.abilities.mayFly = false;
+                player.abilities.flying = false;
+                player.abilities.instaBuild = false;
+                player.abilities.mayBuild = true;
+
+                this.message("Set gamemode to Survival.");
+                return;
+
+            // Creative
+            case "1":
+                player.abilities.mayFly = true;
+                player.abilities.instaBuild = true;
+                player.abilities.mayBuild = true;
+
+                this.message("Set gamemode to Creative.");
+                return;
+
+            // Adventure
+            case "2":
+                player.abilities.mayFly = false;
+                player.abilities.flying = false;
+                player.abilities.instaBuild = false;
+                player.abilities.mayBuild = false;
+
+                this.message("Set gamemode to Adventure.");
+                return;
+        }
+
+        this.message("Gamemode " + messageArray[1] + " does not exist.");
+    }
+
+    invalidCommand(usage) {
+        this.message("Invalid command. Usage: " + usage);
     }
 
     message(message, sender = "Server") {
         if (!this.isValidText(message)) return;
 
         const messageWithSender = `[${sender}] ${message}`;
-
         this.messages.push(messageWithSender);
 
+        // Add the new message to tempMessages with a timestamp
         this.tempMessages.push({
             text: messageWithSender,
             timestamp: Date.now(),
         });
+
+        if (this.messages.length > this.viewHistory) {
+            this.messages.shift();
+        }
     }
 
     give(messageArray) {
         if (!player) return;
 
         if (messageArray.length < 2) {
-            console.log("Invalid command. Usage: /give <Category.ItemName>");
+            this.invalidCommand("/give <Category.ItemName>");
             return;
         }
 

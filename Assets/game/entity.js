@@ -20,6 +20,10 @@ class Entity {
         drag = 3,
         bouncing = false,
         type = EntityTypes.Entity,
+
+        body = null,
+
+        holdItem = new InventoryItem(),
     }) {
         this.position = position;
         this.rotation = rotation;
@@ -33,6 +37,7 @@ class Entity {
         this.type = type;
 
         this.sprite = sprite;
+        this.body = body;
 
         this.img = new Image();
         this.img.src = sprite ? sprite : "";
@@ -45,9 +50,29 @@ class Entity {
         this.bouncing = bouncing;
         this.offset = new Vector2();
 
+        this.lookDirection = 0;
+
         this.swimming = false;
 
         this.originDate = Date.now();
+
+        this.holdItem = holdItem;
+    }
+
+    rotateToPoint(targetPosition, objectPosition) {
+        // Calculate the object's center point (if needed)
+        const centerX = objectPosition.x;
+        const centerY = objectPosition.y;
+
+        // Calculate the difference in x and y positions between the target and object
+        const dx = targetPosition.x - centerX;
+        const dy = targetPosition.y - centerY;
+
+        // Calculate the angle in radians and convert to degrees
+        const angle = Math.atan2(dy, dx);
+        const rotationInDegrees = (angle * 180) / Math.PI;
+
+        return rotationInDegrees; // Return the calculated rotation in degrees
     }
 
     getBlockAtPosition(worldX, worldY) {
@@ -274,6 +299,21 @@ class Entity {
 
         const centerX = this.position.x - camera.x + this.offset.x;
         const centerY = this.position.y - camera.y + this.offset.y;
+
+        if (this.body) {
+            this.body.updatePosition({
+                x: centerX + this.hitbox.x / 4,
+                y: centerY,
+            });
+            this.body.draw(
+                ctx,
+                this.velocity.x,
+                this.grounded,
+                this.lookDirection,
+                this.holdItem
+            );
+            return;
+        }
 
         ctx.translate(centerX, centerY);
 

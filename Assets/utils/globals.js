@@ -1,4 +1,4 @@
-const RENDER_DISTANCE = 3;
+const RENDER_DISTANCE = 1;
 const CHUNK_WIDTH = 16;
 const CHUNK_HEIGHT = 80; // 150
 const BLOCK_SIZE = 64;

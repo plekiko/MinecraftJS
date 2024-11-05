@@ -137,7 +137,7 @@ const Biomes = Object.freeze({
         topLayer: Blocks.GrassBlock,
         secondLayer: Blocks.Dirt,
         secondLayerWidth: 4,
-        treeType: [Trees.Oak],
+        treeType: [Trees.Oak, Trees.Oak, Trees.Birch],
         grassType: [
             Blocks.Grass,
             Blocks.TallGrass,

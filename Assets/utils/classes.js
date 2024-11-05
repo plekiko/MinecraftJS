@@ -291,16 +291,16 @@ class Camera {
     }
 
     followPlayer(deltaTime) {
-        const increment = deltaTime * this.lerpSpeed;
+        // const increment = deltaTime * this.lerpSpeed;
 
-        let targetX = player.position.x - CANVAS.width / 2;
-        let targetY = this.getWorldY(player.position.y);
+        // let targetX = player.position.x - CANVAS.width / 2;
+        // let targetY = this.getWorldY(player.position.y);
 
-        this.x = lerp(this.x, targetX, increment);
-        this.y = lerp(this.y, targetY, increment);
+        // this.x = lerp(this.x, targetX, increment);
+        // this.y = lerp(this.y, targetY, increment);
 
-        // this.x = player.position.x - CANVAS.width / 2;
-        // this.y = this.getWorldY(player.position.y);
+        this.x = player.position.x - CANVAS.width / 2;
+        this.y = this.getWorldY(player.position.y);
 
         // if (Math.abs(this.x - targetX) < 0.1) {
         //     this.x = targetX;

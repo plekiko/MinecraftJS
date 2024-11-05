@@ -1,0 +1,266 @@
+class Body {
+    constructor({ position = { x: 0, y: 0 }, parts = [] }) {
+        this.position = position;
+        this.parts = parts;
+    }
+
+    updatePosition(newPosition) {
+        this.position = newPosition;
+        for (const partName in this.parts) {
+            const part = this.parts[partName];
+
+            // Apply position offset from body position
+            part.position = {
+                x: newPosition.x + part.offset.x,
+                y: newPosition.y + part.offset.y,
+            };
+        }
+    }
+
+    draw(ctx, speed, grounded, lookDirection, holdItem) {
+        const sortedParts = Object.values(this.parts).sort(
+            (a, b) => a.zIndex - b.zIndex
+        );
+        for (const part of sortedParts) {
+            part.position = this.position;
+            part.draw(ctx, speed, grounded, lookDirection, holdItem);
+        }
+    }
+}
+
+class BodyPart {
+    constructor({
+        sprite,
+        position,
+        offset = { x: 0, y: 0 },
+        zIndex = 0,
+        rotationOrigin = { x: 0, y: 0 },
+        eyes = false,
+        sways = false,
+        rotation = 0,
+        swaySpeed = 90,
+        swayIntensity = 10,
+        maxSwayAngle = 90,
+        mainArm = false,
+        holdOrigin = { x: 0, y: 0 },
+    }) {
+        this.sprite = sprite;
+        this.position = position;
+        this.offset = offset;
+        this.zIndex = zIndex;
+        this.rotationOrigin = rotationOrigin;
+        this.eyes = eyes;
+        this.sways = sways;
+        this.rotation = rotation;
+
+        // Sway properties
+        this.swaySpeed = swaySpeed;
+        this.swayIntensity = swayIntensity;
+        this.maxSwayAngle = maxSwayAngle;
+
+        this.direction = -1;
+
+        this.mainArm = mainArm;
+        this.holdOrigin = holdOrigin;
+    }
+
+    getSwayRotation(speed, grounded) {
+        // Oscillate back and forth with time, scaled by swaySpeed for smoothness
+        const oscillation = Math.sin(
+            Date.now() / (grounded ? this.swaySpeed : this.swaySpeed * 5)
+        );
+
+        // Scale the sway range proportionally to speed, capped by maxSwayAngle
+        const effectiveSwayAngle = Math.abs(speed / 1000) * this.maxSwayAngle;
+
+        const output =
+            oscillation *
+            Math.min(effectiveSwayAngle, this.maxSwayAngle) *
+            Math.sign(speed);
+
+        // Return the sway rotation with direction based on speed's sign
+        return output;
+    }
+
+    draw(ctx, speed, grounded, lookDirection, holdItem) {
+        const img = this.loadSprite();
+
+        // Determine direction based on speed
+        // if (speed > 0) this.direction = 1;
+        // if (speed < 0) this.direction = -1;
+
+        ctx.save();
+
+        this.applyTranslation(ctx);
+
+        const finalRotation = this.calculateFinalRotation(
+            speed,
+            grounded,
+            lookDirection
+        );
+
+        const shouldFlip = lookDirection < -90 || lookDirection > 90;
+
+        if (lookDirection !== 0) {
+            this.direction = shouldFlip ? -1 : 1;
+        }
+
+        this.applyRotationAndFlip(ctx, finalRotation, shouldFlip);
+        this.renderHeldItem(ctx, holdItem, this.direction);
+
+        // Draw the main sprite
+        ctx.drawImage(
+            img,
+            -img.width / 2,
+            -img.height / 2,
+            img.width * (BLOCK_SIZE / 16),
+            img.height * (BLOCK_SIZE / 16)
+        );
+
+        ctx.restore();
+    }
+
+    // Load the main sprite image
+    loadSprite() {
+        const img = new Image();
+        img.src = "Assets/sprites/" + this.sprite + ".png";
+        return img;
+    }
+
+    applyTranslation(ctx) {
+        ctx.translate(
+            this.position.x + BLOCK_SIZE * (this.offset.x / 64),
+            this.position.y + BLOCK_SIZE * (this.offset.y / 64)
+        );
+        ctx.translate(this.rotationOrigin.x, this.rotationOrigin.y);
+    }
+
+    calculateFinalRotation(speed, grounded, lookDirection) {
+        let finalRotation = this.rotation;
+        if (this.sways) {
+            const swayRotation =
+                this.getSwayRotation(speed, grounded) *
+                (this.zIndex < 0 ? -1 : 1);
+            finalRotation += swayRotation;
+        }
+        if (this.eyes) {
+            finalRotation += lookDirection;
+        }
+
+        return finalRotation;
+    }
+
+    applyRotationAndFlip(ctx, finalRotation, shouldFlip) {
+        if (shouldFlip && this.eyes) {
+            ctx.scale(-1, 1);
+            finalRotation = 180 - finalRotation;
+        }
+        ctx.rotate((finalRotation * Math.PI) / 180);
+        ctx.translate(-this.rotationOrigin.x, -this.rotationOrigin.y);
+    }
+
+    // Updated renderHeldItem with direction parameter
+    renderHeldItem(ctx, holdItem, direction) {
+        if (!this.mainArm || !holdItem) return;
+
+        const sprite = this.getHeldItemSprite(holdItem);
+        const isTool = this.isTool(holdItem);
+
+        if (!sprite) return;
+
+        const img = new Image();
+        img.src = sprite;
+
+        ctx.save();
+
+        ctx.translate(this.holdOrigin.x, this.holdOrigin.y);
+
+        ctx.scale(!isTool ? direction : -direction, 1);
+
+        ctx.translate(!isTool ? 10 : -20, 0);
+
+        const rotationAngle = Math.PI / (isTool ? -1.35 : 2);
+        ctx.rotate(rotationAngle);
+
+        const scale = isTool ? 0.8 : 0.5;
+
+        ctx.drawImage(
+            img,
+            (-img.width * scale * (BLOCK_SIZE / 16)) / 2,
+            (-img.height * scale * (BLOCK_SIZE / 16)) / 2,
+            img.width * (BLOCK_SIZE / 16) * scale,
+            img.height * (BLOCK_SIZE / 16) * scale
+        );
+
+        ctx.restore();
+    }
+
+    isTool(item) {
+        if (item.itemId) {
+            if (GetItem(item.itemId).toolType != ToolType.Nothing) return true;
+        }
+        return false;
+    }
+
+    getHeldItemSprite(holdItem) {
+        if (holdItem.blockId) {
+            return (
+                "Assets/sprites/blocks/" +
+                GetBlock(holdItem.blockId).sprite +
+                ".png"
+            );
+        }
+        if (holdItem.itemId != null) {
+            return (
+                "Assets/sprites/items/" +
+                GetItem(holdItem.itemId).sprite +
+                ".png"
+            );
+        }
+        return null;
+    }
+}
+
+const playerBody = {
+    head: new BodyPart({
+        sprite: "entities/player/head",
+        offset: { x: -6, y: 0 },
+        rotationOrigin: { x: 12, y: 32 },
+        zIndex: 1,
+        eyes: true,
+    }),
+    torso: new BodyPart({
+        sprite: "entities/player/torso",
+        offset: { x: 0, y: 34 },
+    }),
+    leftArm: new BodyPart({
+        sprite: "entities/player/left-arm",
+        offset: { x: 0, y: 34 },
+        zIndex: 2,
+        rotationOrigin: { x: 4, y: 4 },
+        sways: true,
+        mainArm: true,
+        holdOrigin: { x: 6, y: 35 },
+    }),
+    rightArm: new BodyPart({
+        sprite: "entities/player/right-arm",
+        offset: { x: 0, y: 34 },
+        rotationOrigin: { x: 4, y: 4 },
+        zIndex: -2,
+        sways: true,
+    }),
+    leftLeg: new BodyPart({
+        sprite: "entities/player/left-leg",
+        offset: { x: 0, y: 74 },
+        rotationOrigin: { x: 4, y: 0 },
+        zIndex: 1,
+        sways: true,
+    }),
+    rightLeg: new BodyPart({
+        sprite: "entities/player/right-leg",
+        offset: { x: 0, y: 74 },
+        rotationOrigin: { x: 4, y: 0 },
+        zIndex: -1,
+        sways: true,
+    }),
+};
