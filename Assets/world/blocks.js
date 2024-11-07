@@ -40,6 +40,9 @@ const Blocks = Object.freeze({
     BirchPlanks: 38,
     JunglePlanks: 39,
     Cobblestone: 40,
+    CoalOre: 41,
+    IronOre: 42,
+    Furnace: 43,
 });
 
 const blockTypes = [
@@ -80,7 +83,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
-        drop: Blocks.Cobblestone,
+        dropBlock: Blocks.Cobblestone,
     }),
     new BlockType({
         blockId: 5,
@@ -398,6 +401,7 @@ const blockTypes = [
         hardness: 2.6,
         toolType: ToolType.Axe,
         specialType: SpecialType.CraftingTable,
+        collision: false,
     }),
     new BlockType({
         blockId: 36,
@@ -440,6 +444,40 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 41,
+        sprite: "coal_ore",
+        name: "Coal Ore",
+        hardness: 9,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        dropItem: Items.Coal,
+    }),
+    new BlockType({
+        blockId: 42,
+        sprite: "iron_ore",
+        name: "Iron Ore",
+        hardness: 10,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        requiredToolLevel: 13.5,
+        dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 43,
+        sprite: "furnace_front_off",
+        name: "Furnace",
+        hardness: 8,
+        specialType: SpecialType.Furnace,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        collision: false,
     }),
 ];
 

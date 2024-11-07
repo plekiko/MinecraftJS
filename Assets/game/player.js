@@ -194,10 +194,11 @@ class Player extends Entity {
     }
 
     breakingAndPlacingLogic(deltaTime) {
-        if (!this.hoverBlock) return;
         if (this.windowOpen) return;
 
         if (input.isLeftMouseButtonPressed()) this.swing();
+
+        if (!this.hoverBlock) return;
 
         if (input.isLeftMouseDown()) this.breakingLogic(deltaTime);
         else {
@@ -336,11 +337,16 @@ class Player extends Entity {
 
         // Check if block should be broken
         if (this.breakingTime >= currentBlockHardness) {
-            const shouldDrop = block.dropWithoutTool
+            let shouldDrop = block.dropWithoutTool
                 ? true
                 : selectedTool
                 ? selectedTool == block.toolType
                 : false;
+            if (
+                this.inventory.selectedItem &&
+                this.inventory.selectedItem.toolLevel < block.requiredToolLevel
+            )
+                shouldDrop = false;
             this.hoverBlock.breakBlock(shouldDrop);
             this.resetBreaking();
             this.swing();

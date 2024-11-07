@@ -5,7 +5,7 @@ chat = new Chat();
 
 if (SPAWN_PLAYER) {
     player = new Player({
-        position: new Vector2(40 * BLOCK_SIZE, 50 * BLOCK_SIZE),
+        position: new Vector2(0, TERRAIN_HEIGHT * BLOCK_SIZE),
     });
 
     entities.push(player);

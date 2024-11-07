@@ -14,10 +14,12 @@ class BlockType {
         breakingSound = Sounds.Breaking_Wood,
 
         toolType = ToolType.Nothing,
+        requiredToolLevel = 0,
         dropWithoutTool = true,
         category = null,
 
-        drop = blockId,
+        dropBlock = blockId,
+        dropItem = null,
 
         breakWithoutBlockUnderneath = false,
 
@@ -39,9 +41,11 @@ class BlockType {
 
         this.toolType = toolType;
         this.dropWithoutTool = dropWithoutTool;
+        this.requiredToolLevel = requiredToolLevel;
         this.category = category;
 
-        this.drop = drop;
+        this.dropBlock = dropBlock;
+        this.dropItem = dropItem;
 
         this.specialType = specialType;
     }
@@ -49,21 +53,12 @@ class BlockType {
 
 const SpecialType = Object.freeze({
     CraftingTable: 1,
+    Furnace: 2,
 });
 
 const BlockCategory = Object.freeze({
     Logs: 1,
     Planks: 2,
-});
-
-const ToolType = Object.freeze({
-    Nothing: 0,
-    Pickaxe: 1,
-    Axe: 2,
-    Shovel: 3,
-    Shears: 4,
-    Hoe: 5,
-    Sword: 6,
 });
 
 class Metadata {}
@@ -135,6 +130,7 @@ class Block extends Square {
     }
 
     dropBlock() {
+        const block = GetBlock(this.blockType);
         entities.push(
             new Drop({
                 x:
@@ -142,7 +138,8 @@ class Block extends Square {
                     camera.x +
                     RandomRange(0, BLOCK_SIZE / 3),
                 y: this.transform.position.y + camera.y + BLOCK_SIZE / 4,
-                blockId: GetBlock(this.blockType).drop,
+                blockId: block.dropItem == null ? block.dropBlock : null,
+                itemId: block.dropItem != null ? block.dropItem : null,
             })
         );
     }

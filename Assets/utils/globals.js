@@ -1,15 +1,31 @@
 const RENDER_DISTANCE = 1;
 const CHUNK_WIDTH = 16;
-const CHUNK_HEIGHT = 100; // 150
-const BLOCK_SIZE = 64;
+const CHUNK_HEIGHT = 110; // 150
+const BLOCK_SIZE = 64; // 64
 const CAVES_THRESHOLD = 4;
-const TERRAIN_HEIGHT = 20; // 50
+const TERRAIN_HEIGHT = 30; // 50
 const WATER_LEVEL = 12;
 const CHUNK_FILE_SIZE = 11; // kB
 const GRAVITY = 30 * BLOCK_SIZE;
 const INTERACT_DISTANCE = 4;
 
+const ORE_THRESHOLDS = {
+    coal: 2.5,
+    iron: 2,
+};
+
 const SPAWN_PLAYER = true;
+
 let globalFrame = 0;
 
 let chat = null;
+
+const ToolType = Object.freeze({
+    Nothing: 0,
+    Pickaxe: 1,
+    Axe: 2,
+    Shovel: 3,
+    Shears: 4,
+    Hoe: 5,
+    Sword: 6,
+});

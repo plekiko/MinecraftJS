@@ -27,7 +27,7 @@ const worldTreeNoiseMap = new Noise(
 );
 
 const worldCaveNoiseMap = new Noise(
-    65, // Scale (size)
+    55, // Scale (size)
     10, // Intensity
     5
 );
@@ -36,6 +36,17 @@ const worldMountainsNoiseMap = new Noise(
     30, // Scale (size)
     60, // Intensity
     30
+);
+
+const worldCoalNoiseMap = new Noise(
+    100, // Scale (size)
+    5.3, // Intensity
+    5
+);
+const worldIronNoiseMap = new Noise(
+    100, // Scale (size)
+    5, // Intensity
+    5
 );
 
 function PrintNoiseOutput(noise, count = 100) {
@@ -126,7 +137,8 @@ function GetChunk(worldX) {
 function postProcessChunks() {
     chunks.forEach((chunk) => {
         if (!chunk.generated) {
-            // chunk.generateCaves();
+            chunk.generateOres();
+            chunk.generateCaves();
             chunk.generateWater();
             chunk.generateTrees();
             chunk.generateGrass();

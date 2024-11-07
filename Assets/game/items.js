@@ -1,16 +1,21 @@
 const Items = Object.freeze({
     Stick: 0,
+
     WoodAxe: 1,
     WoodPickaxe: 2,
     WoodShovel: 3,
     WoodHoe: 4,
     WoodSword: 5,
+
     StoneAxe: 6,
     StonePickaxe: 7,
     StoneShovel: 8,
     StoneHoe: 9,
     StoneSword: 10,
+
     Shears: 11,
+
+    Coal: 20,
 });
 
 const items = [
@@ -122,7 +127,14 @@ const items = [
         heldInHand: true,
         stackSize: 1,
     }),
+    //#endregion
 
+    //#region Ores
+    new Item({
+        itemId: 20,
+        name: "Coal",
+        sprite: "coal",
+    }),
     //#endregion
 ];
 

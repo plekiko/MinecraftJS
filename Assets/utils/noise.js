@@ -21,5 +21,5 @@ class Noise {
 const NoisePresets = Object.freeze({
     Flat: new Noise(7, 10, TERRAIN_HEIGHT),
     SmallHills: new Noise(5, 35, TERRAIN_HEIGHT),
-    Mountains: new Noise(1.5, 120, TERRAIN_HEIGHT + 10),
+    Mountains: new Noise(1.5, 120, TERRAIN_HEIGHT + 8),
 });

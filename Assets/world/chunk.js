@@ -294,19 +294,62 @@ class Chunk {
     }
 
     generateCaves() {
+        const halfwayPoint = this.biome.heightNoise.min / 1.2;
+
         for (let y = 0; y < CHUNK_HEIGHT; y++) {
             for (let x = 0; x < CHUNK_WIDTH; x++) {
                 const noiseValue = worldCaveNoiseMap.getNoise(
                     x + this.x / BLOCK_SIZE,
                     y
                 );
-                if (
-                    y <= this.biome.heightNoise.min * 1.5
-                        ? noiseValue <= CAVES_THRESHOLD
-                        : noiseValue <= CAVES_THRESHOLD * 0.5
-                ) {
+
+                let dynamicThreshold = CAVES_THRESHOLD;
+
+                // Apply linear adjustment only from halfway up to the top
+                if (y >= halfwayPoint) {
+                    const heightFactor =
+                        (y - halfwayPoint) /
+                        (this.biome.heightNoise.min - halfwayPoint);
+                    dynamicThreshold =
+                        CAVES_THRESHOLD * (1 - Math.min(heightFactor, 1));
+                }
+
+                // Check if the noise value meets the adjusted threshold
+                if (noiseValue <= dynamicThreshold) {
                     this.setBlockType(x, y, Blocks.Air); // Create cave openings
                 }
+            }
+        }
+    }
+
+    generateOres() {
+        this.generateOre(
+            worldCoalNoiseMap,
+            ORE_THRESHOLDS.coal,
+            Blocks.CoalOre,
+            0
+        );
+        this.generateOre(
+            worldIronNoiseMap,
+            ORE_THRESHOLDS.iron,
+            Blocks.IronOre,
+            100000
+        );
+    }
+
+    generateOre(noise, threshold, block, offset) {
+        for (let y = 0; y < CHUNK_HEIGHT; y++) {
+            for (let x = 0; x < CHUNK_WIDTH; x++) {
+                const noiseValue = noise.getNoise(
+                    x + this.x / BLOCK_SIZE,
+                    y + offset
+                );
+
+                if (this.getBlockType(x, y) != Blocks.Stone) continue;
+
+                if (noiseValue > threshold) continue;
+
+                this.setBlockType(x, y, block);
             }
         }
     }
