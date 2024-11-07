@@ -31,6 +31,7 @@ class Entity {
         this.velocity = velocity;
         this.maxVelocity = maxVelocity;
         this.grounded = false;
+        this.standingOnBlockType = null;
         this.noGravity = noGravity;
         this.fallDistance = 0;
         this.invulnerable = invulnerable;
@@ -55,6 +56,9 @@ class Entity {
         this.swimming = false;
 
         this.originDate = Date.now();
+
+        this.stepCounter = 0;
+        this.stepSize = 1;
 
         this.holdItem = holdItem;
     }
@@ -185,6 +189,14 @@ class Entity {
         this.calculateGravity(deltaTime);
         this.updatePositionWithVelocity(deltaTime);
         this.bounceSprite(deltaTime);
+        this.playFootstepSounds(deltaTime);
+        if (this.body) this.body.updateBody(deltaTime);
+    }
+
+    swing() {
+        if (!this.body) return;
+
+        this.body.swing();
     }
 
     bounceSprite(deltaTime) {
@@ -235,9 +247,11 @@ class Entity {
 
         if (!upCollision) {
             if (downCollision && downCollision !== "fluid") {
+                this.standingOnBlockType = downCollision.blockType;
                 this.velocity.y = 0;
                 this.grounded = true;
             } else {
+                this.grounded = false;
                 if (downCollision && downCollision === "fluid") {
                     if (!this.swimming) {
                         this.enterFluid();
@@ -250,6 +264,23 @@ class Entity {
 
         this.position.x += this.velocity.x * deltaTime;
         this.position.y += this.velocity.y * deltaTime;
+    }
+
+    playFootstepSounds(deltaTime) {
+        if (!this.grounded || Math.abs(this.velocity.x) === 0) return;
+        if (!this.standingOnBlockType) return;
+
+        this.stepCounter += Math.abs(this.velocity.x / 100) * deltaTime;
+
+        if (this.stepCounter >= this.stepSize) {
+            const block = GetBlock(this.standingOnBlockType);
+            if (!block) return;
+            const sounds = block.breakingSound;
+            if (!sounds) return;
+            PlayRandomSoundFromArray({ array: sounds, volume: 0.2 });
+
+            this.stepCounter -= this.stepSize;
+        }
     }
 
     entityCollision() {

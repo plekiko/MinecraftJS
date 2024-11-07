@@ -341,9 +341,3 @@ function lerpEaseOut(a, b, t) {
     const easedT = easeOut(t);
     return a + (b - a) * easedT;
 }
-
-function playSound(sound, volume = 1) {
-    const audio = new Audio("Assets/audio/sfx/" + sound);
-    audio.volume = volume;
-    audio.play();
-}

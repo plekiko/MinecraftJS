@@ -19,6 +19,8 @@ class BlockType {
 
         drop = blockId,
 
+        breakWithoutBlockUnderneath = false,
+
         specialType = null,
     } = {}) {
         this.blockId = blockId;
@@ -32,6 +34,8 @@ class BlockType {
         this.collision = collision;
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
+
+        this.breakWithoutBlockUnderneath = breakWithoutBlockUnderneath;
 
         this.toolType = toolType;
         this.dropWithoutTool = dropWithoutTool;
@@ -110,6 +114,11 @@ class Block extends Square {
 
     breakBlock(drop = false) {
         if (this.blockType === Blocks.Air) return;
+
+        if (chunks.has(this.chunkX)) {
+            chunks.get(this.chunkX).checkForBlockWithAirBeneath(this.x, this.y);
+        }
+
         if (drop) this.dropBlock();
 
         this.playBreakSound();

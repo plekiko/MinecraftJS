@@ -197,6 +197,8 @@ class Player extends Entity {
         if (!this.hoverBlock) return;
         if (this.windowOpen) return;
 
+        if (input.isLeftMouseButtonPressed()) this.swing();
+
         if (input.isLeftMouseDown()) this.breakingLogic(deltaTime);
         else {
             this.resetBreaking();
@@ -212,6 +214,8 @@ class Player extends Entity {
         this.hoverBlock.setBlockType(this.inventory.selectedBlock.blockId);
 
         this.hoverBlock.playBreakSound();
+
+        this.swing();
 
         if (this.abilities.instaBuild) return;
 
@@ -322,6 +326,8 @@ class Player extends Entity {
                 array: block.breakingSound,
                 volume: 0.2,
             });
+
+            this.swing();
         }
 
         this.breakingStage = Math.floor(
@@ -337,6 +343,7 @@ class Player extends Entity {
                 : false;
             this.hoverBlock.breakBlock(shouldDrop);
             this.resetBreaking();
+            this.swing();
         }
     }
 
@@ -402,13 +409,15 @@ class Player extends Entity {
             this.velocity.y = -200;
             this.wasSwimming = false;
         }
+
         if (!this.swimming) return;
 
         this.wasSwimming = true;
 
         // Swim upwards or sink slowly
-        this.velocity.y =
-            input.isKeyDown("Space") || input.isKeyDown("KeyW") ? -100 : 50;
+        if (!this.grounded)
+            this.velocity.y =
+                input.isKeyDown("Space") || input.isKeyDown("KeyW") ? -100 : 50;
     }
 
     handleFlying() {

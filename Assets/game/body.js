@@ -17,6 +17,13 @@ class Body {
         }
     }
 
+    updateBody(deltaTime) {
+        for (const partName in this.parts) {
+            const part = this.parts[partName];
+            if (part.mainArm) part.updateSwing(deltaTime);
+        }
+    }
+
     draw(ctx, speed, grounded, lookDirection, holdItem) {
         const sortedParts = Object.values(this.parts).sort(
             (a, b) => a.zIndex - b.zIndex
@@ -24,6 +31,18 @@ class Body {
         for (const part of sortedParts) {
             part.position = this.position;
             part.draw(ctx, speed, grounded, lookDirection, holdItem);
+        }
+    }
+
+    swing() {
+        for (const partName in this.parts) {
+            const part = this.parts[partName];
+
+            if (!part.mainArm) continue;
+
+            part.swing();
+
+            return;
         }
     }
 }
@@ -62,32 +81,28 @@ class BodyPart {
 
         this.mainArm = mainArm;
         this.holdOrigin = holdOrigin;
+
+        // Swing properties
+        this.isSwinging = false;
+        this.swingProgress = 0;
+        this.swingSpeed = 10; // Speed of the swing (adjust as needed)
+        this.swingAmplitude = 50; // Maximum swing rotation in degrees
     }
 
     getSwayRotation(speed, grounded) {
-        // Oscillate back and forth with time, scaled by swaySpeed for smoothness
         const oscillation = Math.sin(
             Date.now() / (grounded ? this.swaySpeed : this.swaySpeed * 5)
         );
-
-        // Scale the sway range proportionally to speed, capped by maxSwayAngle
         const effectiveSwayAngle = Math.abs(speed / 1000) * this.maxSwayAngle;
-
         const output =
             oscillation *
             Math.min(effectiveSwayAngle, this.maxSwayAngle) *
             Math.sign(speed);
-
-        // Return the sway rotation with direction based on speed's sign
         return output;
     }
 
     draw(ctx, speed, grounded, lookDirection, holdItem) {
         const img = this.loadSprite();
-
-        // Determine direction based on speed
-        // if (speed > 0) this.direction = 1;
-        // if (speed < 0) this.direction = -1;
 
         ctx.save();
 
@@ -108,7 +123,6 @@ class BodyPart {
         this.applyRotationAndFlip(ctx, finalRotation, shouldFlip);
         this.renderHeldItem(ctx, holdItem, this.direction);
 
-        // Draw the main sprite
         ctx.drawImage(
             img,
             -img.width / 2,
@@ -120,19 +134,27 @@ class BodyPart {
         ctx.restore();
     }
 
-    // Load the main sprite image
-    loadSprite() {
-        const img = new Image();
-        img.src = "Assets/sprites/" + this.sprite + ".png";
-        return img;
+    swing() {
+        this.isSwinging = true;
+        this.swingProgress = 0;
     }
 
-    applyTranslation(ctx) {
-        ctx.translate(
-            this.position.x + BLOCK_SIZE * (this.offset.x / 64),
-            this.position.y + BLOCK_SIZE * (this.offset.y / 64)
-        );
-        ctx.translate(this.rotationOrigin.x, this.rotationOrigin.y);
+    updateSwing(deltaTime) {
+        if (!this.isSwinging) return;
+
+        this.swingProgress += this.swingSpeed * deltaTime;
+
+        let angle =
+            Math.sin(this.swingProgress * Math.PI) * this.swingAmplitude;
+
+        angle *= -this.direction;
+
+        this.rotation = angle;
+
+        if (this.swingProgress >= 1) {
+            this.isSwinging = false;
+            this.rotation = 0;
+        }
     }
 
     calculateFinalRotation(speed, grounded, lookDirection) {
@@ -159,7 +181,20 @@ class BodyPart {
         ctx.translate(-this.rotationOrigin.x, -this.rotationOrigin.y);
     }
 
-    // Updated renderHeldItem with direction parameter
+    loadSprite() {
+        const img = new Image();
+        img.src = "Assets/sprites/" + this.sprite + ".png";
+        return img;
+    }
+
+    applyTranslation(ctx) {
+        ctx.translate(
+            this.position.x + BLOCK_SIZE * (this.offset.x / 64),
+            this.position.y + BLOCK_SIZE * (this.offset.y / 64)
+        );
+        ctx.translate(this.rotationOrigin.x, this.rotationOrigin.y);
+    }
+
     renderHeldItem(ctx, holdItem, direction) {
         if (!this.mainArm || !holdItem) return;
 

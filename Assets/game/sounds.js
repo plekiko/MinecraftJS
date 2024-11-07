@@ -62,3 +62,9 @@ function PlayRandomSoundFromArray({
 }) {
     playSound(pathInSfx + array[RandomRange(0, array.length)] + end, volume);
 }
+
+function playSound(sound, volume = 1) {
+    const audio = new Audio("Assets/audio/sfx/" + sound);
+    audio.volume = volume;
+    audio.play();
+}

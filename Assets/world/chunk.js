@@ -188,6 +188,17 @@ class Chunk {
         this.updateWater();
     }
 
+    checkForBlockWithAirBeneath(x, y) {
+        const blockData = this.getBlockTypeData(x, y - 1, false);
+
+        if (!blockData) return;
+
+        const block = this.getBlock(x, y - 1, false);
+
+        if (blockData.breakWithoutBlockUnderneath)
+            block.breakBlock(blockData.dropWithoutTool);
+    }
+
     updateWater() {
         this.getAllBlocks(Blocks.Water).forEach((water) => {
             water.setBlockType(Blocks.Water);
@@ -371,6 +382,15 @@ class Chunk {
         if (!this.blocks[y][x]) return null;
 
         return this.blocks[y][x];
+    }
+
+    getBlockTypeData(x, y, calculated = true) {
+        if (calculated) y = this.calculateY(y);
+
+        if (!this.blocks[y]) return null;
+        if (!this.blocks[y][x]) return null;
+
+        return GetBlock(this.blocks[y][x].blockType);
     }
 
     setBlockType(x, y, blockType, blocks = this.blocks) {

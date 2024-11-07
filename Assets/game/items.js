@@ -10,6 +10,7 @@ const Items = Object.freeze({
     StoneShovel: 8,
     StoneHoe: 9,
     StoneSword: 10,
+    Shears: 11,
 });
 
 const items = [
@@ -109,6 +110,19 @@ const items = [
         heldInHand: true,
         stackSize: 1,
     }),
+    //#endregion
+
+    //#region Iron Tools
+    new Item({
+        itemId: 11,
+        name: "Shears",
+        sprite: "shears",
+        toolType: ToolType.Shears,
+        toolLevel: 2,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+
     //#endregion
 ];
 
