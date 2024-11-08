@@ -4,10 +4,11 @@ class Inventory {
 
         this.items = [];
         this.craftingSlots = [];
+        this.furnaceSlots = [];
 
         this.craftingOutputPosition = {
-            x: this.inventoryUI.x + 508,
-            y: this.inventoryUI.y + 130,
+            x: 508,
+            y: 130,
         };
         this.craftingOutputSlot = new InventorySlot({
             position: {
@@ -17,8 +18,8 @@ class Inventory {
         });
 
         this.craftingPosition = {
-            x: this.inventoryUI.x + 312,
-            y: this.inventoryUI.y + 95,
+            x: 312,
+            y: 95,
         };
 
         this.selectedBlock = null;
@@ -27,13 +28,18 @@ class Inventory {
 
         this.craftingTable = false;
         this.craftingTableOutputPosition = {
-            x: this.inventoryUI.x + 437,
-            y: this.inventoryUI.y + 127,
+            x: 437,
+            y: 127,
         };
         this.craftingTablePosition = {
-            x: this.inventoryUI.x + 109,
-            y: this.inventoryUI.y + 64,
+            x: 109,
+            y: 64,
         };
+
+        this.furnace = false;
+        this.furnaceSlots = null;
+
+        this.interactedBlock = null;
 
         this.lastHoveredSlot = { x: null, y: null };
 
@@ -41,6 +47,8 @@ class Inventory {
         this.hoverSlot = { x: null, y: null, array: null };
 
         this.holdingItem = null;
+
+        this.storage = null;
 
         this.createItemArray();
     }
@@ -50,8 +58,8 @@ class Inventory {
             this.items[y] = [];
             for (let x = 0; x < 9; x++) {
                 const position = {
-                    x: this.inventoryUI.x + 32 + x * 63,
-                    y: y !== 3 ? this.inventoryUI.y + 298 + y * 63 : 651,
+                    x: 32 + x * 63,
+                    y: y !== 3 ? 298 + y * 63 : 501,
                 };
 
                 this.items[y][x] = new InventorySlot({
@@ -87,10 +95,16 @@ class Inventory {
     }
 
     isSlotHovered(x, y) {
-        return mouseOverPosition(x, y, 16 * 3, 16 * 3);
+        return mouseOverPosition(
+            this.inventoryUI.x + x,
+            this.inventoryUI.y + y,
+            16 * 3,
+            16 * 3
+        );
     }
 
-    handleRightClickSpread(item, x, y) {
+    handleRightClickSpread(item, x, y, array) {
+        if (array[y][x].onlyTake) return;
         if (
             input.isRightMouseDown() &&
             (this.lastHoveredSlot.x !== x || this.lastHoveredSlot.y !== y)
@@ -127,10 +141,53 @@ class Inventory {
 
         this.createCraftingArray();
 
+        this.furnaceSlots = null;
+
+        this.storage = null;
+
         return leftOver.length > 0 ? leftOver : null;
     }
 
+    openFurnace(storage) {
+        this.furnace = true;
+
+        this.storage = storage;
+
+        this.createFurnaceSlots();
+    }
+
+    createFurnaceSlots() {
+        let slots = [];
+
+        for (let y = 0; y < this.storage.length; y++) {
+            slots[y] = [];
+            for (let x = 0; x < this.storage.length; x++) {
+                let position = { x: 0, y: 0 };
+
+                // Input
+                if (y === 0 && x === 0) position = { x: 200, y: 64 };
+                if (y === 0 && x === 1) position = { x: 200, y: 190 };
+                if (y === 1 && x === 0) position = { x: 410, y: 126 };
+
+                let slot = new InventorySlot({
+                    position: position,
+                    item: this.storage[y][x],
+                });
+                slots[y][x] = slot;
+            }
+        }
+
+        slots[1][0].onlyTake = true;
+
+        this.furnaceSlots = slots;
+    }
+
     refreshInventory() {
+        if (this.furnace) {
+            this.craftingSlots = [];
+            return;
+        }
+
         this.craftingOutputSlot.position = this.craftingOutputPosition;
         if (this.craftingTable)
             this.craftingOutputSlot.position = this.craftingTableOutputPosition;
@@ -188,6 +245,11 @@ class Inventory {
 
         // If we are holding an item, attempt to place it in the specified item slot
         if (this.holdingItem && array) {
+            // Check if the current slot allows placing items
+            if (array[y][x].onlyTake) {
+                return; // Do not allow placing items in this slot
+            }
+
             this.movingLogic(item);
             return;
         }
@@ -341,6 +403,7 @@ class Inventory {
 
         this.mouseOverCheck(this.items);
         this.mouseOverCheck(this.craftingSlots);
+        this.mouseOverCheck(this.furnaceSlots);
 
         if (
             this.isSlotHovered(
@@ -353,6 +416,7 @@ class Inventory {
     }
 
     mouseOverCheck(array) {
+        if (!array) return;
         for (let y = 0; y < array.length; y++) {
             for (let x = 0; x < array[y].length; x++) {
                 const item = array[y][x];
@@ -546,7 +610,7 @@ class Inventory {
 
         this.hoverSlot = { x: x, y: y, array: array };
 
-        this.handleRightClickSpread(item, x, y);
+        if (!item.onlyTake) this.handleRightClickSpread(item, x, y, array);
 
         if (this.handleRightClickGetHalf(item, x, y, array)) return;
 
@@ -630,29 +694,81 @@ class Inventory {
         ctx.fillStyle = "rgb(0, 0, 0, .6)";
         ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 
-        const path = this.craftingTable ? "crafting_table" : "inventory";
+        let path = "inventory";
+        if (this.craftingTable) path = "crafting_table";
+        if (this.furnace) path = "furnace";
 
-        const inventoryUI = drawImage(
+        this.inventoryUI = drawImage(
             "Assets/sprites/gui/" + path + ".png",
             CANVAS.width / 2,
             CANVAS.height / 6,
             3.5
         );
 
-        this.drawItems(inventoryUI);
         this.drawItems();
         this.drawHoldItem();
         this.drawHoverTitle();
     }
 
-    drawItems(inventoryUI) {
-        for (let y = 0; y < this.items.length; y++) {
-            for (let x = 0; x < this.items[y].length; x++) {
-                this.drawSlot(this.items[y][x]);
+    drawItems() {
+        this.drawSlots(this.items);
+
+        this.drawCraftingSlots();
+        this.drawSlots(this.furnaceSlots);
+        this.drawFurnaceExtras();
+    }
+
+    drawFurnaceExtras() {
+        if (!this.furnace) return;
+        const furnaceData = this.interactedBlock.metaData;
+        if (!furnaceData) return;
+
+        const fuelMax = this.getSlotItem(furnaceData.storage[0][1]).fuelTime;
+        const fuelProgress = furnaceData.fuelProgression;
+
+        if (fuelProgress < 0 || fuelProgress > fuelMax) return;
+
+        // Calculate the frame for the flame
+        const flameFrame = Math.ceil(14 - (fuelProgress / fuelMax) * 14);
+
+        drawImage(
+            "Assets/sprites/gui/furnace_flame.png",
+            this.inventoryUI.x + 196,
+            this.inventoryUI.y + 126,
+            3.5,
+            false,
+            1,
+            flameFrame
+        );
+
+        const arrowProgression = furnaceData.progression;
+        if (arrowProgression < 0 || arrowProgression > 10) return;
+
+        const arrowFrame = Math.ceil((arrowProgression / 10) * 25);
+
+        drawImage(
+            "Assets/sprites/gui/furnace_arrow.png",
+            this.inventoryUI.x + 277,
+            this.inventoryUI.y + 120,
+            3.5,
+            false,
+            1,
+            null,
+            arrowFrame
+        );
+    }
+
+    getSlotItem(item) {
+        return item.blockId ? GetBlock(item.blockId) : GetItem(item.itemId);
+    }
+
+    drawSlots(array) {
+        if (!array) return;
+        for (let y = 0; y < array.length; y++) {
+            for (let x = 0; x < array[y].length; x++) {
+                this.drawSlot(array[y][x]);
             }
         }
-
-        this.drawCraftingSlots(inventoryUI);
     }
 
     drawHoverTitle() {
@@ -697,7 +813,7 @@ class Inventory {
         );
     }
 
-    drawCraftingSlots(inventoryUI) {
+    drawCraftingSlots() {
         for (let y = 0; y < this.craftingSlots.length; y++) {
             for (let x = 0; x < this.craftingSlots[y].length; x++) {
                 this.drawSlot(this.craftingSlots[y][x]);
@@ -715,8 +831,8 @@ class Inventory {
         if (item.count <= 0) return;
         if (!item.blockId && item.itemId === null) return;
 
-        const slotX = slot.position.x;
-        const slotY = slot.position.y;
+        const slotX = this.inventoryUI.x + slot.position.x;
+        const slotY = this.inventoryUI.y + slot.position.y;
 
         const spritePath =
             "Assets/sprites/" +
@@ -736,9 +852,14 @@ class Inventory {
 }
 
 class InventorySlot {
-    constructor({ position = { x: 0, y: 0 }, item = new InventoryItem() }) {
+    constructor({
+        position = { x: 0, y: 0 },
+        item = new InventoryItem(),
+        onlyTake = false,
+    }) {
         this.position = position;
         this.item = item;
+        this.onlyTake = onlyTake;
     }
 
     isEmpty() {

@@ -40,12 +40,20 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+function updateBlocks(deltaTime) {
+    updatingBlocks.forEach((block) => {
+        block.update(deltaTime);
+    });
+}
+
 function updateGame(deltaTime) {
     entities.forEach((entity) => {
         entity.update(deltaTime);
     });
 
-    UpdateDebug();
+    updateDebug();
+
+    updateBlocks(deltaTime);
 
     if (player) cursorBlockLogic();
 

@@ -2,7 +2,7 @@
 //     UpdateDebug();
 // }, 1000 / 60);
 
-function UpdateDebug() {
+function updateDebug() {
     HandleInput();
     HandleDebugging();
     CameraLogic();
@@ -26,7 +26,7 @@ function HandleInput() {
 }
 
 function PrintBlockLogic() {
-    if (input.isLeftMouseButtonPressed()) {
+    if (input.isLeftMouseDown()) {
         const mousePos = input.getMousePositionOnBlockGrid();
         const block = GetBlockAtWorldPosition(mousePos.x, mousePos.y);
 

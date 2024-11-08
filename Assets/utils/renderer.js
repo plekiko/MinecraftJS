@@ -367,26 +367,47 @@ function drawText(text, x, y, size = 25, shadow = true, textAlign = "right") {
     ctx.fillText(text, x, y);
 }
 
-function drawImage(url, x = 0, y = 0, scale = 1, center = true, opacity = 1) {
-    img = new Image();
+function drawImage(
+    url,
+    x = 0,
+    y = 0,
+    scale = 1,
+    center = true,
+    opacity = 1,
+    sizeY = null,
+    sizeX = null
+) {
+    const img = new Image();
     img.src = url;
 
     ctx.globalAlpha = opacity;
 
+    // Determine the source width and height for cropping
+    const sourceWidth = sizeX !== null ? sizeX : img.width;
+    const sourceHeight = sizeY !== null ? sizeY : img.height;
+
+    // Calculate the scaled width and height for drawing
+    const drawWidth = sourceWidth * scale;
+    const drawHeight = sourceHeight * scale;
+
     ctx.drawImage(
         img,
-        center ? x - (img.width / 2) * scale : x,
-        y,
-        img.width * scale,
-        img.height * scale
+        0, // Start x position in the source image (crop start)
+        img.height, // Start y position in the source image (crop start)
+        sourceWidth, // Width of the source to draw (crop width)
+        -sourceHeight, // Height of the source to draw (crop height)
+        center ? x - drawWidth / 2 : x, // x position on canvas
+        y + (sizeY ? (img.height - sizeY) * scale : 0), // y position on canvas
+        drawWidth, // Width on the canvas (scaled)
+        drawHeight // Height on the canvas (scaled)
     );
 
     ctx.globalAlpha = 1;
 
     return {
-        x: center ? x - (img.width / 2) * scale : x,
+        x: center ? x - (sourceWidth / 2) * scale : x,
         y: y,
-        sizeX: img.width * scale,
-        sizeY: img.height * scale,
+        sizeX: drawWidth,
+        sizeY: drawHeight,
     };
 }

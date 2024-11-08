@@ -16,6 +16,7 @@ const Items = Object.freeze({
     Shears: 11,
 
     Coal: 20,
+    Iron: 21,
 });
 
 const items = [
@@ -134,6 +135,12 @@ const items = [
         itemId: 20,
         name: "Coal",
         sprite: "coal",
+        fuelTime: 80,
+    }),
+    new Item({
+        itemId: 21,
+        name: "Iron",
+        sprite: "iron_ingot",
     }),
     //#endregion
 ];

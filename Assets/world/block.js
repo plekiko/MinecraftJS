@@ -23,6 +23,9 @@ class BlockType {
 
         breakWithoutBlockUnderneath = false,
 
+        fuelTime = null,
+        smeltOutput = false,
+
         specialType = null,
     } = {}) {
         this.blockId = blockId;
@@ -47,6 +50,9 @@ class BlockType {
         this.dropBlock = dropBlock;
         this.dropItem = dropItem;
 
+        this.fuelTime = fuelTime;
+        this.smeltOutput = smeltOutput;
+
         this.specialType = specialType;
     }
 }
@@ -61,7 +67,15 @@ const BlockCategory = Object.freeze({
     Planks: 2,
 });
 
-class Metadata {}
+class Metadata {
+    constructor({ storage = null, updating = false }) {
+        this.storage = storage;
+        this.updating = updating;
+        this.progression = 0;
+        this.fuelProgression = 0;
+        this.isActive = false;
+    }
+}
 
 class Block extends Square {
     constructor(
@@ -84,20 +98,147 @@ class Block extends Square {
         this.y = y;
         this.chunkX = chunkX;
         this.blockType = blockType;
-        // this.metaData = new Metadata();
+        if (GetBlock(blockType).specialType) this.setMetaData();
+    }
+
+    setMetaData() {
+        const specialType = GetBlock(this.blockType).specialType;
+        if (specialType == SpecialType.CraftingTable) return;
+
+        let storage = [];
+        let updating = false;
+
+        switch (specialType) {
+            case SpecialType.Furnace:
+                storage = [
+                    [
+                        new InventoryItem({
+                            blockId: Blocks.IronOre,
+                            count: 20,
+                        }),
+                        new InventoryItem({ itemId: Items.Coal, count: 20 }),
+                    ],
+                    [new InventoryItem()],
+                ];
+                updating = true;
+                break;
+        }
+
+        this.metaData = new Metadata({ storage: storage, updating: updating });
     }
 
     setBlockType(blockType) {
+        if (this.blockType === blockType) return;
+
+        const existingIndex = updatingBlocks.indexOf(this);
+        if (existingIndex !== -1) updatingBlocks.splice(existingIndex, 1);
+
         this.blockType = blockType;
+
         const block = GetBlock(blockType);
 
-        // Set a random draw offset for grass blocks
+        this.metaData = undefined;
+
+        if (block.specialType) this.setMetaData();
+
+        if (this.metaData && this.metaData.updating) {
+            updatingBlocks.push(this);
+        }
+
         this.drawOffset = block.grassOffset ? RandomRange(-2, 2) : 0;
 
-        // Determine if this block should display a fluid sprite
         this.fluidSprite = this.shouldDisplayFluidSprite(block);
 
         this.updateSprite();
+    }
+
+    update(deltaTime) {
+        if (!this.metaData) return;
+
+        if (GetBlock(this.blockType).specialType === SpecialType.Furnace)
+            this.furnaceLogic(deltaTime);
+
+        if (!this.metaData.isActive) {
+            this.resetProgression();
+            return;
+        }
+
+        this.metaData.progression += deltaTime;
+    }
+
+    furnaceLogic(deltaTime) {
+        if (this.metaData.isActive)
+            this.setSprite("blocks/furnace_front_on.png");
+        else this.setSprite("blocks/furnace_front_off.png");
+
+        if (!this.metaData.storage) return;
+
+        const storage = this.metaData.storage;
+
+        const input = this.getSlotItem(storage[0][0]);
+        const fuel = this.getSlotItem(storage[0][1]);
+        if (!fuel || !input) {
+            this.metaData.isActive = false;
+            this.resetProgression();
+            return;
+        }
+        const output = this.getSlotItem(storage[1][0]);
+        const outputItem = this.getSlotItem(input.smeltOutput);
+
+        if (
+            fuel.fuelTime &&
+            input.smeltOutput &&
+            (!output ||
+                (output == outputItem &&
+                    storage[1][0].count + 1 <=
+                        this.getSlotItem(input.smeltOutput).stackSize))
+        )
+            this.metaData.isActive = true;
+        else this.metaData.isActive = false;
+
+        if (!this.metaData.isActive) return;
+
+        // chat.message(
+        //     "Fueltime: " +
+        //         fuel.fuelTime +
+        //         " Progression: " +
+        //         this.metaData.progression
+        // );
+
+        this.metaData.fuelProgression += deltaTime;
+
+        if (fuel.fuelTime <= this.metaData.fuelProgression) {
+            // Fuel gone
+            this.removeOneFromStack(storage[0][1]);
+            this.metaData.fuelProgression = 0;
+        }
+
+        if (this.metaData.progression >= 10) {
+            this.removeOneFromStack(storage[0][0]);
+
+            storage[1][0].itemId = outputItem.itemId;
+            storage[1][0].blockId = outputItem.blockId;
+            storage[1][0].count++;
+
+            this.resetProgression();
+        }
+    }
+
+    removeOneFromStack(item) {
+        item.count--;
+
+        if (item.count <= 0) {
+            item.itemId = null;
+            item.blockId = null;
+        }
+    }
+
+    getSlotItem(item) {
+        return item.blockId ? GetBlock(item.blockId) : GetItem(item.itemId);
+    }
+
+    resetProgression() {
+        this.metaData.progression = 0;
     }
 
     shouldDisplayFluidSprite(block) {

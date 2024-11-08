@@ -466,6 +466,7 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         requiredToolLevel: 13.5,
         dropWithoutTool: false,
+        smeltOutput: { blockId: null, itemId: Items.Iron },
     }),
     new BlockType({
         blockId: 43,

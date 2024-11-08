@@ -81,11 +81,24 @@ class Player extends Entity {
 
         if (!block.specialType) return;
 
+        this.swing();
+
         switch (block.specialType) {
             case SpecialType.CraftingTable:
                 this.openCraftingTable();
                 break;
+            case SpecialType.Furnace:
+                this.openFurnace();
+                break;
         }
+    }
+
+    openFurnace() {
+        const furnaceData = this.hoverBlock.metaData.storage;
+
+        this.inventory.openFurnace(furnaceData);
+        this.inventory.interactedBlock = this.hoverBlock;
+        this.openInventory();
     }
 
     openCraftingTable() {
@@ -130,6 +143,7 @@ class Player extends Entity {
         this.inventory.clearSlot(this.inventory.craftingOutputSlot);
 
         this.inventory.craftingTable = false;
+        this.inventory.furnace = false;
     }
 
     collisionLogic() {

@@ -17,6 +17,7 @@ const ORE_THRESHOLDS = {
 const SPAWN_PLAYER = true;
 
 let globalFrame = 0;
+let updatingBlocks = [];
 
 let chat = null;
 

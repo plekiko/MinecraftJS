@@ -7,6 +7,8 @@ class Item {
         toolType = ToolType.Nothing,
         toolLevel = 0,
         heldInHand = false,
+        fuelTime = null,
+        smeltOutput = null,
         baseDamage = 0,
     }) {
         this.itemId = itemId;
@@ -19,6 +21,9 @@ class Item {
         this.baseDamage = baseDamage;
 
         this.stackSize = stackSize;
+
+        this.fuelTime = fuelTime;
+        this.smeltOutput = smeltOutput;
 
         this.heldInHand = heldInHand;
     }
