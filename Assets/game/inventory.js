@@ -166,7 +166,9 @@ class Inventory {
 
                 // Input
                 if (y === 0 && x === 0) position = { x: 200, y: 64 };
+                // Fuel
                 if (y === 0 && x === 1) position = { x: 200, y: 190 };
+                // Output
                 if (y === 1 && x === 0) position = { x: 410, y: 126 };
 
                 let slot = new InventorySlot({
@@ -711,6 +713,7 @@ class Inventory {
     }
 
     drawItems() {
+        this.drawHoverSlot();
         this.drawSlots(this.items);
 
         this.drawCraftingSlots();
@@ -718,10 +721,30 @@ class Inventory {
         this.drawFurnaceExtras();
     }
 
+    drawHoverSlot() {
+        if (!this.hoverSlot.array) return;
+
+        const slot = this.hoverSlot.array[this.hoverSlot.y][this.hoverSlot.x];
+
+        if (!slot) return;
+        if (slot.onlyTake) return;
+
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = "white";
+        ctx.fillRect(
+            slot.position.x + this.inventoryUI.x - 4,
+            slot.position.y + this.inventoryUI.y - 4,
+            20 * 3,
+            20 * 3
+        );
+        ctx.globalAlpha = 1;
+    }
+
     drawFurnaceExtras() {
         if (!this.furnace) return;
         const furnaceData = this.interactedBlock.metaData;
         if (!furnaceData) return;
+        if (!furnaceData.isActive) return;
 
         const fuelMax = this.getSlotItem(furnaceData.storage[0][1]).fuelTime;
         const fuelProgress = furnaceData.fuelProgression;

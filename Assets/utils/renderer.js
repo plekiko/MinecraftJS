@@ -57,6 +57,7 @@ function Draw(chunks, frames) {
 
     DrawBackground();
     DrawChunks(chunks);
+    DrawDestroyStage();
     DrawEntities();
     AfterDraw();
 }
@@ -136,7 +137,7 @@ function AfterDraw() {
 
 function DrawUI() {
     DrawBreakAndPlaceCursor(cursorInRange);
-    DrawDestroyStage();
+
     DrawHotbar();
     DrawInventory();
     chat.draw(ctx);

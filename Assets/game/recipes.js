@@ -241,8 +241,46 @@ const recipes = [
         ],
         output: new InventoryItem({ itemId: Items.StoneSword, count: 1 }),
     }),
-
     //#endregion
 
     //#endregion Tools
+
+    // Furnace
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+            ],
+            [
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+            ],
+            [
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.Furnace, count: 1 }),
+    }),
+
+    // Stone Bricks
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockId: Blocks.Stone }),
+                new RecipeItem({ blockId: Blocks.Stone }),
+            ],
+            [
+                new RecipeItem({ blockId: Blocks.Stone }),
+                new RecipeItem({ blockId: Blocks.Stone }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.StoneBricks, count: 4 }),
+    }),
 ];

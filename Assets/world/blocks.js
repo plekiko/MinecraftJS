@@ -43,6 +43,10 @@ const Blocks = Object.freeze({
     CoalOre: 41,
     IronOre: 42,
     Furnace: 43,
+    SmoothStone: 44,
+    StoneBricks: 45,
+    Jelte: 46,
+    Quinten: 47,
 });
 
 const blockTypes = [
@@ -84,6 +88,7 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropBlock: Blocks.Cobblestone,
+        smeltOutput: { blockId: Blocks.SmoothStone },
     }),
     new BlockType({
         blockId: 5,
@@ -126,6 +131,8 @@ const blockTypes = [
         sprite: "cactus_side",
         name: "Cactus",
         hardness: 1.5,
+        collision: false,
+        breakWithoutBlockUnderneath: true,
         breakSound: Sounds.Break_Cloth,
         breakingSound: Sounds.Breaking_Cloth,
     }),
@@ -444,6 +451,7 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
+        smeltOutput: { blockId: Blocks.Stone, itemId: null },
     }),
     new BlockType({
         blockId: 41,
@@ -466,7 +474,7 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         requiredToolLevel: 13.5,
         dropWithoutTool: false,
-        smeltOutput: { blockId: null, itemId: Items.Iron },
+        smeltOutput: { blockId: null, itemId: Items.IronIngot },
     }),
     new BlockType({
         blockId: 43,
@@ -479,6 +487,48 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
         collision: false,
+    }),
+    new BlockType({
+        blockId: 44,
+        sprite: "stone_slab_top",
+        name: "Smooth Stone",
+        hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 45,
+        sprite: "stonebrick",
+        name: "Stone Bricks",
+        hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 46,
+        name: "Jelte Blok",
+        sprite: "jelte",
+        fuelTime: 20,
+        hardness: 12,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 47,
+        name: "Quinten Blok",
+        sprite: "quinten",
+        fuelTime: 20,
+        hardness: 12,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
     }),
 ];
 

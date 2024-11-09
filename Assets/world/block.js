@@ -24,7 +24,7 @@ class BlockType {
         breakWithoutBlockUnderneath = false,
 
         fuelTime = null,
-        smeltOutput = false,
+        smeltOutput = null,
 
         specialType = null,
     } = {}) {
@@ -112,12 +112,12 @@ class Block extends Square {
             case SpecialType.Furnace:
                 storage = [
                     [
-                        new InventoryItem({
-                            blockId: Blocks.IronOre,
-                            count: 20,
-                        }),
-                        new InventoryItem({ itemId: Items.Coal, count: 20 }),
+                        // input
+                        new InventoryItem(),
+                        // fuel
+                        new InventoryItem(),
                     ],
+                    // output
                     [new InventoryItem()],
                 ];
                 updating = true;
@@ -177,8 +177,9 @@ class Block extends Square {
 
         const input = this.getSlotItem(storage[0][0]);
         const fuel = this.getSlotItem(storage[0][1]);
-        if (!fuel || !input) {
+        if (!fuel || !input || !input.smeltOutput) {
             this.metaData.isActive = false;
+            this.metaData.fuelProgression = 0;
             this.resetProgression();
             return;
         }
@@ -190,8 +191,10 @@ class Block extends Square {
             input.smeltOutput &&
             (!output ||
                 (output == outputItem &&
-                    storage[1][0].count + 1 <=
-                        this.getSlotItem(input.smeltOutput).stackSize))
+                storage[1][0].count + 1 <=
+                    this.getSlotItem(input.smeltOutput).stackSize
+                    ? this.getSlotItem(input.smeltOutput).stackSize
+                    : 64))
         )
             this.metaData.isActive = true;
         else this.metaData.isActive = false;
