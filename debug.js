@@ -16,7 +16,7 @@ function HandleInput() {
     if (player && !player.canMove) return;
     if (input.isKeyPressed("KeyB")) drawingChunkBorders = !drawingChunkBorders;
     if (input.isKeyPressed("KeyN")) drawCamera = !drawCamera;
-    if (input.isKeyPressed("KeyH")) drawHeight = !drawHeight;
+    if (input.isKeyPressed("KeyH")) drawHitbox = !drawHitbox;
     if (input.isKeyPressed("KeyM")) drawDebugMouseBlock = !drawDebugMouseBlock;
     if (input.isKeyPressed("KeyF")) drawFileSize = !drawFileSize;
     if (input.isKeyPressed("KeyI")) drawFps = !drawFps;

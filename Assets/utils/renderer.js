@@ -13,6 +13,7 @@ let drawHeight = false;
 let drawDebugMouseBlock = false;
 let drawFileSize = false;
 let drawFps = true;
+let drawHitbox = true;
 
 let cursorInRange = false;
 
@@ -66,6 +67,8 @@ function DrawEntities() {
     entities.forEach((entity) => {
         entity.draw(ctx, camera);
     });
+
+    if (drawHitbox) drawHitboxes();
 }
 
 function DrawBreakAndPlaceCursor(inRange = false) {
@@ -366,6 +369,12 @@ function drawText(text, x, y, size = 25, shadow = true, textAlign = "right") {
     ctx.font = size + "px Pixel";
 
     ctx.fillText(text, x, y);
+}
+
+function drawHitboxes() {
+    entities.forEach((entity) => {
+        entity.drawHitbox(ctx);
+    });
 }
 
 function drawImage(

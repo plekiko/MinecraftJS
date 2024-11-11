@@ -325,7 +325,7 @@ class Entity {
         }
     }
 
-    draw(ctx, camera) {
+    draw(ctx) {
         ctx.save();
 
         const centerX = this.position.x - camera.x + this.offset.x;
@@ -374,12 +374,29 @@ class Entity {
         if (this.img) {
             ctx.drawImage(
                 this.img,
-                0,
-                0,
+                this.spriteScale * 3,
+                this.spriteScale * 3,
                 this.img.width * this.spriteScale,
                 this.img.height * this.spriteScale
             );
         }
+
+        ctx.restore();
+    }
+
+    drawHitbox(ctx) {
+        ctx.save();
+
+        const centerX = this.position.x - camera.x + this.offset.x;
+        const centerY = this.position.y - camera.y + this.offset.y;
+
+        ctx.translate(centerX, centerY);
+
+        ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+        ctx.lineWidth = 2;
+
+        // Draw the hollow square
+        ctx.strokeRect(0, 0, this.hitbox.x, this.hitbox.y);
 
         ctx.restore();
     }
