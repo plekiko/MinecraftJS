@@ -13,7 +13,7 @@ let drawHeight = false;
 let drawDebugMouseBlock = false;
 let drawFileSize = false;
 let drawFps = true;
-let drawHitbox = true;
+let drawHitbox = false;
 
 let cursorInRange = false;
 

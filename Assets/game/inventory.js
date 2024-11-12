@@ -746,7 +746,7 @@ class Inventory {
         if (!furnaceData) return;
         if (!furnaceData.isActive) return;
 
-        const fuelMax = this.getSlotItem(furnaceData.storage[0][1]).fuelTime;
+        const fuelMax = furnaceData.burningFuelTime;
         const fuelProgress = furnaceData.fuelProgression;
 
         if (fuelProgress < 0 || fuelProgress > fuelMax) return;

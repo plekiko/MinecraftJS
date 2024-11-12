@@ -14,6 +14,11 @@ const Items = Object.freeze({
     StoneSword: 10,
 
     Shears: 11,
+    IronAxe: 12,
+    IronPickaxe: 13,
+    IronShovel: 14,
+    IronHoe: 15,
+    IronSword: 16,
 
     Coal: 20,
     IronIngot: 21,
@@ -128,6 +133,51 @@ const items = [
         heldInHand: true,
         stackSize: 1,
     }),
+    new Item({
+        itemId: 12,
+        name: "Iron Axe",
+        sprite: "iron_axe",
+        toolType: ToolType.Axe,
+        toolLevel: 3,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 13,
+        name: "Iron Pickaxe",
+        sprite: "iron_pickaxe",
+        toolType: ToolType.Pickaxe,
+        toolLevel: 14.5,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 14,
+        name: "Iron Shovel",
+        sprite: "iron_shovel",
+        toolType: ToolType.Shovel,
+        toolLevel: 1.25,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 15,
+        name: "Iron Hoe",
+        sprite: "iron_hoe",
+        toolType: ToolType.Hoe,
+        toolLevel: 3,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 16,
+        name: "Iron Sword",
+        sprite: "iron_sword",
+        toolType: ToolType.Sword,
+        toolLevel: 3,
+        heldInHand: true,
+        stackSize: 1,
+    }),
     //#endregion
 
     //#region Ores
@@ -135,7 +185,7 @@ const items = [
         itemId: 20,
         name: "Coal",
         sprite: "coal",
-        fuelTime: 80,
+        fuelTime: 2,
     }),
     new Item({
         itemId: 21,

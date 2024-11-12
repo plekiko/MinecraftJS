@@ -74,6 +74,7 @@ class Metadata {
         this.progression = 0;
         this.fuelProgression = 0;
         this.isActive = false;
+        this.burningFuelTime = 0;
     }
 }
 
@@ -167,30 +168,39 @@ class Block extends Square {
     }
 
     furnaceLogic(deltaTime) {
+        if (!this.metaData.storage) return;
+
         if (this.metaData.isActive)
             this.setSprite("blocks/furnace_front_on.png");
         else this.setSprite("blocks/furnace_front_off.png");
-
-        if (!this.metaData.storage) return;
 
         const storage = this.metaData.storage;
 
         const input = this.getSlotItem(storage[0][0]);
         const fuel = this.getSlotItem(storage[0][1]);
-        if (!fuel || !input || !input.smeltOutput) {
+
+        if (
+            (!fuel && !this.metaData.burningFuelTime) ||
+            !input ||
+            !input.smeltOutput ||
+            (this.getSlotItem(storage[1][0]) &&
+                this.getSlotItem(input.smeltOutput) !==
+                    this.getSlotItem(storage[1][0]))
+        ) {
             this.metaData.isActive = false;
             this.metaData.fuelProgression = 0;
+            this.metaData.burningFuelTime = 0;
             this.resetProgression();
             return;
         }
+
         const output = this.getSlotItem(storage[1][0]);
         const outputItem = this.getSlotItem(input.smeltOutput);
 
         if (
-            fuel.fuelTime &&
             input.smeltOutput &&
             (!output ||
-                (output == outputItem &&
+                (output === this.getSlotItem(input.smeltOutput) &&
                 storage[1][0].count + 1 <=
                     this.getSlotItem(input.smeltOutput).stackSize
                     ? this.getSlotItem(input.smeltOutput).stackSize
@@ -210,10 +220,18 @@ class Block extends Square {
 
         this.metaData.fuelProgression += deltaTime;
 
-        if (fuel.fuelTime <= this.metaData.fuelProgression) {
-            // Fuel gone
+        if (!this.metaData.burningFuelTime) {
+            if (!fuel) {
+                this.metaData.isActive = false;
+                return;
+            }
+            this.metaData.burningFuelTime = fuel.fuelTime;
             this.removeOneFromStack(storage[0][1]);
+        }
+
+        if (this.metaData.burningFuelTime <= this.metaData.fuelProgression) {
             this.metaData.fuelProgression = 0;
+            this.metaData.burningFuelTime = 0;
         }
 
         if (this.metaData.progression >= 10) {

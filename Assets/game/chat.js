@@ -56,6 +56,7 @@ class Chat {
     }
 
     addToLog(message) {
+        if (this.chatLog[this.chatLog.length - 1] == message) return;
         this.chatLog.push(message);
 
         this.saveLog();

@@ -241,6 +241,114 @@ const recipes = [
         ],
         output: new InventoryItem({ itemId: Items.StoneSword, count: 1 }),
     }),
+
+    //#endregion
+
+    //#region Iron Tools
+
+    // Shears
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.Shears, count: 1 }),
+    }),
+
+    // Iron Axe
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.IronAxe, count: 1 }),
+    }),
+
+    // Iron Pickaxe
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+                ,
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.IronPickaxe, count: 1 }),
+    }),
+
+    // Iron Hoe
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                ,
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.IronHoe, count: 1 }),
+    }),
+
+    // Iron Shovel
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [new RecipeItem({ itemId: Items.IronIngot })],
+            [new RecipeItem({ itemId: Items.Stick }), ,],
+            [new RecipeItem({ itemId: Items.Stick })],
+        ],
+        output: new InventoryItem({ itemId: Items.IronShovel, count: 1 }),
+    }),
+
+    // Iron Sword
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [new RecipeItem({ itemId: Items.IronIngot })],
+            [new RecipeItem({ itemId: Items.IronIngot })],
+            [new RecipeItem({ itemId: Items.Stick })],
+        ],
+        output: new InventoryItem({ itemId: Items.IronSword, count: 1 }),
+    }),
+
     //#endregion
 
     //#endregion Tools

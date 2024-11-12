@@ -210,6 +210,31 @@ function GetBlockAtWorldPosition(worldX, worldY, adjust = true) {
     }
 }
 
+function checkAdjacentBlocks(position) {
+    const directions = [
+        { x: 0, y: -BLOCK_SIZE }, // Above
+        { x: 0, y: BLOCK_SIZE }, // Below
+        { x: -BLOCK_SIZE, y: 0 }, // Left
+        { x: BLOCK_SIZE, y: 0 }, // Right
+    ];
+
+    for (const dir of directions) {
+        const adjacentPos = new Vector2(position.x + dir.x, position.y + dir.y);
+        const block = GetBlockAtWorldPosition(
+            adjacentPos.x,
+            adjacentPos.y,
+            false
+        );
+
+        const type = GetBlock(block.blockType);
+        if (block && !type.fluid && block.blockType !== Blocks.Air) {
+            return true; // Found an adjacent block
+        }
+    }
+
+    return false; // No adjacent block found
+}
+
 function SetBlockTypeAtPosition(worldX, worldY, blockType) {
     const block = GetBlockAtWorldPosition(worldX, worldY);
 

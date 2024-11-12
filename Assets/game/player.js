@@ -253,9 +253,11 @@ class Player extends Entity {
             new Vector2(BLOCK_SIZE, BLOCK_SIZE)
         );
 
-        // chat.message(mousePos.x + " " + this.position.x);
+        const isAdjacentToBlock = checkAdjacentBlocks(mousePos);
 
-        return (isAir || isFluid) && !isCollidingWithPlayer;
+        return (
+            (isAir || isFluid) && !isCollidingWithPlayer && isAdjacentToBlock
+        );
     }
 
     dropLogic() {
