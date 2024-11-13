@@ -101,7 +101,36 @@ class Chat {
             case "gamemode":
                 this.gamemode(messageArray);
                 break;
+            case "tp":
+                this.teleport(messageArray);
+                break;
         }
+    }
+
+    teleport(messageArray) {
+        if (!player) {
+            this.message("No player found.");
+            return;
+        }
+
+        // Check if x and y coordinates are provided
+        if (!messageArray[1] || !messageArray[2]) {
+            this.invalidCommand("/tp x(number) y(number)");
+            return;
+        }
+
+        const x = parseInt(messageArray[1]);
+        const y = parseInt(messageArray[2]);
+
+        if (isNaN(x) || isNaN(y)) {
+            this.invalidCommand("/tp x(number) y(number)");
+            return;
+        }
+
+        player.position.x = x * BLOCK_SIZE;
+        player.position.y = CHUNK_HEIGHT * BLOCK_SIZE - y * BLOCK_SIZE;
+
+        this.message(`Teleported player to x: ${x} y: ${y}`);
     }
 
     gamemode(messageArray) {

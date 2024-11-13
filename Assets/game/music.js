@@ -1,5 +1,6 @@
 const musicStartDelayRange = { min: 10, max: 60 };
 const musicBetweenDelay = { min: 60, max: 180 };
+
 let isPlaying = false;
 let musicPlayer = new Audio();
 
