@@ -211,17 +211,24 @@ class Block extends Square {
         if (this.metaData.fuelProgression >= this.metaData.burningFuelTime) {
             this.metaData.fuelProgression = 0;
             this.metaData.burningFuelTime = 0;
+
+            if (fuel) {
+                this.metaData.burningFuelTime = fuel.fuelTime;
+                this.removeOneFromStack(storage[0][1]);
+            }
         }
 
         // Only progress smelting if input and output conditions are met
         if (
-            input &&
-            input.smeltOutput &&
-            (!output ||
-                (output.itemId === outputItem.itemId &&
-                    storage[1][0].count + 1 <= outputItem.stackSize))
+            !(
+                input &&
+                input.smeltOutput &&
+                (!output ||
+                    (output.itemId === outputItem.itemId &&
+                        storage[1][0].count + 1 <= outputItem.stackSize))
+            )
         ) {
-            this.metaData.progression += deltaTime;
+            this.resetProgression();
         }
 
         // Complete smelting process if progression threshold is met
