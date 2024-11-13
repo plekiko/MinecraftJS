@@ -25,7 +25,7 @@ const Items = Object.freeze({
 });
 
 const items = [
-    new Item({ itemId: 0, name: "Stick", sprite: "stick" }),
+    new Item({ itemId: 0, name: "Stick", sprite: "stick", fuelTime: 5 }),
 
     //#region Wooden Tools
     new Item({
@@ -36,6 +36,7 @@ const items = [
         toolLevel: 1,
         heldInHand: true,
         stackSize: 1,
+        fuelTime: 10,
     }),
     new Item({
         itemId: 2,
@@ -45,6 +46,7 @@ const items = [
         toolLevel: 11.5,
         heldInHand: true,
         stackSize: 1,
+        fuelTime: 10,
     }),
     new Item({
         itemId: 3,
@@ -54,6 +56,7 @@ const items = [
         toolLevel: 0.5,
         heldInHand: true,
         stackSize: 1,
+        fuelTime: 10,
     }),
     new Item({
         itemId: 4,
@@ -63,6 +66,7 @@ const items = [
         toolLevel: 1,
         heldInHand: true,
         stackSize: 1,
+        fuelTime: 10,
     }),
     new Item({
         itemId: 5,
@@ -72,6 +76,7 @@ const items = [
         toolLevel: 1,
         heldInHand: true,
         stackSize: 1,
+        fuelTime: 10,
     }),
     //#endregion
 
@@ -185,7 +190,7 @@ const items = [
         itemId: 20,
         name: "Coal",
         sprite: "coal",
-        fuelTime: 2,
+        fuelTime: 80,
     }),
     new Item({
         itemId: 21,

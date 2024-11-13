@@ -9,6 +9,7 @@ class Recipe {
 const RecipeType = Object.freeze({
     Shapeless: 0,
     Shaped: 1,
+    Filled: 2,
 });
 
 class RecipeItem {

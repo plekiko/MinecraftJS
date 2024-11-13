@@ -227,6 +227,8 @@ class Inventory {
                 ? this.holdingItem.count + this.craftingOutputSlot.item.count
                 : this.craftingOutputSlot.item.count;
 
+            if (item.itemId === null && item.blockId === null) return;
+
             // Check if we can add the crafting output to holdingItem without exceeding max stack size
             if (
                 this.holdingItem &&
@@ -446,12 +448,31 @@ class Inventory {
     }
 
     isRecipeMatch(recipe) {
-        if (recipe.type === RecipeType.Shapeless) {
-            return this.isShapelessMatch(recipe.input);
-        } else if (recipe.type === RecipeType.Shaped) {
-            return this.isShapedMatch(recipe.input);
+        switch (recipe.type) {
+            case RecipeType.Shapeless:
+                return this.isShapelessMatch(recipe.input);
+            case RecipeType.Shaped:
+                return this.isShapedMatch(recipe.input);
+            case RecipeType.Filled:
+                return this.isFilledMatch(recipe.input);
         }
         return false;
+    }
+
+    isFilledMatch(inputItem) {
+        if (this.craftingSlots.length < 3) return false;
+        for (let y = 0; y < 3; y++) {
+            for (let x = 0; x < 3; x++) {
+                console.log(this.craftingSlots[y][x].item, inputItem, y, x);
+                if (!this.isMatch(this.craftingSlots[y][x].item, inputItem)) {
+                    return false;
+                }
+            }
+        }
+
+        console.log("wtf");
+
+        return true;
     }
 
     isShapelessMatch(inputItem) {
@@ -478,12 +499,12 @@ class Inventory {
 
         if (slotItem.count == 0 && patternItem.count == 0) return true;
 
-        // Direct match on blockId, itemId, or blockCategory
         return (
             (patternItem.blockId && slotItem.blockId === patternItem.blockId) ||
-            (patternItem.itemId != null &&
+            (patternItem.itemId !== null &&
                 slotItem.itemId === patternItem.itemId) ||
             (patternItem.blockCategory &&
+                slotCategory &&
                 slotCategory === patternItem.blockCategory)
         );
     }
@@ -886,6 +907,6 @@ class InventorySlot {
     }
 
     isEmpty() {
-        return this.item.itemId != null && !this.item.blockId;
+        return this.item.itemId === null && !this.item.blockId;
     }
 }

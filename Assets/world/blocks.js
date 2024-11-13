@@ -47,6 +47,8 @@ const Blocks = Object.freeze({
     StoneBricks: 45,
     Jelte: 46,
     Quinten: 47,
+    CoalBlock: 48,
+    IronBlock: 49,
 });
 
 const blockTypes = [
@@ -141,6 +143,7 @@ const blockTypes = [
         sprite: "log_oak",
         name: "Oak Log",
         category: BlockCategory.Logs,
+        fuelTime: 15,
         collision: false,
         hardness: 3,
         toolType: ToolType.Axe,
@@ -161,6 +164,7 @@ const blockTypes = [
         sprite: "log_spruce",
         name: "Spruce Log",
         category: BlockCategory.Logs,
+        fuelTime: 15,
         collision: false,
         hardness: 3,
         toolType: ToolType.Axe,
@@ -181,6 +185,7 @@ const blockTypes = [
         sprite: "log_acacia",
         name: "Acacia Log",
         category: BlockCategory.Logs,
+        fuelTime: 15,
         collision: false,
         hardness: 3,
         toolType: ToolType.Axe,
@@ -201,6 +206,7 @@ const blockTypes = [
         sprite: "log_birch",
         name: "Birch Log",
         category: BlockCategory.Logs,
+        fuelTime: 15,
         collision: false,
         hardness: 3,
         toolType: ToolType.Axe,
@@ -378,6 +384,7 @@ const blockTypes = [
         sprite: "log_jungle",
         name: "Jungle Log",
         category: BlockCategory.Logs,
+        fuelTime: 15,
         collision: false,
         hardness: 3,
         toolType: ToolType.Axe,
@@ -400,6 +407,7 @@ const blockTypes = [
         hardness: 2.6,
         toolType: ToolType.Axe,
         category: BlockCategory.Planks,
+        fuelTime: 15,
     }),
     new BlockType({
         blockId: 35,
@@ -409,6 +417,7 @@ const blockTypes = [
         toolType: ToolType.Axe,
         specialType: SpecialType.CraftingTable,
         collision: false,
+        fuelTime: 15,
     }),
     new BlockType({
         blockId: 36,
@@ -417,6 +426,7 @@ const blockTypes = [
         hardness: 2.6,
         toolType: ToolType.Axe,
         category: BlockCategory.Planks,
+        fuelTime: 15,
     }),
     new BlockType({
         blockId: 37,
@@ -425,6 +435,7 @@ const blockTypes = [
         hardness: 2.6,
         toolType: ToolType.Axe,
         category: BlockCategory.Planks,
+        fuelTime: 15,
     }),
     new BlockType({
         blockId: 38,
@@ -433,6 +444,7 @@ const blockTypes = [
         hardness: 2.6,
         toolType: ToolType.Axe,
         category: BlockCategory.Planks,
+        fuelTime: 15,
     }),
     new BlockType({
         blockId: 39,
@@ -441,6 +453,7 @@ const blockTypes = [
         hardness: 2.6,
         toolType: ToolType.Axe,
         category: BlockCategory.Planks,
+        fuelTime: 15,
     }),
     new BlockType({
         blockId: 40,
@@ -451,7 +464,7 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
-        smeltOutput: { blockId: Blocks.Stone, itemId: null },
+        smeltOutput: { blockId: Blocks.Stone },
     }),
     new BlockType({
         blockId: 41,
@@ -524,6 +537,27 @@ const blockTypes = [
         name: "Quinten Blok",
         sprite: "quinten",
         fuelTime: 20,
+        hardness: 12,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 48,
+        name: "Coal Block",
+        sprite: "coal_block",
+        fuelTime: 800,
+        hardness: 10,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 49,
+        name: "Iron Block",
+        sprite: "iron_block",
         hardness: 12,
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,

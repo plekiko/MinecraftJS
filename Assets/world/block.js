@@ -60,6 +60,7 @@ class BlockType {
 const SpecialType = Object.freeze({
     CraftingTable: 1,
     Furnace: 2,
+    SingleChest: 3,
 });
 
 const BlockCategory = Object.freeze({
@@ -170,75 +171,65 @@ class Block extends Square {
     furnaceLogic(deltaTime) {
         if (!this.metaData.storage) return;
 
-        if (this.metaData.isActive)
-            this.setSprite("blocks/furnace_front_on.png");
-        else this.setSprite("blocks/furnace_front_off.png");
-
         const storage = this.metaData.storage;
-
         const input = this.getSlotItem(storage[0][0]);
         const fuel = this.getSlotItem(storage[0][1]);
+        const output = this.getSlotItem(storage[1][0]);
+        const outputItem =
+            input && input.smeltOutput
+                ? this.getSlotItem(input.smeltOutput)
+                : null;
 
-        if (
-            (!fuel && !this.metaData.burningFuelTime) ||
-            !input ||
-            !input.smeltOutput ||
-            (this.getSlotItem(storage[1][0]) &&
-                this.getSlotItem(input.smeltOutput) !==
-                    this.getSlotItem(storage[1][0]))
-        ) {
+        // Determine if furnace should be visually "on" based on fuel availability
+        if (this.metaData.burningFuelTime > 0) {
+            this.setSprite("blocks/furnace_front_on.png");
+            this.metaData.isActive = true;
+            if (!input) this.resetProgression();
+        } else {
+            this.setSprite("blocks/furnace_front_off.png");
             this.metaData.isActive = false;
-            this.metaData.fuelProgression = 0;
-            this.metaData.burningFuelTime = 0;
             this.resetProgression();
-            return;
         }
 
-        const output = this.getSlotItem(storage[1][0]);
-        const outputItem = this.getSlotItem(input.smeltOutput);
-
-        if (
-            input.smeltOutput &&
-            (!output ||
-                (output === this.getSlotItem(input.smeltOutput) &&
-                storage[1][0].count + 1 <=
-                    this.getSlotItem(input.smeltOutput).stackSize
-                    ? this.getSlotItem(input.smeltOutput).stackSize
-                    : 64))
-        )
-            this.metaData.isActive = true;
-        else this.metaData.isActive = false;
-
-        if (!this.metaData.isActive) return;
-
-        // chat.message(
-        //     "Fueltime: " +
-        //         fuel.fuelTime +
-        //         " Progression: " +
-        //         this.metaData.progression
-        // );
-
-        this.metaData.fuelProgression += deltaTime;
-
-        if (!this.metaData.burningFuelTime) {
-            if (!fuel) {
+        // Only start burning fuel if there's an input item with a smeltable output
+        if (!this.metaData.burningFuelTime && input && input.smeltOutput) {
+            if (fuel) {
+                this.metaData.burningFuelTime = fuel.fuelTime;
+                this.removeOneFromStack(storage[0][1]);
+            } else {
                 this.metaData.isActive = false;
                 return;
             }
-            this.metaData.burningFuelTime = fuel.fuelTime;
-            this.removeOneFromStack(storage[0][1]);
         }
 
-        if (this.metaData.burningFuelTime <= this.metaData.fuelProgression) {
+        // If burning fuel time is active, increment fuel progression
+        if (this.metaData.burningFuelTime > 0) {
+            this.metaData.fuelProgression += deltaTime;
+        }
+
+        // Reset burning fuel time if it has been used up
+        if (this.metaData.fuelProgression >= this.metaData.burningFuelTime) {
             this.metaData.fuelProgression = 0;
             this.metaData.burningFuelTime = 0;
         }
 
+        // Only progress smelting if input and output conditions are met
+        if (
+            input &&
+            input.smeltOutput &&
+            (!output ||
+                (output.itemId === outputItem.itemId &&
+                    storage[1][0].count + 1 <= outputItem.stackSize))
+        ) {
+            this.metaData.progression += deltaTime;
+        }
+
+        // Complete smelting process if progression threshold is met
         if (this.metaData.progression >= 10) {
             this.removeOneFromStack(storage[0][0]);
 
-            storage[1][0].itemId = outputItem.itemId;
-            storage[1][0].blockId = outputItem.blockId;
+            storage[1][0].itemId = outputItem ? outputItem.itemId : null;
+            storage[1][0].blockId = outputItem ? outputItem.blockId : null;
             storage[1][0].count++;
 
             this.resetProgression();

@@ -391,4 +391,18 @@ const recipes = [
         ],
         output: new InventoryItem({ blockId: Blocks.StoneBricks, count: 4 }),
     }),
+
+    // Coal Block
+    new Recipe({
+        type: RecipeType.Filled,
+        input: new RecipeItem({ itemId: Items.Coal }),
+        output: new InventoryItem({ blockId: Blocks.CoalBlock, count: 1 }),
+    }),
+
+    // Iron Block
+    new Recipe({
+        type: RecipeType.Filled,
+        input: new RecipeItem({ itemId: Items.IronIngot }),
+        output: new InventoryItem({ blockId: Blocks.IronBlock, count: 1 }),
+    }),
 ];
