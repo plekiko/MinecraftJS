@@ -104,6 +104,9 @@ class Chat {
             case "tp":
                 this.teleport(messageArray);
                 break;
+            default:
+                this.message("Invalid Command!");
+                break;
         }
     }
 

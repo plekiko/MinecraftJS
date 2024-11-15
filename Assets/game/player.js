@@ -154,6 +154,7 @@ class Player extends Entity {
         switch (other.type) {
             case EntityTypes.Drop:
                 this.pickupDrop(other);
+                break;
         }
     }
 

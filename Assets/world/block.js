@@ -212,7 +212,7 @@ class Block extends Square {
             this.metaData.fuelProgression = 0;
             this.metaData.burningFuelTime = 0;
 
-            if (fuel) {
+            if (fuel && input) {
                 this.metaData.burningFuelTime = fuel.fuelTime;
                 this.removeOneFromStack(storage[0][1]);
             }
