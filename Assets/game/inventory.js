@@ -781,6 +781,7 @@ class Inventory {
             this.inventoryUI.y + 126,
             3.5,
             false,
+            false,
             1,
             flameFrame
         );
@@ -795,6 +796,7 @@ class Inventory {
             this.inventoryUI.x + 277,
             this.inventoryUI.y + 120,
             3.5,
+            false,
             false,
             1,
             null,

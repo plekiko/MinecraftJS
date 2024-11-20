@@ -336,7 +336,7 @@ class Player extends Entity {
         }
 
         const soundInterval = 0.2;
-        this.breakingTime += deltaTime;
+        this.breakingTime += this.grounded ? deltaTime : deltaTime / 3;
 
         if (this.breakingTime >= this.lastBreakSoundTime + soundInterval) {
             this.lastBreakSoundTime = this.breakingTime;

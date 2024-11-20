@@ -89,6 +89,7 @@ function DrawBreakAndPlaceCursor(inRange = false) {
             mouseY,
             BLOCK_SIZE / 16,
             false,
+            false,
             0.5
         );
     }
@@ -134,7 +135,7 @@ function DrawLate(chunk) {
 function AfterDraw() {
     if (player) {
         DrawUI();
-        if (player.windowOpen) DrawCursor();
+        DrawCursor();
     }
 }
 
@@ -183,12 +184,26 @@ function DrawChunkLine(chunk) {
 }
 
 function DrawCursor() {
+    if (!player) return;
+
+    if (player.windowOpen) {
+        drawImage(
+            "Assets/sprites/misc/cursor.png",
+            input.getMousePosition().x,
+            input.getMousePosition().y,
+            1,
+            false
+        );
+        return;
+    }
+
     drawImage(
-        "Assets/sprites/misc/cursor.png",
+        "Assets/sprites/misc/crosshair.png",
         input.getMousePosition().x,
         input.getMousePosition().y,
-        1,
-        false
+        3,
+        true,
+        true
     );
 }
 
@@ -382,7 +397,8 @@ function drawImage(
     x = 0,
     y = 0,
     scale = 1,
-    center = true,
+    centerX = true,
+    centerY = false,
     opacity = 1,
     sizeY = null,
     sizeX = null
@@ -406,8 +422,10 @@ function drawImage(
         img.height, // Start y position in the source image (crop start)
         sourceWidth, // Width of the source to draw (crop width)
         -sourceHeight, // Height of the source to draw (crop height)
-        center ? x - drawWidth / 2 : x, // x position on canvas
-        y + (sizeY ? (img.height - sizeY) * scale : 0), // y position on canvas
+        centerX ? x - drawWidth / 2 : x, // x position on canvas
+        centerY
+            ? y - drawHeight / 2 + (sizeY ? (img.height - sizeY) * scale : 0)
+            : y + (sizeY ? (img.height - sizeY) * scale : 0), // y position on canvas
         drawWidth, // Width on the canvas (scaled)
         drawHeight // Height on the canvas (scaled)
     );
@@ -415,8 +433,8 @@ function drawImage(
     ctx.globalAlpha = 1;
 
     return {
-        x: center ? x - (sourceWidth / 2) * scale : x,
-        y: y,
+        x: centerX ? x - (sourceWidth / 2) * scale : x,
+        y: centerY ? y - (sourceWidth / 2) * scale : y,
         sizeX: drawWidth,
         sizeY: drawHeight,
     };
