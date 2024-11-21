@@ -61,6 +61,8 @@ class Entity {
         this.stepSize = 1;
 
         this.holdItem = holdItem;
+
+        this.shouldAddForce = { x: 0, y: 0 };
     }
 
     rotateToPoint(targetPosition, objectPosition) {
@@ -77,6 +79,11 @@ class Entity {
         const rotationInDegrees = (angle * 180) / Math.PI;
 
         return rotationInDegrees; // Return the calculated rotation in degrees
+    }
+
+    addForce(x = 0, y = 0) {
+        this.shouldAddForce.x += x;
+        this.shouldAddForce.y += y;
     }
 
     getBlockAtPosition(worldX, worldY) {
@@ -98,15 +105,6 @@ class Entity {
             this.position.x,
             futureY + this.hitbox.y
         );
-
-        if (
-            blockBelowLeft &&
-            this.isFluid(blockBelowLeft.blockType) &&
-            blockBelowRight &&
-            this.isFluid(blockBelowRight.blockType)
-        ) {
-            return "fluid";
-        }
 
         if (blockBelowLeft && this.isSolid(blockBelowLeft.blockType)) {
             return blockBelowLeft;
@@ -213,6 +211,13 @@ class Entity {
         this.velocity.y += GRAVITY * deltaTime;
     }
 
+    calculateForce() {
+        this.velocity.x += this.shouldAddForce.x;
+        this.velocity.y += this.shouldAddForce.y;
+
+        this.shouldAddForce = { x: 0, y: 0 };
+    }
+
     updatePositionWithVelocity(deltaTime) {
         const nextPositionX = this.position.x + this.velocity.x * deltaTime;
         const nextPositionY = this.position.y + this.velocity.y * deltaTime;
@@ -243,27 +248,38 @@ class Entity {
         const upCollision = this.checkUpCollision(nextPositionY);
         const downCollision = this.checkDownCollision(nextPositionY);
 
-        this.swimming = false;
+        const collidingBlocks = this.isCollidingWithBlockType();
 
         if (!upCollision) {
-            if (downCollision && downCollision !== "fluid") {
+            if (downCollision) {
                 this.standingOnBlockType = downCollision.blockType;
                 this.velocity.y = 0;
                 this.grounded = true;
-            } else {
-                this.grounded = false;
-                if (downCollision && downCollision === "fluid") {
-                    if (!this.swimming) {
-                        this.enterFluid();
-                    }
-                }
             }
         } else {
             this.velocity.y = 0;
         }
 
+        this.fluidLogic(collidingBlocks);
+
+        this.calculateForce();
+
         this.position.x += this.velocity.x * deltaTime;
         this.position.y += this.velocity.y * deltaTime;
+    }
+
+    fluidLogic(collidingBlocks) {
+        this.swimming = false;
+
+        const isCollidingWithFluid =
+            this.filterBlocksByProperty(collidingBlocks, "fluid").length > 0;
+
+        if (isCollidingWithFluid) {
+            this.grounded = false;
+            if (!this.swimming) {
+                this.enterFluid();
+            }
+        }
     }
 
     playFootstepSounds(deltaTime) {
@@ -281,6 +297,44 @@ class Entity {
 
             this.stepCounter -= this.stepSize;
         }
+    }
+
+    isCollidingWithBlockType() {
+        const collidingBlocks = [];
+
+        // Define the range of grid coordinates covered by the entity's hitbox
+        const startX = Math.floor(this.position.x / BLOCK_SIZE);
+        const endX = Math.floor((this.position.x + this.hitbox.x) / BLOCK_SIZE);
+        const startY = Math.floor(this.position.y / BLOCK_SIZE);
+        const endY = Math.floor((this.position.y + this.hitbox.y) / BLOCK_SIZE);
+
+        // Iterate over all grid cells covered by the entity's hitbox
+        for (let x = startX; x <= endX; x++) {
+            for (let y = startY; y <= endY; y++) {
+                // Get the block at the current grid position
+                const block = GetBlockAtWorldPosition(
+                    x * BLOCK_SIZE,
+                    y * BLOCK_SIZE,
+                    false
+                );
+                if (
+                    block &&
+                    block.blockType &&
+                    GetBlock(block.blockType).collision
+                ) {
+                    collidingBlocks.push(block);
+                }
+            }
+        }
+
+        return collidingBlocks; // Return all colliding blocks
+    }
+
+    filterBlocksByProperty(blocks, property) {
+        return blocks.filter((block) => {
+            const blockData = GetBlock(block.blockType);
+            return blockData && blockData[property];
+        });
     }
 
     entityCollision() {

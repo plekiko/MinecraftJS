@@ -154,6 +154,7 @@ function DrawInventory() {
 }
 
 function DrawDestroyStage() {
+    if (!player) return;
     if (player.breakingStage == 0 || player.breakingStage > 10) return;
 
     drawImage(

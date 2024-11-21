@@ -392,11 +392,20 @@ const recipes = [
         output: new InventoryItem({ blockId: Blocks.StoneBricks, count: 4 }),
     }),
 
+    //#region Ore Blocks and Ores
+
     // Coal Block
     new Recipe({
         type: RecipeType.Filled,
         input: new RecipeItem({ itemId: Items.Coal }),
         output: new InventoryItem({ blockId: Blocks.CoalBlock, count: 1 }),
+    }),
+
+    // Coal
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ blockId: Blocks.CoalBlock }),
+        output: new InventoryItem({ itemId: Items.Coal, count: 9 }),
     }),
 
     // Iron Block
@@ -405,4 +414,12 @@ const recipes = [
         input: new RecipeItem({ itemId: Items.IronIngot }),
         output: new InventoryItem({ blockId: Blocks.IronBlock, count: 1 }),
     }),
+
+    // Iron Ore
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ blockId: Blocks.IronBlock }),
+        output: new InventoryItem({ itemId: Items.IronIngot, count: 9 }),
+    }),
+    //#endregion
 ];

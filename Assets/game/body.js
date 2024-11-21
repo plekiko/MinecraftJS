@@ -67,7 +67,13 @@ class BodyPart {
         this.position = position;
         this.offset = offset;
         this.zIndex = zIndex;
-        this.rotationOrigin = rotationOrigin;
+
+        // Precompute and store the scaled rotation origin
+        this.rotationOrigin = {
+            x: rotationOrigin.x * (BLOCK_SIZE / 64),
+            y: rotationOrigin.y * (BLOCK_SIZE / 64),
+        };
+
         this.eyes = eyes;
         this.sways = sways;
         this.rotation = rotation;
@@ -178,7 +184,7 @@ class BodyPart {
             finalRotation = 180 - finalRotation;
         }
         ctx.rotate((finalRotation * Math.PI) / 180);
-        ctx.translate(-this.rotationOrigin.x, -this.rotationOrigin.y);
+        ctx.translate(-this.rotationOrigin.x, -this.rotationOrigin.y); // Use precomputed origin
     }
 
     loadSprite() {
@@ -192,7 +198,7 @@ class BodyPart {
             this.position.x + BLOCK_SIZE * (this.offset.x / 64),
             this.position.y + BLOCK_SIZE * (this.offset.y / 64)
         );
-        ctx.translate(this.rotationOrigin.x, this.rotationOrigin.y);
+        ctx.translate(this.rotationOrigin.x, this.rotationOrigin.y); // Use precomputed origin
     }
 
     renderHeldItem(ctx, holdItem, direction) {

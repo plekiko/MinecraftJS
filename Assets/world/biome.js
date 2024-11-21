@@ -199,11 +199,11 @@ const Biomes = Object.freeze({
         maxWet: Infinity,
         minMount: 0,
         maxMount: 50,
-        waterLevel: 20,
+        waterLevel: 27,
     }),
     RainForest: new Biome({
         name: "Rain Forest",
-        heightNoise: NoisePresets.SmallHills,
+        heightNoise: NoisePresets.LowHills,
         topLayer: Blocks.GrassBlock,
         secondLayer: Blocks.Dirt,
         secondLayerWidth: 4,

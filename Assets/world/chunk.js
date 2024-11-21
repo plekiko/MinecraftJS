@@ -201,7 +201,7 @@ class Chunk {
 
     updateWater() {
         this.getAllBlocks(Blocks.Water).forEach((water) => {
-            water.setBlockType(Blocks.Water);
+            water.setBlockType(Blocks.Water, true);
         });
     }
 

@@ -429,7 +429,7 @@ class Player extends Entity {
     handleSwimming() {
         if (this.wasSwimming && !this.swimming) {
             // Exited Water
-            this.velocity.y = -200;
+            if (this.velocity.y < 0) this.addForce(0, -1.5 * BLOCK_SIZE);
             this.wasSwimming = false;
         }
 
@@ -440,7 +440,9 @@ class Player extends Entity {
         // Swim upwards or sink slowly
         if (!this.grounded)
             this.velocity.y =
-                input.isKeyDown("Space") || input.isKeyDown("KeyW") ? -100 : 50;
+                input.isKeyDown("Space") || input.isKeyDown("KeyW")
+                    ? -1.5 * BLOCK_SIZE
+                    : 0.8 * BLOCK_SIZE;
     }
 
     handleFlying() {
@@ -458,8 +460,8 @@ class Player extends Entity {
 
         this.noGravity = true;
 
-        if (input.isKeyDown("KeyW")) this.velocity.y = -300;
-        else if (input.isKeyDown("KeyS")) this.velocity.y = 300;
+        if (input.isKeyDown("KeyW")) this.velocity.y = -4.7 * BLOCK_SIZE;
+        else if (input.isKeyDown("KeyS")) this.velocity.y = 4.7 * BLOCK_SIZE;
 
         if (!input.isKeyDown("KeyD") && !input.isKeyDown("KeyA")) return;
 

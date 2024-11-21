@@ -129,8 +129,8 @@ class Block extends Square {
         this.metaData = new Metadata({ storage: storage, updating: updating });
     }
 
-    setBlockType(blockType) {
-        if (this.blockType === blockType) return;
+    setBlockType(blockType, override = false) {
+        if (this.blockType === blockType && !override) return;
 
         const existingIndex = updatingBlocks.indexOf(this);
         if (existingIndex !== -1) updatingBlocks.splice(existingIndex, 1);
