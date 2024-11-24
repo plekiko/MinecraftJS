@@ -2,6 +2,7 @@ const EntityTypes = Object.freeze({
     Drop: 0,
     Player: 1,
     Entity: 2,
+    Mob: 3,
 });
 
 class Entity {
@@ -21,7 +22,11 @@ class Entity {
         bouncing = false,
         type = EntityTypes.Entity,
 
+        forceDirection = false,
+
         body = null,
+
+        direction = 1,
 
         holdItem = new InventoryItem(),
     }) {
@@ -36,6 +41,10 @@ class Entity {
         this.fallDistance = 0;
         this.invulnerable = invulnerable;
         this.type = type;
+
+        this.forceDirection = forceDirection;
+
+        this.direction = direction;
 
         this.sprite = sprite;
         this.body = body;
@@ -228,6 +237,8 @@ class Entity {
         const leftCollision = this.checkLeftCollision(nextPositionX);
         const rightCollision = this.checkRightCollision(nextPositionX);
 
+        if (!this.forceDirection) this.direction = this.velocity.x < 0 ? -1 : 1;
+
         if (nextPositionX > this.position.x) {
             if (rightCollision) {
                 this.velocity.x = 0;
@@ -255,6 +266,8 @@ class Entity {
                 this.standingOnBlockType = downCollision.blockType;
                 this.velocity.y = 0;
                 this.grounded = true;
+            } else {
+                this.grounded = false;
             }
         } else {
             this.velocity.y = 0;
@@ -393,10 +406,12 @@ class Entity {
             this.body.draw(
                 ctx,
                 this.velocity.x,
+                this.direction,
                 this.grounded,
                 this.lookDirection,
                 this.holdItem
             );
+            ctx.restore();
             return;
         }
 

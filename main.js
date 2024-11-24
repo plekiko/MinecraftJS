@@ -6,12 +6,15 @@ chat = new Chat();
 if (SPAWN_PLAYER) {
     player = new Player({
         position: new Vector2(0, TERRAIN_HEIGHT * BLOCK_SIZE),
+        entities: entities,
     });
 
     entities.push(player);
 
     hotbar = new Hotbar(player.inventory);
 }
+
+entities.push(new Pig({ position: structuredClone(player.position) }));
 
 function calculateFPS(currentFrameTime) {
     if (!calculateFPS.lastUpdate) calculateFPS.lastUpdate = currentFrameTime;
@@ -31,10 +34,11 @@ function gameLoop() {
     const currentFrameTime = performance.now();
     const deltaTime = (currentFrameTime - lastFrameTime) / 1000;
 
-    if (document.hasFocus()) {
+    if (deltaTime <= 1) {
         updateGame(deltaTime);
     }
-    Draw(chunks, calculateFPS(currentFrameTime));
+
+    Draw(chunks, calculateFPS(currentFrameTime), deltaTime);
 
     lastFrameTime = currentFrameTime;
     requestAnimationFrame(gameLoop);
@@ -47,9 +51,7 @@ function updateBlocks(deltaTime) {
 }
 
 function updateGame(deltaTime) {
-    entities.forEach((entity) => {
-        entity.update(deltaTime);
-    });
+    updateArray(entities, deltaTime);
 
     updateDebug();
 
@@ -64,6 +66,12 @@ function updateGame(deltaTime) {
     animateFrame();
 
     camera.update(deltaTime, player);
+}
+
+function updateArray(array, deltaTime) {
+    array.forEach((element) => {
+        element.update(deltaTime);
+    });
 }
 
 function cursorBlockLogic() {

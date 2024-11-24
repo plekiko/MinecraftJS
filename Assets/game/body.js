@@ -1,6 +1,7 @@
 class Body {
-    constructor({ position = { x: 0, y: 0 }, parts = [] }) {
+    constructor({ position = { x: 0, y: 0 }, parts = [], flipCorrection = 0 }) {
         this.position = position;
+        this.flipCorrection = flipCorrection;
         this.parts = parts;
     }
 
@@ -10,6 +11,8 @@ class Body {
             const part = this.parts[partName];
 
             // Apply position offset from body position
+
+            // POTENTIAL FIX FOR BLOCK SCALING
             part.position = {
                 x: newPosition.x + part.offset.x,
                 y: newPosition.y + part.offset.y,
@@ -24,13 +27,29 @@ class Body {
         }
     }
 
-    draw(ctx, speed, grounded, lookDirection, holdItem) {
+    draw(ctx, speed, direction, grounded, lookDirection, holdItem) {
         const sortedParts = Object.values(this.parts).sort(
             (a, b) => a.zIndex - b.zIndex
         );
+
         for (const part of sortedParts) {
-            part.position = this.position;
-            part.draw(ctx, speed, grounded, lookDirection, holdItem);
+            part.position = {
+                x:
+                    this.position.x +
+                    (direction < 0
+                        ? this.flipCorrection * (BLOCK_SIZE / 64)
+                        : 0),
+                y: this.position.y,
+            };
+            part.draw(
+                ctx,
+                speed,
+                direction,
+                this.flipCorrection,
+                grounded,
+                lookDirection,
+                holdItem
+            );
         }
     }
 
@@ -54,19 +73,27 @@ class BodyPart {
         offset = { x: 0, y: 0 },
         zIndex = 0,
         rotationOrigin = { x: 0, y: 0 },
+        flipOrigin = { x: 0, y: 0 },
         eyes = false,
         sways = false,
         rotation = 0,
         swaySpeed = 90,
-        swayIntensity = 10,
+        swayIntensity = 1,
         maxSwayAngle = 90,
         mainArm = false,
         holdOrigin = { x: 0, y: 0 },
+        flip = false,
     }) {
         this.sprite = sprite;
         this.position = position;
         this.offset = offset;
         this.zIndex = zIndex;
+
+        this.flip = flip;
+        this.flipOrigin = {
+            x: flipOrigin.x * (BLOCK_SIZE / 64),
+            y: flipOrigin.y * (BLOCK_SIZE / 64),
+        };
 
         // Precompute and store the scaled rotation origin
         this.rotationOrigin = {
@@ -104,10 +131,18 @@ class BodyPart {
             oscillation *
             Math.min(effectiveSwayAngle, this.maxSwayAngle) *
             Math.sign(speed);
-        return output;
+        return output * this.swayIntensity;
     }
 
-    draw(ctx, speed, grounded, lookDirection, holdItem) {
+    draw(
+        ctx,
+        speed,
+        direction,
+        flipCorrection,
+        grounded,
+        lookDirection,
+        holdItem
+    ) {
         const img = this.loadSprite();
 
         ctx.save();
@@ -120,11 +155,12 @@ class BodyPart {
             lookDirection
         );
 
-        const shouldFlip = lookDirection < -90 || lookDirection > 90;
-
-        if (lookDirection !== 0) {
-            this.direction = shouldFlip ? -1 : 1;
+        let shouldFlip = lookDirection < -90 || lookDirection > 90;
+        if (this.flip && direction < 0) {
+            shouldFlip = true;
         }
+
+        this.direction = shouldFlip ? -1 : 1;
 
         this.applyRotationAndFlip(ctx, finalRotation, shouldFlip);
         this.renderHeldItem(ctx, holdItem, this.direction);
@@ -179,12 +215,17 @@ class BodyPart {
     }
 
     applyRotationAndFlip(ctx, finalRotation, shouldFlip) {
-        if (shouldFlip && this.eyes) {
-            ctx.scale(-1, 1);
+        if (shouldFlip && (this.eyes || this.flip)) {
+            ctx.scale(this.eyes ? -1 : 1, this.flip ? -1 : 1);
             finalRotation = 180 - finalRotation;
         }
+
         ctx.rotate((finalRotation * Math.PI) / 180);
-        ctx.translate(-this.rotationOrigin.x, -this.rotationOrigin.y); // Use precomputed origin
+
+        const origin =
+            this.flip && shouldFlip ? this.flipOrigin : this.rotationOrigin;
+
+        ctx.translate(-origin.x, -origin.y); // Use precomputed origin
     }
 
     loadSprite() {

@@ -18,6 +18,7 @@ class Player extends Entity {
         score = 0,
         xpLevel = 0,
         inventory = new Inventory(),
+        entities,
     }) {
         super({
             position: position,
@@ -50,6 +51,8 @@ class Player extends Entity {
 
         this.hoverBlock = null;
         this.oldHoverBlock = null;
+
+        this.entities = entities;
     }
 
     update(deltaTime) {
@@ -130,7 +133,7 @@ class Player extends Entity {
         this.windowOpen = false;
         this.canMove = true;
 
-        if (this.inventory.holdingItem) this.dropCurrentInventoryHolding();
+        if (this.inventory.holdingItem) this.opCurrentInventoryHolding();
 
         const leftOver = this.inventory.closeInventory();
 
@@ -247,18 +250,25 @@ class Player extends Entity {
             input.getMousePositionOnBlockGrid().y + Math.floor(camera.y)
         );
 
-        const isCollidingWithPlayer = isColliding(
-            new Vector2(this.position.x, this.position.y),
-            new Vector2(this.hitbox.x, this.hitbox.y),
-            new Vector2(mousePos.x, mousePos.y),
-            new Vector2(BLOCK_SIZE, BLOCK_SIZE)
-        );
+        let collidingWithEntity = false;
+        for (let i = 0; i < this.entities.length; i++) {
+            const entity = this.entities[i];
+            if (
+                isColliding(
+                    new Vector2(entity.position.x, entity.position.y),
+                    new Vector2(entity.hitbox.x, entity.hitbox.y),
+                    new Vector2(mousePos.x, mousePos.y),
+                    new Vector2(BLOCK_SIZE, BLOCK_SIZE)
+                )
+            ) {
+                collidingWithEntity = true;
+                break;
+            }
+        }
 
         const isAdjacentToBlock = checkAdjacentBlocks(mousePos);
 
-        return (
-            (isAir || isFluid) && !isCollidingWithPlayer && isAdjacentToBlock
-        );
+        return (isAir || isFluid) && !collidingWithEntity && isAdjacentToBlock;
     }
 
     dropLogic() {
