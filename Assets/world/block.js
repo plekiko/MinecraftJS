@@ -264,7 +264,7 @@ class Block extends Square {
         if (!block.fluid) return false;
         // console.log(this.chunkX);
         const aboveBlock = GetChunk(this.chunkX).getUp(this.x, this.y);
-        return aboveBlock && aboveBlock.img === null;
+        return !GetBlock(aboveBlock.blockType).fluid;
     }
 
     breakBlock(drop = false) {
