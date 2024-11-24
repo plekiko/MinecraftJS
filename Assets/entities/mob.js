@@ -22,6 +22,7 @@ class Mob extends Entity {
         });
 
         this.health = health;
+        this.maxHealth = health;
         this.noAi = noAi;
         this.speed = speed;
         this.ai = ai;
