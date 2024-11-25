@@ -37,12 +37,11 @@ function playRandomSong() {
 }
 
 function startMusic() {
-    if (!isPlaying) {
-        let startDelay =
-            RandomRange(musicStartDelayRange.min, musicStartDelayRange.max) *
-            1000;
-        setTimeout(playRandomSong, startDelay);
-    }
+    if (isPlaying) return;
+
+    let startDelay =
+        RandomRange(musicStartDelayRange.min, musicStartDelayRange.max) * 1000;
+    setTimeout(playRandomSong, startDelay);
 }
 
 startMusic();
