@@ -214,7 +214,10 @@ class Player extends Entity {
     breakingAndPlacingLogic(deltaTime) {
         if (this.windowOpen) return;
 
-        if (input.isLeftMouseButtonPressed()) this.swing();
+        if (input.isLeftMouseButtonPressed()) {
+            this.swing();
+            this.hit();
+        }
 
         if (!this.hoverBlock) return;
 
@@ -223,6 +226,29 @@ class Player extends Entity {
             this.resetBreaking();
         }
         if (input.isRightMouseDown()) this.placingLogic(deltaTime);
+    }
+
+    hit() {
+        const entity = this.checkForEntityOnMouse();
+        if (!entity) return;
+    }
+
+    checkForEntityOnMouse() {
+        const entity = this.entities.forEach((entity) => {
+            if (
+                mouseOverPosition(
+                    entity.position.x,
+                    entity.position.y,
+                    entity.hitbox.x,
+                    entity.hitbox.y
+                )
+            )
+                return entity;
+        });
+
+        if (!entity) return;
+
+        console.log(entity);
     }
 
     placingLogic(deltaTime) {

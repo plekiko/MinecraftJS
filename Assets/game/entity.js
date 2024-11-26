@@ -55,6 +55,7 @@ class Entity {
         this.spriteScale = spriteScale;
         this.outline = outline;
         this.color = color;
+        this.originalColor = color;
         this.drag = drag;
 
         this.bouncing = bouncing;
@@ -185,6 +186,44 @@ class Entity {
         }
 
         return null;
+    }
+
+    hit(damage, hitfromX = 0, kb = 1) {
+        if (!this.health) return;
+        this.knockBack(hitfromX, kb);
+        this.damage(damage);
+    }
+
+    knockBack(fromX, kb) {}
+
+    damage(damage) {
+        this.flashColor();
+
+        // Insert armor checks etc
+        this.decreaseHealth(damage);
+    }
+
+    forceDamage(damage) {
+        this.flashColor();
+
+        this.decreaseHealth(damage);
+    }
+
+    decreaseHealth(amount) {
+        if (!this.health) return;
+        this.health -= amount;
+    }
+
+    flashColor(color = "red", duration = 0.02) {
+        if (!this.body) {
+            this.color = color;
+            setTimeout(() => {
+                this.color = this.originalColor;
+            }, duration * 1000);
+            return;
+        }
+
+        this.body.flashColor(color, duration);
     }
 
     isSolid(blockType) {

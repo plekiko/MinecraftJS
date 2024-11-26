@@ -3,6 +3,8 @@ class Body {
         this.position = position;
         this.flipCorrection = flipCorrection;
         this.parts = parts;
+
+        this.flashingColor = null;
     }
 
     updatePosition(newPosition) {
@@ -27,6 +29,13 @@ class Body {
         }
     }
 
+    flashColor(color, duration) {
+        this.flashingColor = color;
+        setTimeout(() => {
+            this.flashingColor = null;
+        }, duration * 1000);
+    }
+
     draw(ctx, speed, direction, grounded, lookDirection, holdItem) {
         const sortedParts = Object.values(this.parts).sort(
             (a, b) => a.zIndex - b.zIndex
@@ -45,10 +54,10 @@ class Body {
                 ctx,
                 speed,
                 direction,
-                this.flipCorrection,
                 grounded,
                 lookDirection,
-                holdItem
+                holdItem,
+                this.flashingColor
             );
         }
     }
@@ -138,10 +147,10 @@ class BodyPart {
         ctx,
         speed,
         direction,
-        flipCorrection,
         grounded,
         lookDirection,
-        holdItem
+        holdItem,
+        flashingColor
     ) {
         const img = this.loadSprite();
 
@@ -172,6 +181,21 @@ class BodyPart {
             img.width * (BLOCK_SIZE / 16),
             img.height * (BLOCK_SIZE / 16)
         );
+
+        // Draw flashing color
+        if (flashingColor) {
+            ctx.globalAlpha = 0.4;
+            ctx.fillStyle = flashingColor;
+
+            ctx.fillRect(
+                -img.width / 2,
+                -img.height / 2,
+                img.width * (BLOCK_SIZE / 16),
+                img.height * (BLOCK_SIZE / 16)
+            );
+
+            ctx.globalAlpha = 1;
+        }
 
         ctx.restore();
     }
