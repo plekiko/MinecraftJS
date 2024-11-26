@@ -125,6 +125,13 @@ class InputHandler {
         return { ...this.mouse.position };
     }
 
+    getMouseWorldPosition() {
+        return {
+            x: this.mouse.position.x + camera.x,
+            y: this.mouse.position.y + camera.y,
+        };
+    }
+
     getMousePositionOnBlockGrid() {
         const pos = this.getMousePosition();
 

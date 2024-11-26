@@ -34,8 +34,11 @@ function DrawBackground() {
     ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 }
 
-function mouseOverPosition(x, y, sizeX, sizeY) {
-    const mousePos = input.getMousePosition();
+function mouseOverPosition(x, y, sizeX, sizeY, world = false) {
+    const mousePos = !world
+        ? input.getMousePosition()
+        : input.getMouseWorldPosition();
+
     return (
         mousePos.x >= x &&
         mousePos.x <= x + sizeX &&

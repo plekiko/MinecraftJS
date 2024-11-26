@@ -231,24 +231,24 @@ class Player extends Entity {
     hit() {
         const entity = this.checkForEntityOnMouse();
         if (!entity) return;
+        chat.message(entity);
     }
 
     checkForEntityOnMouse() {
-        const entity = this.entities.forEach((entity) => {
-            if (
-                mouseOverPosition(
-                    entity.position.x,
-                    entity.position.y,
-                    entity.hitbox.x,
-                    entity.hitbox.y
-                )
-            )
-                return entity;
+        const entity = this.entities.find((entity) => {
+            console.log(entity);
+            return mouseOverPosition(
+                entity.position.x,
+                entity.position.y,
+                entity.hitbox.x,
+                entity.hitbox.y,
+                true
+            );
         });
 
         if (!entity) return;
 
-        console.log(entity);
+        entity.hit(1);
     }
 
     placingLogic(deltaTime) {
