@@ -19,6 +19,7 @@ class Mob extends Entity {
             direction: -1,
             forceDirection: true,
             direction: RandomRange(0, 2) ? 1 : -1,
+            maxVelocity: new Vector2(speed * BLOCK_SIZE * 1.5, 1000),
         });
 
         this.health = health;
@@ -68,6 +69,7 @@ class Mob extends Entity {
 
     jump() {
         if (!this.grounded) return;
+
         this.velocity.y = -8 * BLOCK_SIZE;
     }
 

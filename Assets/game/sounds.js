@@ -52,6 +52,9 @@ const Sounds = Object.freeze({
         "step/wood5",
         "step/wood6",
     ],
+
+    // Mobs
+    Pig_Say: ["mobs/pig/say1", "mobs/pig/say2", "mobs/pig/say3"],
 });
 
 function PlayRandomSoundFromArray({
@@ -59,8 +62,33 @@ function PlayRandomSoundFromArray({
     pathInSfx = "",
     end = ".ogg",
     volume = 1,
+    positional = false,
+    range = 10,
+    origin = new Vector2(),
 }) {
-    playSound(pathInSfx + array[RandomRange(0, array.length)] + end, volume);
+    if (!positional)
+        playSound(
+            pathInSfx + array[RandomRange(0, array.length)] + end,
+            volume
+        );
+    else
+        playPositionalSound(
+            origin,
+            pathInSfx + array[RandomRange(0, array.length)] + end,
+            range,
+            volume
+        );
+}
+
+function playPositionalSound(origin, sound, range = 10, volume = 1) {
+    if (!player) {
+        playSound(sound, volume);
+        return;
+    }
+
+    if (Vector2.Distance(player.position, origin) <= range * BLOCK_SIZE) {
+        playSound(sound, volume);
+    }
 }
 
 function playSound(sound, volume = 1) {

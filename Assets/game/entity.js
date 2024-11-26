@@ -92,8 +92,17 @@ class Entity {
     }
 
     addForce(x = 0, y = 0) {
-        this.shouldAddForce.x += x;
-        this.shouldAddForce.y += y;
+        if (
+            this.filterBlocksByProperty(
+                this.isCollidingWithBlockType(),
+                "collision"
+            ).length > 0
+        ) {
+            return;
+        }
+
+        this.shouldAddForce.x += x * BLOCK_SIZE;
+        this.shouldAddForce.y += y * BLOCK_SIZE;
     }
 
     getBlockAtPosition(worldX, worldY) {
@@ -188,13 +197,12 @@ class Entity {
         return null;
     }
 
-    hit(damage, hitfromX = 0, kb = 1) {
-        if (!this.health) return;
-        this.knockBack(hitfromX, kb);
-        this.damage(damage);
+    knockBack(fromX, kb) {
+        this.addForce(
+            fromX < this.position.x ? kb : -kb,
+            this.grounded ? -5 * kb : 0
+        );
     }
-
-    knockBack(fromX, kb) {}
 
     damage(damage) {
         this.flashColor();
@@ -210,11 +218,19 @@ class Entity {
     }
 
     decreaseHealth(amount) {
-        if (!this.health) return;
+        if (this.health === undefined) return;
+
         this.health -= amount;
+
+        if (this.health <= 0) this.die();
     }
 
-    flashColor(color = "red", duration = 0.02) {
+    die() {
+        this.dropLoot();
+        removeEntity(this);
+    }
+
+    flashColor(color = "red", duration = 0.05) {
         if (!this.body) {
             this.color = color;
             setTimeout(() => {
@@ -345,7 +361,13 @@ class Entity {
             if (!block) return;
             const sounds = block.breakingSound;
             if (!sounds) return;
-            PlayRandomSoundFromArray({ array: sounds, volume: 0.2 });
+            PlayRandomSoundFromArray({
+                array: sounds,
+                volume: 0.2,
+                positional: true,
+                range: 6,
+                origin: this.position,
+            });
 
             this.stepCounter -= this.stepSize;
         }
@@ -410,11 +432,12 @@ class Entity {
     }
 
     applyDrag(deltaTime) {
+        if (!this.grounded) return;
         if (this.velocity.x > 0) {
-            this.velocity.x -= this.drag * deltaTime;
+            this.velocity.x -= this.drag * 100 * deltaTime;
             if (this.velocity.x < 0) this.velocity.x = 0;
         } else if (this.velocity.x < 0) {
-            this.velocity.x += this.drag * deltaTime;
+            this.velocity.x += this.drag * 100 * deltaTime;
             if (this.velocity.x > 0) this.velocity.x = 0;
         }
     }

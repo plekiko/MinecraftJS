@@ -34,6 +34,7 @@ class Drop extends Entity {
     }
 
     collisionLogic() {
+        this.getOutBlockLogic();
         const other = this.entityCollision();
 
         if (other.type !== EntityTypes.Drop) return;
@@ -55,6 +56,17 @@ class Drop extends Entity {
 
                 if (other.count <= 0) removeEntity(other);
             }
+        }
+    }
+
+    getOutBlockLogic() {
+        if (
+            this.filterBlocksByProperty(
+                this.isCollidingWithBlockType(),
+                "collision"
+            ).length > 0
+        ) {
+            this.position.y -= BLOCK_SIZE;
         }
     }
 

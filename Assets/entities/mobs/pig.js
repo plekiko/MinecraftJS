@@ -1,6 +1,6 @@
 class Pig extends Mob {
     constructor({
-        health = 10,
+        health = 4,
         noAi = false,
         position = new Vector2(),
         invulnerable = false,
@@ -21,6 +21,19 @@ class Pig extends Mob {
     update(deltaTime) {
         this.updateEntity(deltaTime);
         this.aiUpdate(deltaTime);
+    }
+
+    hit(damage, hitfromX = 0, kb = 1) {
+        if (!this.health) return;
+        this.knockBack(hitfromX, kb);
+        this.damage(damage);
+        PlayRandomSoundFromArray({ array: Sounds.Pig_Say });
+    }
+
+    die() {
+        this.dropLoot();
+        playPositionalSound(this.position, "mobs/pig/death.ogg");
+        removeEntity(this);
     }
 }
 

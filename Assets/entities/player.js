@@ -70,6 +70,12 @@ class Player extends Entity {
         if (this.windowOpen) this.inventory.update(deltaTime);
     }
 
+    hit(damage, hitfromX = 0, kb = 1) {
+        if (!this.health) return;
+        this.knockBack(hitfromX, kb);
+        this.damage(damage);
+    }
+
     setHoldItem() {
         this.holdItem =
             this.inventory.items[3][this.inventory.currentSlot].item;
@@ -236,10 +242,9 @@ class Player extends Entity {
 
     checkForEntityOnMouse() {
         const entity = this.entities.find((entity) => {
-            console.log(entity);
             return mouseOverPosition(
-                entity.position.x,
-                entity.position.y,
+                entity.position.x - camera.x,
+                entity.position.y - camera.y,
                 entity.hitbox.x,
                 entity.hitbox.y,
                 true
@@ -247,8 +252,9 @@ class Player extends Entity {
         });
 
         if (!entity) return;
+        if (entity === this) return;
 
-        entity.hit(1);
+        entity.hit(1, this.position.x);
     }
 
     placingLogic(deltaTime) {
@@ -279,6 +285,7 @@ class Player extends Entity {
         let collidingWithEntity = false;
         for (let i = 0; i < this.entities.length; i++) {
             const entity = this.entities[i];
+            if (entity.type === 0) continue;
             if (
                 isColliding(
                     new Vector2(entity.position.x, entity.position.y),
@@ -465,7 +472,7 @@ class Player extends Entity {
     handleSwimming() {
         if (this.wasSwimming && !this.swimming) {
             // Exited Water
-            if (this.velocity.y < 0) this.addForce(0, -1.5 * BLOCK_SIZE);
+            if (this.velocity.y < 0) this.addForce(0, -1.5);
             this.wasSwimming = false;
         }
 
