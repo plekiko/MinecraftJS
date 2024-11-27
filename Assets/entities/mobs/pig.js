@@ -14,7 +14,7 @@ class Pig extends Mob {
             body: body,
             noAi: noAi,
             ai: AI.Pig,
-            speed: 1,
+            speed: 1.5,
         });
     }
 
@@ -23,12 +23,14 @@ class Pig extends Mob {
         this.aiUpdate(deltaTime);
     }
 
-    hit(damage, hitfromX = 0, kb = 1) {
+    hit(damage, hitfromX = 0, kb = 5) {
         if (!this.health) return;
         this.knockBack(hitfromX, kb);
         this.damage(damage);
         PlayRandomSoundFromArray({ array: Sounds.Pig_Say });
     }
+
+    dropLoot() {}
 
     die() {
         this.dropLoot();

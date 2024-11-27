@@ -104,10 +104,55 @@ class Chat {
             case "tp":
                 this.teleport(messageArray);
                 break;
+            case "summon":
+                this.summon(messageArray);
+                break;
             default:
                 this.message("Invalid Command!");
                 break;
         }
+    }
+
+    summon(messageArray) {
+        if (!messageArray[1] || !messageArray[2] || !messageArray[3]) {
+            this.invalidCommand("/summon <Entity> <x> <y>");
+            return;
+        }
+
+        const entityPath = messageArray[1].split(".");
+        const category = entityPath[0];
+        const itemName = entityPath[1];
+
+        const collections = {
+            Entities,
+        };
+
+        const x = messageArray[2] !== "~" ? parseInt(messageArray[2]) : "~";
+        const y = messageArray[3] !== "~" ? parseInt(messageArray[3]) : "~";
+
+        const position = this.getWorldPosition(new Vector2(x, y));
+
+        if (!position) {
+            this.invalidCommand("/summon <Entity> <x> <y>");
+            return;
+        }
+
+        if (collections[category] && collections[category][itemName] != null) {
+            const entity = collections[category][itemName];
+
+            summonEntity(entity, position);
+        } else {
+            this.message("Entity not found.");
+        }
+    }
+
+    getWorldPosition(position) {
+        if (position.x === "~") position.x = player.position.x / BLOCK_SIZE;
+        if (position.y === "~") position.y = player.position.y / BLOCK_SIZE;
+
+        if (isNaN(position.x) || isNaN(position.y)) return null;
+
+        return new Vector2(position.x * BLOCK_SIZE, position.y * BLOCK_SIZE);
     }
 
     teleport(messageArray) {
@@ -130,8 +175,10 @@ class Chat {
             return;
         }
 
-        player.position.x = x * BLOCK_SIZE;
-        player.position.y = CHUNK_HEIGHT * BLOCK_SIZE - y * BLOCK_SIZE;
+        const targetPosition = this.getWorldPosition(new Vector2(x, y));
+
+        player.position.x = targetPosition.x;
+        player.position.y = targetPosition.y;
 
         this.message(`Teleported player to x: ${x} y: ${y}`);
     }
@@ -263,14 +310,15 @@ class Chat {
                 this.tempMessages.length
             );
             for (let i = 0; i < maxMessages; i++) {
-                drawText(
-                    this.tempMessages[this.tempMessages.length - 1 - i].text, // Reverse order
-                    17,
-                    CANVAS.height - 60 - i * 30,
-                    30,
-                    true,
-                    "left"
-                );
+                drawText({
+                    text: this.tempMessages[this.tempMessages.length - 1 - i]
+                        .text, // Reverse order
+                    x: 17,
+                    y: CANVAS.height - 60 - i * 30,
+                    size: 30,
+                    shadow: true,
+                    textAlign: "left",
+                });
             }
             return;
         }
@@ -281,21 +329,28 @@ class Chat {
         const messageToDisplay =
             this.currentMessage + (this.showCursor ? "_" : "");
 
-        drawText(messageToDisplay, 17, CANVAS.height - 20, 30, false, "left");
+        drawText({
+            text: messageToDisplay,
+            x: 17,
+            y: CANVAS.height - 20,
+            size: 30,
+            shadow: false,
+            textAlign: "left",
+        });
 
         for (let i = 0; i < this.viewHistory; i++) {
             const messageIndex = this.messages.length - 1 - i;
 
             if (!this.messages[messageIndex]) continue;
 
-            drawText(
-                this.messages[messageIndex],
-                17,
-                CANVAS.height - 60 - i * 30,
-                30,
-                true,
-                "left"
-            );
+            drawText({
+                text: this.messages[messageIndex],
+                x: 17,
+                y: CANVAS.height - 60 - i * 30,
+                size: 30,
+                shadow: true,
+                textAlign: "left",
+            });
         }
     }
 
@@ -365,6 +420,8 @@ class Chat {
                     case "Period":
                         this.currentMessage += ".";
                         break;
+                    case "Backquote":
+                        if (input.shiftPressed) this.currentMessage += "~";
 
                     default:
                         break;

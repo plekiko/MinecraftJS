@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "ES6", // Set ECMAScript version for better IntelliSense
+        "module": "commonjs", // Module resolution system
+        "baseUrl": "./" // Base path for imports
+    },
+    "include": [
+        "**/*" // Include all JavaScript files in the workspace
+    ],
+    "exclude": [
+        "node_modules", // Exclude node_modules to avoid cluttering IntelliSense
+        "**/dist/**/*" // Exclude build output folders
+    ]
+}

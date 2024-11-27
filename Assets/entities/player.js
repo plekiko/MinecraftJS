@@ -222,7 +222,7 @@ class Player extends Entity {
 
         if (input.isLeftMouseButtonPressed()) {
             this.swing();
-            this.hit();
+            this.tryHit();
         }
 
         if (!this.hoverBlock) return;
@@ -234,11 +234,11 @@ class Player extends Entity {
         if (input.isRightMouseDown()) this.placingLogic(deltaTime);
     }
 
-    hit() {
-        const entity = this.checkForEntityOnMouse();
-        if (!entity) return;
-        chat.message(entity);
-    }
+    // hit() {
+    //     const entity = this.checkForEntityOnMouse();
+    //     if (!entity) return;
+    //     chat.message(entity);
+    // }
 
     checkForEntityOnMouse() {
         const entity = this.entities.find((entity) => {
@@ -251,6 +251,16 @@ class Player extends Entity {
             );
         });
 
+        return entity;
+    }
+
+    tryHit() {
+        const entity = this.checkForEntityOnMouse();
+
+        this.hitEntity(entity);
+    }
+
+    hitEntity(entity) {
         if (!entity) return;
         if (entity === this) return;
 
@@ -414,7 +424,7 @@ class Player extends Entity {
     }
 
     movementLogic(deltaTime) {
-        this.velocity.x = 0;
+        // this.velocity.x = 0;
 
         if (this.windowOpen) return;
         if (!this.canMove) return;
@@ -457,7 +467,7 @@ class Player extends Entity {
         if (!input.isKeyDown("KeyD") && !input.isKeyDown("KeyA")) return;
 
         // Move right or left based on key pressed
-        this.velocity.x = input.isKeyDown("KeyD") ? speed : -speed;
+        this.targetVelocity.x = input.isKeyDown("KeyD") ? speed : -speed;
     }
 
     handleJump() {

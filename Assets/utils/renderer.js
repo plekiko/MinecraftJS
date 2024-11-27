@@ -14,6 +14,7 @@ let drawDebugMouseBlock = false;
 let drawFileSize = false;
 let drawFps = true;
 let drawHitbox = false;
+let drawCoordinates = true;
 
 let cursorInRange = false;
 
@@ -112,6 +113,21 @@ function DrawChunks(chunksMap) {
     }
 }
 
+function DrawCoordinates() {
+    if (!player) return;
+    drawText({
+        text: `x: ${
+            Math.round((player.position.x / BLOCK_SIZE) * 100) / 100
+        } y: ${Math.round((player.position.y / BLOCK_SIZE) * 100) / 100}`,
+        x: 5,
+        y: 20,
+        size: 20,
+        shadow: false,
+        textAlign: "left",
+        color: "black",
+    });
+}
+
 function DrawCamera() {
     ctx.fillStyle = "white";
     ctx.fillRect(CANVAS.width / 2 - 2, CANVAS.height / 2 - 2, 14, 14);
@@ -130,6 +146,7 @@ function DrawLate(chunk) {
     if (drawingChunkBorders) DrawChunkLine(chunk);
     if (drawCamera) DrawCamera();
     if (drawHeight) DrawHeight();
+    if (drawCoordinates) DrawCoordinates();
     if (drawDebugMouseBlock) DrawDebugMouseBlock();
     if (drawFileSize) DrawExpectedFileSize();
     if (drawFps) DrawFps();
@@ -374,7 +391,15 @@ function DrawHotbar() {
     hotbar.draw(ctx);
 }
 
-function drawText(text, x, y, size = 25, shadow = true, textAlign = "right") {
+function drawText({
+    text,
+    x,
+    y,
+    size = 25,
+    shadow = true,
+    textAlign = "right",
+    color = "white",
+}) {
     ctx.textAlign = textAlign;
 
     if (shadow) {
@@ -384,7 +409,7 @@ function drawText(text, x, y, size = 25, shadow = true, textAlign = "right") {
         ctx.fillText(text, x + 3, y + 3);
     }
 
-    ctx.fillStyle = "white";
+    ctx.fillStyle = color;
     ctx.font = size + "px Pixel";
 
     ctx.fillText(text, x, y);

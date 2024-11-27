@@ -246,6 +246,20 @@ function lerp(a, b, t) {
     return a + (b - a) * t;
 }
 
+function isValidClassType(variable) {
+    try {
+        // Ensure it's a function and can be called with 'new'
+        if (typeof variable === "function" && variable.prototype) {
+            // Test instantiation to confirm it's a class
+            Reflect.construct(() => {}, [], variable);
+            return true;
+        }
+    } catch (e) {
+        // If it fails instantiation, it's not a valid class
+    }
+    return false;
+}
+
 function easeInOut(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }

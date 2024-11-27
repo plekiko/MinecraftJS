@@ -46,7 +46,6 @@ class Mob extends Entity {
             if (!this.moving) this.moveToRandomX();
             else {
                 this.moving = false;
-                this.velocity.x = 0;
                 this.resetMoveTime();
             }
         }
@@ -62,7 +61,7 @@ class Mob extends Entity {
                 this.jump();
             }
 
-            this.velocity.x =
+            this.targetVelocity.x =
                 (this.direction < 0 ? -this.speed : this.speed) * BLOCK_SIZE;
         }
     }

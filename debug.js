@@ -20,6 +20,7 @@ function HandleInput() {
     if (input.isKeyPressed("KeyM")) drawDebugMouseBlock = !drawDebugMouseBlock;
     if (input.isKeyPressed("KeyF")) drawFileSize = !drawFileSize;
     if (input.isKeyPressed("KeyI")) drawFps = !drawFps;
+    if (input.isKeyPressed("KeyC")) drawCoordinates = !drawCoordinates;
     if (input.isKeyPressed("KeyO")) SaveWorld();
     if (input.isKeyPressed("KeyP")) LoadWorld();
     if (input.isKeyPressed("KeyR")) RegenerateWorld();

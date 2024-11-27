@@ -11,6 +11,8 @@ class Entity {
         rotation = new Vector2(),
         hitbox = new Vector2(1, 1),
         velocity = new Vector2(),
+        targetVelocity = new Vector2(),
+        acceleration = 90,
         maxVelocity = new Vector2(1000, 1000),
         noGravity = false,
         invulnerable = false,
@@ -18,7 +20,7 @@ class Entity {
         spriteScale = BLOCK_SIZE / 32,
         outline = 0,
         color = "black",
-        drag = 3,
+        drag = 40,
         bouncing = false,
         type = EntityTypes.Entity,
 
@@ -34,6 +36,8 @@ class Entity {
         this.rotation = rotation;
         this.hitbox = hitbox;
         this.velocity = velocity;
+        this.targetVelocity = targetVelocity;
+        this.acceleration = acceleration;
         this.maxVelocity = maxVelocity;
         this.grounded = false;
         this.standingOnBlockType = null;
@@ -41,6 +45,9 @@ class Entity {
         this.fallDistance = 0;
         this.invulnerable = invulnerable;
         this.type = type;
+
+        this.isGettingKnockback = false;
+        this.knockBackBuffer = false;
 
         this.forceDirection = forceDirection;
 
@@ -198,9 +205,10 @@ class Entity {
     }
 
     knockBack(fromX, kb) {
+        this.isGettingKnockback = true;
         this.addForce(
             fromX < this.position.x ? kb : -kb,
-            this.grounded ? -5 * kb : 0
+            this.grounded ? -kb : 0
         );
     }
 
@@ -282,7 +290,35 @@ class Entity {
         this.shouldAddForce = { x: 0, y: 0 };
     }
 
+    handleTargetVelocity(deltaTime) {
+        if (this.isGettingKnockback) return;
+
+        if (this.targetVelocity.x === 0) return;
+
+        if (this.velocity.x < this.targetVelocity.x) {
+            this.velocity.x += this.acceleration * BLOCK_SIZE * deltaTime;
+
+            // Clamp to avoid overshoot
+            if (this.velocity.x > this.targetVelocity.x) {
+                this.velocity.x = this.targetVelocity.x;
+            }
+        }
+
+        if (this.velocity.x > this.targetVelocity.x) {
+            this.velocity.x -= this.acceleration * BLOCK_SIZE * deltaTime;
+
+            // Clamp to avoid overshoot
+            if (this.velocity.x < this.targetVelocity.x) {
+                this.velocity.x = this.targetVelocity.x;
+            }
+        }
+
+        this.targetVelocity = new Vector2();
+    }
+
     updatePositionWithVelocity(deltaTime) {
+        this.handleTargetVelocity(deltaTime);
+
         const nextPositionX = this.position.x + this.velocity.x * deltaTime;
         const nextPositionY = this.position.y + this.velocity.y * deltaTime;
 
@@ -319,8 +355,7 @@ class Entity {
         if (!upCollision) {
             if (downCollision) {
                 this.standingOnBlockType = downCollision.blockType;
-                this.velocity.y = 0;
-                this.grounded = true;
+                this.ground();
             } else {
                 this.grounded = false;
             }
@@ -334,6 +369,16 @@ class Entity {
 
         this.position.x += this.velocity.x * deltaTime;
         this.position.y += this.velocity.y * deltaTime;
+    }
+
+    ground() {
+        this.velocity.y = 0;
+        this.grounded = true;
+        if (this.knockBackBuffer) {
+            this.isGettingKnockback = false;
+            this.knockBackBuffer = false;
+        }
+        if (this.isGettingKnockback) this.knockBackBuffer = true;
     }
 
     fluidLogic(collidingBlocks) {
@@ -432,7 +477,9 @@ class Entity {
     }
 
     applyDrag(deltaTime) {
-        if (!this.grounded) return;
+        if (this.targetVelocity.x !== 0) return;
+        if (this.isGettingKnockback) return;
+        // if (!this.grounded) return;
         if (this.velocity.x > 0) {
             this.velocity.x -= this.drag * 100 * deltaTime;
             if (this.velocity.x < 0) this.velocity.x = 0;

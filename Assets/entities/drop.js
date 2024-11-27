@@ -59,6 +59,8 @@ class Drop extends Entity {
         }
     }
 
+    hit() {}
+
     getOutBlockLogic() {
         if (
             this.filterBlocksByProperty(

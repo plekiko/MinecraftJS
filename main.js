@@ -14,7 +14,7 @@ if (SPAWN_PLAYER) {
     hotbar = new Hotbar(player.inventory);
 }
 
-entities.push(new Pig({ position: structuredClone(player.position) }));
+summonEntity(Pig, structuredClone(player.position));
 
 function calculateFPS(currentFrameTime) {
     if (!calculateFPS.lastUpdate) calculateFPS.lastUpdate = currentFrameTime;
@@ -28,6 +28,10 @@ function calculateFPS(currentFrameTime) {
     }
 
     return fpsDisplay;
+}
+
+function summonEntity(entity, position) {
+    entities.push(new entity({ position: position }));
 }
 
 function gameLoop() {

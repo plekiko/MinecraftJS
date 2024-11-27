@@ -1,0 +1,5 @@
+{
+    "javascript.suggest.alwaysAllProjects": true,
+    "javascript.suggest.includeCompletionsForImportStatements": true,
+    "explorer.fileNesting.enabled": false
+}

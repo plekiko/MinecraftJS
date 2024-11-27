@@ -6,6 +6,7 @@ class InputHandler {
             this.keys[key] = false;
             this.keysDown[key] = false;
         });
+        this.shiftPressed = false; // Tracks if Shift is pressed
         this.mouse = {
             leftMouseDown: false,
             rightMouseDown: false,
@@ -38,6 +39,12 @@ class InputHandler {
 
     _handleKeyDown(event) {
         const key = event.code;
+
+        // Check for Shift specifically
+        if (key === "ShiftLeft" || key === "ShiftRight") {
+            this.shiftPressed = true;
+        }
+
         if (key in this.keys) {
             if (!this.keys[key]) {
                 this.keysDown[key] = true; // Set keysDown only on the first keydown
@@ -48,6 +55,12 @@ class InputHandler {
 
     _handleKeyUp(event) {
         const key = event.code;
+
+        // Check for Shift specifically
+        if (key === "ShiftLeft" || key === "ShiftRight") {
+            this.shiftPressed = false;
+        }
+
         if (key in this.keys) {
             this.keys[key] = false; // Reset key state
             this.keysDown[key] = false; // Clear single press event

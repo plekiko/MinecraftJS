@@ -81,7 +81,11 @@ class Hotbar {
         ctx.fillStyle = "rgb(0, 0, 0, .7)";
         ctx.font = "25px Pixel";
 
-        drawText(count, CANVAS.width / 2 - 213 + slot * 60, CANVAS.height - 17);
+        drawText({
+            text: count,
+            x: CANVAS.width / 2 - 213 + slot * 60,
+            y: CANVAS.height - 17,
+        });
     }
 
     drawInSlot(sprite, slot) {

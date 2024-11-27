@@ -44,4 +44,4 @@ function startMusic() {
     setTimeout(playRandomSong, startDelay);
 }
 
-startMusic();
+// startMusic();

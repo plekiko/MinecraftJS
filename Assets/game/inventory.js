@@ -830,7 +830,14 @@ class Inventory {
             ? GetBlock(hoverInventoryItem.blockId).name
             : GetItem(hoverInventoryItem.itemId).name;
 
-        drawText(title, mousePos.x + 20, mousePos.y - 5, 25, true, "left");
+        drawText({
+            text: title,
+            x: mousePos.x + 20,
+            y: mousePos.y - 5,
+            size: 25,
+            shadow: true,
+            textAlign: "left",
+        });
     }
 
     drawHoldItem() {
@@ -852,11 +859,11 @@ class Inventory {
 
         if (holdingItem.count <= 1) return;
 
-        drawText(
-            holdingItem.count,
-            image.x + image.sizeX + 5,
-            image.y + image.sizeY + 3
-        );
+        drawText({
+            text: holdingItem.count,
+            x: image.x + image.sizeX + 5,
+            y: image.y + image.sizeY + 3,
+        });
     }
 
     drawCraftingSlots() {
@@ -893,7 +900,7 @@ class Inventory {
         if (item.count <= 1) return;
 
         // Draw the count
-        drawText(item.count, slotX + 55, slotY + 50, 30);
+        drawText({ text: item.count, x: slotX + 55, y: slotY + 50, size: 30 });
     }
 }
 
