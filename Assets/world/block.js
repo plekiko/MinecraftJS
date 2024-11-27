@@ -7,7 +7,7 @@ class BlockType {
         grassOffset = false,
         animationSpeed = null,
         fluid = false,
-        drag = 1,
+        drag = 40,
         collision = true,
 
         breakSound = Sounds.Break_Wood,

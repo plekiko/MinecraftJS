@@ -56,7 +56,7 @@ class Mob extends Entity {
             if (
                 this.velocity.x === 0 &&
                 this.moving &&
-                this.timeLastMoved > 0.1
+                this.timeLastMoved > 0.2
             ) {
                 this.jump();
             }

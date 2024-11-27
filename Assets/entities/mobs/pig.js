@@ -4,7 +4,10 @@ class Pig extends Mob {
         noAi = false,
         position = new Vector2(),
         invulnerable = false,
-        body = pigBody,
+        body = new Body({
+            parts: pigBody.parts,
+            flipCorrection: pigBody.flipCorrection,
+        }),
     } = {}) {
         super({
             health: health,

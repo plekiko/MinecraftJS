@@ -156,15 +156,8 @@ class Player extends Entity {
     }
 
     collisionLogic() {
-        const other = this.entityCollision();
-
-        if (!other) return;
-
-        switch (other.type) {
-            case EntityTypes.Drop:
-                this.pickupDrop(other);
-                break;
-        }
+        const drop = this.entityCollision(EntityTypes.Drop);
+        if (drop) this.pickupDrop(drop);
     }
 
     pickupDrop(drop) {

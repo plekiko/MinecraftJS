@@ -374,6 +374,7 @@ class Entity {
     ground() {
         this.velocity.y = 0;
         this.grounded = true;
+        this.drag = GetBlock(this.standingOnBlockType).drag;
         if (this.knockBackBuffer) {
             this.isGettingKnockback = false;
             this.knockBackBuffer = false;
@@ -456,7 +457,7 @@ class Entity {
         });
     }
 
-    entityCollision() {
+    entityCollision(type = 0) {
         for (let other of entities) {
             if (other !== this) {
                 if (
@@ -465,7 +466,7 @@ class Entity {
                     this.position.y < other.position.y + other.hitbox.y &&
                     this.position.y + this.hitbox.y > other.position.y
                 ) {
-                    return other;
+                    if (other.type === type) return other;
                 }
             }
         }

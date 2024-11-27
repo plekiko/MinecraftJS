@@ -55,7 +55,7 @@ function updateBlocks(deltaTime) {
 }
 
 function updateGame(deltaTime) {
-    updateArray(entities, deltaTime);
+    updateEntities(deltaTime);
 
     updateDebug();
 
@@ -70,6 +70,29 @@ function updateGame(deltaTime) {
     animateFrame();
 
     camera.update(deltaTime, player);
+}
+
+function updateEntities(deltaTime) {
+    if (!player) {
+        updateArray(entities, deltaTime);
+        return;
+    }
+
+    const playerFarX = player.position.x + ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
+    const playerNearX = player.position.x - ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
+
+    entities.forEach((entity) => {
+        if (entity === player) {
+            entity.update(deltaTime);
+            return;
+        }
+        if (
+            entity.position.x >= playerNearX &&
+            entity.position.x <= playerFarX
+        ) {
+            entity.update(deltaTime);
+        }
+    });
 }
 
 function updateArray(array, deltaTime) {
