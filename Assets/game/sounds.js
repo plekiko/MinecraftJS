@@ -53,8 +53,17 @@ const Sounds = Object.freeze({
         "step/wood6",
     ],
 
+    Water_Enter: ["liquid/splash", "liquid/splash2"],
+
     // Mobs
     Pig_Say: ["mobs/pig/say1", "mobs/pig/say2", "mobs/pig/say3"],
+    Pig_Step: [
+        "mobs/pig/step1",
+        "mobs/pig/step2",
+        "mobs/pig/step3",
+        "mobs/pig/step4",
+        "mobs/pig/step5",
+    ],
 });
 
 function PlayRandomSoundFromArray({

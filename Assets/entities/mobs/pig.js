@@ -14,10 +14,13 @@ class Pig extends Mob {
             position: position,
             hitbox: new Vector2(0.9 * BLOCK_SIZE, 0.8 * BLOCK_SIZE),
             invulnerable: invulnerable,
+            footstepSounds: Sounds.Pig_Step,
             body: body,
             noAi: noAi,
             ai: AI.Pig,
             speed: 1.5,
+            stepSize: 0.4,
+            ambientSounds: Sounds.Pig_Say,
         });
     }
 

@@ -248,9 +248,7 @@ function lerp(a, b, t) {
 
 function isValidClassType(variable) {
     try {
-        // Ensure it's a function and can be called with 'new'
         if (typeof variable === "function" && variable.prototype) {
-            // Test instantiation to confirm it's a class
             Reflect.construct(() => {}, [], variable);
             return true;
         }

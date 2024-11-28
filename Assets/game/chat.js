@@ -163,19 +163,18 @@ class Chat {
 
         // Check if x and y coordinates are provided
         if (!messageArray[1] || !messageArray[2]) {
-            this.invalidCommand("/tp x(number) y(number)");
+            this.invalidCommand("/tp <x> <y>");
             return;
         }
 
-        const x = parseInt(messageArray[1]);
-        const y = parseInt(messageArray[2]);
-
-        if (isNaN(x) || isNaN(y)) {
-            this.invalidCommand("/tp x(number) y(number)");
-            return;
-        }
+        const x = messageArray[1] !== "~" ? parseInt(messageArray[1]) : "~";
+        const y = messageArray[2] !== "~" ? parseInt(messageArray[2]) : "~";
 
         const targetPosition = this.getWorldPosition(new Vector2(x, y));
+
+        if (!targetPosition) {
+            this.invalidCommand("/tp <x> <y>");
+        }
 
         player.position.x = targetPosition.x;
         player.position.y = targetPosition.y;

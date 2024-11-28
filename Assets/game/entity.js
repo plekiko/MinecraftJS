@@ -23,6 +23,10 @@ class Entity {
         drag = 40,
         bouncing = false,
         type = EntityTypes.Entity,
+        stepSize = 1,
+        footstepSounds = null,
+
+        float = false,
 
         forceDirection = false,
 
@@ -51,6 +55,8 @@ class Entity {
 
         this.forceDirection = forceDirection;
 
+        this.float = float;
+
         this.direction = direction;
 
         this.sprite = sprite;
@@ -75,7 +81,8 @@ class Entity {
         this.originDate = Date.now();
 
         this.stepCounter = 0;
-        this.stepSize = 1;
+        this.stepSize = stepSize;
+        this.footstepSounds = footstepSounds;
 
         this.holdItem = holdItem;
 
@@ -393,7 +400,13 @@ class Entity {
             if (!this.swimming) {
                 this.enterFluid();
             }
+
+            if (this.float) this.floatLogic();
         }
+    }
+
+    floatLogic() {
+        this.velocity.y += -GRAVITY / BLOCK_SIZE;
     }
 
     playFootstepSounds(deltaTime) {
@@ -403,12 +416,16 @@ class Entity {
         this.stepCounter += Math.abs(this.velocity.x / 100) * deltaTime;
 
         if (this.stepCounter >= this.stepSize) {
-            const block = GetBlock(this.standingOnBlockType);
-            if (!block) return;
-            const sounds = block.breakingSound;
-            if (!sounds) return;
+            if (!this.footstepSounds) {
+                const block = GetBlock(this.standingOnBlockType);
+                if (!block) return;
+                this.playFootstepFromBlock(block);
+                this.stepCounter -= this.stepSize;
+                return;
+            }
+
             PlayRandomSoundFromArray({
-                array: sounds,
+                array: this.footstepSounds,
                 volume: 0.2,
                 positional: true,
                 range: 6,
@@ -417,6 +434,18 @@ class Entity {
 
             this.stepCounter -= this.stepSize;
         }
+    }
+
+    playFootstepFromBlock(block) {
+        const sounds = block.breakingSound;
+        if (!sounds) return;
+        PlayRandomSoundFromArray({
+            array: sounds,
+            volume: 0.2,
+            positional: true,
+            range: 6,
+            origin: this.position,
+        });
     }
 
     isCollidingWithBlockType() {
@@ -475,6 +504,20 @@ class Entity {
 
     enterFluid() {
         this.swimming = true;
+
+        if (this.velocity.y > BLOCK_SIZE * 5) this.playWaterEnterSound();
+
+        if (this.float && this.velocity.y > BLOCK_SIZE * 3) {
+            this.velocity.y /= 1.1;
+        }
+    }
+
+    playWaterEnterSound() {
+        PlayRandomSoundFromArray({
+            array: Sounds.Water_Enter,
+            positional: true,
+            origin: this.position,
+        });
     }
 
     applyDrag(deltaTime) {

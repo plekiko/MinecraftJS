@@ -6,18 +6,26 @@ class Mob extends Entity {
         hitbox = new Vector2(1, 1),
         invulnerable = false,
         type = EntityTypes.Mob,
+        float = true,
         ai,
         speed = 2,
         body = null,
+        stepSize = 1,
+        footstepSounds = null,
+        ambientSounds = null,
+        ambientSoundRange = { min: 5, max: 20 },
     } = {}) {
         super({
             position: position,
             hitbox: hitbox,
+            float: float,
             invulnerable: invulnerable,
             type: type,
             body: body,
             direction: -1,
             forceDirection: true,
+            stepSize: stepSize,
+            footstepSounds: footstepSounds,
             direction: RandomRange(0, 2) ? 1 : -1,
             maxVelocity: new Vector2(speed * BLOCK_SIZE * 1.5, 1000),
         });
@@ -28,6 +36,13 @@ class Mob extends Entity {
         this.speed = speed;
         this.ai = ai;
         this.timeLastMoved = 0;
+        this.ambientSounds = ambientSounds;
+        this.ambientSoundCounter = 0;
+        this.ambientSoundRange = ambientSoundRange;
+        this.ambientSoundTarget = RandomRange(
+            this.ambientSoundRange.min,
+            this.ambientSoundRange.max
+        );
         this.randomMoveTime = RandomRange(
             ai.moveTimeRange.min,
             ai.moveTimeRange.max
@@ -37,6 +52,29 @@ class Mob extends Entity {
 
     aiUpdate(deltaTime) {
         this.passiveMob(deltaTime);
+
+        this.ambientLogic(deltaTime);
+    }
+
+    ambientLogic(deltaTime) {
+        if (!this.ambientSounds) return;
+
+        if (this.ambientSoundCounter >= this.ambientSoundTarget) {
+            this.ambientSoundCounter = 0;
+            this.ambientSoundTarget = RandomRange(
+                this.ambientSoundRange.min,
+                this.ambientSoundRange.max
+            );
+
+            PlayRandomSoundFromArray({
+                array: this.ambientSounds,
+                positional: true,
+                origin: this.position,
+                range: 7,
+            });
+        }
+
+        this.ambientSoundCounter += deltaTime;
     }
 
     passiveMob(deltaTime) {
