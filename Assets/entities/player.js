@@ -389,6 +389,8 @@ class Player extends Entity {
             PlayRandomSoundFromArray({
                 array: block.breakingSound,
                 volume: 0.2,
+                positional: true,
+                origin: getBlockWorldPosition(this.hoverBlock),
             });
 
             this.swing();

@@ -89,13 +89,16 @@ function PlayRandomSoundFromArray({
         );
 }
 
-function playPositionalSound(origin, sound, range = 10, volume = 1) {
+function playPositionalSound(origin, sound, range = 10, maxVolume = 1) {
     if (!player) {
-        playSound(sound, volume);
+        playSound(sound, maxVolume);
         return;
     }
 
-    if (Vector2.Distance(player.position, origin) <= range * BLOCK_SIZE) {
+    const distance = Vector2.Distance(player.position, origin);
+    if (distance <= range * BLOCK_SIZE) {
+        // Calculate linear volume scale
+        const volume = maxVolume * (1 - distance / (range * BLOCK_SIZE));
         playSound(sound, volume);
     }
 }

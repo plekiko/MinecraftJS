@@ -188,6 +188,13 @@ function GetBiomeForNoise(temp, wetness, mountains) {
     return Biomes.Planes;
 }
 
+function getBlockWorldPosition(block) {
+    return new Vector2(
+        block.transform.position.x + camera.x,
+        block.transform.position.y + camera.y
+    );
+}
+
 function GetBlockAtWorldPosition(worldX, worldY, adjust = true) {
     // Remove camera influence from world coordinates to get the correct world position
     let adjustedWorldX = worldX;

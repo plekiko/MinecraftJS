@@ -286,7 +286,11 @@ class Block extends Square {
 
         if (!soundArray) return;
 
-        PlayRandomSoundFromArray({ array: soundArray });
+        PlayRandomSoundFromArray({
+            array: soundArray,
+            positional: true,
+            origin: getBlockWorldPosition(this),
+        });
     }
 
     dropBlock() {
