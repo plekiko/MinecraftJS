@@ -26,6 +26,8 @@ class Entity {
         stepSize = 1,
         footstepSounds = null,
 
+        offset = new Vector2(),
+
         float = false,
 
         forceDirection = false,
@@ -72,7 +74,7 @@ class Entity {
         this.drag = drag;
 
         this.bouncing = bouncing;
-        this.offset = new Vector2();
+        this.offset = offset;
 
         this.lookDirection = 0;
 
@@ -596,8 +598,8 @@ class Entity {
         if (this.img) {
             ctx.drawImage(
                 this.img,
-                this.spriteScale * 3,
-                this.spriteScale * 3,
+                0,
+                0,
                 this.img.width * this.spriteScale,
                 this.img.height * this.spriteScale
             );

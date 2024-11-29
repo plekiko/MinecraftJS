@@ -143,8 +143,8 @@ function postProcessChunks() {
             chunk.generateTrees();
             chunk.generateGrass();
             chunk.generateBedrock();
-            chunk.generated = true;
             chunk.updateChunk();
+            chunk.generated = true;
         }
     });
 }
@@ -242,8 +242,8 @@ function checkAdjacentBlocks(position) {
     return false; // No adjacent block found
 }
 
-function SetBlockTypeAtPosition(worldX, worldY, blockType) {
-    const block = GetBlockAtWorldPosition(worldX, worldY);
+function SetBlockTypeAtPosition(worldX, worldY, blockType, adjust = true) {
+    const block = GetBlockAtWorldPosition(worldX, worldY, adjust);
 
     if (!block) return;
 

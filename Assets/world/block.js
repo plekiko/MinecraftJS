@@ -285,6 +285,16 @@ class Block extends Square {
         this.setBlockType(Blocks.Air);
     }
 
+    gravityBlock() {
+        let fallEntity = Entities.Sand;
+
+        summonEntity(fallEntity, getBlockWorldPosition(this), {
+            blockType: this.blockType,
+        });
+
+        this.breakBlock(false);
+    }
+
     playBreakSound() {
         const soundArray = GetBlock(this.blockType).breakSound;
 

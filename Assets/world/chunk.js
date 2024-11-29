@@ -197,6 +197,8 @@ class Chunk {
 
         if (blockData.breakWithoutBlockUnderneath)
             block.breakBlock(blockData.dropWithoutTool);
+
+        if (blockData.fall) block.gravityBlock();
     }
 
     updateWater() {

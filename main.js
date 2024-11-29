@@ -30,8 +30,8 @@ function calculateFPS(currentFrameTime) {
     return fpsDisplay;
 }
 
-function summonEntity(entity, position) {
-    entities.push(new entity({ position: position }));
+function summonEntity(entity, position, props) {
+    entities.push(new entity({ position: position, ...props }));
 }
 
 function gameLoop() {

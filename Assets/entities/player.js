@@ -269,6 +269,13 @@ class Player extends Entity {
 
         this.hoverBlock.playBreakSound();
 
+        chunks
+            .get(this.hoverBlock.chunkX)
+            .checkForBlockWithAirBeneath(
+                this.hoverBlock.x,
+                this.hoverBlock.y + 1
+            );
+
         this.swing();
 
         if (this.abilities.instaBuild) return;
