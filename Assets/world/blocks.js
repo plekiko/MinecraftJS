@@ -109,6 +109,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Sand,
         breakingSound: Sounds.Breaking_Sand,
         toolType: ToolType.Shovel,
+        fall: true,
     }),
     new BlockType({
         blockId: 7,

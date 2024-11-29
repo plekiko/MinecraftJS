@@ -18,6 +18,8 @@ class BlockType {
         dropWithoutTool = true,
         category = null,
 
+        fall = false,
+
         dropBlock = blockId,
         dropItem = null,
 
@@ -39,6 +41,8 @@ class BlockType {
         this.collision = collision;
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
+
+        this.fall = fall;
 
         this.breakWithoutBlockUnderneath = breakWithoutBlockUnderneath;
 

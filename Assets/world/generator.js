@@ -143,8 +143,8 @@ function postProcessChunks() {
             chunk.generateTrees();
             chunk.generateGrass();
             chunk.generateBedrock();
-            chunk.updateChunk();
             chunk.generated = true;
+            chunk.updateChunk();
         }
     });
 }

@@ -118,8 +118,8 @@ class Square {
                 this.img,
                 -this.transform.size.x / 2 + this.drawOffset,
                 -this.transform.size.y / 2,
-                this.img.width * this.spriteScale,
-                this.img.height * this.spriteScale
+                16 * this.spriteScale,
+                16 * this.spriteScale
             );
 
             // Apply dark overlay if required
