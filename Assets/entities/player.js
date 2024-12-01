@@ -28,6 +28,7 @@ class Player extends Entity {
         });
 
         this.health = health;
+        this.maxHealth = health;
         this.abilities = abilities;
         this.foodExhaustionLevel = foodExhaustionLevel;
         this.foodLevel = foodLevel;

@@ -27,6 +27,8 @@ class BlockType {
 
         breakWithoutBlockUnderneath = false,
 
+        dropTable = null,
+
         fuelTime = null,
         smeltOutput = null,
 
@@ -57,6 +59,7 @@ class BlockType {
 
         this.dropBlock = dropBlock;
         this.dropItem = dropItem;
+        this.dropTable = dropTable;
 
         this.fuelTime = fuelTime;
         this.smeltOutput = smeltOutput;
@@ -284,6 +287,8 @@ class Block extends Square {
 
         if (drop) this.dropBlock();
 
+        if (GetBlock(this.blockType).dropTable) this.dropTable();
+
         this.playBreakSound();
 
         this.setBlockType(Blocks.Air);
@@ -308,6 +313,29 @@ class Block extends Square {
             array: soundArray,
             positional: true,
             origin: getBlockWorldPosition(this),
+        });
+    }
+
+    dropTable() {
+        const block = GetBlock(this.blockType);
+
+        const loot = block.dropTable.getRandomLoot();
+
+        loot.forEach((item) => {
+            summonEntity(
+                Drop,
+                new Vector2(
+                    this.transform.position.x +
+                        camera.x +
+                        RandomRange(0, BLOCK_SIZE / 3),
+                    this.transform.position.y + camera.y + BLOCK_SIZE / 4
+                ),
+                {
+                    blockId: item.blockId,
+                    itemId: item.itemId,
+                    count: item.count,
+                }
+            );
         });
     }
 

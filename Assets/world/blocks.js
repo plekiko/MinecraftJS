@@ -161,6 +161,12 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shears,
+        dropTable: new LootTable([
+            new LootItem({
+                itemId: Items.Apple,
+                subtract: 10,
+            }),
+        ]),
     }),
     new BlockType({
         blockId: 12,
@@ -183,6 +189,12 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shears,
+        dropTable: new LootTable([
+            new LootItem({
+                itemId: Items.Apple,
+                subtract: 10,
+            }),
+        ]),
     }),
     new BlockType({
         blockId: 14,
@@ -227,6 +239,12 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shears,
+        dropTable: new LootTable([
+            new LootItem({
+                itemId: Items.Apple,
+                subtract: 10,
+            }),
+        ]),
     }),
     new BlockType({
         blockId: 18,
@@ -240,6 +258,12 @@ const blockTypes = [
         toolType: ToolType.Shears,
         dropWithoutTool: false,
         breakWithoutBlockUnderneath: true,
+        dropTable: new LootTable([
+            new LootItem({
+                itemId: Items.Seeds,
+                subtract: 6,
+            }),
+        ]),
     }),
     new BlockType({
         blockId: 19,
@@ -253,6 +277,12 @@ const blockTypes = [
         toolType: ToolType.Shears,
         dropWithoutTool: false,
         breakWithoutBlockUnderneath: true,
+        dropTable: new LootTable([
+            new LootItem({
+                itemId: Items.Seeds,
+                subtract: 4,
+            }),
+        ]),
     }),
     new BlockType({
         blockId: 20,

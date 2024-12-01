@@ -1,20 +1,21 @@
 class Chat {
     constructor() {
         this.inChat = false;
+
         this.messages = [];
         this.chatLog = [];
         this.tempMessages = [];
+
         this.currentMessage = "";
+        this.cursorPosition = 0;
 
         this.cursorBlinkTime = 0;
         this.showCursor = true;
 
         this.maxLenght = 50;
-
         this.messageDuration = 8000;
 
         this.historyIndex = 0;
-
         this.viewHistory = 10;
 
         this.loadLog();
@@ -325,17 +326,27 @@ class Chat {
         ctx.fillStyle = "rgb(0, 0, 0, .6)";
         ctx.fillRect(10, CANVAS.height - 50, 1000, 40);
 
-        const messageToDisplay =
-            this.currentMessage + (this.showCursor ? "_" : "");
+        const beforeCursor = this.currentMessage.slice(0, this.cursorPosition);
+        const cursorX = 17 + this.measureTextWidth(beforeCursor, 30); // Using the helper function
+
+        // const messageToDisplay =
+        //     this.currentMessage.slice(0, this.cursorPosition) +
+        //     (this.showCursor ? "_" : "") +
+        //     this.currentMessage.slice(this.cursorPosition);
 
         drawText({
-            text: messageToDisplay,
+            text: this.currentMessage,
             x: 17,
             y: CANVAS.height - 20,
             size: 30,
             shadow: false,
             textAlign: "left",
         });
+
+        if (this.showCursor) {
+            ctx.fillStyle = "white";
+            ctx.fillRect(cursorX, CANVAS.height - 22, 13, 4); // Draw cursor
+        }
 
         for (let i = 0; i < this.viewHistory; i++) {
             const messageIndex = this.messages.length - 1 - i;
@@ -369,6 +380,7 @@ class Chat {
                     this.historyIndex++;
                     this.currentMessage =
                         this.chatLog[this.chatLog.length - this.historyIndex];
+                    this.cursorPosition = this.currentMessage.length;
                 }
             }
         }
@@ -379,14 +391,28 @@ class Chat {
                 this.historyIndex--;
                 this.currentMessage =
                     this.chatLog[this.chatLog.length - this.historyIndex];
+                this.cursorPosition = this.currentMessage.length;
             } else if (this.historyIndex === 1) {
                 this.historyIndex = -1; // Reset to current input
                 this.currentMessage = ""; // Clear the message if no history is selected
+                this.cursorPosition = 0;
             }
         }
     }
 
+    measureTextWidth(text, fontSize) {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.font = `${fontSize}px Pixel`; // Use the same font as your chat
+        return ctx.measureText(text).width;
+    }
+
     updateTyping() {
+        this.cursorPosition = Math.max(
+            0,
+            Math.min(this.currentMessage.length, this.cursorPosition)
+        );
+
         const isShiftPressed =
             input.isKeyDown("ShiftLeft") || input.isKeyDown("ShiftRight");
 
@@ -395,7 +421,33 @@ class Chat {
         trackedKeys.forEach((key) => {
             if (input.isKeyPressed(key)) {
                 if (key === "Backspace") {
-                    this.currentMessage = this.currentMessage.slice(0, -1);
+                    if (this.cursorPosition > 0) {
+                        this.currentMessage =
+                            this.currentMessage.slice(
+                                0,
+                                this.cursorPosition - 1
+                            ) + this.currentMessage.slice(this.cursorPosition);
+                        this.cursorPosition--; // Move cursor back
+                    }
+                    return;
+                }
+                if (key === "Delete") {
+                    if (this.cursorPosition < this.currentMessage.length) {
+                        this.currentMessage =
+                            this.currentMessage.slice(0, this.cursorPosition) +
+                            this.currentMessage.slice(this.cursorPosition + 1);
+                    }
+                    return;
+                }
+                if (key === "ArrowLeft") {
+                    this.cursorPosition = Math.max(0, this.cursorPosition - 1);
+                    return;
+                }
+                if (key === "ArrowRight") {
+                    this.cursorPosition = Math.min(
+                        this.currentMessage.length,
+                        this.cursorPosition + 1
+                    );
                     return;
                 }
                 if (this.currentMessage.length >= this.maxLenght) return;
@@ -403,25 +455,53 @@ class Chat {
                 switch (key) {
                     case key.startsWith("Key") && key:
                         const letter = key.replace("Key", "");
-                        this.currentMessage += isShiftPressed
-                            ? letter.toUpperCase()
-                            : letter.toLowerCase();
+                        this.currentMessage =
+                            this.currentMessage.slice(0, this.cursorPosition) +
+                            (isShiftPressed
+                                ? letter.toUpperCase()
+                                : letter.toLowerCase()) +
+                            this.currentMessage.slice(this.cursorPosition);
+                        this.cursorPosition++; // Move cursor forward
                         break;
                     case key.startsWith("Digit") && key:
-                        this.currentMessage += key.replace("Digit", "");
+                        this.currentMessage =
+                            this.currentMessage.slice(0, this.cursorPosition) +
+                            key.replace("Digit", "") +
+                            this.currentMessage.slice(this.cursorPosition);
+                        this.cursorPosition++;
                         break;
                     case "Space":
-                        this.currentMessage += " ";
+                        this.currentMessage =
+                            this.currentMessage.slice(0, this.cursorPosition) +
+                            " " +
+                            this.currentMessage.slice(this.cursorPosition);
+                        this.cursorPosition++;
                         break;
                     case "Backslash":
-                        this.currentMessage += "/";
+                        this.currentMessage =
+                            this.currentMessage.slice(0, this.cursorPosition) +
+                            "/" +
+                            this.currentMessage.slice(this.cursorPosition);
+                        this.cursorPosition++;
                         break;
                     case "Period":
-                        this.currentMessage += ".";
+                        this.currentMessage =
+                            this.currentMessage.slice(0, this.cursorPosition) +
+                            "." +
+                            this.currentMessage.slice(this.cursorPosition);
+                        this.cursorPosition++;
                         break;
                     case "Backquote":
-                        if (input.shiftPressed) this.currentMessage += "~";
-
+                        if (input.shiftPressed)
+                            this.currentMessage =
+                                this.currentMessage.slice(
+                                    0,
+                                    this.cursorPosition
+                                ) +
+                                "~" +
+                                this.currentMessage.slice(this.cursorPosition);
+                        this.cursorPosition++;
+                        break;
                     default:
                         break;
                 }

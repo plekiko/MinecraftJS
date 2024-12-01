@@ -28,8 +28,11 @@ const Items = Object.freeze({
     CookedBeef: 31,
     RawPorkchop: 32,
     CookedPorkchop: 33,
+    Apple: 34,
 
     Leather: 50,
+
+    Seeds: 100,
 });
 
 const items = [
@@ -45,6 +48,7 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         fuelTime: 10,
+        baseDamage: 0.7,
     }),
     new Item({
         itemId: 2,
@@ -98,6 +102,7 @@ const items = [
         toolLevel: 2,
         heldInHand: true,
         stackSize: 1,
+        baseDamage: 1.7,
     }),
     new Item({
         itemId: 7,
@@ -156,6 +161,7 @@ const items = [
         toolLevel: 3,
         heldInHand: true,
         stackSize: 1,
+        baseDamage: 2.7,
     }),
     new Item({
         itemId: 13,
@@ -239,6 +245,11 @@ const items = [
         name: "Cooked Porkchop",
         sprite: "porkchop_cooked",
     }),
+    new Item({
+        itemId: 34,
+        name: "Apple",
+        sprite: "apple",
+    }),
     //#endregion
 
     //#region Mob Drops
@@ -246,6 +257,14 @@ const items = [
         itemId: 50,
         name: "Leather",
         sprite: "leather",
+    }),
+    //#endregion
+
+    //#region Seeds
+    new Item({
+        itemId: 100,
+        name: "Seeds",
+        sprite: "seeds_wheat",
     }),
     //#endregion
 ];

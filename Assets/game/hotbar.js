@@ -5,9 +5,41 @@ class Hotbar {
         this.currentSlot = 0;
     }
 
+    drawHearts(health, maxHealth, hotbar) {
+        // Empty Hearts
+        for (let i = 0; i < maxHealth / 2; i++) {
+            drawImage(
+                "Assets/sprites/gui/empty_heart.png",
+                hotbar.x + i * 9 * 2.9 + 12,
+                hotbar.y - 35,
+                3
+            );
+        }
+
+        // Draw Full and Half Hearts
+        for (let i = 0; i < Math.floor(health / 2); i++) {
+            drawImage(
+                "Assets/sprites/gui/heart.png",
+                hotbar.x + i * 9 * 2.9 + 12,
+                hotbar.y - 35,
+                3
+            );
+        }
+
+        // Check for Half Heart
+        if (health % 2 !== 0) {
+            drawImage(
+                "Assets/sprites/gui/half_heart.png", // Use the half-heart sprite
+                hotbar.x + Math.floor(health / 2) * 9 * 2.9 + 12,
+                hotbar.y - 35,
+                3
+            );
+        }
+    }
+
     draw(ctx) {
         // Draw hotbar
-        drawImage(
+        const hotbar = drawImage(
             "Assets/sprites/gui/hotbar.png",
             CANVAS.width / 2,
             CANVAS.height - 75,
@@ -23,6 +55,8 @@ class Hotbar {
         );
 
         this.drawItems();
+
+        this.drawHearts(player.health, player.maxHealth, hotbar);
     }
 
     update(deltaTime) {
@@ -95,7 +129,7 @@ class Hotbar {
             path,
             CANVAS.width / 2 - 240 + slot * 60,
             CANVAS.height - 63,
-            2.6
+            2.8
         );
     }
 
