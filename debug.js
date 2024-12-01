@@ -1,6 +1,6 @@
-// setInterval(() => {
-//     UpdateDebug();
-// }, 1000 / 60);
+setInterval(() => {
+    updateDebug();
+}, 1000 / 60);
 
 function updateDebug() {
     HandleInput();

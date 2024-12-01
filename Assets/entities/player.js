@@ -247,6 +247,21 @@ class Player extends Entity {
     }
 
     tryHit() {
+        const cursorDistance =
+            Vector2.Distance(
+                this.position,
+                new Vector2(
+                    input.getMouseWorldPosition().x,
+                    input.getMouseWorldPosition().y
+                )
+            ) / BLOCK_SIZE;
+
+        cursorInRange = !this.abilities.instaBuild
+            ? cursorDistance <= INTERACT_DISTANCE
+            : true;
+
+        if (!cursorInRange) return;
+
         const entity = this.checkForEntityOnMouse();
 
         this.hitEntity(entity);
@@ -256,7 +271,17 @@ class Player extends Entity {
         if (!entity) return;
         if (entity === this) return;
 
-        entity.hit(1, this.position.x);
+        entity.hit(this.calculateDamage(), this.position.x);
+    }
+
+    calculateDamage() {
+        let damage = 1;
+
+        if (this.holdItem.itemId) {
+            damage += GetItem(this.holdItem.itemId).baseDamage;
+        }
+
+        return damage;
     }
 
     placingLogic(deltaTime) {

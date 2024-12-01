@@ -62,7 +62,6 @@ function Draw(chunks, frames) {
 
     DrawBackground();
     DrawChunks(chunks);
-    DrawDestroyStage();
     DrawEntities();
     AfterDraw();
 }
@@ -79,11 +78,6 @@ function DrawBreakAndPlaceCursor(inRange = false) {
     const mouseX = input.getMousePositionOnBlockGrid().x;
     const mouseY = input.getMousePositionOnBlockGrid().y;
 
-    ctx.strokeStyle = inRange ? "black" : "red";
-    ctx.lineWidth = 1;
-
-    ctx.strokeRect(mouseX, mouseY, BLOCK_SIZE, BLOCK_SIZE);
-
     if (player.inventory.selectedBlock) {
         drawImage(
             "Assets/sprites/blocks/" +
@@ -97,6 +91,11 @@ function DrawBreakAndPlaceCursor(inRange = false) {
             0.5
         );
     }
+
+    ctx.strokeStyle = inRange ? "black" : "red";
+    ctx.lineWidth = 1;
+
+    ctx.strokeRect(mouseX, mouseY, BLOCK_SIZE, BLOCK_SIZE);
 }
 
 function DrawChunks(chunksMap) {
@@ -161,6 +160,7 @@ function AfterDraw() {
 
 function DrawUI() {
     DrawBreakAndPlaceCursor(cursorInRange);
+    DrawDestroyStage();
 
     DrawHotbar();
     DrawInventory();

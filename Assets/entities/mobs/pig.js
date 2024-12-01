@@ -1,6 +1,6 @@
 class Pig extends Mob {
     constructor({
-        health = 4,
+        health = 10,
         noAi = false,
         position = new Vector2(),
         invulnerable = false,

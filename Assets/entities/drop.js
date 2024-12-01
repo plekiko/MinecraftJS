@@ -12,6 +12,7 @@ class Drop extends Entity {
             sprite: spritePath,
             bouncing: true,
             type: EntityTypes.Drop,
+            float: true,
         });
 
         this.position = position;
@@ -61,11 +62,11 @@ class Drop extends Entity {
     hit() {}
 
     getOutBlockLogic() {
+        const collidingWith = this.isCollidingWithBlockType();
         if (
-            this.filterBlocksByProperty(
-                this.isCollidingWithBlockType(),
-                "collision"
-            ).length > 0
+            this.filterBlocksByProperty(collidingWith, "collision").length >
+                0 &&
+            this.filterBlocksByProperty(collidingWith, "collision").length === 0
         ) {
             this.position.y -= BLOCK_SIZE;
         }

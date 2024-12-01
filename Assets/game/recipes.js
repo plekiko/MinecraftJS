@@ -392,6 +392,22 @@ const recipes = [
         output: new InventoryItem({ blockId: Blocks.StoneBricks, count: 4 }),
     }),
 
+    // Stone Bricks
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockId: Blocks.Sand }),
+                new RecipeItem({ blockId: Blocks.Sand }),
+            ],
+            [
+                new RecipeItem({ blockId: Blocks.Sand }),
+                new RecipeItem({ blockId: Blocks.Sand }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.SandStone, count: 4 }),
+    }),
+
     //#region Ore Blocks and Ores
 
     // Coal Block

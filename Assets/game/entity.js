@@ -376,7 +376,7 @@ class Entity {
             this.velocity.y = 0;
         }
 
-        this.fluidLogic(collidingBlocks);
+        this.fluidLogic(collidingBlocks, deltaTime);
 
         this.calculateForce();
 
@@ -395,7 +395,7 @@ class Entity {
         if (this.isGettingKnockback) this.knockBackBuffer = true;
     }
 
-    fluidLogic(collidingBlocks) {
+    fluidLogic(collidingBlocks, deltaTime) {
         this.swimming = false;
 
         const isCollidingWithFluid =
@@ -407,12 +407,12 @@ class Entity {
                 this.enterFluid();
             }
 
-            if (this.float) this.floatLogic();
+            if (this.float) this.floatLogic(deltaTime);
         }
     }
 
-    floatLogic() {
-        this.velocity.y += -GRAVITY / BLOCK_SIZE;
+    floatLogic(deltaTime) {
+        this.velocity.y += -GRAVITY * 2 * deltaTime;
     }
 
     playFootstepSounds(deltaTime) {
@@ -596,16 +596,21 @@ class Entity {
         }
 
         ctx.fillStyle = this.color;
-        if (!this.sprite || this.sprite == "")
+        if (!this.sprite || this.sprite == "") {
             ctx.fillRect(0, 0, this.hitbox.x, this.hitbox.y);
+        } else if (this.img) {
+            const spriteWidth = this.img.width * this.spriteScale;
+            const spriteHeight = this.img.height * this.spriteScale;
 
-        if (this.img) {
+            const spriteOffsetX = (this.hitbox.x - spriteWidth) / 2;
+            const spriteOffsetY = (this.hitbox.y - spriteHeight) / 2;
+
             ctx.drawImage(
                 this.img,
-                0,
-                0,
-                this.img.width * this.spriteScale,
-                this.img.height * this.spriteScale
+                spriteOffsetX,
+                spriteOffsetY,
+                spriteWidth,
+                spriteHeight
             );
         }
 

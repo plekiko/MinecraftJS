@@ -57,8 +57,6 @@ function updateBlocks(deltaTime) {
 function updateGame(deltaTime) {
     updateEntities(deltaTime);
 
-    updateDebug();
-
     updateBlocks(deltaTime);
 
     if (player) cursorBlockLogic();

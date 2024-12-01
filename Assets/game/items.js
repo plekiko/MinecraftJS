@@ -85,6 +85,7 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         fuelTime: 10,
+        baseDamage: 1,
     }),
     //#endregion
 
@@ -133,6 +134,7 @@ const items = [
         toolLevel: 2,
         heldInHand: true,
         stackSize: 1,
+        baseDamage: 2,
     }),
     //#endregion
 
@@ -190,6 +192,7 @@ const items = [
         toolLevel: 3,
         heldInHand: true,
         stackSize: 1,
+        baseDamage: 3,
     }),
     //#endregion
 

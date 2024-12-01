@@ -1,7 +1,10 @@
 class FallingBlock extends Entity {
     constructor({ position, blockType = Blocks.Sand } = {}) {
         super({
-            position: position,
+            position: new Vector2(
+                position.x + BLOCK_SIZE / 20,
+                position.y + BLOCK_SIZE / 20
+            ),
             sprite:
                 "Assets/sprites/blocks/" + GetBlock(blockType).sprite + ".png",
             hitbox: new Vector2(
@@ -24,9 +27,19 @@ class FallingBlock extends Entity {
             removeEntity(this);
 
             const position = new Vector2(
-                this.position.x - Math.round(BLOCK_SIZE / 4 / BLOCK_SIZE),
-                this.position.y + Math.round(this.lastVelocityY / BLOCK_SIZE)
+                Math.round(
+                    this.position.x -
+                        Math.round(BLOCK_SIZE / 4 / BLOCK_SIZE) -
+                        BLOCK_SIZE / 20
+                ),
+                Math.round(
+                    this.position.y +
+                        Math.round(this.lastVelocityY / BLOCK_SIZE) -
+                        BLOCK_SIZE / 20
+                )
             );
+
+            chat.message(`${position.x} ${position.y}`);
 
             const previousBlock = this.getBlockAtPosition(
                 position.x,
@@ -36,6 +49,8 @@ class FallingBlock extends Entity {
             previousBlock.breakBlock(
                 GetBlock(previousBlock.blockType).dropWithoutTool
             );
+
+            chat.message(position.x, position.y);
 
             SetBlockTypeAtPosition(
                 position.x,
