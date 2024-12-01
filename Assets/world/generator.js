@@ -75,6 +75,10 @@ function RegenerateWorld() {
 
     pendingBlocks = new Map();
     chunks = new Map();
+
+    setTimeout(() => {
+        player.setOnGround();
+    }, 1);
 }
 
 function GenerateWorld() {
@@ -232,6 +236,8 @@ function checkAdjacentBlocks(position) {
             adjacentPos.y,
             false
         );
+
+        if (!block) continue;
 
         const type = GetBlock(block.blockType);
         if (block && !type.fluid && block.blockType !== Blocks.Air) {

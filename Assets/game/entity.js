@@ -34,6 +34,8 @@ class Entity {
 
         forceDirection = false,
 
+        fallDamage = false,
+
         body = null,
 
         direction = 1,
@@ -50,7 +52,10 @@ class Entity {
         this.grounded = false;
         this.standingOnBlockType = null;
         this.noGravity = noGravity;
+
         this.fallDistance = 0;
+        this.fallDamage = fallDamage;
+
         this.invulnerable = invulnerable;
         this.type = type;
 
@@ -247,8 +252,28 @@ class Entity {
     }
 
     die() {
-        this.dropLoot();
+        this.health = 0;
+        this.dieEvent();
         removeEntity(this);
+    }
+
+    setOnGround() {
+        const currentChunk = this.getCurrentChunk();
+        if (!currentChunk.return);
+        const groundLevel = currentChunk.findGroundLevel(this.getXInChunk());
+        if (groundLevel === 0) return false;
+        const y = (CHUNK_HEIGHT - groundLevel) * BLOCK_SIZE - BLOCK_SIZE * 2;
+
+        this.position.y = y;
+    }
+
+    getXInChunk() {
+        const chunkOriginX = this.getCurrentChunk().x;
+        const relativeX = this.position.x - chunkOriginX;
+
+        const xInChunk = Math.floor(relativeX / BLOCK_SIZE);
+
+        return xInChunk;
     }
 
     flashColor(color = "red", duration = 0.05) {
@@ -261,6 +286,17 @@ class Entity {
         }
 
         this.body.flashColor(color, duration);
+    }
+
+    getCurrentChunk() {
+        const chunkPosition =
+            Math.floor(this.position.x / (CHUNK_WIDTH * BLOCK_SIZE)) *
+            CHUNK_WIDTH *
+            BLOCK_SIZE;
+
+        if (!chunks.has(chunkPosition)) return null;
+
+        return chunks.get(chunkPosition);
     }
 
     isSolid(blockType) {
@@ -380,6 +416,10 @@ class Entity {
 
         this.calculateForce();
 
+        if (!this.grounded && !this.swimming)
+            this.fallDistance += (this.velocity.y / BLOCK_SIZE) * deltaTime;
+        else this.fallDistance = 0;
+
         this.position.x += this.velocity.x * deltaTime;
         this.position.y += this.velocity.y * deltaTime;
     }
@@ -387,12 +427,29 @@ class Entity {
     ground() {
         this.velocity.y = 0;
         this.grounded = true;
+
+        this.takeFallDamage();
+
         this.drag = GetBlock(this.standingOnBlockType).drag;
         if (this.knockBackBuffer) {
             this.isGettingKnockback = false;
             this.knockBackBuffer = false;
         }
         if (this.isGettingKnockback) this.knockBackBuffer = true;
+    }
+
+    takeFallDamage() {
+        if (!this.fallDamage) return;
+
+        if (this.fallDistance < 2) return;
+
+        const damage = Math.round(this.fallDistance - 2);
+
+        if (this.fallDistance < 4)
+            playPositionalSound(this.position, "misc/fallsmall.ogg");
+        else playPositionalSound(this.position, "misc/fallbig.ogg");
+
+        this.hit(damage);
     }
 
     fluidLogic(collidingBlocks, deltaTime) {

@@ -280,7 +280,7 @@ class Chunk {
         this.spawnTreeAt(randomTree, x, y); // Spawn the tree at the position
     }
 
-    findGroundLevel(x) {
+    findGroundLevel(x, spawnable = true) {
         for (let y = this.height - 1; y >= 0; y--) {
             const blockAtPos = this.getBlockType(x, y);
             if (
@@ -289,10 +289,10 @@ class Chunk {
                 blockAtPos == Blocks.Sand ||
                 blockAtPos == Blocks.Podzol
             ) {
-                return y + 1; // Place tree one block above ground
+                return y + 1;
             }
         }
-        return 0; // Default to 0 if no ground is found
+        return 0;
     }
 
     generateCaves() {

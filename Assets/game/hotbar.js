@@ -6,6 +6,8 @@ class Hotbar {
     }
 
     drawHearts(health, maxHealth, hotbar) {
+        if (!player.abilities.hasHealth) return;
+
         // Empty Hearts
         for (let i = 0; i < maxHealth / 2; i++) {
             drawImage(

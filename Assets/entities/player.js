@@ -9,6 +9,7 @@ class Player extends Entity {
             mayFly: false,
             walkSpeed: 6,
             jumpForce: 8.5,
+            hasHealth: true,
         },
         foodExhaustionLevel = 0,
         foodLevel = 20,
@@ -25,6 +26,7 @@ class Player extends Entity {
             hitbox: new Vector2(0.4 * BLOCK_SIZE, 1.8 * BLOCK_SIZE),
             type: EntityTypes.Player,
             body: new Body({ parts: playerBody }),
+            fallDamage: true,
         });
 
         this.health = health;
@@ -71,10 +73,22 @@ class Player extends Entity {
         if (this.windowOpen) this.inventory.update(deltaTime);
     }
 
-    hit(damage, hitfromX = 0, kb = 1) {
+    hit(damage, hitfromX = 0, kb = 0) {
         if (!this.health) return;
+        if (!this.abilities.hasHealth) return;
+
         this.knockBack(hitfromX, kb);
         this.damage(damage);
+
+        PlayRandomSoundFromArray({
+            array: Sounds.Player_Hurt,
+            positional: true,
+            origin: this.position,
+        });
+    }
+
+    dieEvent() {
+        chat.message("Player has dies");
     }
 
     setHoldItem() {
@@ -140,7 +154,7 @@ class Player extends Entity {
         this.windowOpen = false;
         this.canMove = true;
 
-        if (this.inventory.holdingItem) this.CurrentInventoryHolding();
+        if (this.inventory.holdingItem) this.dropCurrentInventoryHolding();
 
         const leftOver = this.inventory.closeInventory();
 
@@ -175,7 +189,7 @@ class Player extends Entity {
             })
         );
 
-        if (left != drop.count) playSound("pop.ogg");
+        if (left != drop.count) playSound("misc/pop.ogg");
 
         if (left > 0) {
             drop.count = left;
@@ -316,6 +330,11 @@ class Player extends Entity {
             input.getMousePositionOnBlockGrid().x + Math.floor(camera.x),
             input.getMousePositionOnBlockGrid().y + Math.floor(camera.y)
         );
+
+        if (mousePos.y <= -1) {
+            chat.message("Can't place here! World height: " + CHUNK_HEIGHT);
+            return;
+        }
 
         let collidingWithEntity = false;
         for (let i = 0; i < this.entities.length; i++) {
@@ -533,7 +552,7 @@ class Player extends Entity {
 
         const isSprinting = input.isKeyDown("ShiftLeft");
         let speed = isSprinting
-            ? this.abilities.walkSpeed * BLOCK_SIZE * 1.3
+            ? this.abilities.walkSpeed * 1.3 * BLOCK_SIZE
             : this.abilities.walkSpeed * BLOCK_SIZE;
 
         this.velocity.y = 0;

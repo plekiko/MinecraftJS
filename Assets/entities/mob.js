@@ -107,6 +107,10 @@ class Mob extends Entity {
         }
     }
 
+    dieEvent() {
+        this.dropLoot();
+    }
+
     dropLoot() {
         if (!this.lootTable) return;
 

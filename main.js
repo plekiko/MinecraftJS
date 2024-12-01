@@ -4,17 +4,20 @@ let fpsDisplay = 0;
 chat = new Chat();
 
 if (SPAWN_PLAYER) {
-    player = new Player({
-        position: new Vector2(0, TERRAIN_HEIGHT * BLOCK_SIZE),
-        entities: entities,
-    });
+    setTimeout(() => {
+        player = new Player({
+            position: new Vector2(0, 0),
+            entities: entities,
+        });
 
-    entities.push(player);
+        player.setOnGround();
 
-    hotbar = new Hotbar(player.inventory);
+        entities.push(player);
+
+        hotbar = new Hotbar(player.inventory);
+        summonEntity(Cow, structuredClone(player.position));
+    }, 100);
 }
-
-summonEntity(Cow, structuredClone(player.position));
 
 function calculateFPS(currentFrameTime) {
     if (!calculateFPS.lastUpdate) calculateFPS.lastUpdate = currentFrameTime;

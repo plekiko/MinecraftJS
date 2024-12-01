@@ -77,6 +77,9 @@ const Sounds = Object.freeze({
         "mobs/cow/step4",
     ],
     Cow_Hurt: ["mobs/cow/hurt1", "mobs/cow/hurt2", "mobs/cow/hurt3"],
+
+    // Player
+    Player_Hurt: ["player/hit1", "player/hit2", "player/hit3"],
 });
 
 function PlayRandomSoundFromArray({

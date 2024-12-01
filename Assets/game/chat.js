@@ -203,6 +203,9 @@ class Chat {
                 player.abilities.instaBuild = false;
                 player.abilities.mayBuild = true;
 
+                player.abilities.hasHealth = true;
+                player.health = 20;
+
                 this.message("Set gamemode to Survival.");
                 return;
 
@@ -211,6 +214,8 @@ class Chat {
                 player.abilities.mayFly = true;
                 player.abilities.instaBuild = true;
                 player.abilities.mayBuild = true;
+
+                player.abilities.hasHealth = false;
 
                 this.message("Set gamemode to Creative.");
                 return;
@@ -221,6 +226,9 @@ class Chat {
                 player.abilities.flying = false;
                 player.abilities.instaBuild = false;
                 player.abilities.mayBuild = false;
+
+                player.abilities.hasHealth = true;
+                player.health = 20;
 
                 this.message("Set gamemode to Adventure.");
                 return;
