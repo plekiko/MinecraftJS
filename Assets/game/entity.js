@@ -26,6 +26,8 @@ class Entity {
         stepSize = 1,
         footstepSounds = null,
 
+        canSwim = true,
+
         offset = new Vector2(),
 
         float = false,
@@ -51,6 +53,8 @@ class Entity {
         this.fallDistance = 0;
         this.invulnerable = invulnerable;
         this.type = type;
+
+        this.canSwim = canSwim;
 
         this.isGettingKnockback = false;
         this.knockBackBuffer = false;
@@ -397,7 +401,7 @@ class Entity {
         const isCollidingWithFluid =
             this.filterBlocksByProperty(collidingBlocks, "fluid").length > 0;
 
-        if (isCollidingWithFluid) {
+        if (isCollidingWithFluid && this.canSwim) {
             this.grounded = false;
             if (!this.swimming) {
                 this.enterFluid();

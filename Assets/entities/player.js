@@ -139,7 +139,7 @@ class Player extends Entity {
         this.windowOpen = false;
         this.canMove = true;
 
-        if (this.inventory.holdingItem) this.opCurrentInventoryHolding();
+        if (this.inventory.holdingItem) this.CurrentInventoryHolding();
 
         const leftOver = this.inventory.closeInventory();
 
@@ -185,14 +185,13 @@ class Player extends Entity {
     }
 
     drop(item, count = item.count) {
-        entities.push(
-            new Drop({
-                x: this.position.x + RandomRange(0, BLOCK_SIZE / 3),
-                y: this.position.y,
-                blockId: item.blockId,
-                itemId: item.itemId,
-                count: count,
-            })
+        summonEntity(
+            Drop,
+            new Vector2(
+                this.position.x + RandomRange(0, BLOCK_SIZE / 3),
+                this.position.y
+            ),
+            { blockId: item.blockId, itemId: item.itemId, count: count }
         );
     }
 

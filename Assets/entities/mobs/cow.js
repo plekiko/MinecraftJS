@@ -1,31 +1,36 @@
-class Pig extends Mob {
+class Cow extends Mob {
     constructor({
         health = 4,
         noAi = false,
         position = new Vector2(),
         invulnerable = false,
         body = new Body({
-            parts: pigBody.parts,
-            flipCorrection: pigBody.flipCorrection,
+            parts: cowBody.parts,
+            flipCorrection: cowBody.flipCorrection,
         }),
     } = {}) {
         super({
             health: health,
             position: position,
-            hitbox: new Vector2(0.9 * BLOCK_SIZE, 0.8 * BLOCK_SIZE),
+            hitbox: new Vector2(0.9 * BLOCK_SIZE, 1 * BLOCK_SIZE),
             invulnerable: invulnerable,
-            footstepSounds: Sounds.Pig_Step,
+            footstepSounds: Sounds.Cow_Step,
             body: body,
             noAi: noAi,
-            ai: AI.Pig,
-            speed: 2.5,
+            ai: AI.Cow,
+            speed: 1.8,
             stepSize: 0.4,
-            ambientSounds: Sounds.Pig_Say,
+            ambientSounds: Sounds.Cow_Say,
             lootTable: new LootTable([
                 new LootItem({
-                    itemId: Items.RawPorkchop,
+                    itemId: Items.RawBeef,
                     maxCount: 2,
                     subtract: 1,
+                }),
+                new LootItem({
+                    itemId: Items.Leather,
+                    maxCount: 3,
+                    subtract: 6,
                 }),
             ]),
         });
@@ -40,63 +45,71 @@ class Pig extends Mob {
         if (!this.health) return;
         this.knockBack(hitfromX, kb);
         this.damage(damage);
-        PlayRandomSoundFromArray({ array: Sounds.Pig_Say });
+        PlayRandomSoundFromArray({
+            array: Sounds.Cow_Hurt,
+            positional: true,
+            origin: this.position,
+        });
     }
 
     die() {
         this.dropLoot();
-        playPositionalSound(this.position, "mobs/pig/death.ogg");
+        PlayRandomSoundFromArray({
+            array: Sounds.Cow_Say,
+            positional: true,
+            origin: this.position,
+        });
         removeEntity(this);
     }
 }
 
-const pigBody = new Body({
-    flipCorrection: 3,
+const cowBody = new Body({
+    flipCorrection: 0,
     parts: {
         head: new BodyPart({
-            sprite: "entities/pig/head",
-            offset: { x: 40, y: -8 },
-            flipOrigin: { x: -52, y: 0 },
+            sprite: "entities/cow/head",
+            offset: { x: 46, y: -18 },
+            flipOrigin: { x: -62, y: 0 },
             zIndex: 0,
             flip: true,
         }),
         torso: new BodyPart({
-            sprite: "entities/pig/torso",
-            offset: { x: -10, y: 4 },
-            flipOrigin: { x: 48, y: 0 },
+            sprite: "entities/cow/torso",
+            offset: { x: -13, y: -3 },
+            flipOrigin: { x: 55, y: 0 },
             zIndex: 2,
             flip: true,
         }),
         back_back_leg: new BodyPart({
-            sprite: "entities/pig/far_leg",
-            offset: { x: -15, y: 31 },
+            sprite: "entities/cow/far_leg",
+            offset: { x: -18, y: 22 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
-            swayIntensity: 4,
+            swayIntensity: 3,
             zIndex: -1,
         }),
         back_leg: new BodyPart({
-            sprite: "entities/pig/leg",
-            offset: { x: -15, y: 31 },
+            sprite: "entities/cow/leg",
+            offset: { x: -18, y: 22 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
-            swayIntensity: 4,
+            swayIntensity: 3,
             zIndex: 1,
         }),
         front_back_leg: new BodyPart({
-            sprite: "entities/pig/far_leg",
-            offset: { x: 30, y: 31 },
+            sprite: "entities/cow/far_leg",
+            offset: { x: 35, y: 22 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
-            swayIntensity: 4,
+            swayIntensity: 3,
             zIndex: -1,
         }),
         front_leg: new BodyPart({
-            sprite: "entities/pig/leg",
-            offset: { x: 30, y: 31 },
+            sprite: "entities/cow/leg",
+            offset: { x: 35, y: 22 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
-            swayIntensity: 4,
+            swayIntensity: 3,
             zIndex: 1,
         }),
         // snout: new BodyPart({

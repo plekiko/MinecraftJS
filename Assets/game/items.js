@@ -23,6 +23,13 @@ const Items = Object.freeze({
     Coal: 20,
     IronIngot: 21,
     Charcoal: 22,
+
+    RawBeef: 30,
+    CookedBeef: 31,
+    RawPorkchop: 32,
+    CookedPorkchop: 33,
+
+    Leather: 50,
 });
 
 const items = [
@@ -203,6 +210,39 @@ const items = [
         name: "Charcoal",
         sprite: "charcoal",
         fuelTime: 80,
+    }),
+    //#endregion
+
+    //#region Food
+    new Item({
+        itemId: 30,
+        name: "Raw Beef",
+        sprite: "beef_raw",
+        smeltOutput: { itemId: 31 },
+    }),
+    new Item({
+        itemId: 31,
+        name: "Cooked Beef",
+        sprite: "beef_cooked",
+    }),
+    new Item({
+        itemId: 32,
+        name: "Raw Porkchop",
+        sprite: "porkchop_raw",
+        smeltOutput: { itemId: 33 },
+    }),
+    new Item({
+        itemId: 33,
+        name: "Cooked Porkchop",
+        sprite: "porkchop_cooked",
+    }),
+    //#endregion
+
+    //#region Mob Drops
+    new Item({
+        itemId: 50,
+        name: "Leather",
+        sprite: "leather",
     }),
     //#endregion
 ];

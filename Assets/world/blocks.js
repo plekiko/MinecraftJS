@@ -384,6 +384,8 @@ const blockTypes = [
         hardness: -2,
         animationSpeed: 0.2,
         fluid: true,
+        dropWithoutTool: false,
+        breakSound: Sounds.Water_Enter,
     }),
     new BlockType({
         blockId: 32,

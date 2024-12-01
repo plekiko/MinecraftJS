@@ -14,6 +14,7 @@ class Mob extends Entity {
         footstepSounds = null,
         ambientSounds = null,
         ambientSoundRange = { min: 5, max: 20 },
+        lootTable = null,
     } = {}) {
         super({
             position: position,
@@ -48,6 +49,8 @@ class Mob extends Entity {
             ai.moveTimeRange.max
         );
         this.moving = false;
+
+        this.lootTable = lootTable;
     }
 
     aiUpdate(deltaTime) {
@@ -104,6 +107,20 @@ class Mob extends Entity {
         }
     }
 
+    dropLoot() {
+        if (!this.lootTable) return;
+
+        const loot = this.lootTable.getRandomLoot();
+
+        loot.forEach((item) => {
+            summonEntity(Drop, new Vector2(this.position.x, this.position.y), {
+                blockId: item.blockId,
+                itemId: item.itemId,
+                count: item.count,
+            });
+        });
+    }
+
     jump() {
         if (!this.grounded) return;
 
@@ -145,6 +162,9 @@ const Agression = Object.freeze({
 
 const AI = Object.freeze({
     Pig: new aiType({
+        moveTimeRange: { min: 3, max: 7 },
+    }),
+    Cow: new aiType({
         moveTimeRange: { min: 3, max: 7 },
     }),
 });

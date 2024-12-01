@@ -64,6 +64,19 @@ const Sounds = Object.freeze({
         "mobs/pig/step4",
         "mobs/pig/step5",
     ],
+    Cow_Say: [
+        "mobs/cow/say1",
+        "mobs/cow/say2",
+        "mobs/cow/say3",
+        "mobs/cow/say4",
+    ],
+    Cow_Step: [
+        "mobs/cow/step1",
+        "mobs/cow/step2",
+        "mobs/cow/step3",
+        "mobs/cow/step4",
+    ],
+    Cow_Hurt: ["mobs/cow/hurt1", "mobs/cow/hurt2", "mobs/cow/hurt3"],
 });
 
 function PlayRandomSoundFromArray({

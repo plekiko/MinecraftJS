@@ -17,7 +17,7 @@ class Hotbar {
         // Draw current slot
         drawImage(
             "Assets/sprites/gui/selected-slot.png",
-            CANVAS.width / 2 - 239 + this.currentSlot * 60,
+            CANVAS.width / 2 - 240 + this.currentSlot * 60,
             CANVAS.height - 78,
             3
         );
@@ -93,9 +93,9 @@ class Hotbar {
 
         drawImage(
             path,
-            CANVAS.width / 2 - 239 + slot * 60,
-            CANVAS.height - 60,
-            2.3
+            CANVAS.width / 2 - 240 + slot * 60,
+            CANVAS.height - 63,
+            2.6
         );
     }
 

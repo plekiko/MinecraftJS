@@ -14,7 +14,7 @@ if (SPAWN_PLAYER) {
     hotbar = new Hotbar(player.inventory);
 }
 
-summonEntity(Pig, structuredClone(player.position));
+summonEntity(Cow, structuredClone(player.position));
 
 function calculateFPS(currentFrameTime) {
     if (!calculateFPS.lastUpdate) calculateFPS.lastUpdate = currentFrameTime;

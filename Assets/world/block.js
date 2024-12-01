@@ -20,6 +20,8 @@ class BlockType {
 
         fall = false,
 
+        ambientSound = null,
+
         dropBlock = blockId,
         dropItem = null,
 
@@ -43,6 +45,8 @@ class BlockType {
         this.breakingSound = breakingSound;
 
         this.fall = fall;
+
+        this.ambientSound = ambientSound;
 
         this.breakWithoutBlockUnderneath = breakWithoutBlockUnderneath;
 
@@ -309,16 +313,19 @@ class Block extends Square {
 
     dropBlock() {
         const block = GetBlock(this.blockType);
-        entities.push(
-            new Drop({
-                x:
-                    this.transform.position.x +
+
+        summonEntity(
+            Drop,
+            new Vector2(
+                this.transform.position.x +
                     camera.x +
                     RandomRange(0, BLOCK_SIZE / 3),
-                y: this.transform.position.y + camera.y + BLOCK_SIZE / 4,
+                this.transform.position.y + camera.y + BLOCK_SIZE / 4
+            ),
+            {
                 blockId: block.dropItem == null ? block.dropBlock : null,
                 itemId: block.dropItem != null ? block.dropItem : null,
-            })
+            }
         );
     }
 

@@ -1,5 +1,5 @@
 class FallingBlock extends Entity {
-    constructor({ position, blockType }) {
+    constructor({ position, blockType = Blocks.Sand } = {}) {
         super({
             position: position,
             sprite:
@@ -9,9 +9,12 @@ class FallingBlock extends Entity {
                 BLOCK_SIZE - BLOCK_SIZE / 10
             ),
             spriteScale: BLOCK_SIZE / 16,
+            canSwim: false,
         });
 
         this.blockType = blockType;
+
+        this.lastVelocityY = 0;
     }
 
     update(deltaTime) {
@@ -19,12 +22,29 @@ class FallingBlock extends Entity {
 
         if (this.grounded) {
             removeEntity(this);
+
+            const position = new Vector2(
+                this.position.x - Math.round(BLOCK_SIZE / 4 / BLOCK_SIZE),
+                this.position.y + Math.round(this.lastVelocityY / BLOCK_SIZE)
+            );
+
+            const previousBlock = this.getBlockAtPosition(
+                position.x,
+                position.y
+            );
+
+            previousBlock.breakBlock(
+                GetBlock(previousBlock.blockType).dropWithoutTool
+            );
+
             SetBlockTypeAtPosition(
-                this.position.x,
-                this.position.y,
+                position.x,
+                position.y,
                 this.blockType,
                 false
             );
+        } else {
+            this.lastVelocityY = this.velocity.y / 2;
         }
     }
 
