@@ -66,7 +66,7 @@ class Drop extends Entity {
         if (
             this.filterBlocksByProperty(collidingWith, "collision").length >
                 0 &&
-            this.filterBlocksByProperty(collidingWith, "collision").length === 0
+            this.filterBlocksByProperty(collidingWith, "fluid").length === 0
         ) {
             this.position.y -= BLOCK_SIZE;
         }

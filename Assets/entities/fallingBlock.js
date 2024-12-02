@@ -39,7 +39,7 @@ class FallingBlock extends Entity {
                 )
             );
 
-            chat.message(`${position.x} ${position.y}`);
+            // chat.message(`${position.x} ${position.y}`);
 
             const previousBlock = this.getBlockAtPosition(
                 position.x,
@@ -50,7 +50,7 @@ class FallingBlock extends Entity {
                 GetBlock(previousBlock.blockType).dropWithoutTool
             );
 
-            chat.message(position.x, position.y);
+            // chat.message(position.x, position.y);
 
             SetBlockTypeAtPosition(
                 position.x,
