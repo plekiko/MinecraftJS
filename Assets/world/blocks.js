@@ -50,6 +50,7 @@ const Blocks = Object.freeze({
     CoalBlock: 48,
     IronBlock: 49,
     IceBlock: 50,
+    Chest: 51,
 });
 
 const blockTypes = [
@@ -612,6 +613,14 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         dropWithoutTool: false,
         drag: 3,
+    }),
+    new BlockType({
+        blockId: 51,
+        name: "Chest",
+        sprite: "chest",
+        hardness: 3,
+        collision: false,
+        specialType: SpecialType.SingleChest,
     }),
 ];
 

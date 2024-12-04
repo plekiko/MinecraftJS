@@ -303,12 +303,12 @@ class Entity {
         return GetBlock(blockType).collision;
     }
 
-    updateEntity(deltaTime) {
-        this.calculateGravity(deltaTime);
-        this.updatePositionWithVelocity(deltaTime);
-        this.bounceSprite(deltaTime);
-        this.playFootstepSounds(deltaTime);
-        if (this.body) this.body.updateBody(deltaTime);
+    updateEntity() {
+        this.calculateGravity();
+        this.updatePositionWithVelocity();
+        this.bounceSprite();
+        this.playFootstepSounds();
+        if (this.body) this.body.updateBody();
     }
 
     swing() {
@@ -317,7 +317,7 @@ class Entity {
         this.body.swing();
     }
 
-    bounceSprite(deltaTime) {
+    bounceSprite() {
         this.offset.y = 0;
 
         if (!this.bouncing) return;
@@ -326,7 +326,7 @@ class Entity {
         this.offset.y = Math.sin((Date.now() - this.originDate) / 120) * 1.5;
     }
 
-    calculateGravity(deltaTime) {
+    calculateGravity() {
         if (this.noGravity) return;
         this.velocity.y += GRAVITY * deltaTime;
     }
@@ -338,7 +338,7 @@ class Entity {
         this.shouldAddForce = { x: 0, y: 0 };
     }
 
-    handleTargetVelocity(deltaTime) {
+    handleTargetVelocity() {
         if (this.isGettingKnockback) return;
 
         if (this.targetVelocity.x === 0) return;
@@ -364,13 +364,13 @@ class Entity {
         this.targetVelocity = new Vector2();
     }
 
-    updatePositionWithVelocity(deltaTime) {
-        this.handleTargetVelocity(deltaTime);
+    updatePositionWithVelocity() {
+        this.handleTargetVelocity();
 
         const nextPositionX = this.position.x + this.velocity.x * deltaTime;
         const nextPositionY = this.position.y + this.velocity.y * deltaTime;
 
-        this.applyDrag(deltaTime);
+        this.applyDrag();
         this.clampHorizontalVelocity();
 
         const leftCollision = this.checkLeftCollision(nextPositionX);
@@ -463,15 +463,15 @@ class Entity {
                 this.enterFluid();
             }
 
-            if (this.float) this.floatLogic(deltaTime);
+            if (this.float) this.floatLogic();
         }
     }
 
-    floatLogic(deltaTime) {
+    floatLogic() {
         this.velocity.y += -GRAVITY * 2 * deltaTime;
     }
 
-    playFootstepSounds(deltaTime) {
+    playFootstepSounds() {
         if (!this.grounded || Math.abs(this.velocity.x) === 0) return;
         if (!this.standingOnBlockType) return;
 
@@ -582,7 +582,7 @@ class Entity {
         });
     }
 
-    applyDrag(deltaTime) {
+    applyDrag() {
         if (this.targetVelocity.x !== 0) return;
         if (this.isGettingKnockback) return;
         // if (!this.grounded) return;

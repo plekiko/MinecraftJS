@@ -72,8 +72,8 @@ class Drop extends Entity {
         }
     }
 
-    update(deltaTime) {
-        this.updateEntity(deltaTime);
+    update() {
+        this.updateEntity();
         this.collisionLogic();
     }
 }

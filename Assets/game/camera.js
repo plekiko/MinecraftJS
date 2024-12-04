@@ -24,7 +24,7 @@ class Camera {
         return chunkIndex;
     }
 
-    update(deltaTime, player) {
+    update(player) {
         if (!player) {
             const calculatedSpeed = input.isKeyDown("ShiftLeft")
                 ? this.speed * 2
@@ -34,14 +34,14 @@ class Camera {
             this.x += this.velocity.x * calculatedSpeed * deltaTime;
             this.y += this.velocity.y * calculatedSpeed * deltaTime;
         } else {
-            this.followPlayer(deltaTime);
+            this.followPlayer();
         }
 
         // Trigger world generation when the camera moves
         GenerateWorld();
     }
 
-    followPlayer(deltaTime) {
+    followPlayer() {
         const increment = deltaTime * this.lerpSpeed;
 
         let targetX = player.position.x - CANVAS.width / 2;

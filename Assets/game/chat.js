@@ -513,7 +513,7 @@ class Chat {
         });
     }
 
-    update(deltaTime) {
+    update() {
         if (!this.inChat && input.isKeyPressed("KeyT")) {
             this.openChat();
         }

@@ -4,14 +4,20 @@ class Hotbar {
 
         this.currentSlot = 0;
 
-        this.flashingHearts = true;
+        this.flashingHearts = false;
+        this.flashCounter = 0;
         this.previousHealth = 0;
     }
 
     drawHearts(health, maxHealth, hotbar) {
         if (!player.abilities.hasHealth) return;
 
-        this.flashingHearts = false;
+        if (this.flashingHearts) this.flashCounter += deltaTime;
+
+        if (this.flashCounter >= 0.1) {
+            this.flashingHearts = false;
+            this.flashCounter = 0;
+        }
 
         if (this.previousHealth !== player.health) {
             this.previousHealth = player.health;
@@ -73,7 +79,7 @@ class Hotbar {
         this.drawHearts(player.health, player.maxHealth, hotbar);
     }
 
-    update(deltaTime) {
+    update() {
         this.handleSelecting();
         this.handleSelected();
     }

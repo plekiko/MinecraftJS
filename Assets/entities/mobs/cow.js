@@ -36,9 +36,9 @@ class Cow extends Mob {
         });
     }
 
-    update(deltaTime) {
-        this.updateEntity(deltaTime);
-        this.aiUpdate(deltaTime);
+    update() {
+        this.updateEntity();
+        this.aiUpdate();
     }
 
     hit(damage, hitfromX = 0, kb = 5) {

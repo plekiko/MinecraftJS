@@ -39,10 +39,10 @@ function summonEntity(entity, position, props) {
 
 function gameLoop() {
     const currentFrameTime = performance.now();
-    const deltaTime = (currentFrameTime - lastFrameTime) / 1000;
+    deltaTime = (currentFrameTime - lastFrameTime) / 1000;
 
     if (deltaTime <= 1) {
-        updateGame(deltaTime);
+        updateGame();
     }
 
     Draw(chunks, calculateFPS(currentFrameTime), deltaTime);
@@ -51,29 +51,29 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-function updateBlocks(deltaTime) {
+function updateBlocks() {
     updatingBlocks.forEach((block) => {
-        block.update(deltaTime);
+        block.update();
     });
 }
 
-function updateGame(deltaTime) {
-    updateEntities(deltaTime);
+function updateGame() {
+    updateEntities();
 
-    updateBlocks(deltaTime);
+    updateBlocks();
 
     if (player) cursorBlockLogic();
 
-    if (hotbar) hotbar.update(deltaTime);
+    if (hotbar) hotbar.update();
 
-    if (chat) chat.update(deltaTime);
+    if (chat) chat.update();
 
     animateFrame();
 
-    camera.update(deltaTime, player);
+    camera.update(player);
 }
 
-function updateEntities(deltaTime) {
+function updateEntities() {
     if (!player) {
         updateArray(entities, deltaTime);
         return;
@@ -84,21 +84,21 @@ function updateEntities(deltaTime) {
 
     entities.forEach((entity) => {
         if (entity === player) {
-            entity.update(deltaTime);
+            entity.update();
             return;
         }
         if (
             entity.position.x >= playerNearX &&
             entity.position.x <= playerFarX
         ) {
-            entity.update(deltaTime);
+            entity.update();
         }
     });
 }
 
 function updateArray(array, deltaTime) {
     array.forEach((element) => {
-        element.update(deltaTime);
+        element.update();
     });
 }
 

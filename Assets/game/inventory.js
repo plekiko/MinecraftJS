@@ -5,6 +5,7 @@ class Inventory {
         this.items = [];
         this.craftingSlots = [];
         this.furnaceSlots = [];
+        this.storageSlots = [];
 
         this.craftingOutputPosition = {
             x: 508,
@@ -169,6 +170,8 @@ class Inventory {
 
         this.furnaceSlots = null;
 
+        this.storageSlots = null;
+
         this.storage = null;
 
         return leftOver.length > 0 ? leftOver : null;
@@ -180,6 +183,31 @@ class Inventory {
         this.storage = storage;
 
         this.createFurnaceSlots();
+    }
+
+    openSingleChest(storage) {
+        this.storage = storage;
+
+        this.createChestSlots();
+    }
+
+    createChestSlots() {
+        let slots = [];
+
+        for (let y = 0; y < this.storage.length; y++) {
+            slots[y] = [];
+            for (let x = 0; x < this.storage[y].length; x++) {
+                let position = { x: 32 + x * 63, y: 70 + y * 63 };
+
+                let slot = new InventorySlot({
+                    position: position,
+                    item: this.storage[y][x],
+                });
+                slots[y][x] = slot;
+            }
+        }
+
+        this.storageSlots = slots;
     }
 
     createFurnaceSlots() {
@@ -211,7 +239,7 @@ class Inventory {
     }
 
     refreshInventory() {
-        if (this.furnace) {
+        if (this.furnace || this.storageSlots) {
             this.craftingSlots = [];
             return;
         }
@@ -415,7 +443,7 @@ class Inventory {
         return remainingCount;
     }
 
-    update(deltaTime) {
+    update() {
         this.mouseHoverOverSlotsLogic();
 
         if (!input.isRightMouseDown()) this.resetLastHoveredSlot();
@@ -434,6 +462,7 @@ class Inventory {
         this.mouseOverCheck(this.items);
         this.mouseOverCheck(this.craftingSlots);
         this.mouseOverCheck(this.furnaceSlots);
+        this.mouseOverCheck(this.storageSlots);
 
         if (
             this.isSlotHovered(
@@ -746,6 +775,7 @@ class Inventory {
         let path = "inventory";
         if (this.craftingTable) path = "crafting_table";
         if (this.furnace) path = "furnace";
+        if (this.storageSlots) path = "single_chest";
 
         this.inventoryUI = drawImage(
             "Assets/sprites/gui/" + path + ".png",
@@ -765,6 +795,7 @@ class Inventory {
 
         this.drawCraftingSlots();
         this.drawSlots(this.furnaceSlots);
+        this.drawSlots(this.storageSlots);
         this.drawFurnaceExtras();
     }
 

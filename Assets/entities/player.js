@@ -61,19 +61,19 @@ class Player extends Entity {
         this.entities = entities;
     }
 
-    update(deltaTime) {
+    update() {
         this.interactLogic();
-        this.movementLogic(deltaTime);
-        this.breakingAndPlacingLogic(deltaTime);
-        this.updateEntity(deltaTime);
-        this.flyingToggleLogic(deltaTime);
+        this.movementLogic();
+        this.breakingAndPlacingLogic();
+        this.updateEntity();
+        this.flyingToggleLogic();
         this.collisionLogic();
         this.toggleLogic();
         this.dropLogic();
         this.hoverBlockLogic();
         this.setHoldItem();
 
-        if (this.windowOpen) this.inventory.update(deltaTime);
+        if (this.windowOpen) this.inventory.update();
     }
 
     setGamemode(mode = this.gamemode) {
@@ -187,7 +187,20 @@ class Player extends Entity {
             case SpecialType.Furnace:
                 this.openFurnace();
                 break;
+            case SpecialType.SingleChest:
+                this.openSingleChest();
+                break;
         }
+    }
+
+    openSingleChest() {
+        const chestStorage = this.hoverBlock.metaData.storage;
+
+        playPositionalSound(this.position, "blocks/chestopen.ogg");
+
+        this.inventory.openSingleChest(chestStorage);
+        this.inventory.interactedBlock = this.hoverBlock;
+        this.openInventory();
     }
 
     openFurnace() {
@@ -228,6 +241,22 @@ class Player extends Entity {
         this.canMove = true;
 
         if (this.inventory.holdingItem) this.dropCurrentInventoryHolding();
+
+        if (
+            this.inventory.interactedBlock &&
+            this.inventory.interactedBlock.metaData
+        ) {
+            switch (
+                GetBlock(this.inventory.interactedBlock.blockType).specialType
+            ) {
+                case SpecialType.SingleChest:
+                    playPositionalSound(
+                        this.position,
+                        "blocks/chestclosed.ogg"
+                    );
+                    break;
+            }
+        }
 
         const leftOver = this.inventory.closeInventory();
 
@@ -290,14 +319,14 @@ class Player extends Entity {
         this.inventory.holdingItem = null;
     }
 
-    flyingToggleLogic(deltaTime) {
+    flyingToggleLogic() {
         if (!this.abilities.mayFly) return;
         if (!input.isKeyPressed("Backquote")) return;
 
         this.abilities.flying = !this.abilities.flying;
     }
 
-    breakingAndPlacingLogic(deltaTime) {
+    breakingAndPlacingLogic() {
         if (this.windowOpen) return;
 
         if (input.isLeftMouseButtonPressed()) {
@@ -307,11 +336,11 @@ class Player extends Entity {
 
         if (!this.hoverBlock) return;
 
-        if (input.isLeftMouseDown()) this.breakingLogic(deltaTime);
+        if (input.isLeftMouseDown()) this.breakingLogic();
         else {
             this.resetBreaking();
         }
-        if (input.isRightMouseDown()) this.placingLogic(deltaTime);
+        if (input.isRightMouseDown()) this.placingLogic();
     }
 
     // hit() {
@@ -372,7 +401,7 @@ class Player extends Entity {
         return damage;
     }
 
-    placingLogic(deltaTime) {
+    placingLogic() {
         if (!this.abilities.mayBuild) return;
         if (!this.checkBlockForPlacing()) return;
         if (!this.inventory.selectedBlock) return;
@@ -475,7 +504,7 @@ class Player extends Entity {
         this.lastBreakSoundTime = 0;
     }
 
-    breakingLogic(deltaTime) {
+    breakingLogic() {
         if (
             !this.abilities.mayBuild ||
             GetBlock(this.hoverBlock.blockType).hardness < 0
@@ -542,7 +571,7 @@ class Player extends Entity {
         }
     }
 
-    movementLogic(deltaTime) {
+    movementLogic() {
         // this.velocity.x = 0;
 
         if (this.windowOpen) return;
@@ -554,7 +583,7 @@ class Player extends Entity {
         this.handleFlying();
         this.lookAtCursor();
 
-        // this.applyDeltaTime(deltaTime);
+        // this.applyDeltaTime();
     }
 
     lookAtCursor() {
@@ -642,7 +671,7 @@ class Player extends Entity {
             : -speed * 2.52;
     }
 
-    applyDeltaTime(deltaTime) {
+    applyDeltaTime() {
         this.velocity.x *= deltaTime;
         this.velocity.y *= deltaTime;
     }

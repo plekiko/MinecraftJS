@@ -135,6 +135,13 @@ class Block extends Square {
                 ];
                 updating = true;
                 break;
+            case SpecialType.SingleChest:
+                for (let y = 0; y < 3; y++) {
+                    storage[y] = [];
+                    for (let x = 0; x < 9; x++) {
+                        storage[y][x] = new InventoryItem();
+                    }
+                }
         }
 
         this.metaData = new Metadata({ storage: storage, updating: updating });
@@ -165,11 +172,11 @@ class Block extends Square {
         this.updateSprite();
     }
 
-    update(deltaTime) {
+    update() {
         if (!this.metaData) return;
 
         if (GetBlock(this.blockType).specialType === SpecialType.Furnace)
-            this.furnaceLogic(deltaTime);
+            this.furnaceLogic();
 
         if (!this.metaData.isActive) {
             this.resetProgression();
@@ -179,7 +186,7 @@ class Block extends Square {
         this.metaData.progression += deltaTime;
     }
 
-    furnaceLogic(deltaTime) {
+    furnaceLogic() {
         if (!this.metaData.storage) return;
 
         const storage = this.metaData.storage;

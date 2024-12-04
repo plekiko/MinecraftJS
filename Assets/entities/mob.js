@@ -53,13 +53,13 @@ class Mob extends Entity {
         this.lootTable = lootTable;
     }
 
-    aiUpdate(deltaTime) {
-        this.passiveMob(deltaTime);
+    aiUpdate() {
+        this.passiveMob();
 
-        this.ambientLogic(deltaTime);
+        this.ambientLogic();
     }
 
-    ambientLogic(deltaTime) {
+    ambientLogic() {
         if (!this.ambientSounds) return;
 
         if (this.ambientSoundCounter >= this.ambientSoundTarget) {
@@ -80,7 +80,7 @@ class Mob extends Entity {
         this.ambientSoundCounter += deltaTime;
     }
 
-    passiveMob(deltaTime) {
+    passiveMob() {
         this.timeLastMoved += deltaTime;
 
         if (this.timeLastMoved >= this.randomMoveTime) {

@@ -22,10 +22,10 @@ class Body {
         }
     }
 
-    updateBody(deltaTime) {
+    updateBody() {
         for (const partName in this.parts) {
             const part = this.parts[partName];
-            if (part.mainArm) part.updateSwing(deltaTime);
+            if (part.mainArm) part.updateSwing();
         }
     }
 
@@ -205,7 +205,7 @@ class BodyPart {
         this.swingProgress = 0;
     }
 
-    updateSwing(deltaTime) {
+    updateSwing() {
         if (!this.isSwinging) return;
 
         this.swingProgress += this.swingSpeed * deltaTime;

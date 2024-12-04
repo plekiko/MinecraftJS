@@ -20,8 +20,8 @@ class FallingBlock extends Entity {
         this.lastVelocityY = 0;
     }
 
-    update(deltaTime) {
-        this.updateEntity(deltaTime);
+    update() {
+        this.updateEntity();
 
         if (this.grounded) {
             removeEntity(this);
