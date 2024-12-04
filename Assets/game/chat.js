@@ -108,6 +108,10 @@ class Chat {
             case "summon":
                 this.summon(messageArray);
                 break;
+            case "kill":
+                if (!player) break;
+                player.dieEvent();
+                break;
             default:
                 this.message("Invalid Command!");
                 break;
@@ -177,8 +181,7 @@ class Chat {
             this.invalidCommand("/tp <x> <y>");
         }
 
-        player.position.x = targetPosition.x;
-        player.position.y = targetPosition.y;
+        player.teleport(targetPosition);
 
         this.message(`Teleported player to x: ${x} y: ${y}`);
     }
@@ -188,53 +191,46 @@ class Chat {
             this.invalidCommand("/gamemode <Gamemode>");
             return;
         }
+
         if (!player) {
             this.message("No player found.");
             return;
         }
 
-        const gamemode = messageArray[1];
+        const gamemodeMap = {
+            survival: 0,
+            creative: 1,
+            adventure: 2,
+            // spectator: 3,
+        };
 
-        switch (gamemode) {
-            // Survival
-            case "0":
-                player.abilities.mayFly = false;
-                player.abilities.flying = false;
-                player.abilities.instaBuild = false;
-                player.abilities.mayBuild = true;
+        const input = messageArray[1].toLowerCase();
 
-                player.abilities.hasHealth = true;
-                player.health = 20;
-
-                this.message("Set gamemode to Survival.");
-                return;
-
-            // Creative
-            case "1":
-                player.abilities.mayFly = true;
-                player.abilities.instaBuild = true;
-                player.abilities.mayBuild = true;
-
-                player.abilities.hasHealth = false;
-
-                this.message("Set gamemode to Creative.");
-                return;
-
-            // Adventure
-            case "2":
-                player.abilities.mayFly = false;
-                player.abilities.flying = false;
-                player.abilities.instaBuild = false;
-                player.abilities.mayBuild = false;
-
-                player.abilities.hasHealth = true;
-                player.health = 20;
-
-                this.message("Set gamemode to Adventure.");
-                return;
+        // Determine the gamemode number
+        let gamemode;
+        if (isNaN(input)) {
+            gamemode = gamemodeMap[input];
+        } else {
+            gamemode = parseInt(input);
         }
 
-        this.message("Gamemode " + messageArray[1] + " does not exist.");
+        if (gamemode === undefined || gamemode < 0 || gamemode > 3) {
+            this.message(
+                "Invalid gamemode. Valid gamemodes are: " +
+                    "0 (Survival) 1 (Creative), 2 (Adventure) "
+            );
+            return;
+        }
+
+        player.setGamemode(gamemode);
+
+        const gamemodeNames = [
+            "Survival",
+            "Creative",
+            "Adventure",
+            // "Spectator",
+        ];
+        this.message("Gamemode set to " + gamemodeNames[gamemode] + ".");
     }
 
     invalidCommand(usage) {

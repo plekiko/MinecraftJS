@@ -47,17 +47,24 @@ class Camera {
         let targetX = player.position.x - CANVAS.width / 2;
         let targetY = this.getWorldY(player.position.y);
 
-        this.x = lerp(this.x, targetX, increment);
-        this.y = lerp(this.y, targetY, increment);
+        // Define a maximum distance threshold
+        const maxDistance = 500; // Adjust this value as needed
 
-        // this.x = player.position.x - CANVAS.width / 2;
-        // this.y = this.getWorldY(player.position.y);
+        // Calculate the distances between the current position and the target
+        const distanceX = Math.abs(this.x - targetX);
+        const distanceY = Math.abs(this.y - targetY);
 
-        // if (Math.abs(this.x - targetX) < 0.1) {
-        //     this.x = targetX;
-        // }
-        // if (Math.abs(this.y - targetY) < 0.1) {
-        //     this.y = targetY;
-        // }
+        // If the distance is greater than maxDistance, snap to the target position
+        if (distanceX > maxDistance) {
+            this.x = targetX;
+        } else {
+            this.x = lerp(this.x, targetX, increment);
+        }
+
+        if (distanceY > maxDistance) {
+            this.y = targetY;
+        } else {
+            this.y = lerp(this.y, targetY, increment);
+        }
     }
 }

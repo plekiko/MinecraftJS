@@ -94,6 +94,32 @@ class Inventory {
         }
     }
 
+    dropAll(position) {
+        for (let y = 0; y < this.items.length; y++) {
+            for (let x = 0; x < this.items[y].length; x++) {
+                const item = this.items[y][x].item;
+
+                if (!item.blockId && (!item.itemId || item.itemId === 0))
+                    continue;
+
+                summonEntity(
+                    Drop,
+                    new Vector2(
+                        position.x + RandomRange(-BLOCK_SIZE, BLOCK_SIZE),
+                        position.y
+                    ),
+                    {
+                        blockId: item.blockId,
+                        itemId: item.itemId,
+                        count: item.count,
+                    }
+                );
+            }
+        }
+
+        this.createItemArray();
+    }
+
     isSlotHovered(x, y) {
         return mouseOverPosition(
             this.inventoryUI.x + x,

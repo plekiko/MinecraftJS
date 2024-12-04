@@ -11,6 +11,7 @@ class Player extends Entity {
             jumpForce: 8.5,
             hasHealth: true,
         },
+        gamemode = 0,
         foodExhaustionLevel = 0,
         foodLevel = 20,
         foodSaturationLevel = 0,
@@ -39,6 +40,8 @@ class Player extends Entity {
         this.playerGameType = playerGameType;
         this.score = score;
         this.xpLevel = xpLevel;
+
+        this.gamemode = gamemode;
 
         this.inventory = inventory;
 
@@ -73,6 +76,43 @@ class Player extends Entity {
         if (this.windowOpen) this.inventory.update(deltaTime);
     }
 
+    setGamemode(mode = this.gamemode) {
+        this.gamemode = mode;
+
+        switch (mode) {
+            case 0:
+                this.abilities.mayFly = false;
+                this.abilities.flying = false;
+                this.abilities.instaBuild = false;
+                this.abilities.mayBuild = true;
+
+                this.abilities.hasHealth = true;
+                this.health = 20;
+                return;
+
+            // Creative
+            case 1:
+                this.abilities.mayFly = true;
+                this.abilities.instaBuild = true;
+                this.abilities.mayBuild = true;
+
+                this.abilities.hasHealth = false;
+                this.health = 20;
+                return;
+
+            // Adventure
+            case 2:
+                this.abilities.mayFly = false;
+                this.abilities.flying = false;
+                this.abilities.instaBuild = false;
+                this.abilities.mayBuild = false;
+
+                this.abilities.hasHealth = true;
+                this.health = 20;
+                return;
+        }
+    }
+
     hit(damage, hitfromX = 0, kb = 0) {
         if (!this.health) return;
         if (!this.abilities.hasHealth) return;
@@ -87,13 +127,39 @@ class Player extends Entity {
         });
     }
 
+    respawn() {
+        this.teleport(new Vector2(0, 0));
+        this.setOnGround();
+        this.setGamemode();
+    }
+
+    dropAllItems() {
+        this.closeInventory();
+
+        this.inventory.dropAll(this.position);
+    }
+
     dieEvent() {
         chat.message("Player has dies");
+
+        this.abilities.mayFly = false;
+        this.abilities.flying = false;
+        this.abilities.instaBuild = false;
+        this.abilities.mayBuild = false;
+        this.canMove = false;
+
+        this.dropAllItems();
+
+        this.respawn();
     }
 
     setHoldItem() {
         this.holdItem =
             this.inventory.items[3][this.inventory.currentSlot].item;
+    }
+
+    teleport(position) {
+        this.position = position;
     }
 
     interactLogic() {

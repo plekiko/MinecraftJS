@@ -254,7 +254,6 @@ class Entity {
     die() {
         this.health = 0;
         this.dieEvent();
-        removeEntity(this);
     }
 
     setOnGround() {

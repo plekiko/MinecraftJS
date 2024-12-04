@@ -43,7 +43,7 @@ class Pig extends Mob {
         PlayRandomSoundFromArray({ array: Sounds.Pig_Say });
     }
 
-    die() {
+    dieEvent() {
         this.dropLoot();
         playPositionalSound(this.position, "mobs/pig/death.ogg");
         removeEntity(this);

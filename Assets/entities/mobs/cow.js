@@ -52,7 +52,7 @@ class Cow extends Mob {
         });
     }
 
-    die() {
+    dieEvent() {
         this.dropLoot();
         PlayRandomSoundFromArray({
             array: Sounds.Cow_Say,
