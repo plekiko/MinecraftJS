@@ -298,6 +298,8 @@ class Block extends Square {
 
         this.playBreakSound();
 
+        if (this.metaData && this.metaData.storage) this.dropStorage();
+
         this.setBlockType(Blocks.Air);
     }
 
@@ -362,6 +364,31 @@ class Block extends Square {
                 itemId: block.dropItem != null ? block.dropItem : null,
             }
         );
+    }
+
+    dropStorage() {
+        const storage = this.metaData.storage;
+
+        for (let y = 0; y < storage.length; y++) {
+            for (let x = 0; x < storage[y].length; x++) {
+                const item = storage[y][x];
+                if (!item.blockId && item.itemId === null) continue;
+                summonEntity(
+                    Drop,
+                    new Vector2(
+                        this.transform.position.x +
+                            camera.x +
+                            RandomRange(0, BLOCK_SIZE / 3),
+                        this.transform.position.y + camera.y + BLOCK_SIZE / 4
+                    ),
+                    {
+                        blockId: item.blockId,
+                        itemId: item.itemId,
+                        count: item.count,
+                    }
+                );
+            }
+        }
     }
 
     updateSprite() {
