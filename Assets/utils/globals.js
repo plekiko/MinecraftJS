@@ -12,6 +12,9 @@ const INTERACT_DISTANCE = 4;
 
 let deltaTime;
 
+let time = 1;
+const dayNightSpeed = 0.01;
+
 const ORE_THRESHOLDS = {
     coal: 2.5,
     iron: 2,

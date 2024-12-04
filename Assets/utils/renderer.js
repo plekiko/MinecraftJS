@@ -27,12 +27,47 @@ const camera = new Camera(0, CHUNK_HEIGHT * 2);
 r.style.setProperty("--drawMouse", "none");
 
 function DrawBackground() {
-    const gradient = ctx.createLinearGradient(0, CANVAS.height, 0, 0); // Bottom to top gradient
-    gradient.addColorStop(0, "#D47147"); // Bottom color
-    gradient.addColorStop(1, "#74B3FF"); // Top color
+    // Calculate the color stops based on time
+    const dayColor = "#74B3FF"; // Daytime top color (light blue)
+    const nightColor = "#000000"; // Nighttime top color (dark blue)
+    const sunsetColor = "#D47147"; // Sunset bottom color
+    const midnightColor = "#001848"; // Midnight bottom color
+
+    const topColor = interpolateColor(
+        nightColor,
+        dayColor,
+        Math.sin(time) * 0.5 + 0.5
+    );
+    const bottomColor = interpolateColor(
+        midnightColor,
+        sunsetColor,
+        Math.sin(time) * 0.5 + 0.5
+    );
+
+    const gradient = ctx.createLinearGradient(0, CANVAS.height, 0, 0);
+    gradient.addColorStop(0, bottomColor); // Bottom color
+    gradient.addColorStop(1, topColor); // Top color
 
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
+}
+
+function interpolateColor(color1, color2, factor) {
+    const c1 = hexToRgb(color1);
+    const c2 = hexToRgb(color2);
+    const r = Math.round(c1.r + (c2.r - c1.r) * factor);
+    const g = Math.round(c1.g + (c2.g - c1.g) * factor);
+    const b = Math.round(c1.b + (c2.b - c1.b) * factor);
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+function hexToRgb(hex) {
+    const bigint = parseInt(hex.slice(1), 16);
+    return {
+        r: (bigint >> 16) & 255,
+        g: (bigint >> 8) & 255,
+        b: bigint & 255,
+    };
 }
 
 function mouseOverPosition(x, y, sizeX, sizeY, world = false) {
@@ -62,6 +97,11 @@ function Draw(chunks, frames) {
 
     DrawBackground();
     DrawChunks(chunks);
+    if (player) {
+        DrawBreakAndPlaceCursor(cursorInRange);
+        DrawDestroyStage();
+    }
+
     DrawEntities();
     AfterDraw();
 }
@@ -159,9 +199,6 @@ function AfterDraw() {
 }
 
 function DrawUI() {
-    DrawBreakAndPlaceCursor(cursorInRange);
-    DrawDestroyStage();
-
     DrawHotbar();
     DrawInventory();
     chat.draw(ctx);

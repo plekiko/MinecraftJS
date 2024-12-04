@@ -189,6 +189,7 @@ class Chunk {
     }
 
     checkForBlockWithAirBeneath(x, y) {
+        console.log(this.getBlockTypeData(x, y - 1, false));
         const blockData = this.getBlockTypeData(x, y - 1, false);
 
         if (!blockData) return;

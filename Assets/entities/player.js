@@ -403,19 +403,27 @@ class Player extends Entity {
 
     placingLogic() {
         if (!this.abilities.mayBuild) return;
-        if (!this.checkBlockForPlacing()) return;
         if (!this.inventory.selectedBlock) return;
+        if (!this.checkBlockForPlacing(this.inventory.selectedBlock.collision))
+            return;
 
         this.hoverBlock.setBlockType(this.inventory.selectedBlock.blockId);
 
         this.hoverBlock.playBreakSound();
 
-        chunks
+        const blockBeneath = chunks
             .get(this.hoverBlock.chunkX)
-            .checkForBlockWithAirBeneath(
-                this.hoverBlock.x,
-                this.hoverBlock.y + 1
-            );
+            .getBlockTypeData(this.hoverBlock.x, this.hoverBlock.y + 1, false);
+
+        if (!blockBeneath) return;
+        if (!blockBeneath.collision) {
+            if (this.inventory.selectedBlock.breakWithoutBlockUnderneath)
+                this.hoverBlock.breakBlock(
+                    this.inventory.selectedBlock.dropWithoutTool
+                );
+            if (this.inventory.selectedBlock.fall)
+                this.hoverBlock.gravityBlock();
+        }
 
         this.swing();
 
@@ -424,7 +432,7 @@ class Player extends Entity {
         this.inventory.removeItem(3, this.inventory.currentSlot);
     }
 
-    checkBlockForPlacing() {
+    checkBlockForPlacing(collision) {
         const isAir = this.hoverBlock.blockType === Blocks.Air;
         const isFluid = GetBlock(this.hoverBlock.blockType).fluid;
 
@@ -439,19 +447,22 @@ class Player extends Entity {
         }
 
         let collidingWithEntity = false;
-        for (let i = 0; i < this.entities.length; i++) {
-            const entity = this.entities[i];
-            if (entity.type === 0) continue;
-            if (
-                isColliding(
-                    new Vector2(entity.position.x, entity.position.y),
-                    new Vector2(entity.hitbox.x, entity.hitbox.y),
-                    new Vector2(mousePos.x, mousePos.y),
-                    new Vector2(BLOCK_SIZE, BLOCK_SIZE)
-                )
-            ) {
-                collidingWithEntity = true;
-                break;
+
+        if (collision) {
+            for (let i = 0; i < this.entities.length; i++) {
+                const entity = this.entities[i];
+                if (entity.type === 0) continue;
+                if (
+                    isColliding(
+                        new Vector2(entity.position.x, entity.position.y),
+                        new Vector2(entity.hitbox.x, entity.hitbox.y),
+                        new Vector2(mousePos.x, mousePos.y),
+                        new Vector2(BLOCK_SIZE, BLOCK_SIZE)
+                    )
+                ) {
+                    collidingWithEntity = true;
+                    break;
+                }
             }
         }
 

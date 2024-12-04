@@ -376,6 +376,29 @@ const recipes = [
         output: new InventoryItem({ blockId: Blocks.Furnace, count: 1 }),
     }),
 
+    // Chest
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.Chest, count: 1 }),
+    }),
+
     // Stone Bricks
     new Recipe({
         type: RecipeType.Shaped,
@@ -437,5 +460,9 @@ const recipes = [
         input: new RecipeItem({ blockId: Blocks.IronBlock }),
         output: new InventoryItem({ itemId: Items.IronIngot, count: 9 }),
     }),
+    //#endregion
+
+    //#region Misc
+
     //#endregion
 ];

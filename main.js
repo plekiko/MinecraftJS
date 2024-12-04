@@ -71,6 +71,12 @@ function updateGame() {
     animateFrame();
 
     camera.update(player);
+
+    dayNightCycle();
+}
+
+function dayNightCycle() {
+    time += deltaTime * dayNightSpeed;
 }
 
 function updateEntities() {

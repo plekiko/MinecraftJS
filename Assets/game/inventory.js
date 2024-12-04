@@ -5,7 +5,7 @@ class Inventory {
         this.items = [];
         this.craftingSlots = [];
         this.furnaceSlots = [];
-        this.storageSlots = [];
+        this.storageSlots = null;
 
         this.craftingOutputPosition = {
             x: 508,
