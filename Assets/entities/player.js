@@ -114,6 +114,7 @@ class Player extends Entity {
     }
 
     hit(damage, hitfromX = 0, kb = 0) {
+        if (!damage) return;
         if (!this.health) return;
         if (!this.abilities.hasHealth) return;
 
@@ -141,6 +142,12 @@ class Player extends Entity {
 
     dieEvent() {
         chat.message("Player has dies");
+
+        PlayRandomSoundFromArray({
+            array: Sounds.Player_Hurt,
+            positional: true,
+            origin: this.position,
+        });
 
         this.abilities.mayFly = false;
         this.abilities.flying = false;

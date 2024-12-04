@@ -3,15 +3,27 @@ class Hotbar {
         this.inventory = inventory;
 
         this.currentSlot = 0;
+
+        this.flashingHearts = true;
+        this.previousHealth = 0;
     }
 
     drawHearts(health, maxHealth, hotbar) {
         if (!player.abilities.hasHealth) return;
 
+        this.flashingHearts = false;
+
+        if (this.previousHealth !== player.health) {
+            this.previousHealth = player.health;
+            this.flashingHearts = true;
+        }
+
         // Empty Hearts
         for (let i = 0; i < maxHealth / 2; i++) {
             drawImage(
-                "Assets/sprites/gui/empty_heart.png",
+                `Assets/sprites/gui/${
+                    this.flashingHearts ? "heart_white.png" : "empty_heart.png"
+                }`,
                 hotbar.x + i * 9 * 2.9 + 12,
                 hotbar.y - 35,
                 3
