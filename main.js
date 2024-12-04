@@ -35,7 +35,9 @@ function calculateFPS(currentFrameTime) {
 }
 
 function summonEntity(entity, position, props) {
-    entities.push(new entity({ position: position, ...props }));
+    const newEntity = new entity({ position: position, ...props });
+    entities.push(newEntity);
+    return newEntity;
 }
 
 function gameLoop() {

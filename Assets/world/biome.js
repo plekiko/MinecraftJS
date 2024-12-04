@@ -15,6 +15,8 @@ class Biome {
         minMount = 0,
         maxMount = 60,
         waterLevel = WATER_LEVEL,
+        mobs = BiomeMobs.CommonMobs,
+        maxMobs = 4,
     } = {}) {
         this.name = name;
         this.heightNoise = heightNoise;
@@ -31,8 +33,14 @@ class Biome {
         this.minMount = minMount;
         this.maxMount = maxMount;
         this.waterLevel = waterLevel;
+        this.mobs = mobs;
+        this.maxMobs = maxMobs;
     }
 }
+
+const BiomeMobs = Object.freeze({
+    CommonMobs: ["Pig", "Cow"],
+});
 
 const Biomes = Object.freeze({
     Planes: new Biome({

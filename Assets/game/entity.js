@@ -272,10 +272,10 @@ class Entity {
 
     setOnGround() {
         const currentChunk = this.getCurrentChunk();
-        if (!currentChunk.return);
+        if (!currentChunk) return;
         const groundLevel = currentChunk.findGroundLevel(this.getXInChunk());
         if (groundLevel === 0) return false;
-        const y = (CHUNK_HEIGHT - groundLevel) * BLOCK_SIZE - BLOCK_SIZE * 2;
+        const y = (CHUNK_HEIGHT - groundLevel) * BLOCK_SIZE - this.hitbox.y - 1;
 
         this.position.y = y;
     }
@@ -605,14 +605,14 @@ class Entity {
             this.velocity.x -=
                 this.drag *
                 100 *
-                (this.type === EntityTypes.Player ? 1 : 0.5) *
+                (this.type === EntityTypes.Player ? 1 : 0.2) *
                 deltaTime;
             if (this.velocity.x < 0) this.velocity.x = 0;
         } else if (this.velocity.x < 0) {
             this.velocity.x +=
                 this.drag *
                 100 *
-                (this.type === EntityTypes.Player ? 1 : 0.5) *
+                (this.type === EntityTypes.Player ? 1 : 0.2) *
                 deltaTime;
             if (this.velocity.x > 0) this.velocity.x = 0;
         }

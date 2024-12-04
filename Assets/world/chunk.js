@@ -184,12 +184,31 @@ class Chunk {
         }
     }
 
+    spawnMobs() {
+        const count = RandomRange(-this.biome.maxMobs, this.biome.maxMobs);
+
+        if (count <= 0) return;
+
+        for (let i = 0; i < count; i++) {
+            const randomX = RandomRange(0, CHUNK_WIDTH);
+
+            const randomEntity =
+                this.biome.mobs[RandomRange(0, this.biome.mobs.length)];
+
+            const entity = summonEntity(
+                Entities[randomEntity],
+                new Vector2(randomX * BLOCK_SIZE + this.x, 0)
+            );
+
+            entity.setOnGround();
+        }
+    }
+
     updateChunk() {
         this.updateWater();
     }
 
     checkForBlockWithAirBeneath(x, y) {
-        console.log(this.getBlockTypeData(x, y - 1, false));
         const blockData = this.getBlockTypeData(x, y - 1, false);
 
         if (!blockData) return;
@@ -281,7 +300,7 @@ class Chunk {
         this.spawnTreeAt(randomTree, x, y); // Spawn the tree at the position
     }
 
-    findGroundLevel(x, spawnable = true) {
+    findGroundLevel(x) {
         for (let y = this.height - 1; y >= 0; y--) {
             const blockAtPos = this.getBlockType(x, y);
             if (

@@ -44,10 +44,7 @@ class Mob extends Entity {
             this.ambientSoundRange.min,
             this.ambientSoundRange.max
         );
-        this.randomMoveTime = RandomRange(
-            ai.moveTimeRange.min,
-            ai.moveTimeRange.max
-        );
+        this.randomMoveTime = RandomRange(0, ai.moveTimeRange.max / 2);
         this.moving = false;
 
         this.lootTable = lootTable;

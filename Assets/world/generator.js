@@ -76,6 +76,10 @@ function RegenerateWorld() {
     pendingBlocks = new Map();
     chunks = new Map();
 
+    entities = [];
+
+    entities.push(player);
+
     setTimeout(() => {
         player.setOnGround();
     }, 1);
@@ -144,6 +148,7 @@ function postProcessChunks() {
             chunk.generateOres();
             chunk.generateCaves();
             chunk.generateWater();
+            chunk.spawnMobs();
             chunk.generateTrees();
             chunk.generateGrass();
             chunk.generateBedrock();

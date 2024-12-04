@@ -390,9 +390,11 @@ class Player extends Entity {
 
     hitEntity(entity) {
         if (!entity) return;
+
+        console.log(entity);
         if (entity === this) return;
 
-        entity.hit(this.calculateDamage(), this.position.x);
+        entity.hit(this.calculateDamage(), this.position.x, 2);
     }
 
     calculateDamage() {
