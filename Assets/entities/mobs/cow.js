@@ -17,8 +17,8 @@ class Cow extends Mob {
             footstepSounds: Sounds.Cow_Step,
             body: body,
             noAi: noAi,
-            ai: AI.Cow,
-            speed: 1.8,
+            ai: AI.PassiveSimple,
+            speed: 1.2,
             stepSize: 0.4,
             ambientSounds: Sounds.Cow_Say,
             lootTable: new LootTable([
@@ -43,8 +43,9 @@ class Cow extends Mob {
 
     hit(damage, hitfromX = 0, kb = 5) {
         if (!this.health) return;
+        if (!this.damage(damage)) return;
+
         this.knockBack(hitfromX, kb);
-        this.damage(damage);
         PlayRandomSoundFromArray({
             array: Sounds.Cow_Hurt,
             positional: true,

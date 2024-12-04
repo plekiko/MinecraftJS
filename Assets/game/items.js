@@ -29,6 +29,7 @@ const Items = Object.freeze({
     RawPorkchop: 32,
     CookedPorkchop: 33,
     Apple: 34,
+    RottenFlesh: 35,
 
     Leather: 50,
 
@@ -249,6 +250,11 @@ const items = [
         itemId: 34,
         name: "Apple",
         sprite: "apple",
+    }),
+    new Item({
+        itemId: 35,
+        name: "Rotten Flesh",
+        sprite: "rotten_flesh",
     }),
     //#endregion
 

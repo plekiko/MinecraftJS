@@ -182,6 +182,11 @@ function lerp(a, b, t) {
     return a + (b - a) * t;
 }
 
+function caculateDirection(positionA, positionB) {
+    if (positionA.x > positionB.x) return -1;
+    return 1;
+}
+
 function isValidClassType(variable) {
     try {
         if (typeof variable === "function" && variable.prototype) {

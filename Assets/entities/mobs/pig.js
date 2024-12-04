@@ -17,8 +17,8 @@ class Pig extends Mob {
             footstepSounds: Sounds.Pig_Step,
             body: body,
             noAi: noAi,
-            ai: AI.Pig,
-            speed: 2.5,
+            ai: AI.PassiveSimple,
+            speed: 1.4,
             stepSize: 0.4,
             ambientSounds: Sounds.Pig_Say,
             lootTable: new LootTable([
@@ -39,7 +39,8 @@ class Pig extends Mob {
     hit(damage, hitfromX = 0, kb = 5) {
         if (!this.health) return;
         this.knockBack(hitfromX, kb);
-        this.damage(damage);
+        if (!this.damage(damage)) return;
+        this.knockBack(hitfromX, kb);
         PlayRandomSoundFromArray({ array: Sounds.Pig_Say });
     }
 

@@ -15,7 +15,8 @@ if (SPAWN_PLAYER) {
         entities.push(player);
 
         hotbar = new Hotbar(player.inventory);
-        summonEntity(Cow, structuredClone(player.position));
+
+        // summonEntity(Zombie, structuredClone(player.position));
     }, 100);
 }
 

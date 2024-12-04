@@ -51,12 +51,67 @@ class Mob extends Entity {
         this.moving = false;
 
         this.lootTable = lootTable;
+
+        this.state = aiState.Wander;
+
+        this.attackCooldown = 1;
     }
 
     aiUpdate() {
-        this.passiveMob();
+        switch (this.state) {
+            case aiState.Wander:
+                this.passiveWander();
+                break;
+            case aiState.Agression:
+                this.agressionWalk();
+        }
+
+        if (this.ai.agressionLevel === Agression.Agressive)
+            this.agressionBehaviour();
 
         this.ambientLogic();
+
+        this.attackCooldownLogic();
+    }
+
+    attackCooldownLogic() {
+        if (this.attackCooldown > 0) this.attackCooldown -= deltaTime;
+
+        if (this.attackCooldown < 0) this.attackCooldown = 0;
+    }
+
+    agressionBehaviour() {
+        if (!player) return;
+        if (
+            Math.abs(Vector2.Distance(this.position, player.position)) <=
+            this.ai.agressionArea
+        ) {
+            this.state = aiState.Agression;
+            return;
+        }
+
+        this.state = aiState.Wander;
+    }
+
+    agressionWalk() {
+        if (!player) return;
+
+        this.direction = caculateDirection(this.position, player.position);
+
+        if (this.velocity.x === 0) {
+            this.jump();
+        }
+
+        if (
+            Math.abs(Vector2.XDistance(this.position, player.position)) <
+            BLOCK_SIZE / 4
+        ) {
+            this.targetVelocity.x = 0;
+            return;
+        }
+
+        this.targetVelocity.x =
+            (this.direction < 0 ? -this.speed : this.speed) * BLOCK_SIZE;
     }
 
     ambientLogic() {
@@ -80,7 +135,7 @@ class Mob extends Entity {
         this.ambientSoundCounter += deltaTime;
     }
 
-    passiveMob() {
+    passiveWander() {
         this.timeLastMoved += deltaTime;
 
         if (this.timeLastMoved >= this.randomMoveTime) {
@@ -128,7 +183,7 @@ class Mob extends Entity {
     jump() {
         if (!this.grounded) return;
 
-        this.velocity.y = -8 * BLOCK_SIZE;
+        this.velocity.y = -9 * BLOCK_SIZE;
     }
 
     resetMoveTime() {
@@ -150,11 +205,11 @@ class aiType {
     constructor({
         moveTimeRange = { min: 1, max: 10 },
         agressionLevel = Agression.Passive,
-        angerZone = 6,
+        agressionArea = 0,
     } = {}) {
         this.moveTimeRange = moveTimeRange;
         this.agressionLevel = agressionLevel;
-        this.angerZone = angerZone * BLOCK_SIZE;
+        this.agressionArea = agressionArea * BLOCK_SIZE;
     }
 }
 
@@ -164,11 +219,18 @@ const Agression = Object.freeze({
     Neutral: 2,
 });
 
+const aiState = Object.freeze({
+    Wander: 0,
+    Agression: 1,
+});
+
 const AI = Object.freeze({
-    Pig: new aiType({
+    PassiveSimple: new aiType({
         moveTimeRange: { min: 3, max: 7 },
     }),
-    Cow: new aiType({
+    Zombie: new aiType({
         moveTimeRange: { min: 3, max: 7 },
+        agressionLevel: Agression.Agressive,
+        agressionArea: 15,
     }),
 });

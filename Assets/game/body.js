@@ -239,7 +239,9 @@ class BodyPart {
     }
 
     applyRotationAndFlip(ctx, finalRotation, shouldFlip) {
-        if (shouldFlip && (this.eyes || this.flip)) {
+        const willFlip = shouldFlip && (this.eyes || this.flip);
+
+        if (willFlip) {
             ctx.scale(this.eyes ? -1 : 1, this.flip ? -1 : 1);
             finalRotation = 180 - finalRotation;
         }

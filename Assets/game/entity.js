@@ -98,6 +98,8 @@ class Entity {
         this.holdItem = holdItem;
 
         this.shouldAddForce = { x: 0, y: 0 };
+
+        this.hurtCooldown = 0.3;
     }
 
     rotateToPoint(targetPosition, objectPosition) {
@@ -230,11 +232,23 @@ class Entity {
         );
     }
 
+    hurtCooldownLogic() {
+        if (!this.hurtCooldown) return;
+        this.hurtCooldown -= deltaTime;
+        if (this.hurtCooldown <= 0) this.hurtCooldown = 0;
+    }
+
     damage(damage) {
+        if (this.hurtCooldown) return false;
+
+        this.hurtCooldown = 0.3;
+
         this.flashColor();
 
         // Insert armor checks etc
         this.decreaseHealth(damage);
+
+        return true;
     }
 
     forceDamage(damage) {
@@ -308,6 +322,7 @@ class Entity {
         this.updatePositionWithVelocity();
         this.bounceSprite();
         this.playFootstepSounds();
+        this.hurtCooldownLogic();
         if (this.body) this.body.updateBody();
     }
 
@@ -587,10 +602,18 @@ class Entity {
         if (this.isGettingKnockback) return;
         // if (!this.grounded) return;
         if (this.velocity.x > 0) {
-            this.velocity.x -= this.drag * 100 * deltaTime;
+            this.velocity.x -=
+                this.drag *
+                100 *
+                (this.type === EntityTypes.Player ? 1 : 0.5) *
+                deltaTime;
             if (this.velocity.x < 0) this.velocity.x = 0;
         } else if (this.velocity.x < 0) {
-            this.velocity.x += this.drag * 100 * deltaTime;
+            this.velocity.x +=
+                this.drag *
+                100 *
+                (this.type === EntityTypes.Player ? 1 : 0.5) *
+                deltaTime;
             if (this.velocity.x > 0) this.velocity.x = 0;
         }
     }

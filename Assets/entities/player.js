@@ -59,6 +59,8 @@ class Player extends Entity {
         this.oldHoverBlock = null;
 
         this.entities = entities;
+
+        // this.setGamemode(1);
     }
 
     update() {
@@ -72,6 +74,7 @@ class Player extends Entity {
         this.dropLogic();
         this.hoverBlockLogic();
         this.setHoldItem();
+        this.hurtCooldownLogic();
 
         if (this.windowOpen) this.inventory.update();
     }
@@ -117,9 +120,8 @@ class Player extends Entity {
         if (!damage) return;
         if (!this.health) return;
         if (!this.abilities.hasHealth) return;
-
+        if (!this.damage(damage)) return;
         this.knockBack(hitfromX, kb);
-        this.damage(damage);
 
         PlayRandomSoundFromArray({
             array: Sounds.Player_Hurt,
@@ -129,6 +131,8 @@ class Player extends Entity {
     }
 
     respawn() {
+        this.velocity = new Vector2();
+        this.shouldAddForce = new Vector2();
         this.teleport(new Vector2(0, 0));
         this.setOnGround();
         this.setGamemode();
@@ -677,7 +681,7 @@ class Player extends Entity {
 
         if (!input.isKeyDown("KeyD") && !input.isKeyDown("KeyA")) return;
 
-        this.velocity.x = input.isKeyDown("KeyD")
+        this.targetVelocity.x = input.isKeyDown("KeyD")
             ? speed * 2.52
             : -speed * 2.52;
     }
