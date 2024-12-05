@@ -3,7 +3,7 @@ class Camera {
         this.x = x;
         this.y = y;
         this.velocity = new Vector2();
-        this.speed = 3;
+        this.speed = 50;
 
         this.lerpTimeX = 0;
         this.lerpTimeY = 0;

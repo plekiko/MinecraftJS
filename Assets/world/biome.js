@@ -16,6 +16,7 @@ class Biome {
         maxMount = 60,
         waterLevel = WATER_LEVEL,
         mobs = BiomeMobs.CommonMobs,
+        googlies = BiomeMobs.Googlies,
         maxMobs = 4,
     } = {}) {
         this.name = name;
@@ -34,12 +35,14 @@ class Biome {
         this.maxMount = maxMount;
         this.waterLevel = waterLevel;
         this.mobs = mobs;
+        this.googlies = googlies;
         this.maxMobs = maxMobs;
     }
 }
 
 const BiomeMobs = Object.freeze({
     CommonMobs: ["Pig", "Cow"],
+    Googlies: ["Zombie"],
 });
 
 const Biomes = Object.freeze({

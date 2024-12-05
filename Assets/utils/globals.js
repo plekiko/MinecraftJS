@@ -12,8 +12,13 @@ const INTERACT_DISTANCE = 4;
 
 let deltaTime;
 
+const mobSpawnDelay = { min: 10, max: 120 };
+
+let passedTime = 0;
+
 let time = 1;
 const dayNightSpeed = 0.01;
+let day = true;
 
 const ORE_THRESHOLDS = {
     coal: 2.5,

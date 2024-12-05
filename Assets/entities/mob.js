@@ -15,6 +15,7 @@ class Mob extends Entity {
         ambientSounds = null,
         ambientSoundRange = { min: 5, max: 20 },
         lootTable = null,
+        myChunkX = 0,
     } = {}) {
         super({
             position: position,
@@ -29,6 +30,7 @@ class Mob extends Entity {
             footstepSounds: footstepSounds,
             direction: RandomRange(0, 2) ? 1 : -1,
             maxVelocity: new Vector2(speed * BLOCK_SIZE * 1.5, 1000),
+            myChunkX: myChunkX,
         });
 
         this.health = health;
@@ -157,10 +159,6 @@ class Mob extends Entity {
             this.targetVelocity.x =
                 (this.direction < 0 ? -this.speed : this.speed) * BLOCK_SIZE;
         }
-    }
-
-    dieEvent() {
-        this.dropLoot();
     }
 
     dropLoot() {

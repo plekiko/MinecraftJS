@@ -108,7 +108,24 @@ function Draw(chunks, frames) {
 
 function DrawEntities() {
     entities.forEach((entity) => {
-        entity.draw(ctx, camera);
+        if (
+            Math.abs(
+                Vector2.XDistance(
+                    new Vector2(camera.getWorldX(camera.x), 0),
+                    entity.position
+                )
+            ) <=
+            RENDER_DISTANCE * 2 * BLOCK_SIZE * CHUNK_WIDTH
+        ) {
+            entity.draw(ctx, camera);
+        } else {
+            if (entity.despawn) {
+                const chunk = chunks.get(entity.myChunkX);
+                chunk.removeEntityFromChunk(entity);
+
+                removeEntity(entity);
+            }
+        }
     });
 
     if (drawHitbox) drawHitboxes();
@@ -146,8 +163,8 @@ function DrawChunks(chunksMap) {
         // console.log(chunkX + " is " + chunksMap.has(chunkX));
 
         if (chunksMap.has(chunkX)) {
-            const chunk = chunksMap.get(chunkX); // Retrieve the chunk from the Map using its x position
-            DrawChunk(chunk, chunkX); // Draw the chunk
+            const chunk = chunksMap.get(chunkX);
+            DrawChunk(chunk, chunkX);
         }
     }
 }

@@ -4,6 +4,7 @@ class Cow extends Mob {
         noAi = false,
         position = new Vector2(),
         invulnerable = false,
+        myChunkX = 0,
         body = new Body({
             parts: cowBody.parts,
             flipCorrection: cowBody.flipCorrection,
@@ -17,6 +18,7 @@ class Cow extends Mob {
             footstepSounds: Sounds.Cow_Step,
             body: body,
             noAi: noAi,
+            myChunkX: myChunkX,
             ai: AI.PassiveSimple,
             speed: 1.2,
             stepSize: 0.4,

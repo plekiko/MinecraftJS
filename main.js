@@ -43,6 +43,7 @@ function summonEntity(entity, position, props) {
 function gameLoop() {
     const currentFrameTime = performance.now();
     deltaTime = (currentFrameTime - lastFrameTime) / 1000;
+    passedTime += deltaTime;
 
     if (deltaTime <= 1) {
         updateGame();
@@ -80,16 +81,20 @@ function updateGame() {
 
 function dayNightCycle() {
     time += deltaTime * dayNightSpeed;
+
+    if (time > 3.5 && time < 6.5) day = false;
+    else day = true;
+
+    if (time > 7.3) {
+        time = 1;
+    }
 }
 
 function updateEntities() {
-    if (!player) {
-        updateArray(entities, deltaTime);
-        return;
-    }
-
-    const playerFarX = player.position.x + ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
-    const playerNearX = player.position.x - ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
+    const cameraFarX =
+        camera.getWorldX(camera.x) - ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
+    const cameraNearX =
+        camera.getWorldX(camera.x) + ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
 
     entities.forEach((entity) => {
         if (entity === player) {
@@ -97,8 +102,8 @@ function updateEntities() {
             return;
         }
         if (
-            entity.position.x >= playerNearX &&
-            entity.position.x <= playerFarX
+            entity.position.x >= cameraFarX &&
+            entity.position.x <= cameraNearX
         ) {
             entity.update();
         }

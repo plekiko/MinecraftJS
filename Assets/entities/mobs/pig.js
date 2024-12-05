@@ -4,6 +4,7 @@ class Pig extends Mob {
         noAi = false,
         position = new Vector2(),
         invulnerable = false,
+        myChunkX = 0,
         body = new Body({
             parts: pigBody.parts,
             flipCorrection: pigBody.flipCorrection,
@@ -18,6 +19,7 @@ class Pig extends Mob {
             body: body,
             noAi: noAi,
             ai: AI.PassiveSimple,
+            myChunkX: myChunkX,
             speed: 1.4,
             stepSize: 0.4,
             ambientSounds: Sounds.Pig_Say,

@@ -28,6 +28,7 @@ class Player extends Entity {
             type: EntityTypes.Player,
             body: new Body({ parts: playerBody }),
             fallDamage: true,
+            despawn: false,
         });
 
         this.health = health;
@@ -391,7 +392,7 @@ class Player extends Entity {
     hitEntity(entity) {
         if (!entity) return;
 
-        console.log(entity);
+        // console.log(entity);
         if (entity === this) return;
 
         entity.hit(this.calculateDamage(), this.position.x, 2);

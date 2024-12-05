@@ -100,6 +100,13 @@ function GenerateWorld() {
             const oldChunkData = getNeighborBiomeData(i, currentChunkIndex);
 
             generateChunk(i, chunkX, oldChunkData);
+        } else {
+            const chunk = chunks.get(chunkX);
+            if (chunk.spawnTime && chunk.spawnTime <= passedTime) {
+                chunk.spawnMobs(day);
+
+                chunk.spawnTime = 0;
+            }
         }
     }
 
@@ -148,7 +155,7 @@ function postProcessChunks() {
             chunk.generateOres();
             chunk.generateCaves();
             chunk.generateWater();
-            chunk.spawnMobs();
+            chunk.spawnMobs(day);
             chunk.generateTrees();
             chunk.generateGrass();
             chunk.generateBedrock();

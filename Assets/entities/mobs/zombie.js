@@ -4,6 +4,7 @@ class Zombie extends Mob {
         noAi = false,
         position = new Vector2(),
         invulnerable = false,
+        myChunkX = 0,
         body = new Body({
             parts: zombieBody,
         }),
@@ -18,6 +19,7 @@ class Zombie extends Mob {
             ai: AI.Zombie,
             speed: 1.4,
             stepSize: 0.4,
+            myChunkX: myChunkX,
             ambientSounds: Sounds.Zombie_Say,
             footstepSounds: Sounds.Zombie_Step,
             lootTable: new LootTable([

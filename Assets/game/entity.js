@@ -26,6 +26,8 @@ class Entity {
         stepSize = 1,
         footstepSounds = null,
 
+        myChunkX = null,
+
         canSwim = true,
 
         offset = new Vector2(),
@@ -38,10 +40,12 @@ class Entity {
 
         body = null,
 
+        despawn = true,
+
         direction = 1,
 
         holdItem = new InventoryItem(),
-    }) {
+    } = {}) {
         this.position = position;
         this.rotation = rotation;
         this.hitbox = hitbox;
@@ -52,6 +56,8 @@ class Entity {
         this.grounded = false;
         this.standingOnBlockType = null;
         this.noGravity = noGravity;
+
+        this.myChunkX = myChunkX;
 
         this.fallDistance = 0;
         this.fallDamage = fallDamage;
@@ -75,6 +81,8 @@ class Entity {
 
         this.img = new Image();
         this.img.src = sprite ? sprite : "";
+
+        this.despawn = despawn;
 
         this.spriteScale = spriteScale;
         this.outline = outline;

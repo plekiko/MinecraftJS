@@ -112,10 +112,29 @@ class Chat {
                 if (!player) break;
                 player.dieEvent();
                 break;
+            case "time":
+                this.setTime(messageArray);
+                break;
             default:
                 this.message("Invalid Command!");
                 break;
         }
+    }
+
+    setTime(messageArray) {
+        if (!messageArray[1]) {
+            this.invalidCommand("/time <time (1 - 7.5)>");
+            return;
+        }
+
+        const newTime = parseFloat(messageArray[1]);
+
+        if (isNaN(newTime)) {
+            this.invalidCommand("/time <time (1 - 7.5)>");
+            return;
+        }
+
+        time = newTime;
     }
 
     summon(messageArray) {

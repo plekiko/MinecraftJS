@@ -19,6 +19,9 @@ class Chunk {
         this.pendingBlocks = pendingBlocks;
         this.grassNoiseMap = worldGrassNoiseMap;
 
+        this.entities = [];
+        this.spawnTime = 0;
+
         this.generateChunk();
     }
 
@@ -184,24 +187,50 @@ class Chunk {
         }
     }
 
-    spawnMobs() {
+    spawnMobs(passive = true) {
         const count = RandomRange(-this.biome.maxMobs, this.biome.maxMobs);
 
-        if (count <= 0) return;
+        if (count <= 0) {
+            this.setMobSpawnTime();
+            return;
+        }
 
         for (let i = 0; i < count; i++) {
             const randomX = RandomRange(0, CHUNK_WIDTH);
 
-            const randomEntity =
-                this.biome.mobs[RandomRange(0, this.biome.mobs.length)];
+            const randomEntity = passive
+                ? this.biome.mobs[RandomRange(0, this.biome.mobs.length)]
+                : this.biome.googlies[
+                      RandomRange(0, this.biome.googlies.length)
+                  ];
 
             const entity = summonEntity(
                 Entities[randomEntity],
-                new Vector2(randomX * BLOCK_SIZE + this.x, 0)
+                new Vector2(randomX * BLOCK_SIZE + this.x, 0),
+                { myChunkX: this.x }
             );
+
+            this.entities.push(entity);
 
             entity.setOnGround();
         }
+    }
+
+    removeEntityFromChunk(entity) {
+        const index = this.entities.indexOf(entity);
+        this.entities.splice(index, 1);
+
+        if (this.spawnTime) return;
+
+        if (this.entities.length === 0) {
+            this.setMobSpawnTime();
+        }
+    }
+
+    setMobSpawnTime() {
+        // chat.message("set spawn");
+
+        this.spawnTime = RandomRange(mobSpawnDelay.min, mobSpawnDelay.max);
     }
 
     updateChunk() {
