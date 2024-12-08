@@ -121,7 +121,7 @@ function DrawEntities() {
         } else {
             if (entity.despawn) {
                 const chunk = chunks.get(entity.myChunkX);
-                chunk.removeEntityFromChunk(entity);
+                if (chunk) chunk.removeEntityFromChunk(entity);
 
                 removeEntity(entity);
             }
