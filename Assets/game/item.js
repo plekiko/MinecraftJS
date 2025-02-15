@@ -10,6 +10,7 @@ class Item {
         fuelTime = null,
         smeltOutput = null,
         baseDamage = 0,
+        foodValue = 0,
     }) {
         this.itemId = itemId;
         this.name = name;
@@ -17,6 +18,8 @@ class Item {
 
         this.toolType = toolType;
         this.toolLevel = toolLevel;
+
+        this.foodValue = foodValue;
 
         this.baseDamage = baseDamage;
 

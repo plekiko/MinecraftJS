@@ -271,6 +271,15 @@ class Entity {
         this.health -= amount;
 
         if (this.health <= 0) this.die();
+
+        return this.health;
+    }
+
+    addHealth(amount) {
+        this.health += amount;
+        if (this.health > this.maxHealth) this.health = this.maxHealth;
+
+        return this.health;
     }
 
     die() {

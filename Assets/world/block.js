@@ -242,8 +242,11 @@ class Block extends Square {
                 input &&
                 input.smeltOutput &&
                 (!output ||
-                    (output.itemId === outputItem.itemId &&
-                        storage[1][0].count + 1 <= outputItem.stackSize))
+                    (((output.blockId !== undefined &&
+                        output.blockId === outputItem.blockId) ||
+                        output.itemId === outputItem.itemId) &&
+                        storage[1][0].count + 1 <=
+                            (outputItem.stackSize || 64)))
             )
         ) {
             this.resetProgression();

@@ -51,6 +51,7 @@ const Blocks = Object.freeze({
     IronBlock: 49,
     IceBlock: 50,
     Chest: 51,
+    Glass: 52,
 });
 
 const blockTypes = [
@@ -110,6 +111,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Sand,
         breakingSound: Sounds.Breaking_Sand,
         toolType: ToolType.Shovel,
+        smeltOutput: { blockId: Blocks.Glass },
         fall: true,
     }),
     new BlockType({
@@ -621,6 +623,16 @@ const blockTypes = [
         hardness: 3,
         collision: false,
         specialType: SpecialType.SingleChest,
+    }),
+    new BlockType({
+        blockId: 52,
+        sprite: "glass",
+        name: "Glass",
+        hardness: 1,
+        breakSound: Sounds.Break_Glass,
+        breakingSound: Sounds.Breaking_Glass,
+        dropWithoutTool: false,
+        collision: false,
     }),
 ];
 

@@ -139,6 +139,37 @@ class Player extends Entity {
         this.setGamemode();
     }
 
+    useItemInHand() {
+        if (!this.holdItem.itemId) return;
+
+        const item = GetItem(this.holdItem.itemId);
+
+        if (!item) return;
+
+        if (item.foodValue > 0) {
+            this.eatFoodInHand();
+        }
+    }
+
+    eatFoodInHand() {
+        if (this.health >= this.maxHealth) return;
+
+        const item = GetItem(this.holdItem.itemId);
+
+        if (!item) return;
+
+        this.addHealth(item.foodValue);
+
+        PlayRandomSoundFromArray({
+            array: Sounds.Player_Eat,
+            positional: true,
+            origin: this.position,
+            volume: 0.5,
+        });
+
+        this.removeFromCurrentSlot();
+    }
+
     dropAllItems() {
         this.closeInventory();
 
@@ -175,13 +206,18 @@ class Player extends Entity {
     }
 
     interactLogic() {
+        if (this.windowOpen) return;
+
         if (!this.hoverBlock) return;
 
         if (!input.isRightMouseButtonPressed()) return;
 
         const block = GetBlock(this.hoverBlock.blockType);
 
-        if (!block.specialType) return;
+        if (!block.specialType) {
+            this.useItemInHand();
+            return;
+        }
 
         this.swing();
 
@@ -436,7 +472,13 @@ class Player extends Entity {
 
         if (this.abilities.instaBuild) return;
 
-        this.inventory.removeItem(3, this.inventory.currentSlot);
+        this.removeFromCurrentSlot();
+    }
+
+    removeFromCurrentSlot(count = 1) {
+        this.inventory.removeItem(3, this.inventory.currentSlot, count);
+
+        this.setHoldItem();
     }
 
     checkBlockForPlacing(collision) {
