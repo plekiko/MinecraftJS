@@ -9,6 +9,7 @@ const WATER_LEVEL = 25;
 const CHUNK_FILE_SIZE = 11; // kB
 const GRAVITY = 30 * BLOCK_SIZE;
 const INTERACT_DISTANCE = 4;
+const TICK_SPEED = 20;
 
 let deltaTime;
 

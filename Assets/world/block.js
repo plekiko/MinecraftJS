@@ -10,6 +10,8 @@ class BlockType {
         drag = 40,
         collision = true,
 
+        updateSpeed = 0,
+
         breakSound = Sounds.Break_Wood,
         breakingSound = Sounds.Breaking_Wood,
 
@@ -46,6 +48,8 @@ class BlockType {
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
 
+        this.updateSpeed = updateSpeed;
+
         this.fall = fall;
 
         this.ambientSound = ambientSound;
@@ -80,9 +84,8 @@ const BlockCategory = Object.freeze({
 });
 
 class Metadata {
-    constructor({ storage = null, updating = false }) {
+    constructor({ storage = null }) {
         this.storage = storage;
-        this.updating = updating;
         this.progression = 0;
         this.fuelProgression = 0;
         this.isActive = false;
@@ -111,7 +114,12 @@ class Block extends Square {
         this.y = y;
         this.chunkX = chunkX;
         this.blockType = blockType;
-        if (GetBlock(blockType).specialType) this.setMetaData();
+
+        if (blockType === Blocks.Water) {
+            this.isSource = true;
+            this.waterLevel = 0;
+            this.cutoff = this.waterLevel;
+        }
     }
 
     setMetaData() {
@@ -119,7 +127,6 @@ class Block extends Square {
         if (specialType == SpecialType.CraftingTable) return;
 
         let storage = [];
-        let updating = false;
 
         switch (specialType) {
             case SpecialType.Furnace:
@@ -133,7 +140,6 @@ class Block extends Square {
                     // output
                     [new InventoryItem()],
                 ];
-                updating = true;
                 break;
             case SpecialType.SingleChest:
                 for (let y = 0; y < 3; y++) {
@@ -144,7 +150,7 @@ class Block extends Square {
                 }
         }
 
-        this.metaData = new Metadata({ storage: storage, updating: updating });
+        this.metaData = new Metadata({ storage: storage });
     }
 
     setBlockType(blockType, override = false) {
@@ -154,36 +160,40 @@ class Block extends Square {
         if (existingIndex !== -1) updatingBlocks.splice(existingIndex, 1);
 
         this.blockType = blockType;
-
         const block = GetBlock(blockType);
 
         this.metaData = undefined;
-
         if (block.specialType) this.setMetaData();
-
-        if (this.metaData && this.metaData.updating) {
-            updatingBlocks.push(this);
-        }
+        if (block.updateSpeed > 0) updatingBlocks.push(this);
 
         this.drawOffset = block.grassOffset ? RandomRange(-2, 2) : 0;
 
-        this.fluidSprite = this.shouldDisplayFluidSprite(block);
+        this.cutoff = 0;
 
+        if (blockType === Blocks.Water) {
+            this.isSource = true;
+            this.waterLevel = 0;
+            this.cutoff = this.waterLevel;
+        }
         this.updateSprite();
     }
 
     update() {
-        if (!this.metaData) return;
-
         if (GetBlock(this.blockType).specialType === SpecialType.Furnace)
             this.furnaceLogic();
+
+        if (GetBlock(this.blockType).fluid) {
+            this.simulateWaterFlow();
+        }
+
+        if (!this.metaData) return;
 
         if (!this.metaData.isActive) {
             this.resetProgression();
             return;
         }
 
-        this.metaData.progression += deltaTime;
+        this.metaData.progression += 1 / TICK_SPEED;
     }
 
     furnaceLogic() {
@@ -264,6 +274,94 @@ class Block extends Square {
         }
     }
 
+    simulateWaterFlow() {
+        // Only process if this block is water.
+        if (this.blockType !== Blocks.Water) return;
+
+        // Ensure waterLevel and isSource are defined.
+        // A new water block defaults to a source.
+        if (this.waterLevel === undefined || this.isSource === undefined) {
+            this.waterLevel = 0; // Full water level for a source block.
+            this.isSource = true;
+            this.cutoff = this.waterLevel;
+        } else {
+            // Update the rendering cutoff (we use waterLevel directly).
+            this.cutoff = this.waterLevel;
+        }
+
+        const worldPos = getBlockWorldPosition(this);
+
+        // --- Downward Flow ---
+        let below = GetBlockAtWorldPosition(
+            worldPos.x,
+            worldPos.y + BLOCK_SIZE,
+            false
+        );
+        if (below && below.blockType === Blocks.Air) {
+            below.setBlockType(Blocks.Water);
+            // If this block is a source, spawn a source downward.
+            // Otherwise, propagate the current waterLevel downward.
+            below.isSource = false;
+            below.waterLevel = 0;
+            below.cutoff = below.waterLevel;
+        }
+
+        // --- Vertical Check Above ---
+        let above = GetBlockAtWorldPosition(
+            worldPos.x,
+            worldPos.y - BLOCK_SIZE,
+            false
+        );
+        if (above && above.blockType === Blocks.Water) {
+            // If there's water above, we force this block to become a source.
+            // this.isSource = true;
+            this.waterLevel = 0;
+            this.cutoff = this.waterLevel;
+        } else if (above && above.blockType === Blocks.Air && this.isSource) {
+            this.cutoff = 0.1;
+        }
+
+        // --- Sideways Flow ---
+        if (!this.isSource && below && GetBlock(below.blockType).fluid) return;
+        if (this.waterLevel > 0.85) return;
+
+        // Determine the water level for new sideways water.
+        // For source blocks, we want the new water block to be flowing (non-source) with a fixed level, e.g. 0.8.
+        // For non-source blocks, we decrease waterLevel by 0.1 (to a minimum of 0.1).
+        let sideLevel;
+        if (this.isSource) {
+            sideLevel = 0.1;
+        } else {
+            sideLevel = this.waterLevel + 0.1;
+        }
+
+        // Check left.
+        let left = GetBlockAtWorldPosition(
+            worldPos.x - BLOCK_SIZE,
+            worldPos.y,
+            false
+        );
+        if (left && left.blockType === Blocks.Air) {
+            left.setBlockType(Blocks.Water);
+            left.isSource = false; // Sideways water is flowing.
+            left.waterLevel = sideLevel;
+            left.cutoff = left.waterLevel;
+        }
+
+        // Check right.
+        let right = GetBlockAtWorldPosition(
+            worldPos.x + BLOCK_SIZE,
+            worldPos.y,
+            false
+        );
+        if (right && right.blockType === Blocks.Air) {
+            right.setBlockType(Blocks.Water);
+            right.isSource = false; // Sideways water is flowing.
+            right.waterLevel = sideLevel;
+            right.cutoff = right.waterLevel;
+        }
+    }
+
     removeOneFromStack(item) {
         item.count--;
 
@@ -281,12 +379,25 @@ class Block extends Square {
         this.metaData.progression = 0;
     }
 
-    shouldDisplayFluidSprite(block) {
-        if (!block.fluid) return false;
-        // console.log(this.chunkX);
-        const aboveBlock = GetChunk(this.chunkX).getUp(this.x, this.y);
-        return !GetBlock(aboveBlock.blockType).fluid;
-    }
+    // shouldDisplayFluidSprite(block) {
+    //     // Only process if this block is a fluid.
+    //     if (!block.fluid) return false;
+
+    //     // Get the chunk that this block belongs to.
+    //     const chunk = GetChunk(this.chunkX);
+    //     if (!chunk) return true; // If no chunk, assume sprite should display.
+
+    //     // Get the block directly above.
+    //     const aboveBlock = chunk.getUp(this.x, this.y);
+
+    //     // If there's no block above or it's air, show the fluid sprite.
+    //     if (!aboveBlock || aboveBlock.blockType === Blocks.Air) {
+    //         return true;
+    //     }
+
+    //     // Only display the fluid sprite if the block above is NOT the same fluid type.
+    //     return aboveBlock.blockType !== this.blockType;
+    // }
 
     breakBlock(drop = false) {
         if (this.blockType === Blocks.Air) return;

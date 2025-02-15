@@ -60,7 +60,8 @@ class Square {
         this.spriteScale = spriteScale;
         this.outline = 0;
         this.dark = dark;
-        this.fluidSprite = false;
+
+        this.cutoff = 1;
 
         this.transform.size.x = BLOCK_SIZE;
         this.transform.size.y = BLOCK_SIZE;
@@ -146,7 +147,7 @@ class Square {
     drawAnimation() {
         const frameHeight = 16;
 
-        const offset = this.fluidSprite ? BLOCK_SIZE / 8 : 0;
+        const offset = BLOCK_SIZE * this.cutoff;
 
         const effectiveFrame =
             Math.floor(globalFrame * this.frameRate) % this.frameCount;

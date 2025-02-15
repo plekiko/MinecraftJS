@@ -55,16 +55,8 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-function updateBlocks() {
-    updatingBlocks.forEach((block) => {
-        block.update();
-    });
-}
-
 function updateGame() {
     updateEntities();
-
-    updateBlocks();
 
     if (player) cursorBlockLogic();
 
