@@ -210,7 +210,7 @@ const Biomes = Object.freeze({
         maxWet: Infinity,
         minMount: 0,
         maxMount: 50,
-        waterLevel: 27,
+        waterLevel: 30,
     }),
     RainForest: new Biome({
         name: "Rain Forest",

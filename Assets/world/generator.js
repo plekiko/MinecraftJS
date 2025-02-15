@@ -10,7 +10,7 @@ const worldGrassNoiseMap = new Noise(550, 0.2, 1);
 
 const worldTemperatureNoiseMap = new Noise(
     30, // Scale (size)
-    50, // Intensity
+    45, // Intensity
     30
 );
 

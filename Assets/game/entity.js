@@ -602,6 +602,7 @@ class Entity {
             array: Sounds.Water_Enter,
             positional: true,
             origin: this.position,
+            volume: 0.2,
         });
     }
 

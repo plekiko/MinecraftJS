@@ -45,79 +45,61 @@ class Chunk {
 
     getHeight(x) {
         const worldX = this.x / BLOCK_SIZE + x;
-
-        // Get the height noise of the current biome
         let heightNoise = this.biome.heightNoise;
-
-        // Check if previousChunk exists and has a different biome height noise
-        if (
-            this.previousChunk &&
-            this.previousChunk.biome.heightNoise !== this.biome.heightNoise
-        ) {
-            // Retrieve the height noise of the previous chunk's biome
-            let previousHeightNoise = this.previousChunk.biome.heightNoise;
-
-            // Calculate blend factor as a gradual transition from 0 (left) to 1 (right)
-            let blendFactor = x / (CHUNK_WIDTH - 1); // 0 to 1 across chunk width
-
-            // Reverse blend factor if moving left
-            if (this.x < this.previousChunk.x) {
-                blendFactor = 1 - blendFactor;
-            }
-
-            // Calculate blended noise outputs directly for each layer
-            const heightFirstPass = lerpEaseInOut(
-                previousHeightNoise.getNoise(worldX, 0),
-                heightNoise.getNoise(worldX, 0),
-                blendFactor
-            );
-            const heightSecondPass = lerpEaseInOut(
-                previousHeightNoise.getNoise(worldX, 100000, 3),
-                heightNoise.getNoise(worldX, 100000, 3),
-                blendFactor
-            );
-            const heightThirdPass = lerpEaseInOut(
-                previousHeightNoise.getNoise(worldX, 500000, 5),
-                heightNoise.getNoise(worldX, 500000, 5),
-                blendFactor
-            );
-            const heightFourthPass = lerpEaseInOut(
-                previousHeightNoise.getNoise(worldX, 1000000, 7),
-                heightNoise.getNoise(worldX, 1000000, 7),
-                blendFactor
-            );
-
-            const lerpedMin = lerpEaseInOut(
-                previousHeightNoise.min,
-                heightNoise.min,
-                blendFactor
-            );
-
-            const heightRaw =
-                (heightFirstPass +
-                    heightSecondPass +
-                    heightThirdPass +
-                    heightFourthPass) /
-                4;
-
-            return Math.floor(lerpedMin + heightRaw);
-        } else {
-            // No blending needed, use the current biome's noise directly
-            const heightFirstPass = heightNoise.getNoise(worldX, 0);
-            const heightSecondPass = heightNoise.getNoise(worldX, 100000, 3);
-            const heightThirdPass = heightNoise.getNoise(worldX, 500000, 5);
-            const heightFourthPass = heightNoise.getNoise(worldX, 1000000, 7);
-
-            const heightRaw =
-                (heightFirstPass +
-                    heightSecondPass +
-                    heightThirdPass +
-                    heightFourthPass) /
-                4;
-
-            return Math.floor(heightNoise.min + heightRaw);
+      
+        // Try to get the left and right neighbor chunks.
+        const leftChunk = this.previousChunk; // Assume this is set for chunk 0 as chunk -1.
+        const rightChunkX = this.x + CHUNK_WIDTH * BLOCK_SIZE;
+        const rightChunk = chunks.get(rightChunkX); // Using your global chunks Map
+      
+        // Determine blend factors for left and right edges.
+        // Near the left edge, use the left neighbor if its biome is different.
+        let leftBlend = 0;
+        if (leftChunk && leftChunk.biome.heightNoise !== heightNoise) {
+          leftBlend = (CHUNK_WIDTH - x) / CHUNK_WIDTH; // 1 at left edge, 0 at right edge.
         }
-    }
+      
+        // Near the right edge, use the right neighbor if its biome is different.
+        let rightBlend = 0;
+        if (rightChunk && rightChunk.biome.heightNoise !== heightNoise) {
+          rightBlend = x / CHUNK_WIDTH; // 0 at left edge, 1 at right edge.
+        }
+      
+        // Create a helper to blend a given noise layer.
+        const blendLayer = (offset, scale) => {
+          const currentVal = heightNoise.getNoise(worldX, offset, scale);
+          // If we are near the left edge, blend with the left neighbor's noise.
+          if (leftBlend > 0) {
+            const leftVal = leftChunk.biome.heightNoise.getNoise(worldX, offset, scale);
+            return lerpEaseInOut(leftVal, currentVal, 1 - leftBlend);
+          }
+          // If we are near the right edge, blend with the right neighbor's noise.
+          if (rightBlend > 0) {
+            const rightVal = rightChunk.biome.heightNoise.getNoise(worldX, offset, scale);
+            return lerpEaseInOut(currentVal, rightVal, rightBlend);
+          }
+          // Otherwise, just use the current biome's noise.
+          return currentVal;
+        };
+      
+        // Blend each noise layer.
+        const layer1 = blendLayer(0, 1);
+        const layer2 = blendLayer(100000, 3);
+        const layer3 = blendLayer(500000, 5);
+        const layer4 = blendLayer(1000000, 7);
+        const noiseAverage = (layer1 + layer2 + layer3 + layer4) / 4;
+      
+        // Also blend the biome's minimum height.
+        let currentMin = heightNoise.min;
+        let blendedMin = currentMin;
+        if (leftBlend > 0) {
+          blendedMin = lerpEaseInOut(leftChunk.biome.heightNoise.min, currentMin, 1 - leftBlend);
+        } else if (rightBlend > 0) {
+          blendedMin = lerpEaseInOut(currentMin, rightChunk.biome.heightNoise.min, rightBlend);
+        }
+      
+        return Math.floor(blendedMin + noiseAverage);
+    }      
 
     getWorldX(x) {
         return this.x + x;

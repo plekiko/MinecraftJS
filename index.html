@@ -8,7 +8,11 @@
         <link rel="icon" href="Assets/sprites/misc/icon_16x16.png" />
     </head>
     <body oncontextmenu="return false;">
-        <canvas id="canvas"></canvas>
+        <!-- <canvas id="canvas"></canvas> -->
+        <div class="chromium-issue-1092080-workaround__wrapper">
+            <canvas id="canvas" id="canvas"></canvas>
+            <div class="chromium-issue-1092080-workaround__overlay"></div>
+        </div>
         <script src="node_modules/tooloud/dist/tooloud.min.js"></script>
         <script src="Assets/utils/globals.js"></script>
         <script src="Assets/utils/input.js"></script>

@@ -23,7 +23,7 @@ function HandleInput() {
     if (input.isKeyPressed("KeyC")) drawCoordinates = !drawCoordinates;
     if (input.isKeyPressed("KeyO")) SaveWorld();
     if (input.isKeyPressed("KeyP")) LoadWorld();
-    if (input.isKeyPressed("KeyR")) RegenerateWorld();
+    // if (input.isKeyPressed("KeyR")) RegenerateWorld();
 }
 
 function PrintBlockLogic() {
