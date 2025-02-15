@@ -70,7 +70,7 @@ const Biomes = Object.freeze({
         secondLayerWidth: 4,
         treeType: [Trees.Cactus],
         grassType: [Blocks.DeadBush],
-        treeThreshold: 6,
+        treeThreshold: 7.5,
         minTemp: 25,
         maxTemp: Infinity,
         minWet: 0,

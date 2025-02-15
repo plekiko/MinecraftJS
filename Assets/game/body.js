@@ -3,6 +3,7 @@ class Body {
         this.position = position;
         this.flipCorrection = flipCorrection;
         this.parts = parts;
+        this.opacity = 1;
 
         this.flashingColor = null;
     }
@@ -41,6 +42,8 @@ class Body {
             (a, b) => a.zIndex - b.zIndex
         );
 
+        ctx.globalAlpha = this.opacity;
+
         for (const part of sortedParts) {
             part.position = {
                 x:
@@ -60,6 +63,8 @@ class Body {
                 this.flashingColor
             );
         }
+
+        ctx.globalAlpha = 1;
     }
 
     swing() {

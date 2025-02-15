@@ -20,11 +20,14 @@ class Entity {
         spriteScale = BLOCK_SIZE / 32,
         outline = 0,
         color = "black",
+        opacity = 1,
         drag = 40,
         bouncing = false,
         type = EntityTypes.Entity,
         stepSize = 1,
         footstepSounds = null,
+
+        noCollision = false,
 
         myChunkX = null,
 
@@ -59,6 +62,8 @@ class Entity {
 
         this.myChunkX = myChunkX;
 
+        this.noCollision = noCollision;
+
         this.fallDistance = 0;
         this.fallDamage = fallDamage;
 
@@ -87,6 +92,7 @@ class Entity {
         this.spriteScale = spriteScale;
         this.outline = outline;
         this.color = color;
+        this.opacity = opacity;
         this.originalColor = color;
         this.drag = drag;
 
@@ -405,6 +411,14 @@ class Entity {
         this.applyDrag();
         this.clampHorizontalVelocity();
 
+        if (this.noCollision) {
+            this.calculateForce();
+
+            this.position.x += this.velocity.x * deltaTime;
+            this.position.y += this.velocity.y * deltaTime;
+            return;
+        }
+
         const leftCollision = this.checkLeftCollision(nextPositionX);
         const rightCollision = this.checkRightCollision(nextPositionX);
 
@@ -659,6 +673,7 @@ class Entity {
                 x: centerX + this.hitbox.x / 4,
                 y: centerY,
             });
+            this.body.opacity = this.opacity;
             this.body.draw(
                 ctx,
                 this.velocity.x,

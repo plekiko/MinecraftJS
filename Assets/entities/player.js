@@ -16,7 +16,6 @@ class Player extends Entity {
         foodLevel = 20,
         foodSaturationLevel = 0,
         foodTickTimer = 0,
-        playerGameType = 0,
         score = 0,
         xpLevel = 0,
         inventory = new Inventory(),
@@ -38,7 +37,6 @@ class Player extends Entity {
         this.foodLevel = foodLevel;
         this.foodSaturationLevel = foodSaturationLevel;
         this.foodTickTimer = foodTickTimer;
-        this.playerGameType = playerGameType;
         this.score = score;
         this.xpLevel = xpLevel;
 
@@ -89,6 +87,8 @@ class Player extends Entity {
                 this.abilities.flying = false;
                 this.abilities.instaBuild = false;
                 this.abilities.mayBuild = true;
+                this.noCollision = false;
+                this.opacity = 1;
 
                 this.abilities.hasHealth = true;
                 this.health = 20;
@@ -99,6 +99,8 @@ class Player extends Entity {
                 this.abilities.mayFly = true;
                 this.abilities.instaBuild = true;
                 this.abilities.mayBuild = true;
+                this.noCollision = false;
+                this.opacity = 1;
 
                 this.abilities.hasHealth = false;
                 this.health = 20;
@@ -110,8 +112,21 @@ class Player extends Entity {
                 this.abilities.flying = false;
                 this.abilities.instaBuild = false;
                 this.abilities.mayBuild = false;
+                this.noCollision = false;
+                this.opacity = 1;
 
                 this.abilities.hasHealth = true;
+                this.health = 20;
+                return;
+
+            case 3:
+                this.abilities.mayFly = false;
+                this.abilities.flying = true;
+                this.abilities.mayBuild = false;
+                this.noCollision = true;
+                this.opacity = 0.5;
+
+                this.abilities.hasHealth = false;
                 this.health = 20;
                 return;
         }

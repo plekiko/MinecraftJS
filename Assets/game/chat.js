@@ -220,7 +220,7 @@ class Chat {
             survival: 0,
             creative: 1,
             adventure: 2,
-            // spectator: 3,
+            spectator: 3,
         };
 
         const input = messageArray[1].toLowerCase();
@@ -236,7 +236,7 @@ class Chat {
         if (gamemode === undefined || gamemode < 0 || gamemode > 3) {
             this.message(
                 "Invalid gamemode. Valid gamemodes are: " +
-                    "0 (Survival) 1 (Creative), 2 (Adventure) "
+                    "0 (Survival) 1 (Creative) 2 (Adventure) 3 (Spectator)"
             );
             return;
         }
@@ -247,7 +247,7 @@ class Chat {
             "Survival",
             "Creative",
             "Adventure",
-            // "Spectator",
+            "Spectator",
         ];
         this.message("Gamemode set to " + gamemodeNames[gamemode] + ".");
     }
