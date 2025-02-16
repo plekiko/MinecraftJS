@@ -148,7 +148,7 @@ class Hotbar {
         drawImage(
             path,
             CANVAS.width / 2 - 240 + slot * 60,
-            CANVAS.height - 63,
+            CANVAS.height - 64,
             2.8
         );
     }
