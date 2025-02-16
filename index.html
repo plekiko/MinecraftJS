@@ -3,57 +3,54 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Minecraft JS</title>
-        <link rel="stylesheet" href="style.css" />
-        <link rel="icon" href="Assets/sprites/misc/icon_16x16.png" />
+        <title>Minecraft JS - Menu</title>
+        <link rel="stylesheet" href="menu.css" />
     </head>
-    <body oncontextmenu="return false;">
-        <!-- <canvas id="canvas"></canvas> -->
-        <div class="chromium-issue-1092080-workaround__wrapper">
-            <canvas id="canvas" id="canvas"></canvas>
-            <div class="chromium-issue-1092080-workaround__overlay"></div>
+    <body>
+        <div class="container">
+            <div class="title">
+                <div class="logo-container">
+                    <div class="logo-column">
+                        <img
+                            class="logo"
+                            src="Assets/sprites/misc/logo.png"
+                            alt="Minecraft JS"
+                        />
+                        <div class="random-text">
+                            <div class="splash"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <a href="game.html" class="btn">Play</a>
+                <!-- <a href="settings.html" class="btn">Settings</a> -->
+                <a href="https://buymeacoffee.com/plekiko" class="btn"
+                    >Buy me a coffee!</a
+                >
+            </div>
         </div>
-        <script src="node_modules/tooloud/dist/tooloud.min.js"></script>
-        <script src="Assets/utils/globals.js"></script>
-        <script src="Assets/utils/input.js"></script>
-        <script src="Assets/utils/classes.js"></script>
-        <script src="Assets/game/camera.js"></script>
-        <script src="Assets/utils/object.js"></script>
-        <script src="Assets/game/sounds.js"></script>
-        <script src="Assets/game/music.js"></script>
-        <script src="Assets/game/lootTable.js"></script>
-        <script src="Assets/game/item.js"></script>
-        <script src="Assets/game/items.js"></script>
-        <script src="Assets/world/block.js"></script>
-        <script src="Assets/world/blocks.js"></script>
-        <script src="Assets/world/tree.js"></script>
-        <script src="Assets/utils/noise.js"></script>
-        <script src="Assets/world/biome.js"></script>
-        <script src="Assets/world/chunk.js"></script>
-        <script src="Assets/game/inventoryItem.js"></script>
-        <script src="Assets/game/recipe.js"></script>
-        <script src="Assets/game/recipes.js"></script>
-        <script src="Assets/game/inventory.js"></script>
-        <script src="Assets/game/hotbar.js"></script>
-        <script src="Assets/utils/renderer.js"></script>
-        <script src="Assets/world/generator.js"></script>
-        <script src="Assets/world/world.js"></script>
-        <script src="Assets/world/saving.js"></script>
-        <script src="Assets/game/body.js"></script>
-        <script src="Assets/game/entity.js"></script>
-        <script src="Assets/entities/drop.js"></script>
-        <script src="Assets/entities/mob.js"></script>
-
-        <script src="Assets/entities/mobs/pig.js"></script>
-        <script src="Assets/entities/mobs/cow.js"></script>
-        <script src="Assets/entities/mobs/zombie.js"></script>
-
-        <script src="Assets/entities/fallingBlock.js"></script>
-        <script src="Assets/entities/entities.js"></script>
-
-        <script src="Assets/entities/player.js"></script>
-        <script src="Assets/game/chat.js"></script>
-        <script src="main.js"></script>
-        <script src="debug.js"></script>
+        <div class="footer">
+            <p>Made by Plekiko - For the best experience use Firefox</p>
+        </div>
     </body>
+
+    <script>
+        const randomTextElement = document.querySelector(".splash");
+
+        fetch("menu_text.json")
+            .then((response) => response.json())
+            .then((data) => {
+                const texts = data.random_text;
+
+                const randomPick =
+                    texts[Math.floor(Math.random() * texts.length)];
+
+                randomTextElement.textContent = randomPick;
+            })
+            .catch((error) => {
+                console.error("Error loading menu_text.json:", error);
+            });
+    </script>
 </html>

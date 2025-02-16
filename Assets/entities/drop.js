@@ -13,6 +13,7 @@ class Drop extends Entity {
             bouncing: true,
             type: EntityTypes.Drop,
             float: true,
+            playWaterEnterSound: false,
         });
 
         this.position = position;

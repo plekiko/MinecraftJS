@@ -115,6 +115,9 @@ class Chat {
             case "time":
                 this.setTime(messageArray);
                 break;
+            case "help":
+                this.printHelp();
+                break;
             default:
                 this.message("Invalid Command!");
                 break;
@@ -254,6 +257,27 @@ class Chat {
 
     invalidCommand(usage) {
         this.message("Invalid command. Usage: " + usage);
+    }
+
+    printHelp() {
+        // List of all available commands
+        const commands = [
+            "/help",
+            "Category's: Blocks, Items, Entities",
+            "/give <Category.ItemName> [count]",
+            "/clear",
+            "/clearlog",
+            "/gamemode <Gamemode>",
+            "/tp <x> <y>",
+            "/summon <Category.ItemName> <x> <y>",
+            "/kill",
+            "/time <1 - 7.5>",
+        ];
+
+        // Print them one by one in chat
+        commands.forEach((cmd) => {
+            this.message(cmd);
+        });
     }
 
     message(message, sender = "Server") {

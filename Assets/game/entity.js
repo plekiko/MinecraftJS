@@ -36,6 +36,7 @@ class Entity {
         offset = new Vector2(),
 
         float = false,
+        playWaterEnterSound = true,
 
         forceDirection = false,
 
@@ -78,6 +79,7 @@ class Entity {
         this.forceDirection = forceDirection;
 
         this.float = float;
+        this.playWaterEnterSound = playWaterEnterSound;
 
         this.direction = direction;
 
@@ -613,14 +615,15 @@ class Entity {
     enterFluid() {
         this.swimming = true;
 
-        if (this.velocity.y > BLOCK_SIZE * 5) this.playWaterEnterSound();
+        if (this.velocity.y > BLOCK_SIZE * 5) this.playWaterEnterSFX();
 
         if (this.float && this.velocity.y > BLOCK_SIZE * 3) {
             this.velocity.y /= 1.1;
         }
     }
 
-    playWaterEnterSound() {
+    playWaterEnterSFX() {
+        if (!this.playWaterEnterSound) return;
         PlayRandomSoundFromArray({
             array: Sounds.Water_Enter,
             positional: true,

@@ -17,6 +17,7 @@ const Blocks = Object.freeze({
     AcaciaLeaves: 15,
     BirchLog: 16,
     BirchLeaves: 17,
+
     Grass: 18,
     TallGrass: 19,
     DeadBush: 20,
@@ -30,31 +31,47 @@ const Blocks = Object.freeze({
     FlowerDandelion: 28,
     FlowerDaisy: 29,
     FlowerAllium: 30,
+
     Water: 31,
+
     JungleLog: 32,
     JungleLeaves: 33,
     OakPlanks: 34,
+
     CraftingTable: 35,
+
     SprucePlanks: 36,
     AcaciaPlanks: 37,
     BirchPlanks: 38,
     JunglePlanks: 39,
+
     Cobblestone: 40,
+
     CoalOre: 41,
     IronOre: 42,
     Furnace: 43,
+
     SmoothStone: 44,
     StoneBricks: 45,
+
     Jelte: 46,
     Quinten: 47,
+
     CoalBlock: 48,
     IronBlock: 49,
+
     IceBlock: 50,
+
     Chest: 51,
+
     Glass: 52,
+
     Lava: 53,
+
     DiamondOre: 54,
     DiamondBlock: 55,
+
+    Obsidian: 56,
 });
 
 const blockTypes = [
@@ -664,7 +681,6 @@ const blockTypes = [
         animationSpeed: 0.03,
         fluid: true,
         dropWithoutTool: false,
-        breakSound: Sounds.Water_Enter,
     }),
     new BlockType({
         blockId: 54,
@@ -688,6 +704,17 @@ const blockTypes = [
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 56,
+        sprite: "obsidian",
+        name: "Obsidian",
+        hardness: 15,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        requiredToolLevel: 15,
         dropWithoutTool: false,
     }),
 ];

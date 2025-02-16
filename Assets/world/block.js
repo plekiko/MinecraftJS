@@ -99,6 +99,152 @@ class Metadata {
     }
 }
 
+function checkDissipation(block, worldPos) {
+    // For non‑source water blocks, check neighbors (above, left, right)
+    // to see if any have a higher water level.
+    let neighborHasHigher = false;
+    const neighborOffsets = [
+        { dx: 0, dy: -BLOCK_SIZE },
+        { dx: -BLOCK_SIZE, dy: 0 },
+        { dx: BLOCK_SIZE, dy: 0 },
+    ];
+    neighborOffsets.forEach((offset) => {
+        const neighbor = GetBlockAtWorldPosition(
+            worldPos.x + offset.dx,
+            worldPos.y + offset.dy,
+            false
+        );
+        // Note: In your original code you check if neighbor.waterLevel < block.waterLevel.
+        // (This may be counterintuitive, but we keep it exactly as provided.)
+        if (
+            neighbor &&
+            neighbor.blockType === block.blockType &&
+            neighbor.waterLevel < block.waterLevel
+        ) {
+            neighborHasHigher = true;
+        }
+    });
+    if (!neighborHasHigher) {
+        block.waterLevel += 0.25;
+        block.cutoff = block.waterLevel;
+        if (block.waterLevel >= 0.85) {
+            block.setBlockType(Blocks.Air);
+            return true;
+        }
+    }
+    return false;
+}
+
+function flowDownward(block, worldPos) {
+    let below = GetBlockAtWorldPosition(
+        worldPos.x,
+        worldPos.y + BLOCK_SIZE,
+        false
+    );
+    if (
+        (below && below.blockType === Blocks.Air) ||
+        (below && GetBlock(below.blockType).breakByFluid)
+    ) {
+        if (GetBlock(below.blockType).breakByFluid) {
+            below.breakBlock(GetBlock(below.blockType).dropWithoutTool);
+        }
+        below.setBlockType(block.blockType);
+        below.isSource = false;
+        below.waterLevel = 0;
+        below.cutoff = below.waterLevel;
+    } else {
+        if (below) CheckLavaWaterInteraction(block, below);
+    }
+    return below;
+}
+
+function CheckLavaWaterInteraction(block, otherBlock) {
+    if (
+        block.blockType === Blocks.Lava &&
+        otherBlock.blockType === Blocks.Water
+    ) {
+        if (otherBlock.isSource) otherBlock.setBlockType(Blocks.Obsidian);
+        else otherBlock.setBlockType(Blocks.Cobblestone);
+
+        playPositionalSound(
+            getBlockWorldPosition(otherBlock),
+            "blocks/fizz.ogg",
+            10,
+            0.5
+        );
+    }
+    if (
+        block.blockType === Blocks.Water &&
+        otherBlock.blockType === Blocks.Lava
+    ) {
+        if (otherBlock.isSource) otherBlock.setBlockType(Blocks.Obsidian);
+        else otherBlock.setBlockType(Blocks.Cobblestone);
+
+        playPositionalSound(
+            getBlockWorldPosition(otherBlock),
+            "blocks/fizz.ogg",
+            10,
+            0.5
+        );
+    }
+}
+
+function verticalCheckAbove(block, worldPos) {
+    let above = GetBlockAtWorldPosition(
+        worldPos.x,
+        worldPos.y - BLOCK_SIZE,
+        false
+    );
+    if (above) {
+        if (above.blockType === block.blockType) {
+            block.waterLevel = 0;
+            block.cutoff = block.waterLevel;
+        } else if (above.blockType === Blocks.Air && block.isSource) {
+            block.waterLevel = 0; // As per original code.
+            block.cutoff = block.waterLevel + 0.1;
+        }
+    }
+}
+
+function flowSideways(block, worldPos, direction) {
+    let target = GetBlockAtWorldPosition(
+        worldPos.x + direction.dx,
+        worldPos.y + direction.dy,
+        false
+    );
+    // Check if the target is air or can be broken by fluid.
+    if (
+        target &&
+        (target.blockType === Blocks.Air ||
+            GetBlock(target.blockType).breakByFluid)
+    ) {
+        if (GetBlock(target.blockType).breakByFluid) {
+            target.breakBlock(GetBlock(target.blockType).dropWithoutTool);
+        }
+        if (
+            target.blockType === Blocks.Lava &&
+            block.blockType === Blocks.Water
+        ) {
+            if (target.isSource) target.setBlockType(Blocks.Obsidian);
+            else target.setBlockType(Blocks.Cobblestone);
+        }
+        target.setBlockType(block.blockType);
+        target.isSource = false;
+        // sideLevel is determined below.
+        return target;
+    } else if (
+        target &&
+        target.blockType === block.blockType &&
+        target.waterLevel > (block.isSource ? 0.2 : block.waterLevel + 0.1) &&
+        !target.isSource
+    ) {
+        return target;
+    } else {
+        if (target) CheckLavaWaterInteraction(block, target);
+    }
+    return null;
+}
+
 class Block extends Square {
     constructor(
         x = 0,
@@ -126,6 +272,8 @@ class Block extends Square {
             this.waterLevel = 0;
             this.cutoff = this.waterLevel;
         }
+
+        this.updateSprite();
     }
 
     setMetaData() {
@@ -306,161 +454,66 @@ class Block extends Square {
         // Only process if this block is water.
         if (!GetBlock(this.blockType).fluid) return;
 
-        // Ensure waterLevel and isSource are defined.
+        // Initialize water properties if undefined.
         if (this.waterLevel === undefined || this.isSource === undefined) {
-            this.waterLevel = 0; // Full water level for a source block.
+            this.waterLevel = 0;
             this.isSource = true;
             this.cutoff = this.waterLevel;
         } else {
-            // Update the rendering cutoff using waterLevel.
             this.cutoff = this.waterLevel;
         }
 
         const worldPos = getBlockWorldPosition(this);
 
-        // For non-source water blocks, determine if they should dissipate.
+        // Dissipation (only for non-source blocks).
         if (!this.isSource) {
-            // Check neighbors (above, left, right) to see if any have a higher water level.
-            let neighborHasHigher = false;
-            const neighbors = [
-                GetBlockAtWorldPosition(
-                    worldPos.x,
-                    worldPos.y - BLOCK_SIZE,
-                    false
-                ), // above
-                GetBlockAtWorldPosition(
-                    worldPos.x - BLOCK_SIZE,
-                    worldPos.y,
-                    false
-                ), // left
-                GetBlockAtWorldPosition(
-                    worldPos.x + BLOCK_SIZE,
-                    worldPos.y,
-                    false
-                ), // right
-            ];
-            neighbors.forEach((n) => {
-                if (
-                    n &&
-                    n.blockType === this.blockType &&
-                    n.waterLevel < this.waterLevel
-                ) {
-                    neighborHasHigher = true;
-                }
-            });
-            // Only dissipate if no neighbor has a higher water level.
-            if (!neighborHasHigher) {
-                this.waterLevel += 0.25;
-                this.cutoff = this.waterLevel;
-                if (this.waterLevel >= 0.85) {
-                    this.setBlockType(Blocks.Air);
-                    return;
-                }
-            }
+            if (checkDissipation(this, worldPos)) return;
         }
 
-        // --- Downward Flow ---
-        let below = GetBlockAtWorldPosition(
-            worldPos.x,
-            worldPos.y + BLOCK_SIZE,
-            false
-        );
-        if (
-            (below && below.blockType === Blocks.Air) ||
-            (below && GetBlock(below.blockType).breakByFluid)
-        ) {
-            if (GetBlock(below.blockType).breakByFluid) {
-                below.breakBlock(GetBlock(below.blockType).dropWithoutTool);
-            }
-            below.setBlockType(this.blockType);
-            // For source blocks, spawn a source downward; otherwise propagate the current waterLevel.
-            below.isSource = false;
-            below.waterLevel = 0;
-            below.cutoff = below.waterLevel;
-        }
+        // Downward Flow.
+        const below = flowDownward(this, worldPos);
 
-        // --- Vertical Check Above ---
-        let above = GetBlockAtWorldPosition(
-            worldPos.x,
-            worldPos.y - BLOCK_SIZE,
-            false
-        );
-        if (above) {
-            // Instead of forcing waterLevel to 0, we could average them to help smooth changes.
-            // For now, we simply keep this block's waterLevel low.
-            if (above.blockType === this.blockType) {
-                this.waterLevel = 0;
-                this.cutoff = this.waterLevel;
-            } else {
-                if (above.blockType === Blocks.Air && this.isSource) {
-                    this.waterLevel = 0;
-                    this.cutoff = this.waterLevel + 0.1;
-                }
-            }
-        }
+        // Vertical Check Above.
+        verticalCheckAbove(this, worldPos);
 
-        // --- Sideways Flow ---
-        // Avoid sideways flow if below is water (to prevent interference) or if waterLevel is too high.
-        if (!this.isSource && below && GetBlock(below.blockType).fluid) return;
+        // Sideways Flow.
         if (this.waterLevel > 0.85) return;
-
-        // For side flow, new water blocks receive a waterLevel that is slightly higher than the current one.
-        let sideLevel = this.isSource ? 0.2 : this.waterLevel + 0.1;
-
-        // Check left.
-        let left = GetBlockAtWorldPosition(
-            worldPos.x - BLOCK_SIZE,
-            worldPos.y,
-            false
-        );
-        if (
-            left &&
-            (left.blockType === Blocks.Air ||
-                GetBlock(left.blockType).breakByFluid)
-        ) {
-            if (GetBlock(left.blockType).breakByFluid) {
-                left.breakBlock(GetBlock(left.blockType).dropWithoutTool);
+        const sideLevel = this.isSource ? 0.2 : this.waterLevel + 0.1;
+        // Left Flow.
+        if (this.isSource || (below && below.blockType !== this.blockType)) {
+            let left = flowSideways(this, worldPos, { dx: -BLOCK_SIZE, dy: 0 });
+            if (left) {
+                if (
+                    left.blockType === this.blockType &&
+                    left.waterLevel > sideLevel &&
+                    !left.isSource
+                ) {
+                    left.waterLevel = sideLevel;
+                    left.cutoff = sideLevel;
+                } else {
+                    left.isSource = false;
+                    left.waterLevel = sideLevel;
+                    left.cutoff = sideLevel;
+                }
             }
-            left.setBlockType(this.blockType);
-            left.isSource = false; // Sideways water is flowing.
-            left.waterLevel = sideLevel;
-            left.cutoff = left.waterLevel;
-        } else if (
-            left &&
-            left.blockType === this.blockType &&
-            left.waterLevel > sideLevel &&
-            !left.isSource
-        ) {
-            left.waterLevel = sideLevel;
-            left.cutoff = left.waterLevel;
         }
-
-        // Check right.
-        let right = GetBlockAtWorldPosition(
-            worldPos.x + BLOCK_SIZE,
-            worldPos.y,
-            false
-        );
-        if (
-            right &&
-            (right.blockType === Blocks.Air ||
-                GetBlock(right.blockType).breakByFluid)
-        ) {
-            if (GetBlock(right.blockType).breakByFluid) {
-                right.breakBlock(GetBlock(right.blockType).dropWithoutTool);
+        // Right Flow.
+        if (this.isSource || (below && below.blockType !== this.blockType)) {
+            let right = flowSideways(this, worldPos, { dx: BLOCK_SIZE, dy: 0 });
+            if (right) {
+                if (
+                    right.blockType === this.blockType &&
+                    right.waterLevel > sideLevel &&
+                    !right.isSource
+                ) {
+                    right.waterLevel = sideLevel;
+                    right.cutoff = sideLevel;
+                } else {
+                    right.isSource = false;
+                    right.waterLevel = sideLevel;
+                    right.cutoff = sideLevel;
+                }
             }
-            right.setBlockType(this.blockType);
-            right.isSource = false; // Sideways water is flowing.
-            right.waterLevel = sideLevel;
-            right.cutoff = right.waterLevel;
-        } else if (
-            right &&
-            right.blockType === this.blockType &&
-            right.waterLevel > sideLevel &&
-            !right.isSource
-        ) {
-            right.waterLevel = sideLevel;
-            right.cutoff = right.waterLevel;
         }
     }
 
@@ -480,26 +533,6 @@ class Block extends Square {
     resetProgression() {
         this.metaData.progression = 0;
     }
-
-    // shouldDisplayFluidSprite(block) {
-    //     // Only process if this block is a fluid.
-    //     if (!block.fluid) return false;
-
-    //     // Get the chunk that this block belongs to.
-    //     const chunk = GetChunk(this.chunkX);
-    //     if (!chunk) return true; // If no chunk, assume sprite should display.
-
-    //     // Get the block directly above.
-    //     const aboveBlock = chunk.getUp(this.x, this.y);
-
-    //     // If there's no block above or it's air, show the fluid sprite.
-    //     if (!aboveBlock || aboveBlock.blockType === Blocks.Air) {
-    //         return true;
-    //     }
-
-    //     // Only display the fluid sprite if the block above is NOT the same fluid type.
-    //     return aboveBlock.blockType !== this.blockType;
-    // }
 
     breakBlock(drop = false) {
         if (this.blockType === Blocks.Air) return;

@@ -1,3 +1,5 @@
+const panel = document.querySelector(".help-container");
+
 setInterval(() => {
     updateDebug();
 }, 1000 / 60);
@@ -23,6 +25,8 @@ function HandleInput() {
     if (input.isKeyPressed("KeyC")) drawCoordinates = !drawCoordinates;
     if (input.isKeyPressed("KeyO")) SaveWorld();
     if (input.isKeyPressed("KeyP")) LoadWorld();
+    if (input.isKeyPressed("KeyZ"))
+        panel.style.display = panel.style.display === "none" ? "flex" : "none";
     // if (input.isKeyPressed("KeyR")) RegenerateWorld();
 }
 

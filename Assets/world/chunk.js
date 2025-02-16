@@ -309,6 +309,51 @@ class Chunk {
         return this.getBlock(x - 1, y); // Block to the left
     }
 
+    updateAmbientSound() {
+        if (!player) return;
+
+        // Array to store blocks that have an ambientSound defined.
+        let ambientBlocks = [];
+
+        // Loop through all blocks in this chunk.
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                let block = this.blocks[y][x];
+                let blockDef = GetBlock(block.blockType);
+                if (blockDef.ambientSound) {
+                    ambientBlocks.push(block);
+                }
+            }
+        }
+
+        if (ambientBlocks.length === 0) return;
+
+        let playerPos = player.position;
+
+        // Find the block with an ambientSound that is closest to the player.
+        let closestBlock = ambientBlocks.reduce((closest, current) => {
+            let currentPos = getBlockWorldPosition(current);
+            let currentDist = Vector2.Distance(playerPos, currentPos);
+            if (!closest) return current;
+            let closestPos = getBlockWorldPosition(closest);
+            let closestDist = Vector2.Distance(playerPos, closestPos);
+            return currentDist < closestDist ? current : closest;
+        }, null);
+
+        if (!closestBlock) return;
+
+        // Get the ambient sound from the block's type.
+        let ambientSound = GetBlock(closestBlock.blockType).ambientSound;
+        if (!ambientSound) return;
+
+        // Use the block's world position as the sound origin.
+        let soundPos = getBlockWorldPosition(closestBlock);
+
+        // Play the sound with positional audio.
+        // The parameters here are: origin position, sound file/string, volume, and loop flag.
+        playPositionalSound(soundPos, ambientSound, 0.5, true);
+    }
+
     getRight(x, y) {
         return this.getBlock(x + 1, y); // Block to the right
     }

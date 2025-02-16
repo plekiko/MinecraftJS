@@ -204,19 +204,19 @@ function DrawChunk(chunk) {
 
 function DrawLate(chunk) {
     if (drawingChunkBorders) DrawChunkLine(chunk);
-    if (drawCamera) DrawCamera();
     if (drawHeight) DrawHeight();
-    if (drawCoordinates) DrawCoordinates();
-    if (drawDebugMouseBlock) DrawDebugMouseBlock();
-    if (drawFileSize) DrawExpectedFileSize();
-    if (drawFps) DrawFps();
 }
 
 function AfterDraw() {
     if (player) {
         DrawUI();
         DrawCursor();
+        if (drawCoordinates) DrawCoordinates();
     }
+    if (drawCamera) DrawCamera();
+    if (drawDebugMouseBlock) DrawDebugMouseBlock();
+    if (drawFileSize) DrawExpectedFileSize();
+    if (drawFps) DrawFps();
 }
 
 function DrawUI() {
