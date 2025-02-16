@@ -318,11 +318,8 @@ class Block extends Square {
 
         // For non-source water blocks, determine if they should dissipate.
         if (!this.isSource) {
-            // Check if we're connected to a source.
-            const connectedToSource = this.isConnectedToSource(25);
-
-            // Check if any neighbor (above, below, left, right) is water with a higher water level.
-            let connectedToHigher = false;
+            // Check neighbors (above, left, right) to see if any have a higher water level.
+            let neighborHasHigher = false;
             const neighbors = [
                 GetBlockAtWorldPosition(
                     worldPos.x,
@@ -346,12 +343,11 @@ class Block extends Square {
                     n.blockType === this.blockType &&
                     n.waterLevel < this.waterLevel
                 ) {
-                    connectedToHigher = true;
+                    neighborHasHigher = true;
                 }
             });
-
-            // Only dissipate if not connected to a source AND not connected to any neighbor (including above) with a higher water level.
-            if (!connectedToSource && !connectedToHigher) {
+            // Only dissipate if no neighbor has a higher water level.
+            if (!neighborHasHigher) {
                 this.waterLevel += 0.25;
                 this.cutoff = this.waterLevel;
                 if (this.waterLevel >= 0.85) {
@@ -382,7 +378,8 @@ class Block extends Square {
             false
         );
         if (above && above.blockType === this.blockType) {
-            // If there's water above, force this block's water level to stay low.
+            // Instead of forcing waterLevel to 0, we could average them to help smooth changes.
+            // For now, we simply keep this block's waterLevel low.
             this.waterLevel = 0;
             this.cutoff = this.waterLevel;
         } else if (above && above.blockType === Blocks.Air && this.isSource) {
@@ -394,8 +391,7 @@ class Block extends Square {
         if (!this.isSource && below && GetBlock(below.blockType).fluid) return;
         if (this.waterLevel > 0.85) return;
 
-        // For side flow, new water blocks receive a waterLevel that is:
-        // For source blocks: fixed at 0.1, for flowing water: current waterLevel increased slightly.
+        // For side flow, new water blocks receive a waterLevel that is slightly higher than the current one.
         let sideLevel = this.waterLevel + 0.1;
 
         // Check left.
@@ -407,6 +403,13 @@ class Block extends Square {
         if (left && left.blockType === Blocks.Air) {
             left.setBlockType(this.blockType);
             left.isSource = false; // Sideways water is flowing.
+            left.waterLevel = sideLevel;
+            left.cutoff = left.waterLevel;
+        } else if (
+            left &&
+            left.blockType === this.blockType &&
+            left.waterLevel > sideLevel
+        ) {
             left.waterLevel = sideLevel;
             left.cutoff = left.waterLevel;
         }
@@ -585,52 +588,3 @@ class Block extends Square {
 function GetBlock(blockId) {
     return blockMap.has(blockId) ? blockMap.get(blockId) : 0;
 }
-
-Block.prototype.isConnectedToSource = function (maxDepth = 10, visited = {}) {
-    // Create a unique key for this block.
-    const key = `${this.chunkX}_${this.x}_${this.y}`;
-    if (visited[key]) return false;
-    visited[key] = true;
-
-    // If this block is a source, return true.
-    if (this.isSource) return true;
-
-    if (maxDepth <= 0) return false;
-
-    // Check neighbors (above, below, left, right)
-    const worldPos = getBlockWorldPosition(this);
-    const neighbors = [];
-
-    let above = GetBlockAtWorldPosition(
-        worldPos.x,
-        worldPos.y - BLOCK_SIZE,
-        false
-    );
-    let below = GetBlockAtWorldPosition(
-        worldPos.x,
-        worldPos.y + BLOCK_SIZE,
-        false
-    );
-    let left = GetBlockAtWorldPosition(
-        worldPos.x - BLOCK_SIZE,
-        worldPos.y,
-        false
-    );
-    let right = GetBlockAtWorldPosition(
-        worldPos.x + BLOCK_SIZE,
-        worldPos.y,
-        false
-    );
-
-    if (above && above.blockType === this.blockType) neighbors.push(above);
-    if (below && below.blockType === this.blockType) neighbors.push(below);
-    if (left && left.blockType === this.blockType) neighbors.push(left);
-    if (right && right.blockType === this.blockType) neighbors.push(right);
-
-    // Recurse into each neighbor.
-    for (let n of neighbors) {
-        if (n.isConnectedToSource(maxDepth - 1, visited)) return true;
-    }
-
-    return false;
-};
