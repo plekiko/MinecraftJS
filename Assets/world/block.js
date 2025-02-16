@@ -20,6 +20,7 @@ class BlockType {
         toolType = ToolType.Nothing,
         requiredToolLevel = 0,
         dropWithoutTool = true,
+        breakByFluid = false,
         category = null,
 
         fall = false,
@@ -63,6 +64,7 @@ class BlockType {
         this.toolType = toolType;
         this.dropWithoutTool = dropWithoutTool;
         this.requiredToolLevel = requiredToolLevel;
+        this.breakByFluid = breakByFluid;
         this.category = category;
 
         this.dropBlock = dropBlock;
@@ -363,7 +365,13 @@ class Block extends Square {
             worldPos.y + BLOCK_SIZE,
             false
         );
-        if (below && below.blockType === Blocks.Air) {
+        if (
+            (below && below.blockType === Blocks.Air) ||
+            GetBlock(below.blockType).breakByFluid
+        ) {
+            if (GetBlock(below.blockType).breakByFluid) {
+                below.breakBlock(GetBlock(below.blockType).dropWithoutTool);
+            }
             below.setBlockType(this.blockType);
             // For source blocks, spawn a source downward; otherwise propagate the current waterLevel.
             below.isSource = false;
@@ -400,7 +408,14 @@ class Block extends Square {
             worldPos.y,
             false
         );
-        if (left && left.blockType === Blocks.Air) {
+        if (
+            left &&
+            (left.blockType === Blocks.Air ||
+                GetBlock(left.blockType).breakByFluid)
+        ) {
+            if (GetBlock(left.blockType).breakByFluid) {
+                left.breakBlock(GetBlock(left.blockType).dropWithoutTool);
+            }
             left.setBlockType(this.blockType);
             left.isSource = false; // Sideways water is flowing.
             left.waterLevel = sideLevel;
@@ -420,7 +435,14 @@ class Block extends Square {
             worldPos.y,
             false
         );
-        if (right && right.blockType === Blocks.Air) {
+        if (
+            right &&
+            (right.blockType === Blocks.Air ||
+                GetBlock(right.blockType).breakByFluid)
+        ) {
+            if (GetBlock(right.blockType).breakByFluid) {
+                right.breakBlock(GetBlock(right.blockType).dropWithoutTool);
+            }
             right.setBlockType(this.blockType);
             right.isSource = false; // Sideways water is flowing.
             right.waterLevel = sideLevel;
