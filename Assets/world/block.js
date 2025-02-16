@@ -367,7 +367,7 @@ class Block extends Square {
         );
         if (
             (below && below.blockType === Blocks.Air) ||
-            GetBlock(below.blockType).breakByFluid
+            (below && GetBlock(below.blockType).breakByFluid)
         ) {
             if (GetBlock(below.blockType).breakByFluid) {
                 below.breakBlock(GetBlock(below.blockType).dropWithoutTool);
@@ -385,13 +385,18 @@ class Block extends Square {
             worldPos.y - BLOCK_SIZE,
             false
         );
-        if (above && above.blockType === this.blockType) {
+        if (above) {
             // Instead of forcing waterLevel to 0, we could average them to help smooth changes.
             // For now, we simply keep this block's waterLevel low.
-            this.waterLevel = 0;
-            this.cutoff = this.waterLevel;
-        } else if (above && above.blockType === Blocks.Air && this.isSource) {
-            this.cutoff = 0.1;
+            if (above.blockType === this.blockType) {
+                this.waterLevel = 0;
+                this.cutoff = this.waterLevel;
+            } else {
+                if (above.blockType === Blocks.Air && this.isSource) {
+                    this.waterLevel = 0;
+                    this.cutoff = this.waterLevel + 0.1;
+                }
+            }
         }
 
         // --- Sideways Flow ---
@@ -400,7 +405,7 @@ class Block extends Square {
         if (this.waterLevel > 0.85) return;
 
         // For side flow, new water blocks receive a waterLevel that is slightly higher than the current one.
-        let sideLevel = this.waterLevel + 0.1;
+        let sideLevel = this.isSource ? 0.2 : this.waterLevel + 0.1;
 
         // Check left.
         let left = GetBlockAtWorldPosition(
@@ -423,7 +428,8 @@ class Block extends Square {
         } else if (
             left &&
             left.blockType === this.blockType &&
-            left.waterLevel > sideLevel
+            left.waterLevel > sideLevel &&
+            !left.isSource
         ) {
             left.waterLevel = sideLevel;
             left.cutoff = left.waterLevel;
@@ -445,6 +451,14 @@ class Block extends Square {
             }
             right.setBlockType(this.blockType);
             right.isSource = false; // Sideways water is flowing.
+            right.waterLevel = sideLevel;
+            right.cutoff = right.waterLevel;
+        } else if (
+            right &&
+            right.blockType === this.blockType &&
+            right.waterLevel > sideLevel &&
+            !right.isSource
+        ) {
             right.waterLevel = sideLevel;
             right.cutoff = right.waterLevel;
         }
