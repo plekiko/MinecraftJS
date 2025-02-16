@@ -24,12 +24,13 @@ let day = true;
 const ORE_THRESHOLDS = {
     coal: 2.5,
     iron: 2,
+    diamond: 1,
 };
 
 const SPAWN_PLAYER = true;
 
 let globalFrame = 0;
-let updatingBlocks = [];
+let updatingBlocks = []; //eg furnace
 
 let chat = null;
 

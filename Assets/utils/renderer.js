@@ -158,11 +158,15 @@ function DrawBreakAndPlaceCursor(inRange = false) {
 function DrawChunks(chunksMap) {
     const currentChunkX = camera.getCurrentChunkIndex(); // Get the x position of the current chunk
 
+    chunks_in_render_distance.clear();
+
     for (let i = -RENDER_DISTANCE; i <= RENDER_DISTANCE; i++) {
         const chunkX = (currentChunkX + i) * CHUNK_WIDTH * BLOCK_SIZE; // Calculate the x position of the chunk to render
         // console.log(chunkX + " is " + chunksMap.has(chunkX));
 
         if (chunksMap.has(chunkX)) {
+            chunks_in_render_distance.set(chunkX, chunksMap.get(chunkX));
+
             const chunk = chunksMap.get(chunkX);
             DrawChunk(chunk, chunkX);
         }

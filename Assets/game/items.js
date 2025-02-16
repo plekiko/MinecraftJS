@@ -221,6 +221,11 @@ const items = [
         sprite: "charcoal",
         fuelTime: 80,
     }),
+    new Item({
+        itemId: 23,
+        name: "Diamond",
+        sprite: "diamond",
+    }),
     //#endregion
 
     //#region Food
@@ -229,38 +234,38 @@ const items = [
         name: "Raw Beef",
         sprite: "beef_raw",
         smeltOutput: { itemId: 31 },
-        foodValue: 1
+        foodValue: 1,
     }),
     new Item({
         itemId: 31,
         name: "Cooked Beef",
         sprite: "beef_cooked",
-        foodValue: 6
+        foodValue: 6,
     }),
     new Item({
         itemId: 32,
         name: "Raw Porkchop",
         sprite: "porkchop_raw",
         smeltOutput: { itemId: 33 },
-        foodValue: 1
+        foodValue: 1,
     }),
     new Item({
         itemId: 33,
         name: "Cooked Porkchop",
         sprite: "porkchop_cooked",
-        foodValue: 6
+        foodValue: 6,
     }),
     new Item({
         itemId: 34,
         name: "Apple",
         sprite: "apple",
-        foodValue: 3
+        foodValue: 3,
     }),
     new Item({
         itemId: 35,
         name: "Rotten Flesh",
         sprite: "rotten_flesh",
-        foodValue: 2
+        foodValue: 2,
     }),
     //#endregion
 

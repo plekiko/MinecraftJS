@@ -1,5 +1,7 @@
 let entities = [];
 
+let chunks_in_render_distance = new Map();
+
 let player;
 
 function removeEntity(entity) {
@@ -18,6 +20,10 @@ setInterval(() => {
 
 function tick() {
     updateBlocks();
+
+    chunks_in_render_distance.forEach((chunk) => {
+        chunk.updateChunk();
+    });
 }
 
 function updateBlocks() {
@@ -46,25 +52,4 @@ function updateBlocks() {
             block._updateAccumulator -= 1; // subtract 1 while preserving any remainder.
         }
     }
-}
-
-function isBlockInRenderDistance(block) {
-    // Convert the block's position to world coordinates.
-    const worldPos = getBlockWorldPosition(block);
-
-    // Get the camera's world position.
-    const camX = camera.getWorldX();
-    const camY = camera.getWorldY();
-
-    // Define a render radius based on your settings.
-    // Adjust margin as needed. (Try a higher value if necessary.)
-    const margin = 100;
-    const renderRadiusX = RENDER_DISTANCE * CHUNK_WIDTH * BLOCK_SIZE + margin;
-    const renderRadiusY = RENDER_DISTANCE * CHUNK_HEIGHT * BLOCK_SIZE + margin;
-
-    // Use absolute differences instead of inequality comparisons.
-    return (
-        Math.abs(worldPos.x - camX) <= renderRadiusX &&
-        Math.abs(worldPos.y - camY) <= renderRadiusY
-    );
 }

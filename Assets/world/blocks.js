@@ -53,6 +53,7 @@ const Blocks = Object.freeze({
     Chest: 51,
     Glass: 52,
     Lava: 53,
+    DiamondOre: 54,
 });
 
 const blockTypes = [
@@ -416,6 +417,7 @@ const blockTypes = [
         sprite: "water_still",
         name: "Water",
         updateSpeed: 0.2,
+        chunkUpdate: true,
         hardness: -2,
         animationSpeed: 0.2,
         fluid: true,
@@ -531,7 +533,7 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         requiredToolLevel: 13.5,
         dropWithoutTool: false,
-        smeltOutput: { blockId: null, itemId: Items.IronIngot },
+        smeltOutput: { itemId: Items.IronIngot },
     }),
     new BlockType({
         blockId: 43,
@@ -643,11 +645,25 @@ const blockTypes = [
         sprite: "lava_still",
         name: "Lava",
         updateSpeed: 0.1,
+        chunkUpdate: true,
         hardness: -2,
         animationSpeed: 0.03,
         fluid: true,
         dropWithoutTool: false,
         breakSound: Sounds.Water_Enter,
+    }),
+    new BlockType({
+        blockId: 54,
+        sprite: "diamond_ore",
+        name: "Diamond Ore",
+        hardness: 10,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropItem: Items.Diamond,
+        requiredToolLevel: 14.5,
+        dropWithoutTool: false,
+        smeltOutput: { itemId: Items.Diamond },
     }),
 ];
 

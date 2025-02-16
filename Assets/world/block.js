@@ -11,6 +11,7 @@ class BlockType {
         collision = true,
 
         updateSpeed = 0,
+        chunkUpdate = false,
         removeFromUpdatingWhenInactive = true,
 
         breakSound = Sounds.Break_Wood,
@@ -50,6 +51,7 @@ class BlockType {
         this.breakingSound = breakingSound;
 
         this.updateSpeed = updateSpeed;
+        this.chunkUpdate = chunkUpdate;
         this.removeFromUpdatingWhenInactive = removeFromUpdatingWhenInactive;
 
         this.fall = fall;
@@ -158,19 +160,46 @@ class Block extends Square {
     setBlockType(blockType, override = false) {
         if (this.blockType === blockType && !override) return;
 
+        const myChunk = chunks.has(this.chunkX)
+            ? chunks.get(this.chunkX)
+            : null;
+
         const existingIndex = updatingBlocks.indexOf(this);
         if (existingIndex !== -1) updatingBlocks.splice(existingIndex, 1);
 
         this.blockType = blockType;
         const block = GetBlock(blockType);
 
+        if (myChunk) {
+            if (block.chunkUpdate) {
+                if (!myChunk.update.includes(this)) {
+                    myChunk.update.push(this);
+                }
+            } else {
+                const index = myChunk.update.indexOf(this);
+                if (index !== -1) {
+                    myChunk.update.splice(index, 1);
+                }
+            }
+        }
+
         this.metaData = undefined;
         if (block.specialType) this.setMetaData();
-        if (block.updateSpeed > 0) updatingBlocks.push(this);
+        if (block.updateSpeed > 0 && !block.chunkUpdate)
+            updatingBlocks.push(this);
 
         this.drawOffset = block.grassOffset ? RandomRange(-2, 2) : 0;
 
         this.cutoff = 0;
+
+        this.waterLevel = undefined;
+        this.isSource = undefined;
+
+        if (GetBlock(blockType).fluid) {
+            this.isSource = true;
+            this.waterLevel = 0;
+            this.cutoff = this.waterLevel;
+        }
 
         this.updateSprite();
     }
@@ -276,28 +305,59 @@ class Block extends Square {
         if (!GetBlock(this.blockType).fluid) return;
 
         // Ensure waterLevel and isSource are defined.
-        // A new water block defaults to a source.
         if (this.waterLevel === undefined || this.isSource === undefined) {
             this.waterLevel = 0; // Full water level for a source block.
             this.isSource = true;
             this.cutoff = this.waterLevel;
         } else {
-            // Update the rendering cutoff (we use waterLevel directly).
+            // Update the rendering cutoff using waterLevel.
             this.cutoff = this.waterLevel;
         }
 
         const worldPos = getBlockWorldPosition(this);
 
+        // For non-source water blocks, determine if they should dissipate.
         if (!this.isSource) {
-            if (!this.isConnectedToSource(10)) {
-                // Not connected? Gradually dissipate.
-                this.waterLevel += 0.1;
+            // Check if we're connected to a source.
+            const connectedToSource = this.isConnectedToSource(25);
+
+            // Check if any neighbor (above, below, left, right) is water with a higher water level.
+            let connectedToHigher = false;
+            const neighbors = [
+                GetBlockAtWorldPosition(
+                    worldPos.x,
+                    worldPos.y - BLOCK_SIZE,
+                    false
+                ), // above
+                GetBlockAtWorldPosition(
+                    worldPos.x - BLOCK_SIZE,
+                    worldPos.y,
+                    false
+                ), // left
+                GetBlockAtWorldPosition(
+                    worldPos.x + BLOCK_SIZE,
+                    worldPos.y,
+                    false
+                ), // right
+            ];
+            neighbors.forEach((n) => {
+                if (
+                    n &&
+                    n.blockType === this.blockType &&
+                    n.waterLevel < this.waterLevel
+                ) {
+                    connectedToHigher = true;
+                }
+            });
+
+            // Only dissipate if not connected to a source AND not connected to any neighbor (including above) with a higher water level.
+            if (!connectedToSource && !connectedToHigher) {
+                this.waterLevel += 0.25;
                 this.cutoff = this.waterLevel;
                 if (this.waterLevel >= 0.85) {
                     this.setBlockType(Blocks.Air);
                     return;
                 }
-                return;
             }
         }
 
@@ -309,8 +369,7 @@ class Block extends Square {
         );
         if (below && below.blockType === Blocks.Air) {
             below.setBlockType(this.blockType);
-            // If this block is a source, spawn a source downward.
-            // Otherwise, propagate the current waterLevel downward.
+            // For source blocks, spawn a source downward; otherwise propagate the current waterLevel.
             below.isSource = false;
             below.waterLevel = 0;
             below.cutoff = below.waterLevel;
@@ -323,8 +382,7 @@ class Block extends Square {
             false
         );
         if (above && above.blockType === this.blockType) {
-            // If there's water above, we force this block to become a source.
-            // this.isSource = true;
+            // If there's water above, force this block's water level to stay low.
             this.waterLevel = 0;
             this.cutoff = this.waterLevel;
         } else if (above && above.blockType === Blocks.Air && this.isSource) {
@@ -332,18 +390,13 @@ class Block extends Square {
         }
 
         // --- Sideways Flow ---
+        // Avoid sideways flow if below is water (to prevent interference) or if waterLevel is too high.
         if (!this.isSource && below && GetBlock(below.blockType).fluid) return;
         if (this.waterLevel > 0.85) return;
 
-        // Determine the water level for new sideways water.
-        // For source blocks, we want the new water block to be flowing (non-source) with a fixed level, e.g. 0.8.
-        // For non-source blocks, we decrease waterLevel by 0.1 (to a minimum of 0.1).
-        let sideLevel;
-        if (this.isSource) {
-            sideLevel = 0.1;
-        } else {
-            sideLevel = this.waterLevel + 0.1;
-        }
+        // For side flow, new water blocks receive a waterLevel that is:
+        // For source blocks: fixed at 0.1, for flowing water: current waterLevel increased slightly.
+        let sideLevel = this.waterLevel + 0.1;
 
         // Check left.
         let left = GetBlockAtWorldPosition(

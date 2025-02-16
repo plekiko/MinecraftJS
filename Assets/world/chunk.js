@@ -20,6 +20,7 @@ class Chunk {
         this.grassNoiseMap = worldGrassNoiseMap;
 
         this.entities = [];
+        this.update = [];
         this.spawnTime = 0;
 
         this.generateChunk();
@@ -248,7 +249,26 @@ class Chunk {
     }
 
     updateChunk() {
-        this.updateWater();
+        // Iterate backwards in case blocks remove themselves from the update array.
+        for (let i = this.update.length - 1; i >= 0; i--) {
+            const block = this.update[i];
+            // Retrieve the block's updateSpeed from its block data.
+            const speed = GetBlock(block.blockType).updateSpeed || 1;
+
+            // Initialize the accumulator if it doesn't exist.
+            if (block._updateAccumulator === undefined) {
+                block._updateAccumulator = 0;
+            }
+
+            // Add the speed value each tick.
+            block._updateAccumulator += speed;
+
+            // When the accumulator reaches at least 1, perform an update.
+            if (block._updateAccumulator >= 1) {
+                block.update();
+                block._updateAccumulator -= 1; // subtract 1 while preserving any remainder.
+            }
+        }
     }
 
     checkForBlockWithAirBeneath(x, y) {
@@ -262,12 +282,6 @@ class Chunk {
             block.breakBlock(blockData.dropWithoutTool);
 
         if (blockData.fall) block.gravityBlock();
-    }
-
-    updateWater() {
-        this.getAllBlocks(Blocks.Water).forEach((water) => {
-            water.setBlockType(Blocks.Water, true);
-        });
     }
 
     getAllBlocks(blockType) {
@@ -400,9 +414,16 @@ class Chunk {
             Blocks.IronOre,
             100000
         );
+        this.generateOre(
+            worldDiamondNoiseMap,
+            ORE_THRESHOLDS.diamond,
+            Blocks.DiamondOre,
+            200000,
+            25
+        );
     }
 
-    generateOre(noise, threshold, block, offset) {
+    generateOre(noise, threshold, block, offset, height = CHUNK_HEIGHT) {
         for (let y = 0; y < CHUNK_HEIGHT; y++) {
             for (let x = 0; x < CHUNK_WIDTH; x++) {
                 const noiseValue = noise.getNoise(
@@ -413,6 +434,8 @@ class Chunk {
                 if (this.getBlockType(x, y) != Blocks.Stone) continue;
 
                 if (noiseValue > threshold) continue;
+
+                if (y > height) continue;
 
                 this.setBlockType(x, y, block);
             }
@@ -504,8 +527,10 @@ class Chunk {
     setBlockType(x, y, blockType, blocks = this.blocks) {
         y = this.calculateY(y);
         if (blocks[y] && blocks[y][x]) {
-            if (blocks[y][x].blockType !== blockType)
-                blocks[y][x].setBlockType(blockType);
+            const block = blocks[y][x];
+            if (block.blockType !== blockType) {
+                block.setBlockType(blockType);
+            }
         }
     }
 
