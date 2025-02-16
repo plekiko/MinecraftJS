@@ -164,6 +164,67 @@ class Player extends Entity {
         if (item.foodValue > 0) {
             this.eatFoodInHand();
         }
+
+        if (
+            item.itemId === Items.Bucket ||
+            item.itemId === Items.WaterBucket ||
+            item.itemId === Items.LavaBucket
+        )
+            this.useBucket();
+    }
+
+    useBucket() {
+        const block = GetBlock(this.hoverBlock.blockType);
+
+        // Placing
+        if (block.blockId === Blocks.Air || block.fluid) {
+            if (this.holdItem.itemId === Items.WaterBucket) {
+                this.removeFromCurrentSlot();
+                this.inventory.addItem(
+                    new InventoryItem({ itemId: Items.Bucket, count: 1 })
+                );
+                this.hoverBlock.setBlockType(Blocks.Water, true);
+                return;
+            }
+            if (this.holdItem.itemId === Items.LavaBucket) {
+                this.removeFromCurrentSlot();
+                this.inventory.addItem(
+                    new InventoryItem({ itemId: Items.Bucket, count: 1 })
+                );
+                this.hoverBlock.setBlockType(Blocks.Lava, true);
+                return;
+            }
+        }
+
+        // Picking up
+        if (block.fluid) {
+            // Water
+            if (
+                this.hoverBlock.blockType === Blocks.Lava &&
+                this.hoverBlock.isSource
+            ) {
+                this.removeFromCurrentSlot();
+                this.inventory.addItem(
+                    new InventoryItem({ itemId: Items.LavaBucket, count: 1 })
+                );
+
+                this.hoverBlock.setBlockType(Blocks.Air);
+            }
+
+            // Lava
+            if (
+                this.hoverBlock.blockType === Blocks.Water &&
+                this.hoverBlock.isSource
+            ) {
+                this.removeFromCurrentSlot();
+                this.inventory.addItem(
+                    new InventoryItem({ itemId: Items.WaterBucket, count: 1 })
+                );
+
+                this.hoverBlock.setBlockType(Blocks.Air);
+            }
+            // playPositionalSound(this.position, "items/bucket_fill.ogg");
+        }
     }
 
     eatFoodInHand() {

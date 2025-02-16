@@ -349,6 +349,24 @@ const recipes = [
         output: new InventoryItem({ itemId: Items.IronSword, count: 1 }),
     }),
 
+    // Bucket
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.Bucket, count: 1 }),
+    }),
+
     //#endregion
 
     //#region Diamond Tools

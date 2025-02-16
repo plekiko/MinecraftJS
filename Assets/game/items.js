@@ -19,6 +19,9 @@ const Items = Object.freeze({
     IronShovel: 14,
     IronHoe: 15,
     IronSword: 16,
+    Bucket: 17,
+    WaterBucket: 18,
+    LavaBucket: 19,
 
     DiamondAxe: 40,
     DiamondPickaxe: 41,
@@ -207,6 +210,26 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 3,
+    }),
+    new Item({
+        itemId: 17,
+        name: "Bucket",
+        sprite: "bucket_empty",
+        heldInHand: true,
+    }),
+    new Item({
+        itemId: 18,
+        name: "Water Bucket",
+        sprite: "bucket_water",
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 19,
+        name: "Lava Bucket",
+        sprite: "bucket_lava",
+        heldInHand: true,
+        stackSize: 1,
     }),
     //#endregion
 
