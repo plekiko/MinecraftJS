@@ -52,6 +52,7 @@ const Blocks = Object.freeze({
     IceBlock: 50,
     Chest: 51,
     Glass: 52,
+    Lava: 53,
 });
 
 const blockTypes = [
@@ -538,6 +539,7 @@ const blockTypes = [
         name: "Furnace",
         hardness: 8,
         updateSpeed: 1,
+        removeFromUpdatingWhenInactive: true,
         specialType: SpecialType.Furnace,
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
@@ -635,6 +637,17 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Glass,
         dropWithoutTool: false,
         collision: false,
+    }),
+    new BlockType({
+        blockId: 53,
+        sprite: "lava_still",
+        name: "Lava",
+        updateSpeed: 0.1,
+        hardness: -2,
+        animationSpeed: 0.03,
+        fluid: true,
+        dropWithoutTool: false,
+        breakSound: Sounds.Water_Enter,
     }),
 ];
 

@@ -11,6 +11,7 @@ class BlockType {
         collision = true,
 
         updateSpeed = 0,
+        removeFromUpdatingWhenInactive = true,
 
         breakSound = Sounds.Break_Wood,
         breakingSound = Sounds.Breaking_Wood,
@@ -49,6 +50,7 @@ class BlockType {
         this.breakingSound = breakingSound;
 
         this.updateSpeed = updateSpeed;
+        this.removeFromUpdatingWhenInactive = removeFromUpdatingWhenInactive;
 
         this.fall = fall;
 
@@ -115,7 +117,7 @@ class Block extends Square {
         this.chunkX = chunkX;
         this.blockType = blockType;
 
-        if (blockType === Blocks.Water) {
+        if (GetBlock(blockType).fluid) {
             this.isSource = true;
             this.waterLevel = 0;
             this.cutoff = this.waterLevel;
@@ -170,11 +172,6 @@ class Block extends Square {
 
         this.cutoff = 0;
 
-        if (blockType === Blocks.Water) {
-            this.isSource = true;
-            this.waterLevel = 0;
-            this.cutoff = this.waterLevel;
-        }
         this.updateSprite();
     }
 
@@ -276,7 +273,7 @@ class Block extends Square {
 
     simulateWaterFlow() {
         // Only process if this block is water.
-        if (this.blockType !== Blocks.Water) return;
+        if (!GetBlock(this.blockType).fluid) return;
 
         // Ensure waterLevel and isSource are defined.
         // A new water block defaults to a source.
@@ -291,6 +288,19 @@ class Block extends Square {
 
         const worldPos = getBlockWorldPosition(this);
 
+        if (!this.isSource) {
+            if (!this.isConnectedToSource(10)) {
+                // Not connected? Gradually dissipate.
+                this.waterLevel += 0.1;
+                this.cutoff = this.waterLevel;
+                if (this.waterLevel >= 0.85) {
+                    this.setBlockType(Blocks.Air);
+                    return;
+                }
+                return;
+            }
+        }
+
         // --- Downward Flow ---
         let below = GetBlockAtWorldPosition(
             worldPos.x,
@@ -298,7 +308,7 @@ class Block extends Square {
             false
         );
         if (below && below.blockType === Blocks.Air) {
-            below.setBlockType(Blocks.Water);
+            below.setBlockType(this.blockType);
             // If this block is a source, spawn a source downward.
             // Otherwise, propagate the current waterLevel downward.
             below.isSource = false;
@@ -312,7 +322,7 @@ class Block extends Square {
             worldPos.y - BLOCK_SIZE,
             false
         );
-        if (above && above.blockType === Blocks.Water) {
+        if (above && above.blockType === this.blockType) {
             // If there's water above, we force this block to become a source.
             // this.isSource = true;
             this.waterLevel = 0;
@@ -342,7 +352,7 @@ class Block extends Square {
             false
         );
         if (left && left.blockType === Blocks.Air) {
-            left.setBlockType(Blocks.Water);
+            left.setBlockType(this.blockType);
             left.isSource = false; // Sideways water is flowing.
             left.waterLevel = sideLevel;
             left.cutoff = left.waterLevel;
@@ -355,7 +365,7 @@ class Block extends Square {
             false
         );
         if (right && right.blockType === Blocks.Air) {
-            right.setBlockType(Blocks.Water);
+            right.setBlockType(this.blockType);
             right.isSource = false; // Sideways water is flowing.
             right.waterLevel = sideLevel;
             right.cutoff = right.waterLevel;
@@ -522,3 +532,52 @@ class Block extends Square {
 function GetBlock(blockId) {
     return blockMap.has(blockId) ? blockMap.get(blockId) : 0;
 }
+
+Block.prototype.isConnectedToSource = function (maxDepth = 10, visited = {}) {
+    // Create a unique key for this block.
+    const key = `${this.chunkX}_${this.x}_${this.y}`;
+    if (visited[key]) return false;
+    visited[key] = true;
+
+    // If this block is a source, return true.
+    if (this.isSource) return true;
+
+    if (maxDepth <= 0) return false;
+
+    // Check neighbors (above, below, left, right)
+    const worldPos = getBlockWorldPosition(this);
+    const neighbors = [];
+
+    let above = GetBlockAtWorldPosition(
+        worldPos.x,
+        worldPos.y - BLOCK_SIZE,
+        false
+    );
+    let below = GetBlockAtWorldPosition(
+        worldPos.x,
+        worldPos.y + BLOCK_SIZE,
+        false
+    );
+    let left = GetBlockAtWorldPosition(
+        worldPos.x - BLOCK_SIZE,
+        worldPos.y,
+        false
+    );
+    let right = GetBlockAtWorldPosition(
+        worldPos.x + BLOCK_SIZE,
+        worldPos.y,
+        false
+    );
+
+    if (above && above.blockType === this.blockType) neighbors.push(above);
+    if (below && below.blockType === this.blockType) neighbors.push(below);
+    if (left && left.blockType === this.blockType) neighbors.push(left);
+    if (right && right.blockType === this.blockType) neighbors.push(right);
+
+    // Recurse into each neighbor.
+    for (let n of neighbors) {
+        if (n.isConnectedToSource(maxDepth - 1, visited)) return true;
+    }
+
+    return false;
+};
