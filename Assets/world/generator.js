@@ -50,7 +50,7 @@ const worldIronNoiseMap = new Noise(
 );
 const worldDiamondNoiseMap = new Noise(
     100, // Scale (size)
-    7, // Intensity
+    6.8, // Intensity
     5
 );
 
@@ -164,7 +164,6 @@ function postProcessChunks() {
             chunk.generateTrees();
             chunk.generateGrass();
             chunk.generateBedrock();
-            chunk.updateChunk();
             chunk.generated = true;
         }
     });

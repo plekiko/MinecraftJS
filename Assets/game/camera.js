@@ -37,6 +37,11 @@ class Camera {
             this.followPlayer();
         }
 
+        // Clamp the camera's y so that the bottom edge doesn't go below the world bottom.
+        // The bottom edge is at: this.y + CANVAS.height/2.
+        // Therefore, ensure: this.y <= CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height/2.
+        this.y = Math.min(this.y, CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height);
+
         // Trigger world generation when the camera moves
         GenerateWorld();
     }
@@ -66,5 +71,11 @@ class Camera {
         } else {
             this.y = lerp(this.y, targetY, increment);
         }
+
+        // Clamp the camera's y after following the player as well.
+        this.y = Math.min(
+            this.y,
+            CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height / 2
+        );
     }
 }

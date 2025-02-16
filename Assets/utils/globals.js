@@ -24,7 +24,7 @@ let day = true;
 const ORE_THRESHOLDS = {
     coal: 2.5,
     iron: 2,
-    diamond: 1,
+    diamond: 0.8,
 };
 
 const SPAWN_PLAYER = true;

@@ -20,9 +20,16 @@ const Items = Object.freeze({
     IronHoe: 15,
     IronSword: 16,
 
+    DiamondAxe: 40,
+    DiamondPickaxe: 41,
+    DiamondShovel: 42,
+    DiamondHoe: 43,
+    DiamondSword: 44,
+
     Coal: 20,
     IronIngot: 21,
     Charcoal: 22,
+    Diamond: 23,
 
     RawBeef: 30,
     CookedBeef: 31,
@@ -201,6 +208,57 @@ const items = [
         stackSize: 1,
         baseDamage: 3,
     }),
+    //#endregion
+
+    //#region Diamond Tools
+    new Item({
+        itemId: 40,
+        name: "Diamond Axe",
+        sprite: "diamond_axe",
+        toolType: ToolType.Axe,
+        toolLevel: 4,
+        heldInHand: true,
+        stackSize: 1,
+        baseDamage: 3.7,
+    }),
+    new Item({
+        itemId: 41,
+        name: "Diamond Pickaxe",
+        sprite: "diamond_pickaxe",
+        toolType: ToolType.Pickaxe,
+        toolLevel: 15,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 42,
+        name: "Diamond Shovel",
+        sprite: "diamond_shovel",
+        toolType: ToolType.Shovel,
+        toolLevel: 1.5,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 43,
+        name: "Diamond Hoe",
+        sprite: "diamond_hoe",
+        toolType: ToolType.Hoe,
+        toolLevel: 4,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 44,
+        name: "Diamond Sword",
+        sprite: "diamond_sword",
+        toolType: ToolType.Sword,
+        toolLevel: 4,
+        heldInHand: true,
+        stackSize: 1,
+        baseDamage: 4,
+    }),
+
     //#endregion
 
     //#region Ores

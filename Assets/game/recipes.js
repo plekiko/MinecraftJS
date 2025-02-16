@@ -351,6 +351,97 @@ const recipes = [
 
     //#endregion
 
+    //#region Diamond Tools
+
+    // Diamond Axe
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.Diamond }),
+                new RecipeItem({ itemId: Items.Diamond }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ itemId: Items.Diamond }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.DiamondAxe, count: 1 }),
+    }),
+
+    // Diamond Pickaxe
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.Diamond }),
+                new RecipeItem({ itemId: Items.Diamond }),
+                new RecipeItem({ itemId: Items.Diamond }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+                ,
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.DiamondPickaxe, count: 1 }),
+    }),
+
+    // Diamond Hoe
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.Diamond }),
+                new RecipeItem({ itemId: Items.Diamond }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                ,
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.DiamondHoe, count: 1 }),
+    }),
+
+    // Diamond Shovel
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [new RecipeItem({ itemId: Items.Diamond })],
+            [new RecipeItem({ itemId: Items.Stick }), ,],
+            [new RecipeItem({ itemId: Items.Stick })],
+        ],
+        output: new InventoryItem({ itemId: Items.DiamondShovel, count: 1 }),
+    }),
+
+    // Diamond Sword
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [new RecipeItem({ itemId: Items.Diamond })],
+            [new RecipeItem({ itemId: Items.Diamond })],
+            [new RecipeItem({ itemId: Items.Stick })],
+        ],
+        output: new InventoryItem({ itemId: Items.DiamondSword, count: 1 }),
+    }),
+
+    //#endregion
+
     //#endregion Tools
 
     // Furnace
@@ -459,6 +550,20 @@ const recipes = [
         type: RecipeType.Shapeless,
         input: new RecipeItem({ blockId: Blocks.IronBlock }),
         output: new InventoryItem({ itemId: Items.IronIngot, count: 9 }),
+    }),
+
+    // Diamond Block
+    new Recipe({
+        type: RecipeType.Filled,
+        input: new RecipeItem({ itemId: Items.Diamond }),
+        output: new InventoryItem({ blockId: Blocks.DiamondBlock, count: 1 }),
+    }),
+
+    // Diamond Ore
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ blockId: Blocks.DiamondBlock }),
+        output: new InventoryItem({ itemId: Items.Diamond, count: 9 }),
     }),
     //#endregion
 

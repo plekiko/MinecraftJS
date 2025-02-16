@@ -54,6 +54,7 @@ const Blocks = Object.freeze({
     Glass: 52,
     Lava: 53,
     DiamondOre: 54,
+    DiamondBlock: 55,
 });
 
 const blockTypes = [
@@ -677,6 +678,17 @@ const blockTypes = [
         requiredToolLevel: 14.5,
         dropWithoutTool: false,
         smeltOutput: { itemId: Items.Diamond },
+    }),
+    new BlockType({
+        blockId: 55,
+        sprite: "diamond_block",
+        name: "Diamond Block",
+        hardness: 12,
+        requiredToolLevel: 14.5,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
     }),
 ];
 
