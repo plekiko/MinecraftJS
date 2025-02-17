@@ -13,6 +13,8 @@ body {
     gap: 15vh;
     width: 100%;
     height: 80%;
+
+    contain: layout paint;
 }
 
 .title {
@@ -27,15 +29,108 @@ body {
     justify-content: center;
     align-items: center;
     text-align: center;
-    gap: 2vh;
     width: 30%;
 }
 
-.btn {
+/* Panorama container takes up the full screen */
+.panorama {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 5vh;
+    height: 100%;
+    /* Perspective allows us to see the cube in 3D */
+    perspective: 500px;
+    perspective-origin: center;
+    /* Put it behind everything else */
+    z-index: -1;
+
+    filter: blur(15px);
+    backface-visibility: hidden;
+}
+
+.random-text,
+.splash {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+}
+
+/* The cube that will hold the 6 faces */
+.cube {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1124px; /* Adjust as needed to match your panorama images */
+    height: 1124px; /* Adjust as needed */
+    transform-style: preserve-3d;
+    transform: translate(-50%, -50%) rotateX(-10deg);
+    /* Slowly rotate the cube around Y axis */
+    animation: spin 120s infinite linear;
+
+    transform-origin: center center;
+}
+
+/* Common face styles */
+.face {
+    position: absolute;
+    width: 1124px; /* same as .cube */
+    height: 1124px;
+    background-size: cover;
     background-position: center;
-    background-image: url("Assets/sprites/misc/menu_button.png");
+    background-repeat: no-repeat;
+}
+
+/* Face 0 (front) */
+.face0 {
+    transform: rotateY(0deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_0.png");
+}
+
+/* Face 1 (right) */
+.face1 {
+    transform: rotateY(90deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_1.png");
+}
+
+/* Face 2 (back) */
+.face2 {
+    transform: rotateY(180deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_2.png");
+}
+
+/* Face 3 (left) */
+.face3 {
+    transform: rotateY(-90deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_3.png");
+}
+
+/* Face 4 (top) */
+.face4 {
+    transform: rotateX(90deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_4.png");
+}
+
+/* Face 5 (bottom) */
+.face5 {
+    transform: rotateX(-90deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_5.png");
+}
+
+/* Slow rotation of the cube around the Y axis */
+@keyframes spin {
+    0% {
+        transform: translate(-50%, -50%) rotateX(0) rotateY(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateX(0) rotateY(360deg);
+    }
+}
+
+.btn {
+    width: 30rem;
+    height: 4rem;
+    background-position: center;
+    background-image: url("Assets/sprites/menu/menu_button.png");
     background-size: contain;
     background-repeat: no-repeat;
     display: flex;
@@ -46,10 +141,15 @@ body {
     font-family: "Pixel";
     text-decoration: none;
     font-size: 1.5rem;
+
+    margin: 0;
+
+    image-rendering: optimizeSpeed;
+    image-rendering: pixelated; /* Chrome and modern browsers */
 }
 
 .btn:hover {
-    background-image: url("Assets/sprites/misc/menu_button_hover.png");
+    background-image: url("Assets/sprites/menu/menu_button_hover.png");
 }
 
 .logo-container {
@@ -71,6 +171,8 @@ body {
     height: auto;
     max-height: 100%;
     object-fit: contain;
+
+    pointer-events: none;
 }
 
 .random-text {
@@ -82,16 +184,22 @@ body {
 
     text-align: center;
     width: 100px;
-    text-wrap: nowrap;
-    font-family: "Pixel";
-    color: yellow;
-    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
     animation: randomText 2s infinite ease-in-out;
-    font-size: 2.5rem;
 }
 
 .splash {
     text-align: center;
+
+    text-wrap: nowrap;
+    font-family: "Pixel";
+    color: yellow;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+    font-size: 2.5rem;
+
+    background-color: transparent;
+    border: none;
+
+    cursor: pointer;
 }
 
 @keyframes randomText {

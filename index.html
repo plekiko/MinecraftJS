@@ -8,17 +8,32 @@
         <link rel="icon" href="Assets/sprites/misc/icon_16x16.png" />
     </head>
     <body>
+        <!-- Panoramic background container -->
+        <div class="panorama">
+            <div class="cube">
+                <div class="face face0"></div>
+                <div class="face face1"></div>
+                <div class="face face2"></div>
+                <div class="face face3"></div>
+                <div class="face face4"></div>
+                <div class="face face5"></div>
+            </div>
+        </div>
+
         <div class="container">
             <div class="title">
                 <div class="logo-container">
                     <div class="logo-column">
                         <img
                             class="logo"
-                            src="Assets/sprites/misc/logo.png"
+                            src="Assets/sprites/menu/logo.png"
                             alt="Minecraft JS"
                         />
                         <div class="random-text">
-                            <div class="splash"></div>
+                            <button
+                                onclick="setRandomText()"
+                                class="splash"
+                            ></button>
                         </div>
                     </div>
                 </div>
@@ -37,21 +52,5 @@
         </div>
     </body>
 
-    <script>
-        const randomTextElement = document.querySelector(".splash");
-
-        fetch("menu_text.json")
-            .then((response) => response.json())
-            .then((data) => {
-                const texts = data.random_text;
-
-                const randomPick =
-                    texts[Math.floor(Math.random() * texts.length)];
-
-                randomTextElement.textContent = randomPick;
-            })
-            .catch((error) => {
-                console.error("Error loading menu_text.json:", error);
-            });
-    </script>
+    <script src="menu.js"></script>
 </html>
