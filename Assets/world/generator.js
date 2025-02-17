@@ -8,6 +8,8 @@ tooloud.Perlin.setSeed(seed);
 
 const worldGrassNoiseMap = new Noise(550, 0.2, 1);
 
+const worldStructureNoiseMap = new Noise(500, 1, 10);
+
 const worldTemperatureNoiseMap = new Noise(
     30, // Scale (size)
     45, // Intensity
@@ -118,6 +120,79 @@ function GenerateWorld() {
     postProcessChunks();
 }
 
+function GenerateStructure(structure, x, y) {
+    const structureData = Structures[structure];
+    if (!structureData) return;
+
+    const structureWidth = structureData.blocks[0].length;
+    const structureHeight = structureData.blocks.length;
+
+    for (let i = 0; i < structureWidth; i++) {
+        for (let j = 0; j < structureHeight; j++) {
+            const blockType = structureData.blocks[j][i];
+
+            const blockX =
+                Math.floor((x + i * BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE;
+            const blockY = Math.floor(y + j * BLOCK_SIZE);
+
+            const block = GetBlockAtWorldPosition(blockX, blockY, false);
+
+            if (!block) {
+                chat.message(
+                    "Cannot place block here. " + blockX + " " + blockY
+                );
+                continue;
+            }
+
+            if (blockType instanceof LootTable) {
+                GenerateChestWithLoot(blockType, blockX, blockY);
+                continue;
+            }
+
+            block.setBlockType(blockType);
+        }
+    }
+}
+
+function GenerateChestWithLoot(lootTable, x, y) {
+    const block = GetBlockAtWorldPosition(x, y, false);
+
+    block.setBlockType(Blocks.Chest);
+
+    const loot = lootTable.getRandomLoot();
+
+    PopulateStorageWithLoot(loot, block);
+}
+
+function PopulateStorageWithLoot(loot, block) {
+    let storage = structuredClone(block.metaData.storage);
+
+    for (const item of loot) {
+        let placed = false;
+        let attempts = 10;
+        while (!placed && attempts > 0) {
+            const randomSlotX = RandomRange(0, storage[0].length);
+            const randomSlotY = RandomRange(0, storage.length);
+            if (storage[randomSlotY][randomSlotX].count === 0) {
+                storage[randomSlotY][randomSlotX] = item;
+                placed = true;
+            }
+            attempts--;
+        }
+        if (!placed) {
+            for (let y = 0; y < storage.length && !placed; y++) {
+                for (let x = 0; x < storage[y].length && !placed; x++) {
+                    if (storage[y][x].count === 0) {
+                        storage[y][x] = item;
+                        placed = true;
+                    }
+                }
+            }
+        }
+    }
+    block.metaData.storage = storage;
+}
+
 function calculateChunkBiome(chunkIndex) {
     const temp = worldTemperatureNoiseMap.getNoise(chunkIndex, 20000);
     const wetness = worldWetnessNoiseMap.getNoise(chunkIndex, 10000);
@@ -164,7 +239,71 @@ function postProcessChunks() {
             chunk.generateTrees();
             chunk.generateGrass();
             chunk.generateBedrock();
+        }
+    });
+    generateStructures();
+}
+
+function generateStructures() {
+    // Loop over each chunk in the global chunks Map.
+    chunks.forEach((chunk, chunkX) => {
+        if (chunk.generated) {
+            return;
+        } else {
             chunk.generated = true;
+        }
+        // Use the chunk index (or its x coordinate) to get a structure noise value.
+        const chunkIndex = chunkX / (CHUNK_WIDTH * BLOCK_SIZE);
+        const structureNoiseValue = worldStructureNoiseMap.getNoise(
+            chunkIndex,
+            0
+        );
+
+        // Define a threshold for structure spawning.
+        if (structureNoiseValue > 10.2) {
+            // Build an array of candidate structure names that "fit" this chunk.
+            const allStructureNames = Object.keys(Structures);
+            const candidates = allStructureNames.filter((name) => {
+                const structure = Structures[name];
+                return (
+                    structure.biome === null ||
+                    structure.biome === chunk.biome.name
+                );
+            });
+
+            if (candidates.length === 0) return;
+
+            const randomName = candidates[RandomRange(0, candidates.length)];
+            const structure = Structures[randomName];
+
+            // Determine placement X coordinate (roughly the center of the chunk)
+            const structureX = chunk.x + (CHUNK_WIDTH * BLOCK_SIZE) / 2;
+
+            let structureY;
+            if (structure.underground) {
+                // Get the surface level at the center of the chunk (0 is top)
+                const localX = Math.floor(CHUNK_WIDTH / 2);
+                const surfaceBlockY = chunk.findGroundLevel(localX, true);
+                if (surfaceBlockY === 0) return;
+                // Multiply by BLOCK_SIZE to get the world coordinate
+                const surfaceY = surfaceBlockY * BLOCK_SIZE;
+                // Choose a fixed offset (in blocks) to place the structure underground.
+                // For example, place it between 16 and 32 blocks below the surface.
+                const undergroundOffset =
+                    RandomRange(8, CHUNK_HEIGHT / 2.5) * BLOCK_SIZE;
+                // structureY = surfaceY + undergroundOffset * BLOCK_SIZE;
+                structureY = surfaceY + undergroundOffset;
+            } else {
+                // For surface structures, use the surface level.
+                const localX = Math.floor(CHUNK_WIDTH / 2);
+                const surfaceBlockY = chunk.findGroundLevel(localX, true);
+                const surfaceY = surfaceBlockY * BLOCK_SIZE;
+
+                structureY = surfaceY - structure.blocks.length * BLOCK_SIZE;
+            }
+
+            // Generate the structure at these world coordinates.
+            GenerateStructure(randomName, structureX, structureY);
         }
     });
 }

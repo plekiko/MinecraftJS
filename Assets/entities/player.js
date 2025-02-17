@@ -748,11 +748,11 @@ class Player extends Entity {
         // this.velocity.x = 0;
 
         if (this.windowOpen) return;
-        if (!this.canMove) return;
 
+        this.handleSwimming();
+        if (!this.canMove) return;
         this.handleHorizontalMovement();
         this.handleJump();
-        this.handleSwimming();
         this.handleFlying();
         this.lookAtCursor();
 
@@ -812,9 +812,13 @@ class Player extends Entity {
         this.wasSwimming = true;
 
         // Swim upwards or sink slowly
+
+        const isPressingUp =
+            input.isKeyDown("Space") || input.isKeyDown("KeyW");
+
         if (!this.grounded)
             this.velocity.y =
-                input.isKeyDown("Space") || input.isKeyDown("KeyW")
+                isPressingUp && this.canMove
                     ? -1.5 * BLOCK_SIZE
                     : 0.8 * BLOCK_SIZE;
     }

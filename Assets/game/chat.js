@@ -118,6 +118,9 @@ class Chat {
             case "help":
                 this.printHelp();
                 break;
+            case "structure":
+                this.structure(messageArray);
+                break;
             default:
                 this.message("Invalid Command!");
                 break;
@@ -138,6 +141,25 @@ class Chat {
         }
 
         time = newTime;
+    }
+
+    structure(messageArray) {
+        if (!messageArray[1]) {
+            this.invalidCommand("/structure <StructureName>");
+            return;
+        }
+
+        const structureName = messageArray[1];
+
+        if (Structures[structureName] !== undefined) {
+            GenerateStructure(
+                structureName,
+                player.position.x,
+                player.position.y
+            );
+        } else {
+            this.message(`Structure ${structureName} not found.`);
+        }
     }
 
     summon(messageArray) {

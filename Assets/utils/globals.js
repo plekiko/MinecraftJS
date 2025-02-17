@@ -1,4 +1,4 @@
-const RENDER_DISTANCE = 1;
+const RENDER_DISTANCE = 1; // In Chunks
 const ENTITY_UPDATE_DISTANCE = 50; // In Blocks
 const CHUNK_WIDTH = 16;
 const CHUNK_HEIGHT = 110; // 150

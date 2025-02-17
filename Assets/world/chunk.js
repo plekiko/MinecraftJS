@@ -227,7 +227,9 @@ class Chunk {
 
             this.entities.push(entity);
 
-            entity.setOnGround();
+            setTimeout(() => {
+                entity.setOnGround();
+            }, 500);
         }
     }
 
@@ -402,7 +404,7 @@ class Chunk {
         this.spawnTreeAt(randomTree, x, y); // Spawn the tree at the position
     }
 
-    findGroundLevel(x) {
+    findGroundLevel(x, correctY = false) {
         for (let y = this.height - 1; y >= 0; y--) {
             const blockAtPos = this.getBlockType(x, y);
             if (
@@ -411,6 +413,7 @@ class Chunk {
                 blockAtPos == Blocks.Sand ||
                 blockAtPos == Blocks.Podzol
             ) {
+                if (correctY) return CHUNK_HEIGHT - y - 1;
                 return y + 1;
             }
         }

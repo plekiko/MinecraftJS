@@ -46,6 +46,7 @@ const Blocks = Object.freeze({
     JunglePlanks: 39,
 
     Cobblestone: 40,
+    MossyCobblestone: 58,
 
     CoalOre: 41,
     IronOre: 42,
@@ -727,6 +728,16 @@ const blockTypes = [
         toolType: ToolType.Axe,
         specialType: SpecialType.Jukebox,
         collision: false,
+    }),
+    new BlockType({
+        blockId: 58,
+        sprite: "cobblestone_mossy",
+        name: "Mossy Cobblestone",
+        hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
     }),
 ];
 

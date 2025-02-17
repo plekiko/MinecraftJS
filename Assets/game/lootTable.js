@@ -13,12 +13,13 @@ class LootItem {
 }
 
 class LootTable {
-    constructor(items) {
+    constructor(items = []) {
         this.items = items;
     }
 
     getRandomLoot() {
         const loot = [];
+        if (this.items.length === 0) return loot;
         this.items.forEach((item) => {
             const count = RandomRange(
                 item.maxCount - item.subtract,
