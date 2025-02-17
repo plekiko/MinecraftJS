@@ -116,22 +116,50 @@ function PlayRandomSoundFromArray({
         );
 }
 
+let playingAudio = [];
+
 function playPositionalSound(origin, sound, range = 10, maxVolume = 1) {
     if (!player) {
         playSound(sound, maxVolume);
         return;
     }
 
+    const audio = new Audio("Assets/audio/sfx/" + sound);
+
+    // Calculate the initial volume based on distance.
     const distance = Vector2.Distance(player.position, origin);
-    if (distance <= range * BLOCK_SIZE) {
-        // Calculate linear volume scale
-        const volume = maxVolume * (1 - distance / (range * BLOCK_SIZE));
-        playSound(sound, volume);
-    }
+    const volume =
+        distance <= range * BLOCK_SIZE
+            ? maxVolume * (1 - distance / (range * BLOCK_SIZE))
+            : 0;
+    audio.volume = volume;
+
+    const audioObj = { audio, origin, range, maxVolume };
+
+    playingAudio.push(audioObj);
+
+    audio.addEventListener("ended", () => {
+        playingAudio = playingAudio.filter((item) => item.audio !== audio);
+    });
+
+    audio.play();
 }
 
 function playSound(sound, volume = 1) {
     const audio = new Audio("Assets/audio/sfx/" + sound);
     audio.volume = volume;
     audio.play();
+}
+
+function updatePositionalAudioVolumes() {
+    if (!player) return;
+    playingAudio.forEach((item) => {
+        const distance = Vector2.Distance(player.position, item.origin);
+        if (distance <= item.range * BLOCK_SIZE) {
+            item.audio.volume =
+                item.maxVolume * (1 - distance / (item.range * BLOCK_SIZE));
+        } else {
+            item.audio.volume = 0;
+        }
+    });
 }

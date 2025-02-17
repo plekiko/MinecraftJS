@@ -21,6 +21,8 @@ setInterval(() => {
 function tick() {
     updateBlocks();
 
+    updatePositionalAudioVolumes();
+
     chunks_in_render_distance.forEach((chunk) => {
         chunk.updateChunk();
     });
