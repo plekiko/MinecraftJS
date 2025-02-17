@@ -72,6 +72,8 @@ const Blocks = Object.freeze({
     DiamondBlock: 55,
 
     Obsidian: 56,
+
+    Jukebox: 57,
 });
 
 const blockTypes = [
@@ -657,7 +659,7 @@ const blockTypes = [
         blockId: 51,
         name: "Chest",
         sprite: "chest",
-        hardness: 3,
+        hardness: 2.6,
         collision: false,
         specialType: SpecialType.SingleChest,
     }),
@@ -716,6 +718,15 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         requiredToolLevel: 15,
         dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 57,
+        sprite: "jukebox_side",
+        name: "Jukebox",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        specialType: SpecialType.Jukebox,
+        collision: false,
     }),
 ];
 

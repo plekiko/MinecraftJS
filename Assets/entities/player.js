@@ -300,6 +300,8 @@ class Player extends Entity {
             return;
         }
 
+        this.hoverBlock.interact(this);
+
         this.swing();
 
         switch (block.specialType) {
@@ -586,6 +588,10 @@ class Player extends Entity {
         this.inventory.removeItem(3, this.inventory.currentSlot, count);
 
         this.setHoldItem();
+    }
+
+    getSelectedSlotItem() {
+        return this.inventory.items[3][this.inventory.currentSlot].item;
     }
 
     checkBlockForPlacing(collision) {

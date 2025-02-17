@@ -44,6 +44,19 @@ const Items = Object.freeze({
     Leather: 50,
 
     Seeds: 100,
+
+    MusicDisc13: 2256,
+    MusicDiscCat: 2257,
+    MusicDiscBlocks: 2258,
+    MusicDiscChirp: 2259,
+    MusicDiscFar: 2260,
+    MusicDiscMall: 2261,
+    MusicDiscMellohi: 2262,
+    MusicDiscStal: 2263,
+    MusicDiscStrad: 2264,
+    MusicDiscWard: 2265,
+    MusicDisc11: 2266,
+    MusicDiscWait: 2267,
 });
 
 const items = [
@@ -363,6 +376,93 @@ const items = [
         itemId: 100,
         name: "Seeds",
         sprite: "seeds_wheat",
+    }),
+    //#endregion
+
+    //#region Music Discs
+    new Item({
+        itemId: 2256,
+        name: "C418 - 13",
+        sprite: "record_13",
+        playMusicInJukebox: "discs/13.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2257,
+        name: "C418 - Cat",
+        sprite: "record_cat",
+        playMusicInJukebox: "discs/cat.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2258,
+        name: "C418 - Blocks",
+        sprite: "record_blocks",
+        playMusicInJukebox: "discs/blocks.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2259,
+        name: "C418 - Chirp",
+        sprite: "record_chirp",
+        playMusicInJukebox: "discs/chirp.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2260,
+        name: "C418 - Far",
+        sprite: "record_far",
+        playMusicInJukebox: "discs/far.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2261,
+        name: "C418 - Mall",
+        sprite: "record_mall",
+        playMusicInJukebox: "discs/mall.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2262,
+        name: "C418 - Mellohi",
+        sprite: "record_mellohi",
+        playMusicInJukebox: "discs/mellohi.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2263,
+        name: "C418 - Stal",
+        sprite: "record_stal",
+        playMusicInJukebox: "discs/stal.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2264,
+        name: "C418 - Strad",
+        sprite: "record_strad",
+        playMusicInJukebox: "discs/strad.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2265,
+        name: "C418 - Ward",
+        sprite: "record_ward",
+        playMusicInJukebox: "discs/ward.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2266,
+        name: "C418 - 11",
+        sprite: "record_11",
+        playMusicInJukebox: "discs/11.ogg",
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 2267,
+        name: "C418 - Wait",
+        sprite: "record_wait",
+        playMusicInJukebox: "discs/wait.ogg",
+        stackSize: 1,
     }),
     //#endregion
 ];

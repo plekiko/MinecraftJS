@@ -587,5 +587,28 @@ const recipes = [
 
     //#region Misc
 
+    // Jukebox
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ itemId: Items.Diamond }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.Jukebox, count: 1 }),
+    }),
+
     //#endregion
 ];

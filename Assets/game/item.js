@@ -11,6 +11,7 @@ class Item {
         smeltOutput = null,
         baseDamage = 0,
         foodValue = 0,
+        playMusicInJukebox = null,
     }) {
         this.itemId = itemId;
         this.name = name;
@@ -25,6 +26,8 @@ class Item {
 
         this.stackSize = stackSize;
 
+        this.playMusicInJukebox = playMusicInJukebox;
+
         this.fuelTime = fuelTime;
         this.smeltOutput = smeltOutput;
 
@@ -33,5 +36,5 @@ class Item {
 }
 
 function GetItem(itemId) {
-    return itemMap.has(itemId) ? itemMap.get(itemId) : 0;
+    return itemMap.has(itemId) ? itemMap.get(itemId) : null;
 }

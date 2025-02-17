@@ -118,6 +118,11 @@ function PlayRandomSoundFromArray({
 
 let playingAudio = [];
 
+function removeAudio(audio) {
+    audio.pause();
+    playingAudio = playingAudio.filter((item) => item.audio !== audio);
+}
+
 function playPositionalSound(origin, sound, range = 10, maxVolume = 1) {
     if (!player) {
         playSound(sound, maxVolume);
@@ -143,6 +148,8 @@ function playPositionalSound(origin, sound, range = 10, maxVolume = 1) {
     });
 
     audio.play();
+
+    return audio;
 }
 
 function playSound(sound, volume = 1) {

@@ -534,14 +534,11 @@ class Inventory {
         if (this.craftingSlots.length < 3) return false;
         for (let y = 0; y < 3; y++) {
             for (let x = 0; x < 3; x++) {
-                console.log(this.craftingSlots[y][x].item, inputItem, y, x);
                 if (!this.isMatch(this.craftingSlots[y][x].item, inputItem)) {
                     return false;
                 }
             }
         }
-
-        console.log("wtf");
 
         return true;
     }

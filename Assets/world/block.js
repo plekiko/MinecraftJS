@@ -82,6 +82,7 @@ const SpecialType = Object.freeze({
     CraftingTable: 1,
     Furnace: 2,
     SingleChest: 3,
+    Jukebox: 4,
 });
 
 const BlockCategory = Object.freeze({
@@ -90,8 +91,9 @@ const BlockCategory = Object.freeze({
 });
 
 class Metadata {
-    constructor({ storage = null }) {
+    constructor({ storage = null, props = null } = {}) {
         this.storage = storage;
+        this.myAudio = props.myAudio;
         this.progression = 0;
         this.fuelProgression = 0;
         this.isActive = false;
@@ -246,6 +248,7 @@ class Block extends Square {
         if (specialType == SpecialType.CraftingTable) return;
 
         let storage = [];
+        let props = {};
 
         switch (specialType) {
             case SpecialType.Furnace:
@@ -267,9 +270,14 @@ class Block extends Square {
                         storage[y][x] = new InventoryItem();
                     }
                 }
+                break;
+            case SpecialType.Jukebox:
+                storage = [[new InventoryItem()]];
+                props.myAudio = null;
+                break;
         }
 
-        this.metaData = new Metadata({ storage: storage });
+        this.metaData = new Metadata({ storage: storage, props: props });
     }
 
     setBlockType(blockType, override = false) {
@@ -426,6 +434,52 @@ class Block extends Square {
         }
     }
 
+    interact(player) {
+        const itemInHand = player.getSelectedSlotItem();
+
+        const block = GetBlock(this.blockType);
+
+        switch (block.specialType) {
+            case SpecialType.Jukebox:
+                this.jukeBoxInteraction(GetItem(itemInHand.itemId), player);
+                break;
+        }
+    }
+
+    jukeBoxInteraction(item, player) {
+        if (!item || this.metaData.storage[0][0].itemId !== null) {
+            // Remove disc from jukebox'
+            if (this.metaData.storage[0][0].itemId !== null) {
+                summonEntity(Drop, getBlockWorldPosition(this), {
+                    itemId: this.metaData.storage[0][0].itemId,
+                    blockId: null,
+                    count: 1,
+                });
+
+                removeAudio(this.metaData.myAudio);
+
+                this.metaData.storage[0][0] = new InventoryItem();
+            }
+
+            return;
+        }
+
+        if (item.playMusicInJukebox) {
+            this.metaData.storage[0][0].itemId = item.itemId;
+            this.metaData.storage[0][0].blockId = null;
+            this.metaData.storage[0][0].count = 1;
+
+            this.metaData.myAudio = playPositionalSound(
+                getBlockWorldPosition(this),
+                "../music/" + item.playMusicInJukebox,
+                20,
+                1
+            );
+
+            player.removeFromCurrentSlot();
+        }
+    }
+
     checkLavaWaterInteraction(pos) {
         // Check for lava-water interaction.
         // Check for blocks surrounding this block
@@ -563,7 +617,15 @@ class Block extends Square {
 
         this.playBreakSound();
 
-        if (this.metaData && this.metaData.storage) this.dropStorage();
+        if (this.metaData) {
+            if (this.metaData.storage) {
+                this.dropStorage();
+            }
+
+            if (this.metaData.myAudio) {
+                removeAudio(this.metaData.myAudio);
+            }
+        }
 
         this.setBlockType(Blocks.Air);
     }
