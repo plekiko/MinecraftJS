@@ -152,41 +152,8 @@ function flowDownward(block, worldPos) {
         below.isSource = false;
         below.waterLevel = 0;
         below.cutoff = below.waterLevel;
-    } else {
-        if (below) CheckLavaWaterInteraction(block, below);
     }
     return below;
-}
-
-function CheckLavaWaterInteraction(block, otherBlock) {
-    if (
-        block.blockType === Blocks.Lava &&
-        otherBlock.blockType === Blocks.Water
-    ) {
-        if (otherBlock.isSource) otherBlock.setBlockType(Blocks.Obsidian);
-        else otherBlock.setBlockType(Blocks.Cobblestone);
-
-        playPositionalSound(
-            getBlockWorldPosition(otherBlock),
-            "blocks/fizz.ogg",
-            10,
-            0.5
-        );
-    }
-    if (
-        block.blockType === Blocks.Water &&
-        otherBlock.blockType === Blocks.Lava
-    ) {
-        if (otherBlock.isSource) otherBlock.setBlockType(Blocks.Obsidian);
-        else otherBlock.setBlockType(Blocks.Cobblestone);
-
-        playPositionalSound(
-            getBlockWorldPosition(otherBlock),
-            "blocks/fizz.ogg",
-            10,
-            0.5
-        );
-    }
 }
 
 function verticalCheckAbove(block, worldPos) {
@@ -239,8 +206,6 @@ function flowSideways(block, worldPos, direction) {
         !target.isSource
     ) {
         return target;
-    } else {
-        if (target) CheckLavaWaterInteraction(block, target);
     }
     return null;
 }
@@ -345,7 +310,9 @@ class Block extends Square {
         this.waterLevel = undefined;
         this.isSource = undefined;
 
-        if (GetBlock(blockType).fluid) {
+        this.frameCount = 0;
+
+        if (block.fluid) {
             this.isSource = true;
             this.waterLevel = 0;
             this.cutoff = this.waterLevel;
@@ -359,6 +326,7 @@ class Block extends Square {
             this.furnaceLogic();
 
         if (GetBlock(this.blockType).fluid) {
+            this.updateSprite();
             this.simulateWaterFlow();
         }
 
@@ -442,12 +410,57 @@ class Block extends Square {
         if (this.metaData.progression >= 10) {
             this.removeOneFromStack(storage[0][0]);
 
-            storage[1][0].itemId = outputItem ? outputItem.itemId : null;
-            storage[1][0].blockId = outputItem ? outputItem.blockId : null;
+            storage[1][0].itemId = outputItem
+                ? outputItem.itemId
+                    ? outputItem.itemId
+                    : null
+                : null;
+            storage[1][0].blockId = outputItem
+                ? outputItem.blockId
+                    ? outputItem.blockId
+                    : null
+                : null;
             storage[1][0].count++;
 
             this.resetProgression();
         }
+    }
+
+    checkLavaWaterInteraction(pos) {
+        // Check for lava-water interaction.
+        // Check for blocks surrounding this block
+        const left = GetBlockAtWorldPosition(pos.x - BLOCK_SIZE, pos.y, false);
+        const right = GetBlockAtWorldPosition(pos.x + BLOCK_SIZE, pos.y, false);
+        const above = GetBlockAtWorldPosition(pos.x, pos.y - BLOCK_SIZE, false);
+        const below = GetBlockAtWorldPosition(pos.x, pos.y + BLOCK_SIZE, false);
+
+        let lavaBlocksNear = [];
+
+        // If there isnt lava in any of these blocks, return
+        for (let block of [left, right, above, below]) {
+            if (block && block.blockType === Blocks.Lava) {
+                lavaBlocksNear.push(block);
+            }
+        }
+
+        if (lavaBlocksNear.length === 0) return;
+
+        // Loop thru all lava blocks
+        for (let lavaBlock of lavaBlocksNear) {
+            if (lavaBlock.isSource) {
+                lavaBlock.setBlockType(Blocks.Obsidian);
+                return;
+            }
+
+            lavaBlock.setBlockType(Blocks.Cobblestone);
+        }
+
+        playPositionalSound(
+            getBlockWorldPosition(this),
+            "blocks/fizz.ogg",
+            10,
+            0.5
+        );
     }
 
     simulateWaterFlow() {
@@ -464,6 +477,9 @@ class Block extends Square {
         }
 
         const worldPos = getBlockWorldPosition(this);
+
+        if (this.blockType === Blocks.Water)
+            this.checkLavaWaterInteraction(worldPos);
 
         // Dissipation (only for non-source blocks).
         if (!this.isSource) {

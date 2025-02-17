@@ -12,6 +12,7 @@ class InputHandler {
             rightMouseDown: false,
             leftMouseClicked: false, // Single-click tracking for left button
             rightMouseClicked: false, // Single-click tracking for right button
+            wheelDown: false,
             position: { x: 0, y: 0 },
         };
         this.scroll = { deltaX: 0, deltaY: 0 }; // Store scroll delta
@@ -78,6 +79,8 @@ class InputHandler {
                 this.mouse.rightMouseClicked = true; // Set right mouse clicked only on the first press
             }
             this.mouse.rightMouseDown = true;
+        } else if (event.button === 1) {
+            this.mouse.wheelDown = true;
         }
     }
 
@@ -88,6 +91,8 @@ class InputHandler {
         } else if (event.button === 2) {
             this.mouse.rightMouseDown = false;
             this.mouse.rightMouseClicked = false; // Reset single-click state
+        } else if (event.button === 1) {
+            this.mouse.wheelDown = false;
         }
     }
 

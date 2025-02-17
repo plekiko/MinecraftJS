@@ -388,6 +388,22 @@ class Inventory {
         return remainingCount;
     }
 
+    getAllItems() {
+        let items = [];
+
+        for (let y = 0; y < this.items.length; y++) {
+            for (let x = 0; x < this.items[y].length; x++) {
+                const item = this.items[y][x].item;
+
+                if (item.count > 0) {
+                    items.push(structuredClone(item));
+                }
+            }
+        }
+
+        return items;
+    }
+
     addToExistingStack(newItem, remainingCount) {
         for (let row of this.items) {
             for (let slot of row) {
@@ -700,6 +716,20 @@ class Inventory {
         const half = Math.round(item.count / 2);
         this.holdingItem.count = half;
         this.removeItem(y, x, half, array);
+    }
+
+    getSlotFromInventory(item) {
+        for (let y = 0; y < this.items.length; y++) {
+            for (let x = 0; x < this.items[y].length; x++) {
+                const slot = this.items[y][x];
+                if (
+                    (slot.item.blockId && slot.item.blockId === item.blockId) ||
+                    (slot.item.itemId !== null &&
+                        slot.item.itemId === item.itemId)
+                )
+                    return slot;
+            }
+        }
     }
 
     rightClickMovingLogic(item) {

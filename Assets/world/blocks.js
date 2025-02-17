@@ -675,7 +675,7 @@ const blockTypes = [
         blockId: 53,
         sprite: "lava_still",
         name: "Lava",
-        updateSpeed: 0.1,
+        updateSpeed: 0.05,
         chunkUpdate: true,
         hardness: -2,
         animationSpeed: 0.03,

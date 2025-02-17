@@ -286,9 +286,14 @@ class Player extends Entity {
 
         if (!this.hoverBlock) return;
 
-        if (!input.isRightMouseButtonPressed()) return;
+        if (!input.isRightMouseButtonPressed() && !input.mouse.wheelDown)
+            return;
 
         const block = GetBlock(this.hoverBlock.blockType);
+
+        if (input.mouse.wheelDown) {
+            this.handleQuickBlockSelect(block);
+        }
 
         if (!block.specialType) {
             this.useItemInHand();
@@ -308,6 +313,32 @@ class Player extends Entity {
                 this.openSingleChest();
                 break;
         }
+    }
+
+    handleQuickBlockSelect(block) {
+        if (!block) return;
+
+        const inventoryItems = this.inventory.getAllItems();
+
+        const blockIndex = inventoryItems.findIndex(
+            (item) => item.blockId === block.blockId
+        );
+
+        if (blockIndex === -1) {
+            if (this.gamemode === 1) {
+                this.inventory.addItem(
+                    new InventoryItem({ blockId: block.blockId, count: 1 })
+                );
+            }
+            return;
+        }
+
+        // WIP
+
+        // If the block is already in the inventory, select it
+        // const item = this.inventory.getSlotFromInventory(block);
+
+        // console.log(item);
     }
 
     openSingleChest() {
