@@ -144,26 +144,63 @@ class Square {
         ctx.restore(); // Restore the context to its original state
     }
 
-    drawAnimation() {
+    drawAnimation(ctx) {
         const frameHeight = 16;
-
-        const offset = BLOCK_SIZE * this.cutoff;
-
         const effectiveFrame =
             Math.floor(globalFrame * this.frameRate) % this.frameCount;
         const frameY = effectiveFrame * frameHeight;
 
+        const drawX = -this.transform.size.x / 2 + this.drawOffset;
+        const drawY = -this.transform.size.y / 2;
+        const drawWidth = 16 * this.spriteScale;
+        const drawHeight = 16 * this.spriteScale;
+
+        // Calculate how much of the sprite should be visible:
+        // When cutoff is 0, visibleFraction is 1 (full sprite).
+        // When cutoff is 1, visibleFraction is 0 (nothing).
+        const visibleFraction = 1 - this.cutoff;
+        const visibleHeight = drawHeight * visibleFraction;
+
+        // For a "cutoff from the top" effect, we want to clip away the top portion.
+        // That is, our clipping rectangle starts at (drawY + (drawHeight - visibleHeight))
+        // and spans the full width and visibleHeight.
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(
+            drawX,
+            drawY + (drawHeight - visibleHeight),
+            drawWidth,
+            visibleHeight
+        );
+        ctx.clip();
+
+        // Draw the entire sprite frame normally.
         ctx.drawImage(
             this.img,
-            0, // X position in the image (always 0 in a vertical strip)
-            frameY, // Y position based on frame index
-            16, // Width of a single frame
-            frameHeight, // Height of a single frame
-            -this.transform.size.x / 2 + this.drawOffset,
-            -this.transform.size.y / 2 + offset,
-            this.img.width * this.spriteScale,
-            frameHeight * this.spriteScale - offset
+            0, // source x
+            frameY, // source y (the frame offset in the sprite sheet)
+            16, // source width (one frame)
+            frameHeight, // source height
+            drawX, // destination x
+            drawY, // destination y
+            drawWidth, // destination width
+            drawHeight // destination height
         );
+
+        // Optionally apply a dark overlay (only over the visible portion).
+        if (this.dark) {
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = "black";
+            ctx.fillRect(
+                drawX,
+                drawY + (drawHeight - visibleHeight),
+                drawWidth,
+                visibleHeight
+            );
+            ctx.globalAlpha = this.alpha;
+        }
+
+        ctx.restore();
     }
 
     isAnimated() {

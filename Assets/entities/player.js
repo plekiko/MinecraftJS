@@ -807,6 +807,11 @@ class Player extends Entity {
             this.wasSwimming = false;
         }
 
+        if (!this.wasSwimming && this.swimming) {
+            // Entered Water
+            this.velocity.x = 0;
+        }
+
         if (!this.swimming) return;
 
         this.wasSwimming = true;

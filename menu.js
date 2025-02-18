@@ -24,6 +24,19 @@ const musicTracks = [
     "Moog City 2",
 ];
 
+function buttonSound() {
+    const audio = new Audio("Assets/audio/sfx/ui/click.ogg");
+    audio.volume = 0.3;
+    audio.play();
+}
+
+function PlayGame() {
+    buttonSound();
+    setTimeout(() => {
+        window.location.href = "game.html";
+    }, 500);
+}
+
 function PlayRandomMusic() {
     const randomTrack =
         musicTracks[Math.floor(Math.random() * musicTracks.length)];
