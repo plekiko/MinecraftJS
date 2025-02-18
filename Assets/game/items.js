@@ -42,6 +42,7 @@ const Items = Object.freeze({
     RottenFlesh: 35,
 
     Leather: 50,
+    Bone: 51,
 
     Seeds: 100,
 
@@ -57,6 +58,8 @@ const Items = Object.freeze({
     MusicDiscWard: 2265,
     MusicDisc11: 2266,
     MusicDiscWait: 2267,
+
+    Snowball: 300,
 });
 
 const items = [
@@ -369,6 +372,11 @@ const items = [
         name: "Leather",
         sprite: "leather",
     }),
+    new Item({
+        itemId: 51,
+        name: "Bone",
+        sprite: "bone",
+    }),
     //#endregion
 
     //#region Seeds
@@ -463,6 +471,14 @@ const items = [
         sprite: "record_wait",
         playMusicInJukebox: "discs/wait.ogg",
         stackSize: 1,
+    }),
+    //#endregion
+
+    //#region Projectiles
+    new Item({
+        itemId: 300,
+        name: "Snowball",
+        sprite: "snowball",
     }),
     //#endregion
 ];

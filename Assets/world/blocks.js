@@ -77,6 +77,8 @@ const Blocks = Object.freeze({
     Jukebox: 57,
 
     StructureAir: 59,
+
+    SnowBlock: 60,
 });
 
 const blockTypes = [
@@ -748,6 +750,16 @@ const blockTypes = [
         name: "Structure Air",
         collision: false,
         air: true,
+    }),
+    new BlockType({
+        blockId: 60,
+        sprite: "snow",
+        name: "Snow Block",
+        hardness: 0,
+        breakSound: Sounds.Break_Snow,
+        breakingSound: Sounds.Breaking_Snow,
+        toolType: ToolType.Shovel,
+        dropWithoutTool: false,
     }),
 ];
 

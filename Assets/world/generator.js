@@ -124,14 +124,32 @@ function GenerateStructure(structure, x, y) {
     const structureData = Structures[structure];
     if (!structureData) return;
 
-    const structureWidth = structureData.blocks[0].length;
-    const structureHeight = structureData.blocks.length;
+    let structureWidth = structureData.blocks[0].length;
+    let structureHeight = structureData.blocks.length;
+
+    if (structureData.walls) {
+        if (structureData.walls[0].length > structureWidth) {
+            structureWidth = structureData.walls[0].length;
+        }
+        if (structureData.walls.length > structureHeight) {
+            structureHeight = structureData.walls.length;
+        }
+    }
+
+    // 50/50 chance to flip horizontally (left-to-right).
+    const flip = Math.random() < 0.5;
 
     let chunk = null;
 
     for (let i = 0; i < structureWidth; i++) {
+        // If flipped, reverse the column index.
+        const colIndex = flip ? structureWidth - 1 - i : i;
         for (let j = 0; j < structureHeight; j++) {
-            const blockType = structureData.blocks[j][i];
+            const blockType = structureData.blocks[j][colIndex];
+            let wallType = Blocks.Air;
+            if (structureData.walls) {
+                wallType = structureData.walls[j][colIndex];
+            }
 
             const blockX =
                 Math.floor((x + i * BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE;
@@ -139,14 +157,33 @@ function GenerateStructure(structure, x, y) {
 
             if (!chunk) chunk = GetChunkForX(blockX);
 
+            // Convert to world coordinate (flip vertically if needed)
             blockY = CHUNK_HEIGHT * BLOCK_SIZE - blockY;
 
+            // Process Blocks:
             if (blockType instanceof LootTable) {
                 GenerateChestWithLoot(blockType, blockX, blockY, chunk);
                 continue;
             } else {
-                if (blockType === Blocks.Air) continue;
-                chunk.setBlockTypeAtPosition(blockX, blockY, blockType);
+                if (blockType !== Blocks.Air) {
+                    chunk.setBlockTypeAtPosition(blockX, blockY, blockType);
+                }
+            }
+
+            // Process Walls:
+            if (wallType instanceof LootTable) {
+                GenerateChestWithLoot(wallType, blockX, blockY, chunk);
+                continue;
+            } else {
+                if (wallType !== Blocks.Air) {
+                    chunk.setBlockTypeAtPosition(
+                        blockX,
+                        blockY,
+                        wallType,
+                        null,
+                        true
+                    );
+                }
             }
         }
     }
@@ -330,7 +367,7 @@ function GetChunkByIndex(index) {
 function GetBiomeForNoise(temp, wetness, mountains) {
     // console.log(`Checking biome for temp: ${temp}, wetness: ${wetness}`); // Debugging log
 
-    return Biomes.Swamp;
+    return Biomes.Tundra;
 
     // Iterate through the available biomes and find one that matches both the temperature and wetness range
     for (let biomeName in Biomes) {

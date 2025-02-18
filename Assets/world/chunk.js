@@ -150,7 +150,8 @@ class Chunk {
                         block.x,
                         block.y,
                         block.blockType,
-                        block.metaData
+                        block.metaData,
+                        block.wall
                     );
             });
             // Once the blocks are placed, remove them from the buffer
@@ -475,7 +476,13 @@ class Chunk {
         }
     }
 
-    setBlockTypeAtPosition(worldX, worldY, blockType, metaData = null) {
+    setBlockTypeAtPosition(
+        worldX,
+        worldY,
+        blockType,
+        metaData = null,
+        wall = false
+    ) {
         // Compute the target chunk's x-coordinate in world space.
         const chunkWidthPixels = CHUNK_WIDTH * BLOCK_SIZE;
         const targetChunkX =
@@ -490,7 +497,7 @@ class Chunk {
                 localX,
                 localY,
                 blockType,
-                targetChunk.blocks,
+                wall ? targetChunk.walls : targetChunk.blocks,
                 metaData
             );
         } else {
@@ -500,7 +507,7 @@ class Chunk {
             }
             pendingBlocks
                 .get(targetChunkX)
-                .push({ x: worldX, y: worldY, blockType, metaData });
+                .push({ x: worldX, y: worldY, blockType, metaData, wall });
             // Optionally log: console.log(`Buffered block at worldX: ${worldX}, worldY: ${worldY}`);
         }
     }
@@ -547,7 +554,7 @@ class Chunk {
             const block = blocks[y][x];
             if (block.blockType !== blockType) {
                 block.setBlockType(blockType);
-                block.metaData = metaData;
+                if (metaData) block.metaData = metaData;
             }
         }
     }

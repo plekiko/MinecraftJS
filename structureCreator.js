@@ -5,17 +5,26 @@ const canvas = document.getElementById("gridCanvas");
 const ctx = canvas.getContext("2d");
 const cellSize = canvas.width / gridCols;
 
+const blockAverageColorCache = {};
+
 ctx.imageSmoothingEnabled = false;
 
 // Global flag to show grid lines.
 let showGrid = true;
 
-// The 2D array structure. Each cell holds a block id (or 0 for Air, or a string for special items).
+// Global flag for wall mode (false = main blocks, true = wall layer)
+let wallMode = false;
+
+// The 2D array structure for main blocks.
 let structureGrid = [];
+// The 2D array structure for walls.
+let wallsGrid = [];
 for (let r = 0; r < gridRows; r++) {
     structureGrid[r] = [];
+    wallsGrid[r] = [];
     for (let c = 0; c < gridCols; c++) {
         structureGrid[r][c] = Blocks.Air;
+        wallsGrid[r][c] = Blocks.Air;
     }
 }
 
@@ -27,6 +36,58 @@ let activeBlockId = 34;
 function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Draw walls
+    for (let r = 0; r < gridRows; r++) {
+        for (let c = 0; c < gridCols; c++) {
+            const cell = wallsGrid[r][c];
+            if (cell !== Blocks.Air) {
+                if (typeof cell === "number") {
+                    const block = GetBlock(cell);
+                    if (block && block.sprite) {
+                        const img = new Image();
+                        img.src =
+                            "Assets/sprites/blocks/" + block.sprite + ".png";
+                        // Optionally, you might draw walls with a slight offset or different opacity.
+                        ctx.drawImage(
+                            img,
+                            c * cellSize,
+                            r * cellSize,
+                            cellSize,
+                            cellSize
+                        );
+                        ctx.globalAlpha = 0.5;
+                        ctx.fillRect(
+                            c * cellSize,
+                            r * cellSize,
+                            cellSize,
+                            cellSize
+                        );
+                        ctx.globalAlpha = 1;
+                    } else {
+                        ctx.fillStyle = "#aaa";
+                        ctx.fillRect(
+                            c * cellSize,
+                            r * cellSize,
+                            cellSize,
+                            cellSize
+                        );
+                    }
+                } else if (typeof cell === "string") {
+                    const img = new Image();
+                    img.src = "Assets/sprites/blocks/chest.png";
+                    ctx.drawImage(
+                        img,
+                        c * cellSize,
+                        r * cellSize,
+                        cellSize,
+                        cellSize
+                    );
+                }
+            }
+        }
+    }
+
+    // Draw main blocks.
     for (let r = 0; r < gridRows; r++) {
         for (let c = 0; c < gridCols; c++) {
             const cell = structureGrid[r][c];
@@ -68,6 +129,7 @@ function drawGrid() {
         }
     }
 
+    // Draw grid lines if enabled.
     if (showGrid) {
         ctx.strokeStyle = "rgba(0,0,0,0.3)";
         for (let r = 0; r <= gridRows; r++) {
@@ -100,9 +162,17 @@ function handlePaint(e) {
     if (row < 0 || row >= gridRows || col < 0 || col >= gridCols) return;
 
     if (currentAction === "place") {
-        structureGrid[row][col] = activeBlockId;
+        if (wallMode) {
+            wallsGrid[row][col] = activeBlockId;
+        } else {
+            structureGrid[row][col] = activeBlockId;
+        }
     } else if (currentAction === "remove") {
-        structureGrid[row][col] = Blocks.Air;
+        if (wallMode) {
+            wallsGrid[row][col] = Blocks.Air;
+        } else {
+            structureGrid[row][col] = Blocks.Air;
+        }
     }
     drawGrid();
 }
@@ -139,7 +209,6 @@ canvas.addEventListener("contextmenu", (e) => {
 // ----- PALETTE (Block Previews) -----
 const paletteContainer = document.getElementById("palette");
 
-// Create search bar if not present.
 if (!document.getElementById("paletteSearch")) {
     const searchBar = document.createElement("input");
     searchBar.id = "paletteSearch";
@@ -151,13 +220,11 @@ if (!document.getElementById("paletteSearch")) {
     paletteContainer.appendChild(searchBar);
 }
 
-// Label for normal blocks.
 const paletteTitle = document.createElement("h3");
 paletteTitle.style.color = "#e8e8e8";
 paletteTitle.textContent = "Blocks";
 paletteContainer.appendChild(paletteTitle);
 
-// Filter out Air and sort by block name alphabetically.
 const sortedBlocks = blockTypes
     .filter((block) => block.blockId !== Blocks.Air)
     .sort((a, b) => a.name.localeCompare(b.name));
@@ -182,7 +249,6 @@ function createPaletteItem(labelText, imgSrc, value) {
     return itemDiv;
 }
 
-// Add normal blocks.
 sortedBlocks.forEach((block) => {
     const imgSrc = block.sprite
         ? "Assets/sprites/blocks/" + block.sprite + ".png"
@@ -192,13 +258,11 @@ sortedBlocks.forEach((block) => {
     paletteContainer.appendChild(item);
 });
 
-// Label for ChestLoot.
 const lootTitle = document.createElement("h3");
 lootTitle.style.color = "#e8e8e8";
 lootTitle.textContent = "Chest Loot";
 paletteContainer.appendChild(lootTitle);
 
-// Add ChestLoot items.
 for (const key in ChestLoot) {
     if (ChestLoot.hasOwnProperty(key)) {
         const lootId = "ChestLoot." + key;
@@ -207,19 +271,18 @@ for (const key in ChestLoot) {
         if (activeBlockId === lootId) item.classList.add("selected");
         paletteContainer.appendChild(item);
     }
-}
 
-// Palette search functionality.
-document.getElementById("paletteSearch").addEventListener("input", (e) => {
-    const query = e.target.value.trim().toLowerCase();
-    document.querySelectorAll(".palette-item").forEach((item) => {
-        if (item.dataset.value.indexOf(query) !== -1) {
-            item.style.display = "";
-        } else {
-            item.style.display = "none";
-        }
+    document.getElementById("paletteSearch").addEventListener("input", (e) => {
+        const query = e.target.value.trim().toLowerCase();
+        document.querySelectorAll(".palette-item").forEach((item) => {
+            if (item.dataset.value.indexOf(query) !== -1) {
+                item.style.display = "";
+            } else {
+                item.style.display = "none";
+            }
+        });
     });
-});
+}
 
 // ----- LOCAL STORAGE: SAVE & LOAD BUILDS -----
 const BUILD_STORAGE_KEY = "savedBuilds";
@@ -233,36 +296,29 @@ function saveBuildsToLocalStorage(builds) {
     localStorage.setItem(BUILD_STORAGE_KEY, JSON.stringify(builds));
 }
 
-// Instead of trimming to a bounding box, save the entire grid.
+// Save the entire grid (both blocks and walls).
+const buildNameInput = document.getElementById("buildName");
 document.getElementById("saveBuildBtn").addEventListener("click", () => {
-    const buildNameInput = document.getElementById("buildName");
     const buildName = buildNameInput.value.trim();
     if (!buildName) return;
-
-    // Save the entire structureGrid.
-    const buildData = { blocks: structureGrid };
-
+    const buildData = { blocks: structureGrid, walls: wallsGrid };
     const builds = loadSavedBuilds();
     builds[buildName] = buildData;
     saveBuildsToLocalStorage(builds);
-
     buildNameInput.value = "";
     updateSavedBuildsList();
 });
 
 const buildSearchInput = document.getElementById("buildSearch");
-buildSearch.addEventListener("input", updateSavedBuildsList);
+buildSearchInput.addEventListener("input", updateSavedBuildsList);
 
 function updateSavedBuildsList() {
     const builds = loadSavedBuilds();
     const savedBuildsContainer = document.getElementById("savedBuilds");
     savedBuildsContainer.innerHTML = "";
-
-    // Get search query for saved builds.
     const searchQuery = buildSearchInput
         ? buildSearchInput.value.trim().toLowerCase()
         : "";
-
     Object.keys(builds).forEach((buildName) => {
         if (
             searchQuery &&
@@ -272,14 +328,14 @@ function updateSavedBuildsList() {
         }
         const buildEntry = document.createElement("div");
         buildEntry.className = "build-entry";
-
-        const previewCanvas = generatePreviewCanvas(builds[buildName]);
+        // Generate a preview canvas for the main blocks.
+        const previewCanvas = generatePreviewCanvas({
+            blocks: builds[buildName].blocks,
+        });
         buildEntry.appendChild(previewCanvas);
-
         const label = document.createElement("span");
         label.textContent = buildName;
         buildEntry.appendChild(label);
-
         const removeBtn = document.createElement("button");
         removeBtn.className = "remove-build-btn";
         removeBtn.textContent = "Remove";
@@ -291,25 +347,27 @@ function updateSavedBuildsList() {
             updateSavedBuildsList();
         });
         buildEntry.appendChild(removeBtn);
-
         buildEntry.addEventListener("click", () => {
             const buildData = builds[buildName];
             structureGrid = buildData.blocks;
+            if (buildData.walls) wallsGrid = buildData.walls;
+            buildNameInput.value = buildName;
             drawGrid();
         });
-
         savedBuildsContainer.appendChild(buildEntry);
     });
 }
+
+updateSavedBuildsList();
+
 // Global cache for computed average colors by block id.
-const blockAverageColorCache = {};
 
 let updateTimeout;
 function scheduleSavedBuildsUpdate() {
     if (updateTimeout) clearTimeout(updateTimeout);
     updateTimeout = setTimeout(() => {
         updateSavedBuildsList();
-    }, 200); // adjust the delay as needed
+    }, 200);
 }
 
 function getBlockAverageColor(block, fallbackColor = "#ffffff") {
@@ -363,25 +421,21 @@ function generatePreviewCanvas(
     previewCanvas.height = previewHeight;
     const pctx = previewCanvas.getContext("2d");
     pctx.clearRect(0, 0, previewWidth, previewHeight);
-
-    // buildData.blocks is a 2D array.
     const blocks = buildData.blocks;
     const rows = blocks.length;
     const cols = blocks[0].length;
     const cellW = previewWidth / cols;
     const cellH = previewHeight / rows;
-
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             const cell = blocks[r][c];
-            let fillColor = "#74b3ff"; // default
+            let fillColor = "#74b3ff";
             if (typeof cell === "number") {
                 const block = GetBlock(cell);
                 if (block && block.name) {
                     fillColor = getBlockAverageColor(block, "#74b3ff");
                 }
             } else if (typeof cell === "string") {
-                // For ChestLoot, use a fixed color.
                 fillColor = "#aa4400";
             }
             pctx.fillStyle = fillColor;
@@ -394,16 +448,22 @@ function generatePreviewCanvas(
 updateSavedBuildsList();
 
 // ----- EXPORT FUNCTIONALITY -----
-// Export only the bounding box (width and height) that covers the non-Air cells.
+// Export only the bounding box (width and height) that covers the non-Air cells
+// in either the main blocks grid or the walls grid.
 document.getElementById("exportBtn").addEventListener("click", () => {
     let minRow = gridRows,
         maxRow = -1,
         minCol = gridCols,
         maxCol = -1;
 
+    // Loop over every cell in both grids
     for (let r = 0; r < gridRows; r++) {
         for (let c = 0; c < gridCols; c++) {
-            if (structureGrid[r][c] !== Blocks.Air) {
+            // Check if either the main grid or the walls grid has a non-Air cell.
+            if (
+                structureGrid[r][c] !== Blocks.Air ||
+                wallsGrid[r][c] !== Blocks.Air
+            ) {
                 if (r < minRow) minRow = r;
                 if (r > maxRow) maxRow = r;
                 if (c < minCol) minCol = c;
@@ -412,31 +472,42 @@ document.getElementById("exportBtn").addEventListener("click", () => {
         }
     }
 
+    // If nothing was placed, exit.
     if (maxRow < minRow || maxCol < minCol) return;
 
-    const trimmed = [];
+    // Create trimmed arrays for both grids.
+    const trimmedBlocks = [];
+    const trimmedWalls = [];
     for (let r = minRow; r <= maxRow; r++) {
-        trimmed.push(structureGrid[r].slice(minCol, maxCol + 1));
+        trimmedBlocks.push(structureGrid[r].slice(minCol, maxCol + 1));
+        trimmedWalls.push(wallsGrid[r].slice(minCol, maxCol + 1));
     }
 
     // Convert cell values: If number, convert using GetBlock; if string, output as is.
-    const trimmedNames = trimmed.map((row) =>
-        row.map((cell) => {
-            if (typeof cell === "string") {
-                return cell;
-            } else {
-                const block = GetBlock(cell);
-                return block
-                    ? "Blocks." + block.name.replace(/\s+/g, "")
-                    : cell;
-            }
-        })
-    );
+    const convertGrid = (grid) =>
+        grid.map((row) =>
+            row.map((cell) => {
+                if (typeof cell === "string") {
+                    return cell;
+                } else {
+                    const block = GetBlock(cell);
+                    return block
+                        ? "Blocks." + block.name.replace(/\s+/g, "")
+                        : cell;
+                }
+            })
+        );
 
-    let exportData = { blocks: trimmedNames };
+    const trimmedNamesBlocks = convertGrid(trimmedBlocks);
+    const trimmedNamesWalls = convertGrid(trimmedWalls);
 
+    let exportData = {
+        blocks: trimmedNamesBlocks,
+        walls: trimmedNamesWalls,
+    };
+
+    // Convert exportData to JSON and then remove braces and quotes if needed.
     exportData = JSON.stringify(exportData, null, 2);
-    // Remove braces and double quotes if needed.
     exportData = exportData.replace(/{/g, "").replace(/}/g, "");
     exportData = exportData.replace(/"/g, "");
 
@@ -448,7 +519,9 @@ document.getElementById("copyBtn").addEventListener("click", () => {
     let outputText = document.getElementById("output").textContent.trim();
     navigator.clipboard
         .writeText(outputText)
-        .then(() => {})
+        .then(() => {
+            // alert("Blocks array copied to clipboard!");
+        })
         .catch((err) => {
             console.error("Error copying text: ", err);
         });
@@ -459,6 +532,7 @@ document.getElementById("cleanBtn").addEventListener("click", () => {
     for (let r = 0; r < gridRows; r++) {
         for (let c = 0; c < gridCols; c++) {
             structureGrid[r][c] = Blocks.Air;
+            wallsGrid[r][c] = Blocks.Air;
         }
     }
     drawGrid();
@@ -468,4 +542,13 @@ document.getElementById("cleanBtn").addEventListener("click", () => {
 document.getElementById("toggleGridBtn").addEventListener("click", () => {
     showGrid = !showGrid;
     drawGrid();
+});
+
+// ----- TOGGLE WALL MODE FUNCTIONALITY -----
+// This button toggles between drawing main blocks and walls.
+document.getElementById("toggleWallModeBtn").addEventListener("click", () => {
+    wallMode = !wallMode;
+    // Update button label
+    document.getElementById("toggleWallModeBtn").textContent =
+        "Wall Mode: " + (wallMode ? "ON" : "OFF");
 });

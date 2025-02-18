@@ -81,4 +81,36 @@ const ChestLoot = Object.freeze({
             subtract: 7,
         }),
     ]),
+    Iglo: new LootTable([
+        new LootItem({
+            blockId: Blocks.IceBlock,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.Snowball,
+            maxCount: 4,
+            subtract: 6,
+        }),
+        new LootItem({
+            itemId: Items.Leather,
+            maxCount: 1,
+            subtract: 2,
+        }),
+        new LootItem({
+            itemId: Items.Stick,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.Bone,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.IronIngot,
+            maxCount: 1,
+            subtract: 3,
+        }),
+    ]),
 });
