@@ -1,0 +1,84 @@
+const ChestLoot = Object.freeze({
+    Spawner: new LootTable([
+        new LootItem({
+            itemId: Items.MusicDisc11,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDisc13,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDiscBlocks,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDiscChirp,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDiscCat,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDiscFar,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDiscMall,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDiscMellohi,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDiscStal,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDiscStrad,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDiscWait,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.MusicDiscWard,
+            maxCount: 1,
+            subtract: 20,
+        }),
+        new LootItem({
+            itemId: Items.RottenFlesh,
+            maxCount: 3,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.Charcoal,
+            maxCount: 1,
+            subtract: 2,
+        }),
+        new LootItem({
+            itemId: Items.Leather,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.Stick,
+            maxCount: 4,
+            subtract: 7,
+        }),
+    ]),
+});

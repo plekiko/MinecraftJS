@@ -5,30 +5,71 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Structure Creator</title>
         <style>
+            /* General Page Styles */
             body {
-                font-family: sans-serif;
                 margin: 0;
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: #f3f3f3;
                 display: flex;
                 height: 100vh;
             }
-            /* Left panel: grid editor */
+            h1 {
+                margin: 0 0 20px;
+            }
+
+            /* Editor Panel */
             .editor {
                 flex: 3;
+                background: #1d1d1d;
+                padding: 20px;
                 position: relative;
-                background: #eee;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
             }
             #gridCanvas {
-                border: 1px solid #333;
-                display: block;
-                margin: auto;
-                background: #fff;
+                border: 2px solid #333;
+                background-image: linear-gradient(#74b3ff, #d47147);
+                image-rendering: pixelated;
+                margin-bottom: 10px;
             }
-            /* Right panel: block preview list */
+            .controls {
+                width: 100%;
+                text-align: center;
+            }
+            .controls button {
+                background: #333;
+                color: #fff;
+                border: none;
+                padding: 10px 20px;
+                margin: 0 10px;
+                cursor: pointer;
+                border-radius: 5px;
+                font-size: 1rem;
+                transition: background 0.2s, transform 0.2s;
+            }
+            .controls button:hover {
+                background: #555;
+                transform: translateY(-2px);
+            }
+            pre#output {
+                margin-top: 10px;
+                background: #fff;
+                padding: 15px;
+                border: 1px solid #ccc;
+                max-height: 200px;
+                overflow-y: auto;
+                text-align: left;
+            }
+
+            /* Palette Panel */
             .palette {
                 flex: 1;
+                background: #333;
+                padding: 5px;
                 overflow-y: auto;
-                background: #ddd;
-                padding: 10px;
+                border-left: 1px solid #4c4c4c;
             }
             .palette-item {
                 display: flex;
@@ -36,53 +77,44 @@
                 gap: 10px;
                 margin-bottom: 10px;
                 cursor: pointer;
-                border: 1px solid transparent;
                 padding: 5px;
+                border: 1px solid transparent;
+                border-radius: 4px;
+                transition: background 0.2s, border-color 0.2s;
+            }
+            .palette-item:hover {
+                background: #444444;
             }
             .palette-item.selected {
-                border-color: #333;
-                background: #fff;
+                border-color: #808080;
+                background: #4a4a4a;
             }
             .palette-item img {
                 width: 32px;
                 height: 32px;
                 image-rendering: pixelated;
             }
-            .export {
-                position: absolute;
-                bottom: 10px;
-                left: 10px;
-                background: #fff;
-                padding: 5px;
-                border: 1px solid #333;
-                cursor: pointer;
-            }
-            pre#output {
-                white-space: pre-wrap;
-                font-size: 0.8rem;
-                background: #fff;
-                padding: 10px;
-                border: 1px solid #333;
-                margin-top: 10px;
+            .palette-item span {
+                font-size: 0.9rem;
+                color: #e8e8e8;
             }
         </style>
     </head>
     <body>
         <div class="editor">
-            <center>
-                <h1>Structure Creator</h1>
-            </center>
+            <h1 class="title" style="color: #fff">Structure Creator</h1>
             <canvas id="gridCanvas" width="512" height="512"></canvas>
             <div class="controls">
                 <button id="exportBtn">Export Structure</button>
                 <button id="copyBtn">Copy Blocks Array</button>
+                <button id="cleanBtn">Clean Grid</button>
+                <button id="toggleGridBtn">Toggle Grid</button>
                 <pre id="output"></pre>
             </div>
-
-            <pre id="output"></pre>
         </div>
         <div class="palette" id="palette"></div>
 
+        <!-- External Scripts -->
         <script src="Assets/utils/globals.js"></script>
         <script src="Assets/utils/classes.js"></script>
         <script src="Assets/game/sounds.js"></script>
@@ -91,6 +123,7 @@
         <script src="Assets/game/items.js"></script>
         <script src="Assets/world/block.js"></script>
         <script src="Assets/world/blocks.js"></script>
+        <script src="Assets/world/chestLoot.js"></script>
 
         <script src="structureCreator.js"></script>
     </body>
