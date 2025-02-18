@@ -664,6 +664,7 @@ const blockTypes = [
         hardness: 2.6,
         collision: false,
         specialType: SpecialType.SingleChest,
+        chunkProtection: true,
     }),
     new BlockType({
         blockId: 52,

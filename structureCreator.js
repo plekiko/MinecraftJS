@@ -285,7 +285,7 @@ document.getElementById("copyBtn").addEventListener("click", () => {
     navigator.clipboard
         .writeText(outputText)
         .then(() => {
-            alert("Blocks array copied to clipboard!");
+            // alert("Blocks array copied to clipboard!");
         })
         .catch((err) => {
             console.error("Error copying text: ", err);

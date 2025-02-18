@@ -11,6 +11,8 @@ class BlockType {
         drag = 40,
         collision = true,
 
+        chunkProtection = false,
+
         updateSpeed = 0,
         chunkUpdate = false,
         removeFromUpdatingWhenInactive = true,
@@ -52,6 +54,8 @@ class BlockType {
         this.collision = collision;
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
+
+        this.chunkProtection = chunkProtection;
 
         this.updateSpeed = updateSpeed;
         this.chunkUpdate = chunkUpdate;
@@ -95,7 +99,7 @@ const BlockCategory = Object.freeze({
 class Metadata {
     constructor({ storage = null, props = null } = {}) {
         this.storage = storage;
-        this.myAudio = props.myAudio;
+        this.myAudio = props?.myAudio;
         this.progression = 0;
         this.fuelProgression = 0;
         this.isActive = false;

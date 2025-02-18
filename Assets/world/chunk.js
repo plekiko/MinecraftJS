@@ -145,7 +145,13 @@ class Chunk {
             blocksToPlace.forEach((block) => {
                 // console.log("Placed buffered " + block.blockType.name + " at " + block.x + " - " + block.y);
 
-                this.setBlockTypeAtPosition(block.x, block.y, block.blockType);
+                if (!GetBlock(block).chunkProtection)
+                    this.setBlockTypeAtPosition(
+                        block.x,
+                        block.y,
+                        block.blockType,
+                        block.metaData
+                    );
             });
             // Once the blocks are placed, remove them from the buffer
             pendingBlocks.delete(chunkX);
@@ -311,51 +317,6 @@ class Chunk {
         return this.getBlock(x - 1, y); // Block to the left
     }
 
-    updateAmbientSound() {
-        if (!player) return;
-
-        // Array to store blocks that have an ambientSound defined.
-        let ambientBlocks = [];
-
-        // Loop through all blocks in this chunk.
-        for (let y = 0; y < this.height; y++) {
-            for (let x = 0; x < this.width; x++) {
-                let block = this.blocks[y][x];
-                let blockDef = GetBlock(block.blockType);
-                if (blockDef.ambientSound) {
-                    ambientBlocks.push(block);
-                }
-            }
-        }
-
-        if (ambientBlocks.length === 0) return;
-
-        let playerPos = player.position;
-
-        // Find the block with an ambientSound that is closest to the player.
-        let closestBlock = ambientBlocks.reduce((closest, current) => {
-            let currentPos = getBlockWorldPosition(current);
-            let currentDist = Vector2.Distance(playerPos, currentPos);
-            if (!closest) return current;
-            let closestPos = getBlockWorldPosition(closest);
-            let closestDist = Vector2.Distance(playerPos, closestPos);
-            return currentDist < closestDist ? current : closest;
-        }, null);
-
-        if (!closestBlock) return;
-
-        // Get the ambient sound from the block's type.
-        let ambientSound = GetBlock(closestBlock.blockType).ambientSound;
-        if (!ambientSound) return;
-
-        // Use the block's world position as the sound origin.
-        let soundPos = getBlockWorldPosition(closestBlock);
-
-        // Play the sound with positional audio.
-        // The parameters here are: origin position, sound file/string, volume, and loop flag.
-        playPositionalSound(soundPos, ambientSound, 0.5, true);
-    }
-
     getRight(x, y) {
         return this.getBlock(x + 1, y); // Block to the right
     }
@@ -514,13 +475,19 @@ class Chunk {
         }
     }
 
-    setBlockTypeAtPosition(worldX, worldY, blockType) {
+    setBlockTypeAtPosition(worldX, worldY, blockType, metaData = null) {
         const targetChunk = this.getChunkForBlock(worldX);
         if (targetChunk && worldY < targetChunk.height * BLOCK_SIZE) {
             const localX = this.getLocalX(worldX, targetChunk);
             const localY = worldY / BLOCK_SIZE;
 
-            targetChunk.setBlockType(localX, localY, blockType);
+            targetChunk.setBlockType(
+                localX,
+                localY,
+                blockType,
+                this.blocks,
+                metaData
+            );
         } else {
             if (blockType == BlockType.Air) return;
             // Buffer the block to place it once the chunk is generated
@@ -531,7 +498,9 @@ class Chunk {
             if (!pendingBlocks.has(chunkX)) {
                 pendingBlocks.set(chunkX, []);
             }
-            pendingBlocks.get(chunkX).push({ x: worldX, y: worldY, blockType });
+            pendingBlocks
+                .get(chunkX)
+                .push({ x: worldX, y: worldY, blockType, metaData });
             // console.log(`Buffered block at worldX: ${worldX}, worldY: ${worldY}`);
         }
     }
@@ -572,12 +541,13 @@ class Chunk {
         return GetBlock(this.blocks[y][x].blockType);
     }
 
-    setBlockType(x, y, blockType, blocks = this.blocks) {
+    setBlockType(x, y, blockType, blocks = this.blocks, metaData = null) {
         y = this.calculateY(y);
         if (blocks[y] && blocks[y][x]) {
             const block = blocks[y][x];
             if (block.blockType !== blockType) {
                 block.setBlockType(blockType);
+                block.metaData = metaData;
             }
         }
     }

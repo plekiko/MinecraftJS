@@ -127,46 +127,53 @@ function GenerateStructure(structure, x, y) {
     const structureWidth = structureData.blocks[0].length;
     const structureHeight = structureData.blocks.length;
 
+    let chunk = null;
+
     for (let i = 0; i < structureWidth; i++) {
         for (let j = 0; j < structureHeight; j++) {
             const blockType = structureData.blocks[j][i];
 
             const blockX =
                 Math.floor((x + i * BLOCK_SIZE) / BLOCK_SIZE) * BLOCK_SIZE;
-            const blockY = Math.floor(y + j * BLOCK_SIZE);
+            let blockY = Math.floor(y + j * BLOCK_SIZE);
 
-            const block = GetBlockAtWorldPosition(blockX, blockY, false);
+            if (!chunk) chunk = GetChunkForX(blockX);
 
-            if (!block) {
-                chat.message(
-                    "Cannot place block here. " + blockX + " " + blockY
-                );
-                continue;
-            }
+            blockY = CHUNK_HEIGHT * BLOCK_SIZE - blockY;
 
             if (blockType instanceof LootTable) {
-                GenerateChestWithLoot(blockType, blockX, blockY);
+                GenerateChestWithLoot(blockType, blockX, blockY, chunk);
                 continue;
+            } else {
+                chunk.setBlockTypeAtPosition(blockX, blockY, blockType);
             }
-
-            block.setBlockType(blockType);
         }
     }
 }
 
-function GenerateChestWithLoot(lootTable, x, y) {
-    const block = GetBlockAtWorldPosition(x, y, false);
-
-    block.setBlockType(Blocks.Chest);
-
+function GenerateChestWithLoot(lootTable, x, y, chunk) {
     const loot = lootTable.getRandomLoot();
 
-    PopulateStorageWithLoot(loot, block);
+    let storage = [[]];
+
+    for (let y = 0; y < 3; y++) {
+        storage[y] = [];
+        for (let x = 0; x < 9; x++) {
+            storage[y][x] = new InventoryItem();
+        }
+    }
+
+    const newStorage = PopulateStorageWithLoot(loot, storage);
+
+    chunk.setBlockTypeAtPosition(
+        x,
+        y,
+        Blocks.Chest,
+        new Metadata({ storage: newStorage })
+    );
 }
 
-function PopulateStorageWithLoot(loot, block) {
-    let storage = structuredClone(block.metaData.storage);
-
+function PopulateStorageWithLoot(loot, storage) {
     for (const item of loot) {
         let placed = false;
         let attempts = 10;
@@ -190,7 +197,7 @@ function PopulateStorageWithLoot(loot, block) {
             }
         }
     }
-    block.metaData.storage = storage;
+    return storage;
 }
 
 function calculateChunkBiome(chunkIndex) {
@@ -277,7 +284,8 @@ function generateStructures() {
             const structure = Structures[randomName];
 
             // Determine placement X coordinate (roughly the center of the chunk)
-            const structureX = chunk.x + (CHUNK_WIDTH * BLOCK_SIZE) / 2;
+            const structureX =
+                chunk.x + RandomRange(0, CHUNK_WIDTH) * BLOCK_SIZE;
 
             let structureY;
             if (structure.underground) {
@@ -409,6 +417,10 @@ function SetBlockTypeAtPosition(worldX, worldY, blockType, adjust = true) {
     if (!block) return;
 
     block.setBlockType(blockType);
+}
+
+function SetBufferedBlock(worldX, worldY, blockType) {
+    GetChunkForX(worldX).setBlockTypeAtPosition(worldX, worldY, blockType);
 }
 
 function GetChunkForX(worldX) {
