@@ -13,6 +13,8 @@ class BlockType {
 
         air = false,
 
+        dropSelf = true,
+
         chunkProtection = false,
 
         updateSpeed = 0,

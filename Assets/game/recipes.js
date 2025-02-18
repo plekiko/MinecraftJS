@@ -609,6 +609,27 @@ const recipes = [
         ],
         output: new InventoryItem({ blockId: Blocks.Jukebox, count: 1 }),
     }),
+    // Snow Block
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.Snowball }),
+                new RecipeItem({ itemId: Items.Snowball }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.Snowball }),
+                new RecipeItem({ itemId: Items.Snowball }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.SnowBlock, count: 1 }),
+    }),
+    // Snow Ball
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ blockId: Blocks.SnowBlock }),
+        output: new InventoryItem({ itemId: Items.Snowball, count: 4 }),
+    }),
 
     //#endregion
 ];

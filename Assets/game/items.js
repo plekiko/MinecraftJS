@@ -479,6 +479,7 @@ const items = [
         itemId: 300,
         name: "Snowball",
         sprite: "snowball",
+        stackSize: 16,
     }),
     //#endregion
 ];

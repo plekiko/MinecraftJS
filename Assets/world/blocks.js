@@ -91,6 +91,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shovel,
+        dropBlock: Blocks.Dirt,
     }),
     new BlockType({
         blockId: 2,
@@ -109,6 +110,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shovel,
+        dropBlock: Blocks.Dirt,
     }),
     new BlockType({
         blockId: 4,
@@ -156,9 +158,10 @@ const blockTypes = [
         sprite: "grass_side_snowed",
         name: "Snowed Grass",
         hardness: 2,
-        breakSound: Sounds.Break_Snow,
-        breakingSound: Sounds.Breaking_Snow,
+        breakSound: Sounds.Break_Gravel,
+        breakingSound: Sounds.Break_Gravel,
         toolType: ToolType.Shovel,
+        dropBlock: Blocks.Dirt,
     }),
     new BlockType({
         blockId: 9,
@@ -755,11 +758,19 @@ const blockTypes = [
         blockId: 60,
         sprite: "snow",
         name: "Snow Block",
-        hardness: 0,
+        hardness: 0.8,
+        dropItem: Items.Snowball,
+        dropTable: new LootTable([
+            new LootItem({
+                itemId: Items.Snowball,
+                maxCount: 3,
+                subtract: 3,
+            }),
+        ]),
+        dropSelf: false,
         breakSound: Sounds.Break_Snow,
         breakingSound: Sounds.Breaking_Snow,
         toolType: ToolType.Shovel,
-        dropWithoutTool: false,
     }),
 ];
 
