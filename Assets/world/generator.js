@@ -163,7 +163,6 @@ function GenerateStructure(structure, x, y) {
             // Process Blocks:
             if (blockType instanceof LootTable) {
                 GenerateChestWithLoot(blockType, blockX, blockY, chunk);
-                continue;
             } else {
                 if (blockType !== Blocks.Air) {
                     chunk.setBlockTypeAtPosition(blockX, blockY, blockType);
@@ -173,7 +172,6 @@ function GenerateStructure(structure, x, y) {
             // Process Walls:
             if (wallType instanceof LootTable) {
                 GenerateChestWithLoot(wallType, blockX, blockY, chunk);
-                continue;
             } else {
                 if (wallType !== Blocks.Air) {
                     chunk.setBlockTypeAtPosition(
