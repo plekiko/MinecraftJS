@@ -304,16 +304,21 @@ function updateSavedBuildsList() {
 // Global cache for computed average colors by block id.
 const blockAverageColorCache = {};
 
+let updateTimeout;
+function scheduleSavedBuildsUpdate() {
+    if (updateTimeout) clearTimeout(updateTimeout);
+    updateTimeout = setTimeout(() => {
+        updateSavedBuildsList();
+    }, 200); // adjust the delay as needed
+}
+
 function getBlockAverageColor(block, fallbackColor = "#ffffff") {
-    // If already cached, return the color.
     if (blockAverageColorCache[block.blockId]) {
         return blockAverageColorCache[block.blockId];
     }
-
     if (block.sprite) {
         const img = new Image();
         img.src = "Assets/sprites/blocks/" + block.sprite + ".png";
-        // If the image is already loaded, compute immediately.
         if (img.complete) {
             const offCanvas = document.createElement("canvas");
             offCanvas.width = 1;
@@ -328,7 +333,6 @@ function getBlockAverageColor(block, fallbackColor = "#ffffff") {
             blockAverageColorCache[block.blockId] = color;
             return color;
         } else {
-            // If the image isn't loaded yet, set an onload handler.
             img.onload = () => {
                 const offCanvas = document.createElement("canvas");
                 offCanvas.width = 1;
@@ -341,10 +345,8 @@ function getBlockAverageColor(block, fallbackColor = "#ffffff") {
                     b = data[2];
                 const color = `rgb(${r}, ${g}, ${b})`;
                 blockAverageColorCache[block.blockId] = color;
-                // Optionally update the saved builds previews if needed.
-                updateSavedBuildsList();
+                scheduleSavedBuildsUpdate();
             };
-            // Return fallback color until loaded.
             return fallbackColor;
         }
     }
