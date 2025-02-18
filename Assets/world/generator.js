@@ -274,8 +274,7 @@ function generateStructures() {
             const candidates = allStructureNames.filter((name) => {
                 const structure = Structures[name];
                 return (
-                    structure.biome === null ||
-                    structure.biome === chunk.biome.name
+                    structure.biome === null || structure.biome === chunk.biome
                 );
             });
 
@@ -308,7 +307,10 @@ function generateStructures() {
                 const surfaceBlockY = chunk.findGroundLevel(localX, true);
                 const surfaceY = surfaceBlockY * BLOCK_SIZE;
 
-                structureY = surfaceY - structure.blocks.length * BLOCK_SIZE;
+                structureY =
+                    surfaceY -
+                    structure.blocks.length * BLOCK_SIZE +
+                    BLOCK_SIZE;
             }
 
             // Generate the structure at these world coordinates.
@@ -327,6 +329,8 @@ function GetChunkByIndex(index) {
 
 function GetBiomeForNoise(temp, wetness, mountains) {
     // console.log(`Checking biome for temp: ${temp}, wetness: ${wetness}`); // Debugging log
+
+    return Biomes.Swamp;
 
     // Iterate through the available biomes and find one that matches both the temperature and wetness range
     for (let biomeName in Biomes) {

@@ -9,7 +9,7 @@
             body {
                 margin: 0;
                 font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-                background: #f3f3f3;
+                background: #1d1d1d;
                 display: flex;
                 height: 100vh;
             }
@@ -37,6 +37,7 @@
             .controls {
                 width: 100%;
                 text-align: center;
+                margin-bottom: 10px;
             }
             .controls button {
                 background: #333;
@@ -63,13 +64,98 @@
                 text-align: left;
             }
 
+            /* Build Save/Load Panel */
+            .build-save-load {
+                width: 90%;
+                margin-top: 15px;
+                text-align: center;
+            }
+            .build-save-load input {
+                width: 20%;
+                padding: 5px;
+                font-size: 1rem;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
+            .build-save-load button {
+                background: #333;
+                color: #fff;
+                border: none;
+                padding: 5px 10px;
+                margin-left: 5px;
+                cursor: pointer;
+                border-radius: 5px;
+                font-size: 1rem;
+                transition: background 0.2s, transform 0.2s;
+            }
+            .build-save-load button:hover {
+                background: #555;
+                transform: translateY(-2px);
+            }
+            #savedBuilds {
+                margin-top: 10px;
+                text-align: left;
+                overflow-y: auto;
+
+                max-height: 200px;
+
+                margin-bottom: 20px;
+            }
+            .build-entry {
+                padding: 5px;
+                border-bottom: 1px solid #ccc;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .build-entry:hover {
+                background: #4b4b4b;
+            }
+            .build-entry canvas {
+                margin-right: 10px;
+                border: 1px solid #aaa;
+            }
+            .build-entry span {
+                font-size: 0.9rem;
+                color: #fff;
+            }
+            .remove-build-btn {
+                background: #aa0000;
+                border: none;
+                color: #fff;
+                padding: 3px 6px;
+                border-radius: 3px;
+                cursor: pointer;
+                font-size: 0.8rem;
+                transition: background 0.2s;
+            }
+            .remove-build-btn:hover {
+                background: #cc0000;
+            }
+
             /* Palette Panel */
             .palette {
                 flex: 1;
                 background: #333;
                 padding: 5px;
                 overflow-y: auto;
+                overflow-x: hidden;
                 border-left: 1px solid #4c4c4c;
+            }
+            .palette input {
+                width: 100%;
+                padding: 5px;
+                margin-bottom: 10px;
+                border: 1px solid #555;
+                border-radius: 4px;
+                background: #444;
+                color: #e8e8e8;
+            }
+            .palette h3 {
+                margin: 5px 0;
+                color: #e8e8e8;
             }
             .palette-item {
                 display: flex;
@@ -111,6 +197,29 @@
                 <button id="toggleGridBtn">Toggle Grid</button>
                 <pre id="output"></pre>
             </div>
+            <div class="build-save-load">
+                <input
+                    type="text"
+                    id="buildName"
+                    placeholder="Enter build name"
+                />
+                <button id="saveBuildBtn">Save Build</button>
+                <!-- Build search bar -->
+                <input
+                    type="text"
+                    id="buildSearch"
+                    placeholder="Search saved builds..."
+                    style="
+                        width: 100%;
+                        padding: 5px;
+                        margin-top: 10px;
+                        margin-bottom: 10px;
+                        border: 1px solid #ccc;
+                        border-radius: 4px;
+                    "
+                />
+                <div id="savedBuilds"></div>
+            </div>
         </div>
         <div class="palette" id="palette"></div>
 
@@ -124,7 +233,6 @@
         <script src="Assets/world/block.js"></script>
         <script src="Assets/world/blocks.js"></script>
         <script src="Assets/world/chestLoot.js"></script>
-
         <script src="structureCreator.js"></script>
     </body>
 </html>

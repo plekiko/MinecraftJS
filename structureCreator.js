@@ -15,25 +15,23 @@ let structureGrid = [];
 for (let r = 0; r < gridRows; r++) {
     structureGrid[r] = [];
     for (let c = 0; c < gridCols; c++) {
-        structureGrid[r][c] = Blocks.Air; // assuming Blocks.Air === 0
+        structureGrid[r][c] = Blocks.Air;
     }
 }
 
-// The currently selected block from the palette (default: Oak Planks, for example).
-// This can be a number (block id) or a string (e.g. "ChestLoot.Spawner").
-let activeBlockId = 34; // change this default as needed
+// The currently selected block from the palette.
+// Can be a number (block id) or a string (e.g. "ChestLoot.Spawner").
+let activeBlockId = 34;
 
 // ----- DRAWING THE GRID -----
 function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw filled cells using a preview image if available.
     for (let r = 0; r < gridRows; r++) {
         for (let c = 0; c < gridCols; c++) {
             const cell = structureGrid[r][c];
             if (cell !== Blocks.Air) {
                 if (typeof cell === "number") {
-                    // Normal block
                     const block = GetBlock(cell);
                     if (block && block.sprite) {
                         const img = new Image();
@@ -56,7 +54,6 @@ function drawGrid() {
                         );
                     }
                 } else if (typeof cell === "string") {
-                    // Special string (ChestLoot, etc.)
                     const img = new Image();
                     img.src = "Assets/sprites/blocks/chest.png";
                     ctx.drawImage(
@@ -71,7 +68,6 @@ function drawGrid() {
         }
     }
 
-    // Optionally draw grid lines.
     if (showGrid) {
         ctx.strokeStyle = "rgba(0,0,0,0.3)";
         for (let r = 0; r <= gridRows; r++) {
@@ -89,7 +85,6 @@ function drawGrid() {
     }
 }
 
-// Initial draw
 drawGrid();
 
 // ----- CONTINUOUS PAINTING INTERACTION -----
@@ -102,7 +97,6 @@ function handlePaint(e) {
     const clickY = e.clientY - rect.top;
     const col = Math.floor(clickX / cellSize);
     const row = Math.floor(clickY / cellSize);
-
     if (row < 0 || row >= gridRows || col < 0 || col >= gridCols) return;
 
     if (currentAction === "place") {
@@ -116,7 +110,6 @@ function handlePaint(e) {
 canvas.addEventListener("mousedown", (e) => {
     e.preventDefault();
     isPainting = true;
-    // Left button (0) = place; Right button (2) = remove.
     if (e.button === 0) {
         currentAction = "place";
     } else if (e.button === 2) {
@@ -126,9 +119,7 @@ canvas.addEventListener("mousedown", (e) => {
 });
 
 canvas.addEventListener("mousemove", (e) => {
-    if (isPainting) {
-        handlePaint(e);
-    }
+    if (isPainting) handlePaint(e);
 });
 
 canvas.addEventListener("mouseup", () => {
@@ -146,10 +137,9 @@ canvas.addEventListener("contextmenu", (e) => {
 });
 
 // ----- PALETTE (Block Previews) -----
-// The palette container already includes a search bar from the HTML.
 const paletteContainer = document.getElementById("palette");
 
-// Create a search bar if not already present.
+// Create search bar if not present.
 if (!document.getElementById("paletteSearch")) {
     const searchBar = document.createElement("input");
     searchBar.id = "paletteSearch";
@@ -161,7 +151,7 @@ if (!document.getElementById("paletteSearch")) {
     paletteContainer.appendChild(searchBar);
 }
 
-// Add a label for normal blocks.
+// Label for normal blocks.
 const paletteTitle = document.createElement("h3");
 paletteTitle.style.color = "#e8e8e8";
 paletteTitle.textContent = "Blocks";
@@ -175,16 +165,13 @@ const sortedBlocks = blockTypes
 function createPaletteItem(labelText, imgSrc, value) {
     const itemDiv = document.createElement("div");
     itemDiv.className = "palette-item";
-    itemDiv.dataset.value = labelText.toLowerCase(); // For filtering.
-
+    itemDiv.dataset.value = labelText.toLowerCase();
     const img = document.createElement("img");
     img.src = imgSrc;
     itemDiv.appendChild(img);
-
     const label = document.createElement("span");
     label.textContent = labelText;
     itemDiv.appendChild(label);
-
     itemDiv.addEventListener("click", () => {
         activeBlockId = value;
         document
@@ -192,11 +179,10 @@ function createPaletteItem(labelText, imgSrc, value) {
             .forEach((el) => el.classList.remove("selected"));
         itemDiv.classList.add("selected");
     });
-
     return itemDiv;
 }
 
-// Add normal block palette items.
+// Add normal blocks.
 sortedBlocks.forEach((block) => {
     const imgSrc = block.sprite
         ? "Assets/sprites/blocks/" + block.sprite + ".png"
@@ -206,13 +192,13 @@ sortedBlocks.forEach((block) => {
     paletteContainer.appendChild(item);
 });
 
-// Add a label for ChestLoot items.
+// Label for ChestLoot.
 const lootTitle = document.createElement("h3");
 lootTitle.style.color = "#e8e8e8";
 lootTitle.textContent = "Chest Loot";
 paletteContainer.appendChild(lootTitle);
 
-// Add ChestLoot palette items from the ChestLoot object.
+// Add ChestLoot items.
 for (const key in ChestLoot) {
     if (ChestLoot.hasOwnProperty(key)) {
         const lootId = "ChestLoot." + key;
@@ -223,7 +209,7 @@ for (const key in ChestLoot) {
     }
 }
 
-// ----- PALETTE SEARCH FUNCTIONALITY -----
+// Palette search functionality.
 document.getElementById("paletteSearch").addEventListener("input", (e) => {
     const query = e.target.value.trim().toLowerCase();
     document.querySelectorAll(".palette-item").forEach((item) => {
@@ -234,6 +220,176 @@ document.getElementById("paletteSearch").addEventListener("input", (e) => {
         }
     });
 });
+
+// ----- LOCAL STORAGE: SAVE & LOAD BUILDS -----
+const BUILD_STORAGE_KEY = "savedBuilds";
+
+function loadSavedBuilds() {
+    const saved = localStorage.getItem(BUILD_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : {};
+}
+
+function saveBuildsToLocalStorage(builds) {
+    localStorage.setItem(BUILD_STORAGE_KEY, JSON.stringify(builds));
+}
+
+// Instead of trimming to a bounding box, save the entire grid.
+document.getElementById("saveBuildBtn").addEventListener("click", () => {
+    const buildNameInput = document.getElementById("buildName");
+    const buildName = buildNameInput.value.trim();
+    if (!buildName) return;
+
+    // Save the entire structureGrid.
+    const buildData = { blocks: structureGrid };
+
+    const builds = loadSavedBuilds();
+    builds[buildName] = buildData;
+    saveBuildsToLocalStorage(builds);
+
+    buildNameInput.value = "";
+    updateSavedBuildsList();
+});
+
+const buildSearchInput = document.getElementById("buildSearch");
+buildSearch.addEventListener("input", updateSavedBuildsList);
+
+function updateSavedBuildsList() {
+    const builds = loadSavedBuilds();
+    const savedBuildsContainer = document.getElementById("savedBuilds");
+    savedBuildsContainer.innerHTML = "";
+
+    // Get search query for saved builds.
+    const searchQuery = buildSearchInput
+        ? buildSearchInput.value.trim().toLowerCase()
+        : "";
+
+    Object.keys(builds).forEach((buildName) => {
+        if (
+            searchQuery &&
+            buildName.toLowerCase().indexOf(searchQuery) === -1
+        ) {
+            return;
+        }
+        const buildEntry = document.createElement("div");
+        buildEntry.className = "build-entry";
+
+        const previewCanvas = generatePreviewCanvas(builds[buildName]);
+        buildEntry.appendChild(previewCanvas);
+
+        const label = document.createElement("span");
+        label.textContent = buildName;
+        buildEntry.appendChild(label);
+
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "remove-build-btn";
+        removeBtn.textContent = "Remove";
+        removeBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const builds = loadSavedBuilds();
+            delete builds[buildName];
+            saveBuildsToLocalStorage(builds);
+            updateSavedBuildsList();
+        });
+        buildEntry.appendChild(removeBtn);
+
+        buildEntry.addEventListener("click", () => {
+            const buildData = builds[buildName];
+            structureGrid = buildData.blocks;
+            drawGrid();
+        });
+
+        savedBuildsContainer.appendChild(buildEntry);
+    });
+}
+// Global cache for computed average colors by block id.
+const blockAverageColorCache = {};
+
+function getBlockAverageColor(block, fallbackColor = "#ffffff") {
+    // If already cached, return the color.
+    if (blockAverageColorCache[block.blockId]) {
+        return blockAverageColorCache[block.blockId];
+    }
+
+    if (block.sprite) {
+        const img = new Image();
+        img.src = "Assets/sprites/blocks/" + block.sprite + ".png";
+        // If the image is already loaded, compute immediately.
+        if (img.complete) {
+            const offCanvas = document.createElement("canvas");
+            offCanvas.width = 1;
+            offCanvas.height = 1;
+            const offCtx = offCanvas.getContext("2d");
+            offCtx.drawImage(img, 0, 0, 1, 1);
+            const data = offCtx.getImageData(0, 0, 1, 1).data;
+            const r = data[0],
+                g = data[1],
+                b = data[2];
+            const color = `rgb(${r}, ${g}, ${b})`;
+            blockAverageColorCache[block.blockId] = color;
+            return color;
+        } else {
+            // If the image isn't loaded yet, set an onload handler.
+            img.onload = () => {
+                const offCanvas = document.createElement("canvas");
+                offCanvas.width = 1;
+                offCanvas.height = 1;
+                const offCtx = offCanvas.getContext("2d");
+                offCtx.drawImage(img, 0, 0, 1, 1);
+                const data = offCtx.getImageData(0, 0, 1, 1).data;
+                const r = data[0],
+                    g = data[1],
+                    b = data[2];
+                const color = `rgb(${r}, ${g}, ${b})`;
+                blockAverageColorCache[block.blockId] = color;
+                // Optionally update the saved builds previews if needed.
+                updateSavedBuildsList();
+            };
+            // Return fallback color until loaded.
+            return fallbackColor;
+        }
+    }
+    return fallbackColor;
+}
+
+function generatePreviewCanvas(
+    buildData,
+    previewWidth = 64,
+    previewHeight = 64
+) {
+    const previewCanvas = document.createElement("canvas");
+    previewCanvas.width = previewWidth;
+    previewCanvas.height = previewHeight;
+    const pctx = previewCanvas.getContext("2d");
+    pctx.clearRect(0, 0, previewWidth, previewHeight);
+
+    // buildData.blocks is a 2D array.
+    const blocks = buildData.blocks;
+    const rows = blocks.length;
+    const cols = blocks[0].length;
+    const cellW = previewWidth / cols;
+    const cellH = previewHeight / rows;
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            const cell = blocks[r][c];
+            let fillColor = "#74b3ff"; // default
+            if (typeof cell === "number") {
+                const block = GetBlock(cell);
+                if (block && block.name) {
+                    fillColor = getBlockAverageColor(block, "#74b3ff");
+                }
+            } else if (typeof cell === "string") {
+                // For ChestLoot, use a fixed color.
+                fillColor = "#aa4400";
+            }
+            pctx.fillStyle = fillColor;
+            pctx.fillRect(c * cellW, r * cellH, cellW, cellH);
+        }
+    }
+    return previewCanvas;
+}
+
+updateSavedBuildsList();
 
 // ----- EXPORT FUNCTIONALITY -----
 // Export only the bounding box (width and height) that covers the non-Air cells.
@@ -276,10 +432,12 @@ document.getElementById("exportBtn").addEventListener("click", () => {
     );
 
     let exportData = { blocks: trimmedNames };
+
     exportData = JSON.stringify(exportData, null, 2);
     // Remove braces and double quotes if needed.
     exportData = exportData.replace(/{/g, "").replace(/}/g, "");
     exportData = exportData.replace(/"/g, "");
+
     document.getElementById("output").textContent = exportData;
 });
 
@@ -288,9 +446,7 @@ document.getElementById("copyBtn").addEventListener("click", () => {
     let outputText = document.getElementById("output").textContent.trim();
     navigator.clipboard
         .writeText(outputText)
-        .then(() => {
-            // alert("Blocks array copied to clipboard!");
-        })
+        .then(() => {})
         .catch((err) => {
             console.error("Error copying text: ", err);
         });
