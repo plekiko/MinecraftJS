@@ -64,7 +64,8 @@ const Biomes = Object.freeze({
     }),
     Desert: new Biome({
         name: "Desert",
-        heightNoise: NoisePresets.SmallHills,
+        heightNoise: NoisePresets.Flat,
+        mobs: [],
         topLayer: Blocks.Sand,
         secondLayer: Blocks.SandStone,
         secondLayerWidth: 4,

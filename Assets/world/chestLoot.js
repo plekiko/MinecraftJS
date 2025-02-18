@@ -1,11 +1,6 @@
 const ChestLoot = Object.freeze({
     Spawner: new LootTable([
         new LootItem({
-            itemId: Items.MusicDisc11,
-            maxCount: 1,
-            subtract: 20,
-        }),
-        new LootItem({
             itemId: Items.MusicDisc13,
             maxCount: 1,
             subtract: 20,
@@ -111,6 +106,53 @@ const ChestLoot = Object.freeze({
             itemId: Items.IronIngot,
             maxCount: 1,
             subtract: 3,
+        }),
+    ]),
+    DesertTemple: new LootTable([
+        new LootItem({
+            itemId: Items.Bone,
+            maxCount: 4,
+            subtract: 6,
+        }),
+        new LootItem({
+            itemId: Items.RottenFlesh,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.Bucket,
+            maxCount: 1,
+            subtract: 3,
+        }),
+        new LootItem({
+            itemId: Items.IronIngot,
+            maxCount: 3,
+            subtract: 5,
+        }),
+        new LootItem({
+            itemId: Items.MusicDisc11,
+            maxCount: 1,
+            subtract: 10,
+        }),
+        new LootItem({
+            itemId: Items.Diamond,
+            maxCount: 1,
+            subtract: 5,
+        }),
+        new LootItem({
+            itemId: Items.Stick,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            blockId: Blocks.DeadBush,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            blockId: Blocks.Sand,
+            maxCount: 6,
+            subtract: 8,
         }),
     ]),
 });

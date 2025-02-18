@@ -320,12 +320,14 @@ function generateStructures() {
 
             // Determine placement X coordinate (roughly the center of the chunk)
             const structureX =
-                chunk.x + RandomRange(0, CHUNK_WIDTH) * BLOCK_SIZE;
+                chunk.x +
+                RandomRange(0, CHUNK_WIDTH) * BLOCK_SIZE +
+                structure.shift.x * BLOCK_SIZE;
 
             let structureY;
             if (structure.underground) {
                 // Get the surface level at the center of the chunk (0 is top)
-                const localX = Math.floor(CHUNK_WIDTH / 2);
+                const localX = chunk.getLocalX(structureX);
                 const surfaceBlockY = chunk.findGroundLevel(localX, true);
                 if (surfaceBlockY === 0) return;
                 // Multiply by BLOCK_SIZE to get the world coordinate
@@ -338,14 +340,14 @@ function generateStructures() {
                 structureY = surfaceY + undergroundOffset;
             } else {
                 // For surface structures, use the surface level.
-                const localX = Math.floor(CHUNK_WIDTH / 2);
+                const localX = chunk.getLocalX(structureX);
                 const surfaceBlockY = chunk.findGroundLevel(localX, true);
                 const surfaceY = surfaceBlockY * BLOCK_SIZE;
 
                 structureY =
                     surfaceY -
                     structure.blocks.length * BLOCK_SIZE +
-                    BLOCK_SIZE;
+                    structure.shift.y * BLOCK_SIZE;
             }
 
             // Generate the structure at these world coordinates.
@@ -365,7 +367,7 @@ function GetChunkByIndex(index) {
 function GetBiomeForNoise(temp, wetness, mountains) {
     // console.log(`Checking biome for temp: ${temp}, wetness: ${wetness}`); // Debugging log
 
-    return Biomes.Tundra;
+    // return Biomes.Desert;
 
     // Iterate through the available biomes and find one that matches both the temperature and wetness range
     for (let biomeName in Biomes) {

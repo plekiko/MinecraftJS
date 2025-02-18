@@ -265,7 +265,7 @@ const items = [
         name: "Diamond Pickaxe",
         sprite: "diamond_pickaxe",
         toolType: ToolType.Pickaxe,
-        toolLevel: 15,
+        toolLevel: 14.8,
         heldInHand: true,
         stackSize: 1,
     }),

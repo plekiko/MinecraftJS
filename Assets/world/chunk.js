@@ -210,6 +210,12 @@ class Chunk {
     }
 
     spawnMobs(passive = true) {
+        if (
+            (this.biome.mobs.length == 0 && passive) ||
+            (this.biome.googlies.length == 0 && !passive)
+        )
+            return;
+
         const count = RandomRange(-this.biome.maxMobs, this.biome.maxMobs);
 
         if (count <= 0) {

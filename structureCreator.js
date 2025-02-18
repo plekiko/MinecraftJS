@@ -56,6 +56,7 @@ function drawGrid() {
                             cellSize
                         );
                         ctx.globalAlpha = 0.5;
+                        ctx.fillStyle = "black";
                         ctx.fillRect(
                             c * cellSize,
                             r * cellSize,
@@ -107,12 +108,14 @@ function drawGrid() {
                         );
                     } else {
                         ctx.fillStyle = "#aaa";
+                        ctx.globalAlpha = 0.5;
                         ctx.fillRect(
                             c * cellSize,
                             r * cellSize,
                             cellSize,
                             cellSize
                         );
+                        ctx.globalAlpha = 1;
                     }
                 } else if (typeof cell === "string") {
                     const img = new Image();
@@ -305,7 +308,6 @@ document.getElementById("saveBuildBtn").addEventListener("click", () => {
     const builds = loadSavedBuilds();
     builds[buildName] = buildData;
     saveBuildsToLocalStorage(builds);
-    buildNameInput.value = "";
     updateSavedBuildsList();
 });
 

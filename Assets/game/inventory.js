@@ -177,6 +177,74 @@ class Inventory {
         return leftOver.length > 0 ? leftOver : null;
     }
 
+    addItemToArray(newItem, array) {
+        let remaining = newItem.count;
+
+        // First, try to add to existing stacks.
+        for (let y = 0; y < array.length; y++) {
+            for (let x = 0; x < array[y].length; x++) {
+                let slot = array[y][x];
+                if (
+                    !slot.isEmpty() &&
+                    slot.item.blockId === newItem.blockId &&
+                    slot.item.itemId === newItem.itemId &&
+                    slot.item.count < this.getStackSize(slot.item)
+                ) {
+                    const available =
+                        this.getStackSize(slot.item) - slot.item.count;
+                    const toAdd = Math.min(remaining, available);
+                    slot.item.count += toAdd;
+                    remaining -= toAdd;
+                    if (remaining === 0) return 0;
+                }
+            }
+        }
+
+        // Then, try to place into empty slots.
+        for (let y = 0; y < array.length; y++) {
+            for (let x = 0; x < array[y].length; x++) {
+                let slot = array[y][x];
+                if (slot.isEmpty()) {
+                    // Place as many as possible in this slot.
+                    const stackSize = this.getStackSize(newItem);
+                    slot.item = structuredClone(newItem);
+                    slot.item.count = Math.min(remaining, stackSize);
+                    remaining -= slot.item.count;
+                    if (remaining === 0) return 0;
+                }
+            }
+        }
+        return remaining;
+    }
+
+    handleShiftClick(slot, array) {
+        if (!input.shiftPressed) return false;
+        if (!array) return false;
+        if (slot.isEmpty()) return false;
+
+        let targetArray = null;
+
+        // Determine target array: if slot is from storage, target main inventory; if from main, target storage.
+        if (array === this.storageSlots) {
+            targetArray = this.items;
+        } else if (array === this.items && this.storageSlots) {
+            targetArray = this.storageSlots;
+        } else {
+            return false;
+        }
+
+        // Attempt to add the entire stack from the slot into the target array.
+        let remaining = this.addItemToArray(slot.item, targetArray);
+
+        // If everything was moved, clear the slot; otherwise update the count.
+        if (remaining === 0) {
+            this.clearSlot(slot);
+        } else {
+            slot.item.count = remaining;
+        }
+        return true;
+    }
+
     openFurnace(storage) {
         this.furnace = true;
 
@@ -267,6 +335,11 @@ class Inventory {
     // Logic for picking up or moving items
     handleLeftClickItemInteraction(item, x, y, array) {
         if (!input.isLeftMouseButtonPressed()) return;
+
+        if (input.shiftPressed) {
+            // If shift-click transfer succeeded, exit.
+            if (this.handleShiftClick(array[y][x], array)) return;
+        }
 
         // Specific handling for the crafting output slot
         if (item === this.craftingOutputSlot.item) {

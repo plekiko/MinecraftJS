@@ -4,10 +4,12 @@ class Structure {
         walls = null,
         biome = null,
         underground = false,
+        shift = { x: 0, y: 1 },
     }) {
         this.blocks = blocks;
         this.walls = walls;
         this.biome = biome;
         this.underground = underground;
+        this.shift = shift;
     }
 }
