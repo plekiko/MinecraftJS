@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Structure Creator</title>
+        <style>
+            body {
+                font-family: sans-serif;
+                margin: 0;
+                display: flex;
+                height: 100vh;
+            }
+            /* Left panel: grid editor */
+            .editor {
+                flex: 3;
+                position: relative;
+                background: #eee;
+            }
+            #gridCanvas {
+                border: 1px solid #333;
+                display: block;
+                margin: auto;
+                background: #fff;
+            }
+            /* Right panel: block preview list */
+            .palette {
+                flex: 1;
+                overflow-y: auto;
+                background: #ddd;
+                padding: 10px;
+            }
+            .palette-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 10px;
+                cursor: pointer;
+                border: 1px solid transparent;
+                padding: 5px;
+            }
+            .palette-item.selected {
+                border-color: #333;
+                background: #fff;
+            }
+            .palette-item img {
+                width: 32px;
+                height: 32px;
+                image-rendering: pixelated;
+            }
+            .export {
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                background: #fff;
+                padding: 5px;
+                border: 1px solid #333;
+                cursor: pointer;
+            }
+            pre#output {
+                white-space: pre-wrap;
+                font-size: 0.8rem;
+                background: #fff;
+                padding: 10px;
+                border: 1px solid #333;
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="editor">
+            <center>
+                <h1>Structure Creator</h1>
+            </center>
+            <canvas id="gridCanvas" width="512" height="512"></canvas>
+            <div class="controls">
+                <button id="exportBtn">Export Structure</button>
+                <button id="copyBtn">Copy Blocks Array</button>
+                <pre id="output"></pre>
+            </div>
+
+            <pre id="output"></pre>
+        </div>
+        <div class="palette" id="palette"></div>
+
+        <script src="Assets/utils/globals.js"></script>
+        <script src="Assets/utils/classes.js"></script>
+        <script src="Assets/game/sounds.js"></script>
+        <script src="Assets/game/lootTable.js"></script>
+        <script src="Assets/game/item.js"></script>
+        <script src="Assets/game/items.js"></script>
+        <script src="Assets/world/block.js"></script>
+        <script src="Assets/world/blocks.js"></script>
+
+        <script src="structureCreator.js"></script>
+    </body>
+</html>

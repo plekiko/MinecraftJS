@@ -572,6 +572,7 @@ const blockTypes = [
     new BlockType({
         blockId: 43,
         sprite: "furnace_front_off",
+        states: ["furnace_front_off", "furnace_front_on"],
         name: "Furnace",
         hardness: 8,
         updateSpeed: 1,

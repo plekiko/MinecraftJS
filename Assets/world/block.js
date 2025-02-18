@@ -2,6 +2,7 @@ class BlockType {
     constructor({
         blockId,
         sprite = null,
+        states = [],
         name = "New block",
         hardness = -2,
         grassOffset = false,
@@ -41,6 +42,7 @@ class BlockType {
     } = {}) {
         this.blockId = blockId;
         this.sprite = sprite;
+        this.states = states;
         this.name = name;
         this.hardness = hardness;
         this.grassOffset = grassOffset;
@@ -348,6 +350,11 @@ class Block extends Square {
         this.metaData.progression += 1 / TICK_SPEED;
     }
 
+    setState(index) {
+        const sprite = GetBlock(this.blockType).states[index];
+        this.setSprite("blocks/" + sprite + ".png");
+    }
+
     furnaceLogic() {
         if (!this.metaData.storage) return;
 
@@ -362,11 +369,11 @@ class Block extends Square {
 
         // Determine if furnace should be visually "on" based on fuel availability
         if (this.metaData.burningFuelTime > 0) {
-            this.setSprite("blocks/furnace_front_on.png");
+            this.setState(1);
             this.metaData.isActive = true;
             if (!input) this.resetProgression();
         } else {
-            this.setSprite("blocks/furnace_front_off.png");
+            this.setState(0);
             this.metaData.isActive = false;
             this.resetProgression();
         }
