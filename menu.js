@@ -33,6 +33,8 @@ function PlayRandomMusic() {
 function playMusic(track) {
     const audio = new Audio(`Assets/audio/music/menu/${track}.mp3`);
 
+    audio.volume = 0.3;
+
     audio.play();
 
     audio.addEventListener("ended", () => {
