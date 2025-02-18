@@ -75,10 +75,12 @@ const Blocks = Object.freeze({
     Obsidian: 56,
 
     Jukebox: 57,
+
+    StructureAir: 59,
 });
 
 const blockTypes = [
-    new BlockType({ blockId: 0, name: "Air", collision: false }),
+    new BlockType({ blockId: 0, name: "Air", collision: false, air: true }),
     new BlockType({
         blockId: 1,
         sprite: "grass_side",
@@ -740,6 +742,12 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 59,
+        name: "Structure Air",
+        collision: false,
+        air: true,
     }),
 ];
 

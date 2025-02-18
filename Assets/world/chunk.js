@@ -145,7 +145,7 @@ class Chunk {
             blocksToPlace.forEach((block) => {
                 // console.log("Placed buffered " + block.blockType.name + " at " + block.x + " - " + block.y);
 
-                if (!GetBlock(block).chunkProtection)
+                if (block.blockType !== Blocks.Air)
                     this.setBlockTypeAtPosition(
                         block.x,
                         block.y,
@@ -185,7 +185,7 @@ class Chunk {
                 const blockType = this.getBlockType(x, y);
 
                 // Place water only if the block is air (empty)
-                if (blockType === Blocks.Air) {
+                if (GetBlock(blockType).air) {
                     this.setBlockType(x, y, Blocks.Water);
                 }
 
@@ -348,7 +348,7 @@ class Chunk {
         for (let x = 0; x < CHUNK_WIDTH; x++) {
             if (this.grassNoiseMap.getNoise(this.getWorldX(x)) >= 1) {
                 const y = this.findGroundLevel(x);
-                if (this.getBlockType(x, y) != Blocks.Air) continue;
+                if (!GetBlock(this.getBlockType(x, y)).air) continue;
                 const randomGrass =
                     this.biome.grassType[
                         RandomRange(0, this.biome.grassType.length)
@@ -360,7 +360,7 @@ class Chunk {
 
     spawnTree(x) {
         const y = this.findGroundLevel(x); // Find valid ground level
-        if (this.getBlockType(x, y) != Blocks.Air) return;
+        if (!GetBlock(this.getBlockType(x, y)).air) return;
         const randomTree = this.getRandomTreeFromBiome(); // Pick a random tree
         this.spawnTreeAt(randomTree, x, y); // Spawn the tree at the position
     }
@@ -476,32 +476,32 @@ class Chunk {
     }
 
     setBlockTypeAtPosition(worldX, worldY, blockType, metaData = null) {
-        const targetChunk = this.getChunkForBlock(worldX);
-        if (targetChunk && worldY < targetChunk.height * BLOCK_SIZE) {
-            const localX = this.getLocalX(worldX, targetChunk);
-            const localY = worldY / BLOCK_SIZE;
+        // Compute the target chunk's x-coordinate in world space.
+        const chunkWidthPixels = CHUNK_WIDTH * BLOCK_SIZE;
+        const targetChunkX =
+            Math.floor(worldX / chunkWidthPixels) * chunkWidthPixels;
+        const targetChunk = chunks.get(targetChunkX);
 
+        if (targetChunk && worldY < targetChunk.height * BLOCK_SIZE) {
+            // Calculate local X relative to the target chunk.
+            const localX = Math.floor((worldX - targetChunk.x) / BLOCK_SIZE);
+            const localY = Math.floor(worldY / BLOCK_SIZE);
             targetChunk.setBlockType(
                 localX,
                 localY,
                 blockType,
-                this.blocks,
+                targetChunk.blocks,
                 metaData
             );
         } else {
-            if (blockType == BlockType.Air) return;
-            // Buffer the block to place it once the chunk is generated
-            const chunkX =
-                Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
-                CHUNK_WIDTH *
-                BLOCK_SIZE;
-            if (!pendingBlocks.has(chunkX)) {
-                pendingBlocks.set(chunkX, []);
+            // Buffer the block to place it once the chunk is generated.
+            if (!pendingBlocks.has(targetChunkX)) {
+                pendingBlocks.set(targetChunkX, []);
             }
             pendingBlocks
-                .get(chunkX)
+                .get(targetChunkX)
                 .push({ x: worldX, y: worldY, blockType, metaData });
-            // console.log(`Buffered block at worldX: ${worldX}, worldY: ${worldY}`);
+            // Optionally log: console.log(`Buffered block at worldX: ${worldX}, worldY: ${worldY}`);
         }
     }
 
@@ -557,7 +557,7 @@ class Chunk {
     }
 
     countAirBlockArea(startX, startY) {
-        if (this.getBlockType(startX, startY) !== Blocks.Air) {
+        if (!GetBlock(this.getBlockType(startX, startY)).air) {
             return 0;
         }
 
@@ -573,7 +573,7 @@ class Chunk {
                 y >= 0 &&
                 y < this.height &&
                 !visited.has(key) &&
-                this.getBlockType(x, y) === Blocks.Air
+                GetBlock(this.getBlockType(x, y)).air
             ) {
                 queue.push([x, y]);
                 visited.add(key);

@@ -11,6 +11,8 @@ class BlockType {
         drag = 40,
         collision = true,
 
+        air = false,
+
         chunkProtection = false,
 
         updateSpeed = 0,
@@ -54,6 +56,8 @@ class BlockType {
         this.collision = collision;
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
+
+        this.air = air;
 
         this.chunkProtection = chunkProtection;
 
@@ -150,7 +154,7 @@ function flowDownward(block, worldPos) {
         false
     );
     if (
-        (below && below.blockType === Blocks.Air) ||
+        (below && GetBlock(below.blockType).air) ||
         (below && GetBlock(below.blockType).breakByFluid)
     ) {
         if (GetBlock(below.blockType).breakByFluid) {
@@ -174,7 +178,7 @@ function verticalCheckAbove(block, worldPos) {
         if (above.blockType === block.blockType) {
             block.waterLevel = 0;
             block.cutoff = block.waterLevel;
-        } else if (above.blockType === Blocks.Air && block.isSource) {
+        } else if (GetBlock(above.blockType).air && block.isSource) {
             block.waterLevel = 0; // As per original code.
             block.cutoff = block.waterLevel + 0.1;
         }
@@ -190,7 +194,7 @@ function flowSideways(block, worldPos, direction) {
     // Check if the target is air or can be broken by fluid.
     if (
         target &&
-        (target.blockType === Blocks.Air ||
+        (GetBlock(target.blockType).air ||
             GetBlock(target.blockType).breakByFluid)
     ) {
         if (GetBlock(target.blockType).breakByFluid) {
@@ -228,7 +232,7 @@ class Block extends Square {
     ) {
         super(
             new Transform(new Vector2(), new Vector2()),
-            blockType == Blocks.Air ? 0 : 1,
+            1,
             GetBlock(blockType).sprite
                 ? "blocks/" + GetBlock(blockType).sprite + ".png"
                 : null,
@@ -616,7 +620,7 @@ class Block extends Square {
     }
 
     breakBlock(drop = false) {
-        if (this.blockType === Blocks.Air) return;
+        if (GetBlock(this.blockType).air) return;
 
         if (chunks.has(this.chunkX)) {
             chunks.get(this.chunkX).checkForBlockWithAirBeneath(this.x, this.y);
@@ -730,7 +734,7 @@ class Block extends Square {
     }
 
     updateSprite() {
-        if (!GetBlock(this.blockType).sprite) {
+        if (GetBlock(this.blockType).air) {
             this.alpha = 0;
             return;
         }

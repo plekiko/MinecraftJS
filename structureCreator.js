@@ -32,8 +32,8 @@ function drawGrid() {
         for (let c = 0; c < gridCols; c++) {
             const cell = structureGrid[r][c];
             if (cell !== Blocks.Air) {
-                // If cell is a number, then it's a normal block.
                 if (typeof cell === "number") {
+                    // Normal block
                     const block = GetBlock(cell);
                     if (block && block.sprite) {
                         const img = new Image();
@@ -56,7 +56,7 @@ function drawGrid() {
                         );
                     }
                 } else if (typeof cell === "string") {
-                    // For ChestLoot (or other special string values), use a chest preview image.
+                    // Special string (ChestLoot, etc.)
                     const img = new Image();
                     img.src = "Assets/sprites/blocks/chest.png";
                     ctx.drawImage(
@@ -146,83 +146,94 @@ canvas.addEventListener("contextmenu", (e) => {
 });
 
 // ----- PALETTE (Block Previews) -----
-// Filter out Air and sort by block name alphabetically.
-const sortedBlocks = blockTypes
-    .filter((block) => block.blockId !== Blocks.Air)
-    .sort((a, b) => a.name.localeCompare(b.name));
-
+// The palette container already includes a search bar from the HTML.
 const paletteContainer = document.getElementById("palette");
 
+// Create a search bar if not already present.
+if (!document.getElementById("paletteSearch")) {
+    const searchBar = document.createElement("input");
+    searchBar.id = "paletteSearch";
+    searchBar.type = "text";
+    searchBar.placeholder = "Search blocks...";
+    searchBar.style.width = "100%";
+    searchBar.style.padding = "5px";
+    searchBar.style.marginBottom = "10px";
+    paletteContainer.appendChild(searchBar);
+}
+
+// Add a label for normal blocks.
 const paletteTitle = document.createElement("h3");
 paletteTitle.style.color = "#e8e8e8";
 paletteTitle.textContent = "Blocks";
 paletteContainer.appendChild(paletteTitle);
 
-// First, add normal blocks.
-sortedBlocks.forEach((block) => {
+// Filter out Air and sort by block name alphabetically.
+const sortedBlocks = blockTypes
+    .filter((block) => block.blockId !== Blocks.Air)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+function createPaletteItem(labelText, imgSrc, value) {
     const itemDiv = document.createElement("div");
     itemDiv.className = "palette-item";
-    if (block.blockId === activeBlockId) itemDiv.classList.add("selected");
+    itemDiv.dataset.value = labelText.toLowerCase(); // For filtering.
 
     const img = document.createElement("img");
-    if (block.sprite) {
-        img.src = "Assets/sprites/blocks/" + block.sprite + ".png";
-    } else {
-        img.src = "Assets/sprites/misc/placeholder.png";
-    }
+    img.src = imgSrc;
     itemDiv.appendChild(img);
 
     const label = document.createElement("span");
-    label.textContent = block.name;
+    label.textContent = labelText;
     itemDiv.appendChild(label);
 
     itemDiv.addEventListener("click", () => {
-        activeBlockId = block.blockId;
+        activeBlockId = value;
         document
             .querySelectorAll(".palette-item")
             .forEach((el) => el.classList.remove("selected"));
         itemDiv.classList.add("selected");
     });
 
-    paletteContainer.appendChild(itemDiv);
+    return itemDiv;
+}
+
+// Add normal block palette items.
+sortedBlocks.forEach((block) => {
+    const imgSrc = block.sprite
+        ? "Assets/sprites/blocks/" + block.sprite + ".png"
+        : "Assets/sprites/misc/placeholder.png";
+    const item = createPaletteItem(block.name, imgSrc, block.blockId);
+    if (block.blockId === activeBlockId) item.classList.add("selected");
+    paletteContainer.appendChild(item);
 });
 
-// Next, add ChestLoot items from the ChestLoot object.
+// Add a label for ChestLoot items.
 const lootTitle = document.createElement("h3");
 lootTitle.style.color = "#e8e8e8";
 lootTitle.textContent = "Chest Loot";
 paletteContainer.appendChild(lootTitle);
 
+// Add ChestLoot palette items from the ChestLoot object.
 for (const key in ChestLoot) {
     if (ChestLoot.hasOwnProperty(key)) {
-        const itemDiv = document.createElement("div");
-        itemDiv.className = "palette-item";
-
-        // Set activeBlockId as a string like "ChestLoot.Spawner"
         const lootId = "ChestLoot." + key;
-
-        if (activeBlockId === lootId) itemDiv.classList.add("selected");
-
-        const img = document.createElement("img");
-        // We'll use the chest image as the preview for ChestLoot.
-        img.src = "Assets/sprites/blocks/chest.png";
-        itemDiv.appendChild(img);
-
-        const label = document.createElement("span");
-        label.textContent = key;
-        itemDiv.appendChild(label);
-
-        itemDiv.addEventListener("click", () => {
-            activeBlockId = lootId;
-            document
-                .querySelectorAll(".palette-item")
-                .forEach((el) => el.classList.remove("selected"));
-            itemDiv.classList.add("selected");
-        });
-
-        paletteContainer.appendChild(itemDiv);
+        const imgSrc = "Assets/sprites/blocks/chest.png";
+        const item = createPaletteItem(key, imgSrc, lootId);
+        if (activeBlockId === lootId) item.classList.add("selected");
+        paletteContainer.appendChild(item);
     }
 }
+
+// ----- PALETTE SEARCH FUNCTIONALITY -----
+document.getElementById("paletteSearch").addEventListener("input", (e) => {
+    const query = e.target.value.trim().toLowerCase();
+    document.querySelectorAll(".palette-item").forEach((item) => {
+        if (item.dataset.value.indexOf(query) !== -1) {
+            item.style.display = "";
+        } else {
+            item.style.display = "none";
+        }
+    });
+});
 
 // ----- EXPORT FUNCTIONALITY -----
 // Export only the bounding box (width and height) that covers the non-Air cells.
@@ -243,9 +254,7 @@ document.getElementById("exportBtn").addEventListener("click", () => {
         }
     }
 
-    if (maxRow < minRow || maxCol < minCol) {
-        return;
-    }
+    if (maxRow < minRow || maxCol < minCol) return;
 
     const trimmed = [];
     for (let r = minRow; r <= maxRow; r++) {
@@ -256,7 +265,6 @@ document.getElementById("exportBtn").addEventListener("click", () => {
     const trimmedNames = trimmed.map((row) =>
         row.map((cell) => {
             if (typeof cell === "string") {
-                // Already a special string (like "ChestLoot.Spawner")
                 return cell;
             } else {
                 const block = GetBlock(cell);
@@ -267,15 +275,11 @@ document.getElementById("exportBtn").addEventListener("click", () => {
         })
     );
 
-    let exportData = {
-        blocks: trimmedNames,
-    };
-
+    let exportData = { blocks: trimmedNames };
     exportData = JSON.stringify(exportData, null, 2);
-
+    // Remove braces and double quotes if needed.
     exportData = exportData.replace(/{/g, "").replace(/}/g, "");
     exportData = exportData.replace(/"/g, "");
-
     document.getElementById("output").textContent = exportData;
 });
 

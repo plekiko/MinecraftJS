@@ -43,7 +43,11 @@ class Pig extends Mob {
         this.knockBack(hitfromX, kb);
         if (!this.damage(damage)) return;
         this.knockBack(hitfromX, kb);
-        PlayRandomSoundFromArray({ array: Sounds.Pig_Say });
+        PlayRandomSoundFromArray({
+            array: Sounds.Pig_Say,
+            positional: true,
+            origin: this.position,
+        });
     }
 
     dieEvent() {

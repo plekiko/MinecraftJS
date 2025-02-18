@@ -145,6 +145,7 @@ function GenerateStructure(structure, x, y) {
                 GenerateChestWithLoot(blockType, blockX, blockY, chunk);
                 continue;
             } else {
+                if (blockType === Blocks.Air) continue;
                 chunk.setBlockTypeAtPosition(blockX, blockY, blockType);
             }
         }
@@ -229,7 +230,6 @@ function generateChunk(chunkIndex, chunkX, oldChunkData) {
     );
 
     chunks.set(chunkX, newChunk);
-    newChunk.applyBufferedBlocks();
 }
 
 function GetChunk(worldX) {
@@ -241,6 +241,7 @@ function postProcessChunks() {
         if (!chunk.generated) {
             chunk.generateOres();
             chunk.generateCaves();
+            chunk.applyBufferedBlocks();
             chunk.generateWater();
             chunk.spawnMobs(day);
             chunk.generateTrees();
@@ -403,7 +404,7 @@ function checkAdjacentBlocks(position) {
         if (!block) continue;
 
         const type = GetBlock(block.blockType);
-        if (block && !type.fluid && block.blockType !== Blocks.Air) {
+        if (block && !type.fluid && !GetBlock(block.blockType).air) {
             return true; // Found an adjacent block
         }
     }

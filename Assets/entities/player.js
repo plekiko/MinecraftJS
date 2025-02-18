@@ -177,7 +177,7 @@ class Player extends Entity {
         const block = GetBlock(this.hoverBlock.blockType);
 
         // Placing
-        if (block.blockId === Blocks.Air || block.fluid) {
+        if (block.air || block.fluid) {
             if (this.holdItem.itemId === Items.WaterBucket) {
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
@@ -595,7 +595,7 @@ class Player extends Entity {
     }
 
     checkBlockForPlacing(collision) {
-        const isAir = this.hoverBlock.blockType === Blocks.Air;
+        const isAir = GetBlock(this.hoverBlock.blockType).air;
         const isFluid = GetBlock(this.hoverBlock.blockType).fluid;
 
         const mousePos = new Vector2(

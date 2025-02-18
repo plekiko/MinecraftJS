@@ -351,7 +351,7 @@ class Chat {
                           count: count,
                       });
 
-            if (inventoryItem.blockId === Blocks.Air) return;
+            if (inventoryItem.air) return;
 
             player.inventory.addItem(inventoryItem);
 
