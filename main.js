@@ -3,6 +3,13 @@ let fpsDisplay = 0;
 
 chat = new Chat();
 
+// window.onbeforeunload = (e) => {
+//     alert("You are about to close the game!");
+//     var dialogText = "Whoops, you probably didn't mean to close the game!";
+//     e.returnValue = dialogText;
+//     return dialogText;
+// };
+
 if (SPAWN_PLAYER) {
     setTimeout(() => {
         player = new Player({

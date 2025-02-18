@@ -553,13 +553,51 @@ class Player extends Entity {
         return damage;
     }
 
+    checkWallForPlacing() {
+        const chunk = chunks.get(this.hoverBlock.chunkX);
+
+        if (!chunk) return;
+
+        const hoverWall = chunk.getBlock(
+            this.hoverBlock.x,
+            this.hoverBlock.y,
+            false,
+            true
+        );
+
+        if (!GetBlock(hoverWall.blockType).air) return false;
+
+        const mousePos = new Vector2(
+            input.getMousePositionOnBlockGrid().x + Math.floor(camera.x),
+            input.getMousePositionOnBlockGrid().y + Math.floor(camera.y)
+        );
+
+        const isAdjacentToBlock = checkAdjacentBlocks(mousePos, true);
+
+        return isAdjacentToBlock;
+    }
+
     placingLogic() {
         if (!this.abilities.mayBuild) return;
         if (!this.inventory.selectedBlock) return;
+
         if (!this.checkBlockForPlacing(this.inventory.selectedBlock.collision))
             return;
 
-        this.hoverBlock.setBlockType(this.inventory.selectedBlock.blockId);
+        // this.hoverBlock.setBlockType(this.inventory.selectedBlock.blockId);
+
+        // if (!this.checkWallForPlacing()) return;
+
+        const chunk = chunks.get(this.hoverBlock.chunkX);
+
+        chunk.setBlockType(
+            this.hoverBlock.x,
+            this.hoverBlock.y,
+            this.inventory.selectedBlock.blockId,
+            false,
+            null,
+            false
+        );
 
         this.hoverBlock.playBreakSound();
 

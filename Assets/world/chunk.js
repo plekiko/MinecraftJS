@@ -168,7 +168,7 @@ class Chunk {
                     this.setBlockType(x, y, this.biome.secondLayer);
                 } else {
                     this.setBlockType(x, y, Blocks.Stone);
-                    this.setBlockType(x, y, Blocks.Stone, this.walls);
+                    this.setBlockType(x, y, Blocks.Stone, true);
                 }
             }
             this.setBlockType(x, height, this.biome.topLayer);
@@ -354,7 +354,7 @@ class Chunk {
         if (this.biome.grassType.length == 0) return;
         for (let x = 0; x < CHUNK_WIDTH; x++) {
             if (this.grassNoiseMap.getNoise(this.getWorldX(x)) >= 1) {
-                const y = this.findGroundLevel(x);
+                const y = this.findGroundLevel(x, false, true);
                 if (!GetBlock(this.getBlockType(x, y)).air) continue;
                 const randomGrass =
                     this.biome.grassType[
@@ -366,24 +366,26 @@ class Chunk {
     }
 
     spawnTree(x) {
-        const y = this.findGroundLevel(x); // Find valid ground level
+        const y = this.findGroundLevel(x, false, true); // Find valid ground level
         if (!GetBlock(this.getBlockType(x, y)).air) return;
         const randomTree = this.getRandomTreeFromBiome(); // Pick a random tree
         this.spawnTreeAt(randomTree, x, y); // Spawn the tree at the position
     }
 
-    findGroundLevel(x, correctY = false) {
+    findGroundLevel(x, correctY = false, validGround = false) {
         for (let y = this.height - 1; y >= 0; y--) {
             const blockAtPos = this.getBlockType(x, y);
             if (
-                blockAtPos == Blocks.GrassBlock ||
-                blockAtPos == Blocks.SnowedGrassBlock ||
-                blockAtPos == Blocks.Sand ||
-                blockAtPos == Blocks.Podzol
+                blockAtPos != Blocks.GrassBlock &&
+                blockAtPos != Blocks.SnowedGrassBlock &&
+                blockAtPos != Blocks.Sand &&
+                blockAtPos != Blocks.Podzol
             ) {
-                if (correctY) return CHUNK_HEIGHT - y - 1;
-                return y + 1;
+                if (validGround) continue;
             }
+            if (!GetBlock(blockAtPos).collision) continue;
+            if (correctY) return CHUNK_HEIGHT - y - 1;
+            return y + 1;
         }
         return 0;
     }
@@ -499,13 +501,7 @@ class Chunk {
             // Calculate local X relative to the target chunk.
             const localX = Math.floor((worldX - targetChunk.x) / BLOCK_SIZE);
             const localY = Math.floor(worldY / BLOCK_SIZE);
-            targetChunk.setBlockType(
-                localX,
-                localY,
-                blockType,
-                wall ? targetChunk.walls : targetChunk.blocks,
-                metaData
-            );
+            targetChunk.setBlockType(localX, localY, blockType, wall, metaData);
         } else {
             // Buffer the block to place it once the chunk is generated.
             if (!pendingBlocks.has(targetChunkX)) {
@@ -536,28 +532,49 @@ class Chunk {
         return this.blocks[y][x].blockType;
     }
 
-    getBlock(x, y, calculated = true) {
+    getBlock(x, y, calculated = true, wall = false) {
         if (calculated) y = this.calculateY(y);
 
-        if (!this.blocks[y]) return null;
-        if (!this.blocks[y][x]) return null;
+        if (!wall) {
+            if (!this.blocks[y]) return null;
+            if (!this.blocks[y][x]) return null;
 
-        return this.blocks[y][x];
+            return this.blocks[y][x];
+        } else {
+            if (!this.walls[y]) return null;
+            if (!this.walls[y][x]) return null;
+
+            return this.walls[y][x];
+        }
     }
 
-    getBlockTypeData(x, y, calculated = true) {
-        if (calculated) y = this.calculateY(y);
+    getBlockTypeData(x, y, calculate = true, wall = false) {
+        if (calculate) y = this.calculateY(y);
 
-        if (!this.blocks[y]) return null;
-        if (!this.blocks[y][x]) return null;
-
-        return GetBlock(this.blocks[y][x].blockType);
+        if (!wall) {
+            if (!this.blocks[y]) return null;
+            if (!this.blocks[y][x]) return null;
+            return GetBlock(this.blocks[y][x].blockType);
+        } else {
+            if (!this.walls[y]) return null;
+            if (!this.walls[y][x]) return null;
+            return GetBlock(this.walls[y][x].blockType);
+        }
     }
 
-    setBlockType(x, y, blockType, blocks = this.blocks, metaData = null) {
-        y = this.calculateY(y);
-        if (blocks[y] && blocks[y][x]) {
-            const block = blocks[y][x];
+    setBlockType(
+        x,
+        y,
+        blockType,
+        wall = false,
+        metaData = null,
+        calculate = true
+    ) {
+        const array = wall ? this.walls : this.blocks;
+
+        if (calculate) y = this.calculateY(y);
+        if (array[y] && array[y][x]) {
+            const block = array[y][x];
             if (block.blockType !== blockType) {
                 block.setBlockType(blockType);
                 if (metaData) block.metaData = metaData;
