@@ -42,4 +42,5 @@ const ToolType = Object.freeze({
     Shears: 4,
     Hoe: 5,
     Sword: 6,
+    Hammer: 7,
 });

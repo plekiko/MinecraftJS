@@ -127,7 +127,7 @@ const ChestLoot = Object.freeze({
         new LootItem({
             itemId: Items.IronIngot,
             maxCount: 3,
-            subtract: 5,
+            subtract: 4,
         }),
         new LootItem({
             itemId: Items.MusicDisc11,
@@ -136,7 +136,7 @@ const ChestLoot = Object.freeze({
         }),
         new LootItem({
             itemId: Items.Diamond,
-            maxCount: 1,
+            maxCount: 2,
             subtract: 5,
         }),
         new LootItem({

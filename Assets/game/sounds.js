@@ -122,6 +122,11 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 // Global array to store currently playing audio objects.
 let playingAudio = [];
 
+function removeAudio(audio) {
+    audio.pause();
+    playingAudio = playingAudio.filter((item) => item.audio !== audio);
+}
+
 // Play a positional sound using the Web Audio API with panning.
 function playPositionalSound(origin, sound, range = 10, maxVolume = 1) {
     if (!player) {

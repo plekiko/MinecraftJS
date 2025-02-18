@@ -29,6 +29,12 @@ const Items = Object.freeze({
     DiamondHoe: 43,
     DiamondSword: 44,
 
+    WoodHammer: 1000,
+    StoneHammer: 1001,
+    IronHammer: 1002,
+    DiamondHammer: 1003,
+    GoldHammer: 1004,
+
     Coal: 20,
     IronIngot: 21,
     Charcoal: 22,
@@ -296,6 +302,61 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 4,
+    }),
+
+    //#endregion
+
+    //#region Hammers
+
+    new Item({
+        itemId: 1000,
+        name: "Wood Hammer",
+        sprite: "wood_hammer",
+        toolType: ToolType.Hammer,
+        toolLevel: 1,
+        heldInHand: true,
+        stackSize: 1,
+        baseDamage: 2,
+    }),
+    new Item({
+        itemId: 1001,
+        name: "Stone Hammer",
+        sprite: "stone_hammer",
+        toolType: ToolType.Hammer,
+        toolLevel: 2,
+        heldInHand: true,
+        stackSize: 1,
+        baseDamage: 3,
+    }),
+    new Item({
+        itemId: 1002,
+        name: "Iron Hammer",
+        sprite: "iron_hammer",
+        toolType: ToolType.Hammer,
+        toolLevel: 3,
+        heldInHand: true,
+        stackSize: 1,
+        baseDamage: 4,
+    }),
+    new Item({
+        itemId: 1003,
+        name: "Diamond Hammer",
+        sprite: "diamond_hammer",
+        toolType: ToolType.Hammer,
+        toolLevel: 4,
+        heldInHand: true,
+        stackSize: 1,
+        baseDamage: 5,
+    }),
+    new Item({
+        itemId: 1004,
+        name: "Gold Hammer",
+        sprite: "gold_hammer",
+        toolType: ToolType.Hammer,
+        toolLevel: 5,
+        heldInHand: true,
+        stackSize: 1,
+        baseDamage: 6,
     }),
 
     //#endregion
