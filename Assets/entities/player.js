@@ -57,6 +57,8 @@ class Player extends Entity {
         this.hoverBlock = null;
         this.oldHoverBlock = null;
 
+        this.hoverWall = null;
+
         this.entities = entities;
 
         // this.setGamemode(1);
@@ -329,7 +331,11 @@ class Player extends Entity {
         if (blockIndex === -1) {
             if (this.gamemode === 1) {
                 this.inventory.addItem(
-                    new InventoryItem({ blockId: block.blockId, count: 1 })
+                    new InventoryItem({
+                        blockId: block.blockId,
+                        count: 1,
+                        props: { wall: true },
+                    })
                 );
             }
             return;
@@ -438,6 +444,7 @@ class Player extends Entity {
                 blockId: drop.blockId,
                 itemId: drop.itemId,
                 count: drop.count,
+                props: drop.props,
             })
         );
 
@@ -458,7 +465,12 @@ class Player extends Entity {
                 this.position.x + RandomRange(0, BLOCK_SIZE / 3),
                 this.position.y
             ),
-            { blockId: item.blockId, itemId: item.itemId, count: count }
+            {
+                blockId: item.blockId,
+                itemId: item.itemId,
+                count: count,
+                props: item.props,
+            }
         );
     }
 
@@ -558,21 +570,16 @@ class Player extends Entity {
 
         if (!chunk) return;
 
-        const hoverWall = chunk.getBlock(
-            this.hoverBlock.x,
-            this.hoverBlock.y,
-            false,
-            true
-        );
-
-        if (!GetBlock(hoverWall.blockType).air) return false;
+        if (!GetBlock(this.hoverWall.blockType).air) return false;
 
         const mousePos = new Vector2(
             input.getMousePositionOnBlockGrid().x + Math.floor(camera.x),
             input.getMousePositionOnBlockGrid().y + Math.floor(camera.y)
         );
 
-        const isAdjacentToBlock = checkAdjacentBlocks(mousePos, true);
+        let isAdjacentToBlock =
+            checkAdjacentBlocks(mousePos, true) ||
+            checkAdjacentBlocks(mousePos);
 
         return isAdjacentToBlock;
     }
@@ -581,12 +588,18 @@ class Player extends Entity {
         if (!this.abilities.mayBuild) return;
         if (!this.inventory.selectedBlock) return;
 
-        if (!this.checkBlockForPlacing(this.inventory.selectedBlock.collision))
-            return;
+        const isWall = this.getSelectedSlotItem().props?.wall;
+
+        if (!isWall) {
+            if (
+                !this.checkBlockForPlacing(
+                    this.inventory.selectedBlock.collision
+                )
+            )
+                return;
+        } else if (!this.checkWallForPlacing()) return;
 
         // this.hoverBlock.setBlockType(this.inventory.selectedBlock.blockId);
-
-        // if (!this.checkWallForPlacing()) return;
 
         const chunk = chunks.get(this.hoverBlock.chunkX);
 
@@ -594,12 +607,21 @@ class Player extends Entity {
             this.hoverBlock.x,
             this.hoverBlock.y,
             this.inventory.selectedBlock.blockId,
-            false,
+            isWall,
             null,
             false
         );
 
-        this.hoverBlock.playBreakSound();
+        if (!isWall) this.hoverBlock.playBreakSound();
+        else this.hoverWall.playBreakSound();
+
+        this.swing();
+
+        if (isWall) {
+            if (this.abilities.instaBuild) return;
+            this.removeFromCurrentSlot();
+            return;
+        }
 
         const blockBeneath = chunks
             .get(this.hoverBlock.chunkX)
@@ -614,8 +636,6 @@ class Player extends Entity {
             if (this.inventory.selectedBlock.fall)
                 this.hoverBlock.gravityBlock();
         }
-
-        this.swing();
 
         if (this.abilities.instaBuild) return;
 

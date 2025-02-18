@@ -137,6 +137,14 @@ function cursorBlockLogic() {
               false
           )
         : null;
+    player.hoverWall = cursorInRange
+        ? GetBlockAtWorldPosition(
+              input.getMousePositionOnBlockGrid().x + Math.floor(camera.x),
+              input.getMousePositionOnBlockGrid().y + Math.floor(camera.y),
+              false,
+              true
+          )
+        : null;
 }
 
 function animateFrame() {

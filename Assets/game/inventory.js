@@ -347,7 +347,8 @@ class Inventory {
             const isSameType =
                 this.holdingItem &&
                 this.holdingItem.blockId === item.blockId &&
-                this.holdingItem.itemId === item.itemId;
+                this.holdingItem.itemId === item.itemId &&
+                this.holdingItem.props === item.props;
 
             // Calculate combined count only if holding the same item type
             const combinedCount = isSameType
@@ -484,7 +485,8 @@ class Inventory {
                 if (
                     item.blockId === newItem.blockId &&
                     item.itemId === newItem.itemId &&
-                    item.count < this.getStackSize(item)
+                    item.count < this.getStackSize(item) &&
+                    this.arePropsEqual(item.props, newItem.props)
                 ) {
                     const availableSpace = this.getStackSize(item) - item.count;
                     const toAdd = Math.min(remainingCount, availableSpace);
@@ -509,6 +511,7 @@ class Inventory {
                     item.blockId = newItem.blockId;
                     item.itemId = newItem.itemId;
                     item.count = remainingCount;
+                    item.props = newItem.props;
                     return 0;
                 }
             }
@@ -523,6 +526,7 @@ class Inventory {
                     item.blockId = newItem.blockId;
                     item.itemId = newItem.itemId;
                     item.count = remainingCount;
+                    item.props = newItem.props;
                     return 0;
                 }
             }
@@ -809,7 +813,8 @@ class Inventory {
             item.count < this.getStackSize(item) &&
             ((item.blockId === null && item.itemId == null) ||
                 (item.blockId === this.holdingItem.blockId &&
-                    item.itemId === this.holdingItem.itemId))
+                    item.itemId === this.holdingItem.itemId &&
+                    this.arePropsEqual(item.props, this.holdingItem.props)))
         ) {
             item.count += 1;
             this.holdingItem.count -= 1;
@@ -817,6 +822,7 @@ class Inventory {
             if (item.count === 1) {
                 item.blockId = this.holdingItem.blockId;
                 item.itemId = this.holdingItem.itemId;
+                item.props = structuredClone(this.holdingItem.props || {});
             }
 
             if (this.holdingItem.count === 0) {
@@ -825,39 +831,44 @@ class Inventory {
         }
     }
 
-    movingLogic(item) {
-        if (item.count <= 0 || (!item.blockId && item.itemId == null)) {
-            item.count = this.holdingItem.count;
-
-            if (this.holdingItem.blockId)
-                item.blockId = this.holdingItem.blockId;
-            else if (this.holdingItem.itemId != null)
-                item.itemId = this.holdingItem.itemId;
-
+    movingLogic(slotItem) {
+        if (
+            slotItem.count <= 0 ||
+            (!slotItem.blockId && slotItem.itemId == null)
+        ) {
+            // Replace the slot's item with the holding item (cloning props too)
+            slotItem.count = this.holdingItem.count;
+            slotItem.blockId = this.holdingItem.blockId;
+            slotItem.itemId = this.holdingItem.itemId;
+            slotItem.props = structuredClone(this.holdingItem.props || {});
             this.holdingItem = null;
             return;
         }
 
         if (
-            item.blockId !== this.holdingItem.blockId ||
-            item.itemId !== this.holdingItem.itemId
+            slotItem.blockId !== this.holdingItem.blockId ||
+            slotItem.itemId !== this.holdingItem.itemId ||
+            !this.arePropsEqual(slotItem.props, this.holdingItem.props)
         ) {
-            const oldItem = structuredClone(item);
-            item.blockId = this.holdingItem.blockId;
-            item.itemId = this.holdingItem.itemId;
-            item.count = this.holdingItem.count;
+            // Swap the items (and their props)
+            let oldItem = structuredClone(slotItem);
+            slotItem.blockId = this.holdingItem.blockId;
+            slotItem.itemId = this.holdingItem.itemId;
+            slotItem.count = this.holdingItem.count;
+            slotItem.props = structuredClone(this.holdingItem.props || {});
             this.holdingItem = oldItem;
             return;
         }
 
         if (
-            item.blockId === this.holdingItem.blockId &&
-            item.itemId === this.holdingItem.itemId
+            slotItem.blockId === this.holdingItem.blockId &&
+            slotItem.itemId === this.holdingItem.itemId &&
+            this.arePropsEqual(slotItem.props, this.holdingItem.props)
         ) {
-            const maxStackSize = this.getStackSize(item);
-            const totalCount = item.count + this.holdingItem.count;
+            const maxStackSize = this.getStackSize(slotItem);
+            const totalCount = slotItem.count + this.holdingItem.count;
 
-            item.count = Math.min(totalCount, maxStackSize);
+            slotItem.count = Math.min(totalCount, maxStackSize);
             this.holdingItem.count =
                 totalCount > maxStackSize ? totalCount - maxStackSize : 0;
 
@@ -865,6 +876,19 @@ class Inventory {
                 this.holdingItem = null;
             }
         }
+    }
+
+    arePropsEqual(a, b) {
+        // Treat null/undefined as equal
+        if (!a && !b) return true;
+        if ((a && !b) || (!a && b)) return false;
+        const aKeys = Object.keys(a);
+        const bKeys = Object.keys(b);
+        if (aKeys.length !== bKeys.length) return false;
+        for (let key of aKeys) {
+            if (a[key] !== b[key]) return false;
+        }
+        return true;
     }
 
     draw(ctx) {
@@ -987,8 +1011,12 @@ class Inventory {
             ? GetBlock(hoverInventoryItem.blockId).name
             : GetItem(hoverInventoryItem.itemId).name;
 
+        let text = title;
+        if (Object.keys(hoverInventoryItem.props).length > 0)
+            text += ` (${JSON.stringify(hoverInventoryItem.props)})`;
+
         drawText({
-            text: title,
+            text: text,
             x: mousePos.x + 20,
             y: mousePos.y - 5,
             size: 25,

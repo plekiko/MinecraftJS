@@ -1,5 +1,11 @@
 class Drop extends Entity {
-    constructor({ position, blockId = null, itemId = null, count = 1 }) {
+    constructor({
+        position,
+        blockId = null,
+        itemId = null,
+        count = 1,
+        props = {},
+    }) {
         const spritePath =
             "Assets/sprites/" +
             (blockId
@@ -20,6 +26,7 @@ class Drop extends Entity {
         this.blockId = blockId;
         this.itemId = itemId;
         this.count = count;
+        this.props = props;
 
         this.isReady = false;
 
