@@ -498,18 +498,17 @@ class Player extends Entity {
 
         if (!this.hoverBlock) return;
 
-        if (input.isLeftMouseDown()) this.breakingLogic();
+        if (input.isLeftMouseDown())
+            this.breakingLogic(
+                this.inventory.selectedItem?.toolType === ToolType.Hammer
+                    ? this.hoverWall
+                    : this.hoverBlock
+            );
         else {
             this.resetBreaking();
         }
         if (input.isRightMouseDown()) this.placingLogic();
     }
-
-    // hit() {
-    //     const entity = this.checkForEntityOnMouse();
-    //     if (!entity) return;
-    //     chat.message(entity);
-    // }
 
     checkForEntityOnMouse() {
         const entity = this.entities.find((entity) => {
@@ -573,8 +572,8 @@ class Player extends Entity {
         if (!GetBlock(this.hoverWall.blockType).air) return false;
 
         const mousePos = new Vector2(
-            input.getMousePositionOnBlockGrid().x + Math.floor(camera.x),
-            input.getMousePositionOnBlockGrid().y + Math.floor(camera.y)
+            input.getMousePositionOnBlockGrid().x,
+            input.getMousePositionOnBlockGrid().y
         );
 
         let isAdjacentToBlock =
@@ -737,28 +736,35 @@ class Player extends Entity {
         this.lastBreakSoundTime = 0;
     }
 
-    breakingLogic() {
-        if (
-            !this.abilities.mayBuild ||
-            GetBlock(this.hoverBlock.blockType).hardness < 0
-        ) {
+    breakingLogic(hover) {
+        let block = GetBlock(hover.blockType);
+
+        if (block.air) return;
+
+        if (!this.abilities.mayBuild || GetBlock(hover).hardness < 0) {
             this.resetBreaking();
             return;
         }
 
         if (this.abilities.instaBuild) {
-            this.hoverBlock.breakBlock(false);
+            hover.breakBlock(false);
+            this.swing();
             return;
         }
-
-        const block = GetBlock(this.hoverBlock.blockType);
 
         let currentBlockHardness = block.hardness;
 
         const selectedTool = this.inventory.selectedItem?.toolType;
 
+        let isWall = false;
+
+        if (selectedTool === ToolType.Hammer) {
+            isWall = true;
+        }
+
         // set hardness to tooltype
         if (
+            !isWall &&
             selectedTool &&
             block.toolType === this.inventory.selectedItem.toolType
         ) {
@@ -766,6 +772,9 @@ class Player extends Entity {
             currentBlockHardness -= this.inventory.selectedItem.toolLevel / 2;
             if (currentBlockHardness < 0) currentBlockHardness = 0;
         }
+
+        if (isWall)
+            currentBlockHardness = 2 - this.inventory.selectedItem.toolLevel;
 
         const soundInterval = 0.2;
         this.breakingTime += this.grounded ? deltaTime : deltaTime / 3;
@@ -793,12 +802,15 @@ class Player extends Entity {
                 : selectedTool
                 ? selectedTool == block.toolType
                 : false;
+            if (isWall) shouldDrop = true;
             if (
                 this.inventory.selectedItem &&
-                this.inventory.selectedItem.toolLevel < block.requiredToolLevel
+                (this.inventory.selectedItem.toolLevel <
+                    block.requiredToolLevel ||
+                    !isWall)
             )
                 shouldDrop = false;
-            this.hoverBlock.breakBlock(shouldDrop);
+            hover.breakBlock(shouldDrop);
             this.resetBreaking();
             this.swing();
         }

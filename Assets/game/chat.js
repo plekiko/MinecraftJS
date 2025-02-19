@@ -294,6 +294,7 @@ class Chat {
             "/summon <Category.ItemName> <x> <y>",
             "/kill",
             "/time <1 - 7.5>",
+            "/structure <StructureName>",
         ];
 
         // Print them one by one in chat

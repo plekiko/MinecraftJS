@@ -577,6 +577,8 @@ class Chunk {
             const block = array[y][x];
             if (block.blockType !== blockType) {
                 block.setBlockType(blockType);
+                block.dark = wall;
+                block.wall = wall;
                 if (metaData) block.metaData = metaData;
             }
         }

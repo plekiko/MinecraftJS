@@ -13,8 +13,6 @@ class BlockType {
 
         air = false,
 
-        dropSelf = true,
-
         chunkProtection = false,
 
         updateSpeed = 0,
@@ -31,6 +29,8 @@ class BlockType {
         category = null,
 
         fall = false,
+
+        wall = false,
 
         ambientSound = null,
 
@@ -60,6 +60,8 @@ class BlockType {
         this.breakingSound = breakingSound;
 
         this.air = air;
+
+        this.wall = wall;
 
         this.chunkProtection = chunkProtection;
 
@@ -288,6 +290,8 @@ class Block extends Square {
         const myChunk = chunks.has(this.chunkX)
             ? chunks.get(this.chunkX)
             : null;
+
+        this.dark = false;
 
         const existingIndex = updatingBlocks.indexOf(this);
         if (existingIndex !== -1) updatingBlocks.splice(existingIndex, 1);
@@ -683,6 +687,11 @@ class Block extends Square {
     dropBlock() {
         const block = GetBlock(this.blockType);
 
+        let props = {};
+        if (this.wall) {
+            props.wall = true;
+        }
+
         summonEntity(
             Drop,
             new Vector2(
@@ -692,6 +701,7 @@ class Block extends Square {
             {
                 blockId: block.dropItem == null ? block.dropBlock : null,
                 itemId: block.dropItem != null ? block.dropItem : null,
+                props: props,
             }
         );
     }
