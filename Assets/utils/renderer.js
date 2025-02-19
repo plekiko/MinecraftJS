@@ -415,10 +415,15 @@ function DrawDebugMouseBlock() {
     const topLeftY = mouseY;
 
     ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 5;
 
     // Draw the hollow square
-    ctx.strokeRect(topLeftX, topLeftY, BLOCK_SIZE, BLOCK_SIZE);
+    ctx.strokeRect(
+        topLeftX - Math.floor(camera.x),
+        topLeftY - Math.floor(camera.y),
+        BLOCK_SIZE,
+        BLOCK_SIZE
+    );
 }
 
 function DrawHotbar() {

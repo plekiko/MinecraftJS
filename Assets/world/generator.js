@@ -367,7 +367,7 @@ function GetChunkByIndex(index) {
 function GetBiomeForNoise(temp, wetness, mountains) {
     // console.log(`Checking biome for temp: ${temp}, wetness: ${wetness}`); // Debugging log
 
-    return Biomes.Desert;
+    // return Biomes.Desert;
 
     // Iterate through the available biomes and find one that matches both the temperature and wetness range
     for (let biomeName in Biomes) {
