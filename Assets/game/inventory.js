@@ -218,30 +218,47 @@ class Inventory {
     }
 
     handleShiftClick(slot, array) {
-        if (!input.shiftPressed) return false;
-        if (!array) return false;
-        if (slot.isEmpty()) return false;
+        if (!input.shiftPressed || !array || slot.isEmpty()) return false;
 
         let targetArray = null;
-
-        // Determine target array: if slot is from storage, target main inventory; if from main, target storage.
-        if (array === this.storageSlots) {
-            targetArray = this.items;
-        } else if (array === this.items && this.storageSlots) {
+        // Determine target array: if the slot is in the main inventory and chest is open, transfer to chest;
+        // otherwise if slot is in the chest, transfer to main inventory.
+        if (array === this.items && this.storageSlots) {
             targetArray = this.storageSlots;
+        } else if (array === this.storageSlots && this.items) {
+            targetArray = this.items;
         } else {
             return false;
         }
 
-        // Attempt to add the entire stack from the slot into the target array.
-        let remaining = this.addItemToArray(slot.item, targetArray);
+        // Clone the item from the current slot.
+        let itemToTransfer = structuredClone(slot.item);
+        let originalCount = itemToTransfer.count;
 
-        // If everything was moved, clear the slot; otherwise update the count.
-        if (remaining === 0) {
+        // Try to add the entire cloned item stack into the target array.
+        let remaining = this.addItemToArray(itemToTransfer, targetArray);
+        let moved = originalCount - remaining;
+
+        // Deduct the moved amount from the original slot.
+        slot.item.count -= moved;
+        if (slot.item.count <= 0) {
             this.clearSlot(slot);
-        } else {
-            slot.item.count = remaining;
         }
+
+        // If transferring into a chest, update the underlying storage.
+        if (targetArray === this.storageSlots) {
+            chat.message("desposited into chest");
+            // Rebuild the chest storage from the storageSlots view.
+            for (let i = 0; i < this.storageSlots.length; i++) {
+                for (let j = 0; j < this.storageSlots[i].length; j++) {
+                    // Make a deep copy if needed; structuredClone (or JSON methods) can be used here.
+                    this.storage[i][j] = structuredClone(
+                        this.storageSlots[i][j].item
+                    );
+                }
+            }
+        }
+
         return true;
     }
 

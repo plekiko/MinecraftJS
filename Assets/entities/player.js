@@ -597,7 +597,9 @@ class Player extends Entity {
                 )
             )
                 return;
-        } else if (!this.checkWallForPlacing()) return;
+        } else {
+            if (!this.checkWallForPlacing()) return;
+        }
 
         // this.hoverBlock.setBlockType(this.inventory.selectedBlock.blockId);
 
@@ -657,8 +659,8 @@ class Player extends Entity {
         const isFluid = GetBlock(this.hoverBlock.blockType).fluid;
 
         const mousePos = new Vector2(
-            input.getMousePositionOnBlockGrid().x + Math.floor(camera.x),
-            input.getMousePositionOnBlockGrid().y + Math.floor(camera.y)
+            input.getMousePositionOnBlockGrid().x,
+            input.getMousePositionOnBlockGrid().y
         );
 
         if (mousePos.y <= -1) {
