@@ -668,10 +668,8 @@ class Block extends Square {
             summonEntity(
                 Drop,
                 new Vector2(
-                    this.transform.position.x +
-                        camera.x +
-                        RandomRange(0, BLOCK_SIZE / 3),
-                    this.transform.position.y + camera.y + BLOCK_SIZE / 4
+                    this.transform.position.x + RandomRange(0, BLOCK_SIZE / 3),
+                    this.transform.position.y + BLOCK_SIZE / 4
                 ),
                 {
                     blockId: item.blockId,
