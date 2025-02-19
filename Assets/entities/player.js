@@ -345,7 +345,6 @@ class Player extends Entity {
                     new InventoryItem({
                         blockId: block.blockId,
                         count: 1,
-                        props: { wall: true },
                     })
                 );
             }
@@ -811,14 +810,14 @@ class Player extends Entity {
             let shouldDrop = block.dropWithoutTool
                 ? true
                 : selectedTool
-                ? selectedTool == block.toolType
+                ? selectedTool === block.toolType
                 : false;
             if (isWall) shouldDrop = true;
             if (
-                this.inventory.selectedItem &&
-                (this.inventory.selectedItem.toolLevel <
-                    block.requiredToolLevel ||
-                    !isWall)
+                isWall ||
+                (this.inventory.selectedItem &&
+                    this.inventory.selectedItem.toolLevel <
+                        block.requiredToolLevel)
             )
                 shouldDrop = false;
             hover.breakBlock(shouldDrop);

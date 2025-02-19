@@ -235,6 +235,8 @@ class Inventory {
             return false;
         }
 
+        if (slot.onlyTake) return false;
+
         // Clone the item from the current slot.
         let itemToTransfer = structuredClone(slot.item);
         let originalCount = itemToTransfer.count;
