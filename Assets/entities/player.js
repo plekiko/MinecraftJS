@@ -316,7 +316,18 @@ class Player extends Entity {
             case SpecialType.SingleChest:
                 this.openSingleChest();
                 break;
+            case SpecialType.Converter:
+                this.openConverter();
+                break;
         }
+    }
+
+    openConverter() {
+        const storage = this.hoverBlock.metaData.storage;
+
+        this.inventory.openConverter(storage);
+        this.inventory.interactedBlock = this.hoverBlock;
+        this.openInventory();
     }
 
     handleQuickBlockSelect(block) {
@@ -739,7 +750,7 @@ class Player extends Entity {
     breakingLogic(hover) {
         let block = GetBlock(hover.blockType);
 
-        if (block.air) return;
+        if (block.air || block.fluid) return;
 
         if (!this.abilities.mayBuild || GetBlock(hover).hardness < 0) {
             this.resetBreaking();

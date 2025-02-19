@@ -39,6 +39,7 @@ const Blocks = Object.freeze({
     OakPlanks: 34,
 
     CraftingTable: 35,
+    Converter: 61,
 
     SprucePlanks: 36,
     AcaciaPlanks: 37,
@@ -79,6 +80,8 @@ const Blocks = Object.freeze({
     StructureAir: 59,
 
     SnowBlock: 60,
+
+    GoldOre: 62,
 });
 
 const blockTypes = [
@@ -771,6 +774,29 @@ const blockTypes = [
         breakSound: Sounds.Break_Snow,
         breakingSound: Sounds.Breaking_Snow,
         toolType: ToolType.Shovel,
+    }),
+    new BlockType({
+        blockId: 61,
+        sprite: "smithing_table_side",
+        name: "Converter",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        specialType: SpecialType.Converter,
+        collision: false,
+    }),
+    // Gold ore
+    new BlockType({
+        blockId: 62,
+        sprite: "gold_ore",
+        name: "Gold Ore",
+        hardness: 10,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropItem: Items.GoldIngot,
+        requiredToolLevel: 13,
+        dropWithoutTool: false,
+        smeltOutput: { itemId: Items.GoldIngot },
     }),
 ];
 

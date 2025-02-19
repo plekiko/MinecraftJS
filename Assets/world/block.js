@@ -11,6 +11,8 @@ class BlockType {
         drag = 40,
         collision = true,
 
+        cannotBeConverted = false,
+
         air = false,
 
         chunkProtection = false,
@@ -29,8 +31,6 @@ class BlockType {
         category = null,
 
         fall = false,
-
-        wall = false,
 
         ambientSound = null,
 
@@ -59,9 +59,9 @@ class BlockType {
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
 
-        this.air = air;
+        this.cannotBeConverted = cannotBeConverted;
 
-        this.wall = wall;
+        this.air = air;
 
         this.chunkProtection = chunkProtection;
 
@@ -97,6 +97,7 @@ const SpecialType = Object.freeze({
     Furnace: 2,
     SingleChest: 3,
     Jukebox: 4,
+    Converter: 5,
 });
 
 const BlockCategory = Object.freeze({
@@ -278,6 +279,9 @@ class Block extends Square {
             case SpecialType.Jukebox:
                 storage = [[new InventoryItem()]];
                 props.myAudio = null;
+                break;
+            case SpecialType.Converter:
+                storage = [[new InventoryItem(), new InventoryItem()]];
                 break;
         }
 

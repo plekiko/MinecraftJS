@@ -3,6 +3,7 @@ const EntityTypes = Object.freeze({
     Player: 1,
     Entity: 2,
     Mob: 3,
+    Projectile: 4,
 });
 
 class Entity {
@@ -12,12 +13,18 @@ class Entity {
         hitbox = new Vector2(1, 1),
         velocity = new Vector2(),
         targetVelocity = new Vector2(),
+
         acceleration = 90,
+
         maxVelocity = new Vector2(1000, 1000),
+
         noGravity = false,
+
         invulnerable = false,
+
         sprite = null,
         spriteScale = BLOCK_SIZE / 32,
+
         outline = 0,
         color = "black",
         opacity = 1,
@@ -437,9 +444,9 @@ class Entity {
             }
         }
 
-        if (!this.grounded) {
-            this.velocity.y += this.drag * deltaTime;
-        }
+        // if (!this.grounded) {
+        //     this.velocity.y += this.drag * deltaTime;
+        // }
 
         this.clampVerticalVelocity();
 

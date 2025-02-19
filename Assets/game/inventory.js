@@ -40,6 +40,8 @@ class Inventory {
         this.furnace = false;
         this.furnaceSlots = null;
 
+        this.openUIImage = "";
+
         this.interactedBlock = null;
 
         this.lastHoveredSlot = { x: null, y: null };
@@ -174,6 +176,8 @@ class Inventory {
 
         this.storage = null;
 
+        this.openUIImage = "";
+
         return leftOver.length > 0 ? leftOver : null;
     }
 
@@ -247,7 +251,6 @@ class Inventory {
 
         // If transferring into a chest, update the underlying storage.
         if (targetArray === this.storageSlots) {
-            chat.message("desposited into chest");
             // Rebuild the chest storage from the storageSlots view.
             for (let i = 0; i < this.storageSlots.length; i++) {
                 for (let j = 0; j < this.storageSlots[i].length; j++) {
@@ -260,6 +263,88 @@ class Inventory {
         }
 
         return true;
+    }
+
+    openConverter(storage) {
+        this.storage = storage;
+
+        let slots = [];
+
+        this.openUIImage = "converter";
+
+        slots = [
+            [
+                new InventorySlot({
+                    position: { x: 193, y: 123 },
+                    item: this.storage[0][0],
+                }),
+                new InventorySlot({
+                    position: { x: 410, y: 126 },
+                    onlyTake: true,
+                }),
+            ],
+        ];
+
+        this.storageSlots = slots;
+    }
+
+    updateConverter() {
+        // Ensure we're in converter mode.
+        if (!this.storageSlots || this.openUIImage !== "converter") return;
+
+        const leftSlot = this.storageSlots[0][0];
+        const rightSlot = this.storageSlots[0][1];
+
+        // If the left slot is empty, clear the right slot.
+        if (leftSlot.isEmpty()) {
+            this.clearSlot(rightSlot);
+            return;
+        }
+
+        // Only operate on blocks—not items.
+        // If there's no blockId, then this is not a block.
+        if (!leftSlot.item.blockId) {
+            this.clearSlot(rightSlot);
+            return;
+        }
+
+        // Retrieve block data for the item in the left slot.
+        const block = GetBlock(leftSlot.item.blockId);
+
+        // If the block has the cannotBeConverted tag, do nothing (or clear the output).
+        if (block.cannotBeConverted) {
+            this.clearSlot(rightSlot);
+            return;
+        }
+
+        // Otherwise, take the input item from the left slot and create a converted output.
+        let inputItem = leftSlot.item;
+        let outputItem = structuredClone(inputItem);
+        outputItem.props = outputItem.props || {};
+
+        // Toggle conversion:
+        // If the input already has the wall property, remove it; otherwise, add it.
+        if (outputItem.props.wall) {
+            delete outputItem.props.wall;
+        } else {
+            outputItem.props.wall = true;
+        }
+
+        // Place the converted output in the right slot.
+        rightSlot.item = outputItem;
+
+        // When the player takes the output (i.e. holding item matches the converted item), clear both slots.
+        if (
+            this.holdingItem &&
+            this.holdingItem.blockId === rightSlot.item.blockId &&
+            this.holdingItem.itemId === rightSlot.item.itemId &&
+            this.holdingItem.props &&
+            ((this.holdingItem.props.wall && rightSlot.item.props.wall) ||
+                (!this.holdingItem.props.wall && !rightSlot.item.props.wall))
+        ) {
+            this.clearSlot(leftSlot);
+            this.clearSlot(rightSlot);
+        }
     }
 
     openFurnace(storage) {
@@ -559,6 +644,10 @@ class Inventory {
         if (!input.isRightMouseDown()) this.resetLastHoveredSlot();
 
         this.craftingLogic();
+
+        if (this.openUIImage === "converter") {
+            this.updateConverter();
+        }
     }
 
     resetLastHoveredSlot() {
@@ -918,12 +1007,16 @@ class Inventory {
         if (this.furnace) path = "furnace";
         if (this.storageSlots) path = "single_chest";
 
-        this.inventoryUI = drawImage(
-            "Assets/sprites/gui/" + path + ".png",
-            CANVAS.width / 2,
-            CANVAS.height / 6,
-            3.5
-        );
+        if (this.openUIImage !== "") {
+            path = this.openUIImage;
+        }
+
+        this.inventoryUI = drawImage({
+            url: "Assets/sprites/gui/" + path + ".png",
+            x: CANVAS.width / 2,
+            y: CANVAS.height / 6,
+            scale: 3.5,
+        });
 
         this.drawItems();
         this.drawHoldItem();
@@ -973,33 +1066,28 @@ class Inventory {
         // Calculate the frame for the flame
         const flameFrame = Math.ceil(14 - (fuelProgress / fuelMax) * 14);
 
-        drawImage(
-            "Assets/sprites/gui/furnace_flame.png",
-            this.inventoryUI.x + 196,
-            this.inventoryUI.y + 126,
-            3.5,
-            false,
-            false,
-            1,
-            flameFrame
-        );
+        drawImage({
+            url: "Assets/sprites/gui/furnace_flame.png",
+            x: this.inventoryUI.x + 196,
+            y: this.inventoryUI.y + 126,
+            scale: 3.5,
+            centerX: false,
+            sizeY: flameFrame,
+        });
 
         const arrowProgression = furnaceData.progression;
         if (arrowProgression < 0 || arrowProgression > 10) return;
 
         const arrowFrame = Math.ceil((arrowProgression / 10) * 25);
 
-        drawImage(
-            "Assets/sprites/gui/furnace_arrow.png",
-            this.inventoryUI.x + 277,
-            this.inventoryUI.y + 120,
-            3.5,
-            false,
-            false,
-            1,
-            null,
-            arrowFrame
-        );
+        drawImage({
+            url: "Assets/sprites/gui/furnace_arrow.png",
+            x: this.inventoryUI.x + 277,
+            y: this.inventoryUI.y + 120,
+            scale: 3.5,
+            centerX: false,
+            sizeX: arrowFrame,
+        });
     }
 
     getSlotItem(item) {
@@ -1029,8 +1117,9 @@ class Inventory {
             : GetItem(hoverInventoryItem.itemId).name;
 
         let text = title;
-        if (Object.keys(hoverInventoryItem.props).length > 0)
-            text += ` (${JSON.stringify(hoverInventoryItem.props)})`;
+        // if (Object.keys(hoverInventoryItem.props).length > 0)
+        //     text += ` (${JSON.stringify(hoverInventoryItem.props)})`;
+        if (hoverInventoryItem.props.wall) text += " (Wall)";
 
         drawText({
             text: text,
@@ -1057,7 +1146,14 @@ class Inventory {
                 : "items/" + GetItem(holdingItem.itemId).sprite) +
             ".png";
 
-        image = drawImage(spritePath, mousePos.x, mousePos.y, 2.5, false);
+        image = drawImage({
+            url: spritePath,
+            x: mousePos.x,
+            y: mousePos.y,
+            scale: 2.5,
+            centerX: false,
+            dark: holdingItem.props.wall === true,
+        });
 
         if (holdingItem.count <= 1) return;
 
@@ -1097,7 +1193,14 @@ class Inventory {
             ".png";
 
         // Draw the sprite
-        drawImage(spritePath, slotX, slotY, 3, false);
+        drawImage({
+            url: spritePath,
+            x: slotX,
+            y: slotY,
+            scale: 3,
+            centerX: false,
+            dark: item.props.wall === true,
+        });
 
         if (item.count <= 1) return;
 

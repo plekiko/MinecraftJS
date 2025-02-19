@@ -44,22 +44,6 @@ const recipes = [
         output: new InventoryItem({ itemId: Items.Stick, count: 4 }),
     }),
 
-    // Crafting Table
-    new Recipe({
-        type: RecipeType.Shaped,
-        input: [
-            [
-                new RecipeItem({ blockCategory: BlockCategory.Planks }),
-                new RecipeItem({ blockCategory: BlockCategory.Planks }),
-            ],
-            [
-                new RecipeItem({ blockCategory: BlockCategory.Planks }),
-                new RecipeItem({ blockCategory: BlockCategory.Planks }),
-            ],
-        ],
-        output: new InventoryItem({ blockId: Blocks.CraftingTable, count: 1 }),
-    }),
-
     //#region Tools
 
     //#region Wooden Tools
@@ -462,6 +446,24 @@ const recipes = [
 
     //#endregion Tools
 
+    //#region Crafting Stations
+
+    // Crafting Table
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.CraftingTable, count: 1 }),
+    }),
+
     // Furnace
     new Recipe({
         type: RecipeType.Shaped,
@@ -507,6 +509,31 @@ const recipes = [
         ],
         output: new InventoryItem({ blockId: Blocks.Chest, count: 1 }),
     }),
+
+    // Converter
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+            ],
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.Converter, count: 1 }),
+    }),
+
+    //#endregion
 
     // Stone Bricks
     new Recipe({

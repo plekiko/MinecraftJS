@@ -136,17 +136,17 @@ function DrawBreakAndPlaceCursor(inRange = false) {
     const mouseY = input.getMousePositionOnBlockGrid().y;
 
     if (player.inventory.selectedBlock) {
-        drawImage(
-            "Assets/sprites/blocks/" +
+        drawImage({
+            url:
+                "Assets/sprites/blocks/" +
                 player.inventory.selectedBlock.sprite +
                 ".png",
-            mouseX - Math.floor(camera.x),
-            mouseY - Math.floor(camera.y),
-            BLOCK_SIZE / 16,
-            false,
-            false,
-            0.5
-        );
+            x: mouseX - Math.floor(camera.x),
+            y: mouseY - Math.floor(camera.y),
+            scale: BLOCK_SIZE / 16,
+            centerX: false,
+            opacity: 0.5,
+        });
     }
 
     ctx.strokeStyle = inRange ? "black" : "red";
@@ -238,15 +238,16 @@ function DrawDestroyStage() {
     const mouseX = input.getMousePositionOnBlockGrid().x;
     const mouseY = input.getMousePositionOnBlockGrid().y;
 
-    drawImage(
-        "Assets/sprites/blocks/destroy_stage_" +
+    drawImage({
+        url:
+            "Assets/sprites/blocks/destroy_stage_" +
             (player.breakingStage - 1) +
             ".png",
-        mouseX - Math.floor(camera.x),
-        mouseY - Math.floor(camera.y),
-        BLOCK_SIZE / 16,
-        false
-    );
+        x: mouseX - Math.floor(camera.x),
+        y: mouseY - Math.floor(camera.y),
+        scale: BLOCK_SIZE / 16,
+        centerX: false,
+    });
 }
 
 function DrawChunkLine(chunk) {
@@ -269,24 +270,22 @@ function DrawCursor() {
     if (!player) return;
 
     if (player.windowOpen) {
-        drawImage(
-            "Assets/sprites/misc/cursor.png",
-            input.getMousePosition().x,
-            input.getMousePosition().y,
-            1,
-            false
-        );
+        drawImage({
+            url: "Assets/sprites/misc/cursor.png",
+            x: input.getMousePosition().x,
+            y: input.getMousePosition().y,
+            centerX: false,
+        });
         return;
     }
 
-    drawImage(
-        "Assets/sprites/misc/crosshair.png",
-        input.getMousePosition().x,
-        input.getMousePosition().y,
-        3,
-        true,
-        true
-    );
+    drawImage({
+        url: "Assets/sprites/misc/crosshair.png",
+        x: input.getMousePosition().x,
+        y: input.getMousePosition().y,
+        scale: 3,
+        centerY: true,
+    });
 }
 
 function mouseOverPosition(x, y, sizeX, sizeY) {
@@ -462,7 +461,7 @@ function drawHitboxes() {
     });
 }
 
-function drawImage(
+function drawImage({
     url,
     x = 0,
     y = 0,
@@ -471,8 +470,9 @@ function drawImage(
     centerY = false,
     opacity = 1,
     sizeY = null,
-    sizeX = null
-) {
+    sizeX = null,
+    dark = false,
+}) {
     const img = new Image();
     img.src = url;
 
@@ -499,6 +499,21 @@ function drawImage(
         drawWidth, // Width on the canvas (scaled)
         drawHeight // Height on the canvas (scaled)
     );
+
+    if (dark) {
+        ctx.globalAlpha = 0.4;
+        ctx.fillStyle = "black";
+        ctx.fillRect(
+            centerX ? x - drawWidth / 2 : x,
+            centerY
+                ? y -
+                      drawHeight / 2 +
+                      (sizeY ? (img.height - sizeY) * scale : 0)
+                : y + (sizeY ? (img.height - sizeY) * scale : 0),
+            drawWidth,
+            drawHeight
+        );
+    }
 
     ctx.globalAlpha = 1;
 

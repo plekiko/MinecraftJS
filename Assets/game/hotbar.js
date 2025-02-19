@@ -26,53 +26,53 @@ class Hotbar {
 
         // Empty Hearts
         for (let i = 0; i < maxHealth / 2; i++) {
-            drawImage(
-                `Assets/sprites/gui/${
+            drawImage({
+                url: `Assets/sprites/gui/${
                     this.flashingHearts ? "heart_white.png" : "empty_heart.png"
                 }`,
-                hotbar.x + i * 9 * 2.9 + 12,
-                hotbar.y - 35,
-                3
-            );
+                x: hotbar.x + i * 9 * 2.9 + 12,
+                y: hotbar.y - 35,
+                scale: 3,
+            });
         }
 
         // Draw Full and Half Hearts
         for (let i = 0; i < Math.floor(health / 2); i++) {
-            drawImage(
-                "Assets/sprites/gui/heart.png",
-                hotbar.x + i * 9 * 2.9 + 12,
-                hotbar.y - 35,
-                3
-            );
+            drawImage({
+                url: "Assets/sprites/gui/heart.png",
+                x: hotbar.x + i * 9 * 2.9 + 12,
+                y: hotbar.y - 35,
+                scale: 3,
+            });
         }
 
         // Check for Half Heart
         if (health % 2 !== 0) {
-            drawImage(
-                "Assets/sprites/gui/half_heart.png", // Use the half-heart sprite
-                hotbar.x + Math.floor(health / 2) * 9 * 2.9 + 12,
-                hotbar.y - 35,
-                3
-            );
+            drawImage({
+                url: "Assets/sprites/gui/half_heart.png", // Use the half-heart sprite
+                x: hotbar.x + Math.floor(health / 2) * 9 * 2.9 + 12,
+                y: hotbar.y - 35,
+                scale: 3,
+            });
         }
     }
 
     draw(ctx) {
         // Draw hotbar
-        const hotbar = drawImage(
-            "Assets/sprites/gui/hotbar.png",
-            CANVAS.width / 2,
-            CANVAS.height - 75,
-            3
-        );
+        const hotbar = drawImage({
+            url: "Assets/sprites/gui/hotbar.png",
+            x: CANVAS.width / 2,
+            y: CANVAS.height - 75,
+            scale: 3,
+        });
 
         // Draw current slot
-        drawImage(
-            "Assets/sprites/gui/selected-slot.png",
-            CANVAS.width / 2 - 240 + this.currentSlot * 60,
-            CANVAS.height - 78,
-            3
-        );
+        drawImage({
+            url: "Assets/sprites/gui/selected-slot.png",
+            x: CANVAS.width / 2 - 240 + this.currentSlot * 60,
+            y: CANVAS.height - 78,
+            scale: 3,
+        });
 
         this.drawItems();
 
@@ -107,7 +107,7 @@ class Hotbar {
         for (let i = 0; i < this.inventory.items[3].length; i++) {
             const item = this.inventory.items[3][i].item;
             if (item.blockId !== null) {
-                this.drawBlock(item.blockId, i);
+                this.drawBlock(item.blockId, i, item.props.wall === true);
                 this.drawCount(item.count, i);
             } else {
                 if (item.itemId != null) {
@@ -118,10 +118,10 @@ class Hotbar {
         }
     }
 
-    drawBlock(blockId, slot) {
+    drawBlock(blockId, slot, dark = false) {
         const block = GetBlock(blockId);
 
-        this.drawInSlot("blocks/" + block.sprite + ".png", slot);
+        this.drawInSlot("blocks/" + block.sprite + ".png", slot, dark);
     }
 
     drawItem(itemId, slot) {
@@ -142,15 +142,16 @@ class Hotbar {
         });
     }
 
-    drawInSlot(sprite, slot) {
+    drawInSlot(sprite, slot, dark = false) {
         const path = "Assets/sprites/" + sprite;
 
-        drawImage(
-            path,
-            CANVAS.width / 2 - 240 + slot * 60,
-            CANVAS.height - 64,
-            2.8
-        );
+        drawImage({
+            url: path,
+            x: CANVAS.width / 2 - 240 + slot * 60,
+            y: CANVAS.height - 64,
+            scale: 2.8,
+            dark: dark,
+        });
     }
 
     handleSelecting() {

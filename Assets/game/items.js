@@ -39,6 +39,7 @@ const Items = Object.freeze({
     IronIngot: 21,
     Charcoal: 22,
     Diamond: 23,
+    GoldIngot: 24,
 
     RawBeef: 30,
     CookedBeef: 31,
@@ -383,6 +384,11 @@ const items = [
         itemId: 23,
         name: "Diamond",
         sprite: "diamond",
+    }),
+    new Item({
+        itemId: 24,
+        name: "Gold Ingot",
+        sprite: "gold_ingot",
     }),
     //#endregion
 

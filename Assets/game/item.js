@@ -12,6 +12,7 @@ class Item {
         baseDamage = 0,
         foodValue = 0,
         playMusicInJukebox = null,
+        projectile = null,
     }) {
         this.itemId = itemId;
         this.name = name;
@@ -27,6 +28,8 @@ class Item {
         this.stackSize = stackSize;
 
         this.playMusicInJukebox = playMusicInJukebox;
+
+        this.projectile = projectile;
 
         this.fuelTime = fuelTime;
         this.smeltOutput = smeltOutput;
