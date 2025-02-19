@@ -84,7 +84,7 @@ class Square {
             if (this.isAnimated()) this.frameCount = this.img.height / 16;
     }
 
-    draw(ctx) {
+    draw(ctx, camera) {
         if (!this.img) return;
 
         ctx.save();
@@ -104,8 +104,11 @@ class Square {
         if (this.outline > 0) {
             ctx.fillStyle = "white";
             ctx.fillRect(
-                -this.transform.size.x / 2 - this.outline + this.drawOffset,
-                -this.transform.size.y / 2 - this.outline,
+                -this.transform.size.x / 2 -
+                    this.outline +
+                    this.drawOffset -
+                    camera.x,
+                -this.transform.size.y / 2 - this.outline - camera.y,
                 this.transform.size.x + this.outline * 2,
                 this.transform.size.y + this.outline * 2
             );
@@ -117,8 +120,8 @@ class Square {
         if (this.img && (!this.frameCount || this.frameCount == 0)) {
             ctx.drawImage(
                 this.img,
-                -this.transform.size.x / 2 + this.drawOffset,
-                -this.transform.size.y / 2,
+                -this.transform.size.x / 2 + this.drawOffset - camera.x,
+                -this.transform.size.y / 2 - camera.y,
                 16 * this.spriteScale,
                 16 * this.spriteScale
             );
@@ -128,8 +131,8 @@ class Square {
                 ctx.globalAlpha = 0.5;
                 ctx.fillStyle = "black";
                 ctx.fillRect(
-                    -this.transform.size.x / 2 + this.drawOffset,
-                    -this.transform.size.y / 2,
+                    -this.transform.size.x / 2 + this.drawOffset - camera.x,
+                    -this.transform.size.y / 2 - camera.y,
                     this.transform.size.x,
                     this.transform.size.y
                 );
@@ -138,20 +141,20 @@ class Square {
         }
 
         if (this.img && this.frameCount > 0) {
-            this.drawAnimation(ctx);
+            this.drawAnimation(ctx, camera);
         }
 
         ctx.restore(); // Restore the context to its original state
     }
 
-    drawAnimation(ctx) {
+    drawAnimation(ctx, camera) {
         const frameHeight = 16;
         const effectiveFrame =
             Math.floor(globalFrame * this.frameRate) % this.frameCount;
         const frameY = effectiveFrame * frameHeight;
 
-        const drawX = -this.transform.size.x / 2 + this.drawOffset;
-        const drawY = -this.transform.size.y / 2;
+        const drawX = -this.transform.size.x / 2 + this.drawOffset - camera.x;
+        const drawY = -this.transform.size.y / 2 - camera.y;
         const drawWidth = 16 * this.spriteScale;
         const drawHeight = 16 * this.spriteScale;
 

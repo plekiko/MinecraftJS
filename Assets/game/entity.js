@@ -151,7 +151,7 @@ class Entity {
     getBlockAtPosition(worldX, worldY) {
         worldX = Math.floor(worldX / BLOCK_SIZE) * BLOCK_SIZE;
         worldY = Math.floor(worldY / BLOCK_SIZE) * BLOCK_SIZE;
-        return GetBlockAtWorldPosition(worldX, worldY, false);
+        return GetBlockAtWorldPosition(worldX, worldY);
     }
 
     isFluid(blockType) {
@@ -573,8 +573,7 @@ class Entity {
                 // Get the block at the current grid position
                 const block = GetBlockAtWorldPosition(
                     x * BLOCK_SIZE,
-                    y * BLOCK_SIZE,
-                    false
+                    y * BLOCK_SIZE
                 );
                 if (
                     block &&

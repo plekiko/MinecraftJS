@@ -625,4 +625,34 @@ class Chunk {
 
         return areaSize;
     }
+
+    //#region Drawing
+
+    draw(ctx, camera) {
+        this.drawBlocks(ctx, this.walls, camera);
+        this.drawBlocks(ctx, this.blocks, camera);
+    }
+
+    drawBlocks(ctx, blocks, camera) {
+        for (let i = 0; i < blocks.length; i++) {
+            for (let j = 0; j < blocks[i].length; j++) {
+                const block = blocks[i][j];
+
+                const worldX = j * BLOCK_SIZE; // Use j for x (horizontal)
+
+                const worldY = i * BLOCK_SIZE; // Use i for y (vertical)
+
+                this.drawBlockAtPosition(ctx, block, worldX, worldY, camera);
+            }
+        }
+    }
+
+    drawBlockAtPosition(ctx, block, x, y, camera) {
+        block.transform.position.x = x + this.x;
+        block.transform.position.y = y;
+
+        block.draw(ctx, camera);
+    }
+
+    //#endregion
 }

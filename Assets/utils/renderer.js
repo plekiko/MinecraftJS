@@ -140,8 +140,8 @@ function DrawBreakAndPlaceCursor(inRange = false) {
             "Assets/sprites/blocks/" +
                 player.inventory.selectedBlock.sprite +
                 ".png",
-            mouseX,
-            mouseY,
+            mouseX - Math.floor(camera.x),
+            mouseY - Math.floor(camera.y),
             BLOCK_SIZE / 16,
             false,
             false,
@@ -152,7 +152,12 @@ function DrawBreakAndPlaceCursor(inRange = false) {
     ctx.strokeStyle = inRange ? "black" : "red";
     ctx.lineWidth = 1;
 
-    ctx.strokeRect(mouseX, mouseY, BLOCK_SIZE, BLOCK_SIZE);
+    ctx.strokeRect(
+        mouseX - Math.floor(camera.x),
+        mouseY - Math.floor(camera.y),
+        BLOCK_SIZE,
+        BLOCK_SIZE
+    );
 }
 
 function DrawChunks(chunksMap) {
@@ -168,7 +173,9 @@ function DrawChunks(chunksMap) {
             chunks_in_render_distance.set(chunkX, chunksMap.get(chunkX));
 
             const chunk = chunksMap.get(chunkX);
-            DrawChunk(chunk, chunkX);
+
+            chunk.draw(ctx, camera);
+            DrawLate(chunk);
         }
     }
 }
@@ -193,13 +200,6 @@ function DrawCamera() {
     ctx.fillRect(CANVAS.width / 2 - 2, CANVAS.height / 2 - 2, 14, 14);
     ctx.fillStyle = "black";
     ctx.fillRect(CANVAS.width / 2, CANVAS.height / 2, 10, 10);
-}
-
-function DrawChunk(chunk) {
-    DrawBlocks(chunk.walls, chunk.x);
-    DrawBlocks(chunk.blocks, chunk.x);
-
-    DrawLate(chunk);
 }
 
 function DrawLate(chunk) {
@@ -235,12 +235,15 @@ function DrawDestroyStage() {
     if (!player) return;
     if (player.breakingStage == 0 || player.breakingStage > 10) return;
 
+    const mouseX = input.getMousePositionOnBlockGrid().x;
+    const mouseY = input.getMousePositionOnBlockGrid().y;
+
     drawImage(
         "Assets/sprites/blocks/destroy_stage_" +
             (player.breakingStage - 1) +
             ".png",
-        input.getMousePositionOnBlockGrid().x,
-        input.getMousePositionOnBlockGrid().y,
+        mouseX - Math.floor(camera.x),
+        mouseY - Math.floor(camera.y),
         BLOCK_SIZE / 16,
         false
     );
@@ -400,31 +403,6 @@ function DrawHeight() {
     ctx.strokeStyle = "black";
     ctx.lineWidth = 2;
     ctx.stroke();
-}
-
-function DrawBlocks(blocks, xOffset) {
-    for (let i = 0; i < blocks.length; i++) {
-        for (let j = 0; j < blocks[i].length; j++) {
-            // Get the block at position [i][j]
-            const block = blocks[i][j];
-
-            // j corresponds to the x position (horizontal)
-            const worldX = j * BLOCK_SIZE; // Use j for x (horizontal)
-
-            // i corresponds to the y position (vertical)
-            const worldY = i * BLOCK_SIZE; // Use i for y (vertical)
-
-            // Draw the block at the calculated 2D position
-            DrawBlockAtPosition(block, worldX + xOffset, worldY);
-        }
-    }
-}
-
-function DrawBlockAtPosition(block, x, y) {
-    block.transform.position.x = x - camera.x;
-    block.transform.position.y = y - camera.y;
-
-    block.draw(ctx);
 }
 
 function DrawDebugMouseBlock() {

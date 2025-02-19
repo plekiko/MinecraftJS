@@ -398,27 +398,15 @@ function GetBiomeForNoise(temp, wetness, mountains) {
 }
 
 function getBlockWorldPosition(block) {
-    return new Vector2(
-        block.transform.position.x + camera.x,
-        block.transform.position.y + camera.y
-    );
+    return new Vector2(block.transform.position.x, block.transform.position.y);
 }
 
-function GetBlockAtWorldPosition(worldX, worldY, adjust = true, wall = false) {
-    // Remove camera influence from world coordinates to get the correct world position
-    let adjustedWorldX = worldX;
-    let adjustedWorldY = worldY;
+function GetBlockAtWorldPosition(worldX, worldY, wall = false) {
+    const targetChunk = GetChunkForX(worldX);
 
-    if (adjust) {
-        adjustedWorldX = worldX + camera.x;
-        adjustedWorldY = worldY + camera.y;
-    }
-
-    const targetChunk = GetChunkForX(adjustedWorldX);
-
-    if (targetChunk && adjustedWorldY < CHUNK_HEIGHT * BLOCK_SIZE) {
-        const localX = targetChunk.getLocalX(Math.floor(adjustedWorldX));
-        const localY = Math.floor(adjustedWorldY / BLOCK_SIZE);
+    if (targetChunk && worldY < CHUNK_HEIGHT * BLOCK_SIZE) {
+        const localX = targetChunk.getLocalX(Math.floor(worldX));
+        const localY = Math.floor(worldY / BLOCK_SIZE);
 
         return targetChunk.getBlock(localX, localY, false, wall);
     } else {
@@ -439,12 +427,8 @@ function checkAdjacentBlocks(position, wall = false) {
         const block = GetBlockAtWorldPosition(
             adjacentPos.x,
             adjacentPos.y,
-            false,
             wall
         );
-
-        console.log(block);
-
         if (!block) continue;
 
         const type = GetBlock(block.blockType);
@@ -456,34 +440,16 @@ function checkAdjacentBlocks(position, wall = false) {
     return false; // No adjacent block found
 }
 
-function SetBlockTypeAtPosition(
-    worldX,
-    worldY,
-    blockType,
-    adjust = true,
-    wall = false
-) {
-    const block = GetBlockAtWorldPosition(worldX, worldY, adjust, wall);
+function SetBlockTypeAtPosition(worldX, worldY, blockType, wall = false) {
+    const block = GetBlockAtWorldPosition(worldX, worldY, wall);
 
     if (!block) return;
 
     block.setBlockType(blockType);
 }
 
-function SetBufferedBlock(worldX, worldY, blockType, adjust = true) {
-    const adjustedWorldX = adjust
-        ? Math.floor((worldX + camera.x) / BLOCK_SIZE)
-        : worldX;
-    const adjustedWorldY = adjust
-        ? Math.floor((worldY + camera.y) / BLOCK_SIZE)
-        : worldY;
-    GetChunkForX(worldX).setBlockTypeAtPosition(
-        adjustedWorldX,
-        adjustedWorldY,
-        blockType
-    );
-
-    console.log("Buffered block set at:", adjustedWorldX, adjustedWorldY);
+function SetBufferedBlock(worldX, worldY, blockType) {
+    GetChunkForX(worldX).setBlockTypeAtPosition(worldX, worldY, blockType);
 }
 
 function GetChunkForX(worldX) {

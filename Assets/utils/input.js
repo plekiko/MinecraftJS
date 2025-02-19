@@ -153,12 +153,8 @@ class InputHandler {
     getMousePositionOnBlockGrid() {
         const pos = this.getMousePosition();
 
-        const gridX =
-            Math.floor((pos.x + camera.x) / BLOCK_SIZE) * BLOCK_SIZE -
-            Math.floor(camera.x);
-        const gridY =
-            Math.floor((pos.y + camera.y) / BLOCK_SIZE) * BLOCK_SIZE -
-            Math.floor(camera.y);
+        const gridX = Math.floor((pos.x + camera.x) / BLOCK_SIZE) * BLOCK_SIZE;
+        const gridY = Math.floor((pos.y + camera.y) / BLOCK_SIZE) * BLOCK_SIZE;
 
         return new Vector2(Math.floor(gridX), Math.floor(gridY));
     }

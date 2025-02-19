@@ -120,8 +120,8 @@ function cursorBlockLogic() {
         Vector2.Distance(
             player.position,
             new Vector2(
-                input.getMousePositionOnBlockGrid().x + Math.floor(camera.x),
-                input.getMousePositionOnBlockGrid().y + Math.floor(camera.y)
+                input.getMousePositionOnBlockGrid().x,
+                input.getMousePositionOnBlockGrid().y
             )
         ) / BLOCK_SIZE
     );
@@ -132,16 +132,14 @@ function cursorBlockLogic() {
 
     player.hoverBlock = cursorInRange
         ? GetBlockAtWorldPosition(
-              input.getMousePositionOnBlockGrid().x + Math.floor(camera.x),
-              input.getMousePositionOnBlockGrid().y + Math.floor(camera.y),
-              false
+              input.getMousePositionOnBlockGrid().x,
+              input.getMousePositionOnBlockGrid().y
           )
         : null;
     player.hoverWall = cursorInRange
         ? GetBlockAtWorldPosition(
-              input.getMousePositionOnBlockGrid().x + Math.floor(camera.x),
-              input.getMousePositionOnBlockGrid().y + Math.floor(camera.y),
-              false,
+              input.getMousePositionOnBlockGrid().x,
+              input.getMousePositionOnBlockGrid().y,
               true
           )
         : null;

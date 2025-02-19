@@ -125,8 +125,7 @@ function checkDissipation(block, worldPos) {
     neighborOffsets.forEach((offset) => {
         const neighbor = GetBlockAtWorldPosition(
             worldPos.x + offset.dx,
-            worldPos.y + offset.dy,
-            false
+            worldPos.y + offset.dy
         );
         // Note: In your original code you check if neighbor.waterLevel < block.waterLevel.
         // (This may be counterintuitive, but we keep it exactly as provided.)
@@ -150,11 +149,7 @@ function checkDissipation(block, worldPos) {
 }
 
 function flowDownward(block, worldPos) {
-    let below = GetBlockAtWorldPosition(
-        worldPos.x,
-        worldPos.y + BLOCK_SIZE,
-        false
-    );
+    let below = GetBlockAtWorldPosition(worldPos.x, worldPos.y + BLOCK_SIZE);
     if (
         (below && GetBlock(below.blockType).air) ||
         (below && GetBlock(below.blockType).breakByFluid)
@@ -171,11 +166,7 @@ function flowDownward(block, worldPos) {
 }
 
 function verticalCheckAbove(block, worldPos) {
-    let above = GetBlockAtWorldPosition(
-        worldPos.x,
-        worldPos.y - BLOCK_SIZE,
-        false
-    );
+    let above = GetBlockAtWorldPosition(worldPos.x, worldPos.y - BLOCK_SIZE);
     if (above) {
         if (above.blockType === block.blockType) {
             block.waterLevel = 0;
@@ -190,8 +181,7 @@ function verticalCheckAbove(block, worldPos) {
 function flowSideways(block, worldPos, direction) {
     let target = GetBlockAtWorldPosition(
         worldPos.x + direction.dx,
-        worldPos.y + direction.dy,
-        false
+        worldPos.y + direction.dy
     );
     // Check if the target is air or can be broken by fluid.
     if (
@@ -500,10 +490,10 @@ class Block extends Square {
     checkLavaWaterInteraction(pos) {
         // Check for lava-water interaction.
         // Check for blocks surrounding this block
-        const left = GetBlockAtWorldPosition(pos.x - BLOCK_SIZE, pos.y, false);
-        const right = GetBlockAtWorldPosition(pos.x + BLOCK_SIZE, pos.y, false);
-        const above = GetBlockAtWorldPosition(pos.x, pos.y - BLOCK_SIZE, false);
-        const below = GetBlockAtWorldPosition(pos.x, pos.y + BLOCK_SIZE, false);
+        const left = GetBlockAtWorldPosition(pos.x - BLOCK_SIZE, pos.y);
+        const right = GetBlockAtWorldPosition(pos.x + BLOCK_SIZE, pos.y);
+        const above = GetBlockAtWorldPosition(pos.x, pos.y - BLOCK_SIZE);
+        const below = GetBlockAtWorldPosition(pos.x, pos.y + BLOCK_SIZE);
 
         let lavaBlocksNear = [];
 
@@ -698,10 +688,8 @@ class Block extends Square {
         summonEntity(
             Drop,
             new Vector2(
-                this.transform.position.x +
-                    camera.x +
-                    RandomRange(0, BLOCK_SIZE / 3),
-                this.transform.position.y + camera.y + BLOCK_SIZE / 4
+                this.transform.position.x + RandomRange(0, BLOCK_SIZE / 3),
+                this.transform.position.y + BLOCK_SIZE / 4
             ),
             {
                 blockId: block.dropItem == null ? block.dropBlock : null,
@@ -721,14 +709,14 @@ class Block extends Square {
                     Drop,
                     new Vector2(
                         this.transform.position.x +
-                            camera.x +
                             RandomRange(0, BLOCK_SIZE / 3),
-                        this.transform.position.y + camera.y + BLOCK_SIZE / 4
+                        this.transform.position.y + BLOCK_SIZE / 4
                     ),
                     {
                         blockId: item.blockId,
                         itemId: item.itemId,
                         count: item.count,
+                        props: structuredClone(item.props || {}),
                     }
                 );
             }
