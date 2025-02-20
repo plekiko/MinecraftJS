@@ -1,4 +1,9 @@
-let currentSave = { seed: 0, chunks: new Map(), pendingBlocks: new Map() };
+let currentSave = {
+    playerPosition: new Vector2(),
+    seed: 0,
+    chunks: new Map(),
+    pendingBlocks: new Map(),
+};
 
 // Assuming chunks, seed, pendingBlocks, etc. are defined elsewhere in the global scope
 
@@ -15,19 +20,30 @@ function SaveWorld() {
             for (let x = 0; x < CHUNK_WIDTH; x++) {
                 blocks[y][x] = chunk.blocks[y][x].blockType; // Assuming blockType is a property
                 walls[y][x] = chunk.walls[y][x].blockType; // Assuming blockType is a property
+
+                if (chunk.blocks[y][x].metaData) {
+                    // Create object from block like: {0, metaData: {props: {}}}
+                    blocks[y][x] = {
+                        t: chunk.blocks[y][x].blockType,
+                        m: JSON.stringify(chunk.blocks[y][x].metaData),
+                    };
+                }
             }
         }
 
         savedChunks.push({
             x: chunk.x,
-            biome: chunk.biome,
-            previousChunk: chunk.previousChunk,
+            biome: chunk.biome.name,
+            previousChunk: chunk.previousChunk.x,
             blocks: blocks,
             walls: walls,
         });
     });
     // savedChunks.splice(1, savedChunks.length - 1);
 
+    if (player) {
+        currentSave.playerPosition = JSON.stringify(player.position);
+    }
     currentSave.chunks = savedChunks;
     currentSave.seed = seed;
     currentSave.pendingBlocks = pendingBlocks;
@@ -43,7 +59,7 @@ const saveJSONToFile = (obj, filename) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${filename}.json`;
+    a.download = `${filename}.save`;
     a.click();
     URL.revokeObjectURL(url);
 };
@@ -56,47 +72,71 @@ function LoadWorld(save) {
         return; // Exit if loading fails
     }
 
-    camera.x = 0;
-    camera.y = (CHUNK_HEIGHT * BLOCK_SIZE) / 2.5;
+    loadingWorld = true;
 
     // Reinitialize global variables
     chunks = new Map();
     // pendingBlocks = new Map();
-    seed = currentSave.seed; // Set the seed before processing chunks
+    setSeed(currentSave.seed);
+
+    entities = [];
 
     currentSave.chunks.forEach((chunk) => {
+        const previousChunk = chunk.previousChunk
+            ? chunks.get(chunk.previousChunk)
+            : null;
         const constructedChunk = new Chunk(
             chunk.x,
             CHUNK_WIDTH,
-            chunk.biome,
-            chunk.previousChunk,
+            Biomes[chunk.biome],
+            previousChunk,
             pendingBlocks,
             worldGrassNoiseMap,
             true
         );
 
-        const constructedBlocks = [];
-        const constructedWalls = [];
+        constructedChunk.generateArray();
 
-        // Construct the blocks from save file
         for (let y = 0; y < CHUNK_HEIGHT; y++) {
-            constructedBlocks[y] = [];
-            constructedWalls[y] = [];
             for (let x = 0; x < CHUNK_WIDTH; x++) {
-                const newBlock = new Block(x, y);
-                const newWall = new Block(x, y, Blocks.Air, true);
-
-                newBlock.setBlockType(chunk.blocks[y][x]);
-                newWall.setBlockType(chunk.walls[y][x]);
-
-                constructedBlocks[y][x] = newBlock;
-                constructedWalls[y][x] = newWall;
+                // Blocks
+                constructedChunk.setBlockType(
+                    x,
+                    y,
+                    chunk.blocks[y][x].t
+                        ? chunk.blocks[y][x].t
+                        : chunk.blocks[y][x],
+                    false,
+                    chunk.blocks[y][x].m
+                        ? JSON.parse(chunk.blocks[y][x].m)
+                        : null,
+                    false
+                );
+                // Walls
+                constructedChunk.setBlockType(
+                    x,
+                    y,
+                    chunk.walls[y][x].t
+                        ? chunk.walls[y][x].t
+                        : chunk.walls[y][x],
+                    true,
+                    chunk.walls[y][x].m
+                        ? JSON.parse(chunk.walls[y][x].m)
+                        : null,
+                    false
+                );
             }
         }
 
-        constructedChunk.blocks = constructedBlocks;
-        constructedChunk.walls = constructedWalls;
-
-        chunks.set(constructedChunk.x, constructedChunk);
+        chunks.set(chunk.x, constructedChunk);
     });
+
+    if (SPAWN_PLAYER) {
+        const position = JSON.parse(currentSave.playerPosition);
+        SpawnPlayer(new Vector2(position.x, position.y));
+    }
+
+    setTimeout(() => {
+        loadingWorld = false;
+    }, 500);
 }

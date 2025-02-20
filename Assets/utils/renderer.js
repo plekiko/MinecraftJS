@@ -423,6 +423,8 @@ function DrawDebugMouseBlock() {
         BLOCK_SIZE,
         BLOCK_SIZE
     );
+
+    ctx.lineWidth = 1;
 }
 
 function DrawHotbar() {

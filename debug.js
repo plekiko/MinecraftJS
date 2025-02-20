@@ -35,6 +35,16 @@ function PrintBlockLogic() {
         const mousePos = input.getMousePositionOnBlockGrid();
         const block = GetBlockAtWorldPosition(mousePos.x, mousePos.y);
 
+        chat.message(
+            `${GetBlock(block.blockType).name} at ${mousePos.x}, ${
+                mousePos.y
+            } ${
+                block.metaData && block.metaData.props
+                    ? "metadata: " + JSON.stringify(block.metaData.props)
+                    : ""
+            }`
+        );
+
         console.log(mousePos.x + " - " + mousePos.y);
         console.log(block);
 

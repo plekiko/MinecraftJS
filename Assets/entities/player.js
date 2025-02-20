@@ -180,6 +180,7 @@ class Player extends Entity {
 
         // Placing
         if (block.air || block.fluid) {
+            if (!this.checkBlockForPlacing(true)) return;
             if (this.holdItem.itemId === Items.WaterBucket) {
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
@@ -203,7 +204,7 @@ class Player extends Entity {
             // Water
             if (
                 this.hoverBlock.blockType === Blocks.Lava &&
-                this.hoverBlock.isSource
+                this.hoverBlock.metaData.props.isSource
             ) {
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
@@ -216,7 +217,7 @@ class Player extends Entity {
             // Lava
             if (
                 this.hoverBlock.blockType === Blocks.Water &&
-                this.hoverBlock.isSource
+                this.hoverBlock.metaData.props.isSource
             ) {
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
@@ -323,7 +324,7 @@ class Player extends Entity {
     }
 
     openConverter() {
-        const storage = this.hoverBlock.metaData.storage;
+        const storage = this.hoverBlock.metaData.props.storage;
 
         this.inventory.openConverter(storage);
         this.inventory.interactedBlock = this.hoverBlock;
@@ -360,7 +361,7 @@ class Player extends Entity {
     }
 
     openSingleChest() {
-        const chestStorage = this.hoverBlock.metaData.storage;
+        const chestStorage = this.hoverBlock.metaData.props.storage;
 
         playPositionalSound(this.position, "blocks/chestopen.ogg");
 
@@ -370,7 +371,7 @@ class Player extends Entity {
     }
 
     openFurnace() {
-        const furnaceData = this.hoverBlock.metaData.storage;
+        const furnaceData = this.hoverBlock.metaData.props.storage;
 
         this.inventory.openFurnace(furnaceData);
         this.inventory.interactedBlock = this.hoverBlock;
@@ -662,7 +663,6 @@ class Player extends Entity {
     getSelectedSlotItem() {
         return this.inventory.items[3][this.inventory.currentSlot].item;
     }
-
     checkBlockForPlacing(collision) {
         const isAir = GetBlock(this.hoverBlock.blockType).air;
         const isFluid = GetBlock(this.hoverBlock.blockType).fluid;

@@ -253,6 +253,7 @@ const items = [
         sprite: "bucket_lava",
         heldInHand: true,
         stackSize: 1,
+        fuelTime: 1000,
     }),
     //#endregion
 

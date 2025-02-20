@@ -12,19 +12,22 @@ chat = new Chat();
 
 if (SPAWN_PLAYER) {
     setTimeout(() => {
-        player = new Player({
-            position: new Vector2(0, 0),
-            entities: entities,
-        });
-
-        player.setOnGround();
-
-        entities.push(player);
-
-        hotbar = new Hotbar(player.inventory);
-
+        SpawnPlayer();
         // summonEntity(Zombie, structuredClone(player.position));
     }, 100);
+}
+
+function SpawnPlayer(position = new Vector2(0, 0)) {
+    player = new Player({
+        position: position,
+        entities: entities,
+    });
+
+    player.setOnGround();
+
+    entities.push(player);
+
+    hotbar = new Hotbar(player.inventory);
 }
 
 function calculateFPS(currentFrameTime) {

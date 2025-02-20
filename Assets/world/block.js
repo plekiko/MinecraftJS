@@ -106,13 +106,8 @@ const BlockCategory = Object.freeze({
 });
 
 class Metadata {
-    constructor({ storage = null, props = null } = {}) {
-        this.storage = storage;
-        this.myAudio = props?.myAudio;
-        this.progression = 0;
-        this.fuelProgression = 0;
-        this.isActive = false;
-        this.burningFuelTime = 0;
+    constructor({ props = null } = {}) {
+        this.props = props;
     }
 }
 
@@ -135,15 +130,15 @@ function checkDissipation(block, worldPos) {
         if (
             neighbor &&
             neighbor.blockType === block.blockType &&
-            neighbor.waterLevel < block.waterLevel
+            neighbor.metaData.props.waterLevel < block.metaData.props.waterLevel
         ) {
             neighborHasHigher = true;
         }
     });
     if (!neighborHasHigher) {
-        block.waterLevel += 0.25;
-        block.cutoff = block.waterLevel;
-        if (block.waterLevel >= 0.85) {
+        block.metaData.props.waterLevel += 0.25;
+        block.cutoff = block.metaData.props.waterLevel;
+        if (block.metaData.props.waterLevel >= 0.85) {
             block.setBlockType(Blocks.Air);
             return true;
         }
@@ -161,9 +156,9 @@ function flowDownward(block, worldPos) {
             below.breakBlock(GetBlock(below.blockType).dropWithoutTool);
         }
         below.setBlockType(block.blockType);
-        below.isSource = false;
-        below.waterLevel = 0;
-        below.cutoff = below.waterLevel;
+        below.metaData.props.isSource = false;
+        below.metaData.props.waterLevel = 0;
+        below.cutoff = below.metaData.props.waterLevel;
     }
     return below;
 }
@@ -172,11 +167,14 @@ function verticalCheckAbove(block, worldPos) {
     let above = GetBlockAtWorldPosition(worldPos.x, worldPos.y - BLOCK_SIZE);
     if (above) {
         if (above.blockType === block.blockType) {
-            block.waterLevel = 0;
-            block.cutoff = block.waterLevel;
-        } else if (GetBlock(above.blockType).air && block.isSource) {
-            block.waterLevel = 0; // As per original code.
-            block.cutoff = block.waterLevel + 0.1;
+            block.metaData.props.waterLevel = 0;
+            block.cutoff = block.metaData.props.waterLevel;
+        } else if (
+            GetBlock(above.blockType).air &&
+            block.metaData.props.isSource
+        ) {
+            block.metaData.props.waterLevel = 0; // As per original code.
+            block.cutoff = block.metaData.props.waterLevel + 0.1;
         }
     }
 }
@@ -199,18 +197,22 @@ function flowSideways(block, worldPos, direction) {
             target.blockType === Blocks.Lava &&
             block.blockType === Blocks.Water
         ) {
-            if (target.isSource) target.setBlockType(Blocks.Obsidian);
+            if (target.metaData.props.isSource)
+                target.setBlockType(Blocks.Obsidian);
             else target.setBlockType(Blocks.Cobblestone);
         }
         target.setBlockType(block.blockType);
-        target.isSource = false;
+        target.metaData.props.isSource = false;
         // sideLevel is determined below.
         return target;
     } else if (
         target &&
         target.blockType === block.blockType &&
-        target.waterLevel > (block.isSource ? 0.2 : block.waterLevel + 0.1) &&
-        !target.isSource
+        target.metaData.props.waterLevel >
+            (block.metaData.props.isSource
+                ? 0.2
+                : block.metaData.props.waterLevel + 0.1) &&
+        !target.metaData.props.isSource
     ) {
         return target;
     }
@@ -239,21 +241,28 @@ class Block extends Square {
         this.chunkX = chunkX;
         this.blockType = blockType;
 
-        if (GetBlock(blockType).fluid) {
-            this.isSource = true;
-            this.waterLevel = 0;
-            this.cutoff = this.waterLevel;
-        }
-
         this.updateSprite();
     }
 
     setMetaData() {
-        const specialType = GetBlock(this.blockType).specialType;
-        if (specialType == SpecialType.CraftingTable) return;
+        const block = GetBlock(this.blockType);
 
-        let storage = [];
         let props = {};
+        let storage = [];
+
+        if (block.fluid) {
+            props.isSource = true;
+            props.waterLevel = 0;
+
+            this.metaData = new Metadata({ props: props });
+            return;
+        }
+
+        if (!block.specialType) return;
+
+        const specialType = GetBlock(this.blockType).specialType;
+
+        if (specialType == SpecialType.CraftingTable) return;
 
         switch (specialType) {
             case SpecialType.Furnace:
@@ -285,7 +294,11 @@ class Block extends Square {
                 break;
         }
 
-        this.metaData = new Metadata({ storage: storage, props: props });
+        if (storage.length > 0) {
+            props.storage = storage;
+        }
+
+        this.metaData = new Metadata({ props: props });
     }
 
     setBlockType(blockType, override = false) {
@@ -317,7 +330,7 @@ class Block extends Square {
         }
 
         this.metaData = undefined;
-        if (block.specialType) this.setMetaData();
+        this.setMetaData();
         if (block.updateSpeed > 0 && !block.chunkUpdate)
             updatingBlocks.push(this);
 
@@ -325,15 +338,10 @@ class Block extends Square {
 
         this.cutoff = 0;
 
-        this.waterLevel = undefined;
-        this.isSource = undefined;
-
         this.frameCount = 0;
 
         if (block.fluid) {
-            this.isSource = true;
-            this.waterLevel = 0;
-            this.cutoff = this.waterLevel;
+            this.cutoff = this.metaData.props.waterLevel;
         }
 
         this.updateSprite();
@@ -348,14 +356,20 @@ class Block extends Square {
             this.simulateWaterFlow();
         }
 
-        if (!this.metaData) return;
+        if (
+            !this.metaData ||
+            !this.metaData.props ||
+            !this.metaData.props.isActive ||
+            !this.metaData.props.progression
+        )
+            return;
 
-        if (!this.metaData.isActive) {
+        if (!this.metaData.props.isActive) {
             this.resetProgression();
             return;
         }
 
-        this.metaData.progression += 1 / TICK_SPEED;
+        this.metaData.props.progression += 1 / TICK_SPEED;
     }
 
     setState(index) {
@@ -364,9 +378,9 @@ class Block extends Square {
     }
 
     furnaceLogic() {
-        if (!this.metaData.storage) return;
+        if (!this.metaData.props.storage) return;
 
-        const storage = this.metaData.storage;
+        const storage = this.metaData.props.storage;
         const input = this.getSlotItem(storage[0][0]);
         const fuel = this.getSlotItem(storage[0][1]);
         const output = this.getSlotItem(storage[1][0]);
@@ -376,39 +390,46 @@ class Block extends Square {
                 : null;
 
         // Determine if furnace should be visually "on" based on fuel availability
-        if (this.metaData.burningFuelTime > 0) {
+        if (this.metaData.props.burningFuelTime > 0) {
             this.setState(1);
-            this.metaData.isActive = true;
+            this.metaData.props.isActive = true;
             if (!input) this.resetProgression();
         } else {
             this.setState(0);
-            this.metaData.isActive = false;
+            this.metaData.props.isActive = false;
             this.resetProgression();
         }
 
         // Only start burning fuel if there's an input item with a smeltable output
-        if (!this.metaData.burningFuelTime && input && input.smeltOutput) {
+        if (
+            !this.metaData.props.burningFuelTime &&
+            input &&
+            input.smeltOutput
+        ) {
             if (fuel) {
-                this.metaData.burningFuelTime = fuel.fuelTime;
+                this.metaData.props.burningFuelTime = fuel.fuelTime;
                 this.removeOneFromStack(storage[0][1]);
             } else {
-                this.metaData.isActive = false;
+                this.metaData.props.isActive = false;
                 return;
             }
         }
 
         // If burning fuel time is active, increment fuel progression
-        if (this.metaData.burningFuelTime > 0) {
-            this.metaData.fuelProgression += deltaTime;
+        if (this.metaData.props.burningFuelTime > 0) {
+            this.metaData.props.fuelProgression += deltaTime;
         }
 
         // Reset burning fuel time if it has been used up
-        if (this.metaData.fuelProgression >= this.metaData.burningFuelTime) {
-            this.metaData.fuelProgression = 0;
-            this.metaData.burningFuelTime = 0;
+        if (
+            this.metaData.props.fuelProgression >=
+            this.metaData.props.burningFuelTime
+        ) {
+            this.metaData.props.fuelProgression = 0;
+            this.metaData.props.burningFuelTime = 0;
 
             if (fuel && input) {
-                this.metaData.burningFuelTime = fuel.fuelTime;
+                this.metaData.props.burningFuelTime = fuel.fuelTime;
                 this.removeOneFromStack(storage[0][1]);
             }
         }
@@ -430,7 +451,7 @@ class Block extends Square {
         }
 
         // Complete smelting process if progression threshold is met
-        if (this.metaData.progression >= 10) {
+        if (this.metaData.props.progression >= 10) {
             this.removeOneFromStack(storage[0][0]);
 
             storage[1][0].itemId = outputItem
@@ -462,29 +483,29 @@ class Block extends Square {
     }
 
     jukeBoxInteraction(item, player) {
-        if (!item || this.metaData.storage[0][0].itemId !== null) {
+        if (!item || this.metaData.props.storage[0][0].itemId !== null) {
             // Remove disc from jukebox'
-            if (this.metaData.storage[0][0].itemId !== null) {
+            if (this.metaData.props.storage[0][0].itemId !== null) {
                 summonEntity(Drop, getBlockWorldPosition(this), {
-                    itemId: this.metaData.storage[0][0].itemId,
+                    itemId: this.metaData.props.storage[0][0].itemId,
                     blockId: null,
                     count: 1,
                 });
 
-                removeAudio(this.metaData.myAudio);
+                removeAudio(this.metaData.props.myAudio);
 
-                this.metaData.storage[0][0] = new InventoryItem();
+                this.metaData.props.storage[0][0] = new InventoryItem();
             }
 
             return;
         }
 
         if (item.playMusicInJukebox) {
-            this.metaData.storage[0][0].itemId = item.itemId;
-            this.metaData.storage[0][0].blockId = null;
-            this.metaData.storage[0][0].count = 1;
+            this.metaData.props.storage[0][0].itemId = item.itemId;
+            this.metaData.props.storage[0][0].blockId = null;
+            this.metaData.props.storage[0][0].count = 1;
 
-            this.metaData.myAudio = playPositionalSound(
+            this.metaData.props.myAudio = playPositionalSound(
                 getBlockWorldPosition(this),
                 "../music/" + item.playMusicInJukebox,
                 20,
@@ -516,7 +537,7 @@ class Block extends Square {
 
         // Loop thru all lava blocks
         for (let lavaBlock of lavaBlocksNear) {
-            if (lavaBlock.isSource) {
+            if (lavaBlock.metaData.props.isSource) {
                 lavaBlock.setBlockType(Blocks.Obsidian);
                 return;
             }
@@ -537,12 +558,15 @@ class Block extends Square {
         if (!GetBlock(this.blockType).fluid) return;
 
         // Initialize water properties if undefined.
-        if (this.waterLevel === undefined || this.isSource === undefined) {
-            this.waterLevel = 0;
-            this.isSource = true;
-            this.cutoff = this.waterLevel;
+        if (
+            this.metaData.props.waterLevel === undefined ||
+            this.metaData.props.isSource === undefined
+        ) {
+            this.metaData.props.waterLevel = 0;
+            this.metaData.props.isSource = true;
+            this.cutoff = this.metaData.props.waterLevel;
         } else {
-            this.cutoff = this.waterLevel;
+            this.cutoff = this.metaData.props.waterLevel;
         }
 
         const worldPos = getBlockWorldPosition(this);
@@ -551,7 +575,7 @@ class Block extends Square {
             this.checkLavaWaterInteraction(worldPos);
 
         // Dissipation (only for non-source blocks).
-        if (!this.isSource) {
+        if (!this.metaData.props.isSource) {
             if (checkDissipation(this, worldPos)) return;
         }
 
@@ -562,40 +586,48 @@ class Block extends Square {
         verticalCheckAbove(this, worldPos);
 
         // Sideways Flow.
-        if (this.waterLevel > 0.85) return;
-        const sideLevel = this.isSource ? 0.2 : this.waterLevel + 0.1;
+        if (this.metaData.props.waterLevel > 0.85) return;
+        const sideLevel = this.metaData.props.isSource
+            ? 0.2
+            : this.metaData.props.waterLevel + 0.1;
         // Left Flow.
-        if (this.isSource || (below && below.blockType !== this.blockType)) {
+        if (
+            this.metaData.props.isSource ||
+            (below && below.blockType !== this.blockType)
+        ) {
             let left = flowSideways(this, worldPos, { dx: -BLOCK_SIZE, dy: 0 });
             if (left) {
                 if (
-                    left.blockType === this.blockType &&
-                    left.waterLevel > sideLevel &&
-                    !left.isSource
+                    left.metaData.props.blockType === this.blockType &&
+                    left.metaData.props.waterLevel > sideLevel &&
+                    !left.metaData.props.isSource
                 ) {
-                    left.waterLevel = sideLevel;
+                    left.metaData.props.waterLevel = sideLevel;
                     left.cutoff = sideLevel;
                 } else {
-                    left.isSource = false;
-                    left.waterLevel = sideLevel;
+                    left.metaData.props.isSource = false;
+                    left.metaData.props.waterLevel = sideLevel;
                     left.cutoff = sideLevel;
                 }
             }
         }
         // Right Flow.
-        if (this.isSource || (below && below.blockType !== this.blockType)) {
+        if (
+            this.metaData.props.isSource ||
+            (below && below.blockType !== this.blockType)
+        ) {
             let right = flowSideways(this, worldPos, { dx: BLOCK_SIZE, dy: 0 });
             if (right) {
                 if (
                     right.blockType === this.blockType &&
-                    right.waterLevel > sideLevel &&
-                    !right.isSource
+                    right.metaData.props.waterLevel > sideLevel &&
+                    !right.metaData.props.isSource
                 ) {
-                    right.waterLevel = sideLevel;
+                    right.metaData.props.waterLevel = sideLevel;
                     right.cutoff = sideLevel;
                 } else {
-                    right.isSource = false;
-                    right.waterLevel = sideLevel;
+                    right.metaData.props.isSource = false;
+                    right.metaData.props.waterLevel = sideLevel;
                     right.cutoff = sideLevel;
                 }
             }
@@ -616,7 +648,7 @@ class Block extends Square {
     }
 
     resetProgression() {
-        this.metaData.progression = 0;
+        this.metaData.props.progression = 0;
     }
 
     breakBlock(drop = false) {
@@ -633,12 +665,12 @@ class Block extends Square {
         this.playBreakSound();
 
         if (this.metaData) {
-            if (this.metaData.storage) {
+            if (this.metaData.props.storage) {
                 this.dropStorage();
             }
 
-            if (this.metaData.myAudio) {
-                removeAudio(this.metaData.myAudio);
+            if (this.metaData.props.myAudio) {
+                removeAudio(this.metaData.props.myAudio);
             }
         }
 
@@ -711,7 +743,7 @@ class Block extends Square {
     }
 
     dropStorage() {
-        const storage = this.metaData.storage;
+        const storage = this.metaData.props.storage;
 
         for (let y = 0; y < storage.length; y++) {
             for (let x = 0; x < storage[y].length; x++) {

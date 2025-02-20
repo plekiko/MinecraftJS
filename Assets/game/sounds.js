@@ -123,6 +123,8 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let playingAudio = [];
 
 function removeAudio(audio) {
+    if (!audio) return;
+    if (!(audio instanceof Audio)) return;
     audio.pause();
     playingAudio = playingAudio.filter((item) => item.audio !== audio);
 }

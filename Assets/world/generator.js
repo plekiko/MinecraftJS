@@ -6,6 +6,13 @@ let seed = Math.floor(Math.random() * 1000000);
 
 tooloud.Perlin.setSeed(seed);
 
+function setSeed(newSeed) {
+    seed = newSeed;
+    tooloud.Perlin.setSeed(seed);
+}
+
+let loadingWorld = false;
+
 const worldGrassNoiseMap = new Noise(550, 0.2, 1);
 
 const worldStructureNoiseMap = new Noise(500, 1, 10);
@@ -93,6 +100,8 @@ function RegenerateWorld() {
 }
 
 function GenerateWorld() {
+    if (loadingWorld) return;
+
     const currentChunkIndex = camera.getCurrentChunkIndex();
 
     // Generate chunks within the visible range of the camera
@@ -205,7 +214,7 @@ function GenerateChestWithLoot(lootTable, x, y, chunk) {
         x,
         y,
         Blocks.Chest,
-        new Metadata({ storage: newStorage })
+        new Metadata({ props: { storage: newStorage } })
     );
 }
 

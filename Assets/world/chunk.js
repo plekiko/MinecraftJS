@@ -32,7 +32,7 @@ class Chunk {
             this.blocks[y] = [];
             this.walls[y] = [];
             for (let x = 0; x < this.width; x++) {
-                this.blocks[y][x] = new Block(x, y, Blocks.Air, this.x); // Set default as air block
+                this.blocks[y][x] = new Block(x, y, Blocks.Air, this.x);
                 this.walls[y][x] = new Block(x, y, Blocks.Air, this.x, true);
             }
         }
