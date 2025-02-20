@@ -20,6 +20,7 @@ class Drop extends Entity {
             type: EntityTypes.Drop,
             float: true,
             playWaterEnterSound: false,
+            dark: props.wall === true,
         });
 
         this.position = position;

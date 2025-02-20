@@ -24,6 +24,7 @@ class Entity {
 
         sprite = null,
         spriteScale = BLOCK_SIZE / 32,
+        dark = false,
 
         outline = 0,
         color = "black",
@@ -92,6 +93,7 @@ class Entity {
 
         this.sprite = sprite;
         this.body = body;
+        this.dark = dark;
 
         this.img = new Image();
         this.img.src = sprite ? sprite : "";
@@ -697,10 +699,10 @@ class Entity {
 
         ctx.translate(centerX, centerY);
 
-        if (!this.sprite || this.sprite == "") {
-            ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-            ctx.fillRect(0, 0, this.hitbox.x, this.hitbox.y);
-        }
+        // if (!this.sprite || this.sprite == "") {
+        //     ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+        //     ctx.fillRect(0, 0, this.hitbox.x, this.hitbox.y);
+        // }
 
         if (this.rotation) {
             ctx.rotate((this.rotation * Math.PI) / 180);
@@ -733,6 +735,17 @@ class Entity {
                 spriteWidth,
                 spriteHeight
             );
+
+            if (this.dark) {
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = "black";
+                ctx.fillRect(
+                    spriteOffsetX,
+                    spriteOffsetY,
+                    spriteWidth,
+                    spriteHeight
+                );
+            }
         }
 
         ctx.restore();

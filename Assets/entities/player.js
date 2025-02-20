@@ -812,14 +812,12 @@ class Player extends Entity {
                 : selectedTool
                 ? selectedTool === block.toolType
                 : false;
-            if (isWall) shouldDrop = true;
             if (
-                isWall ||
-                (this.inventory.selectedItem &&
-                    this.inventory.selectedItem.toolLevel <
-                        block.requiredToolLevel)
+                this.inventory.selectedItem &&
+                this.inventory.selectedItem.toolLevel < block.requiredToolLevel
             )
                 shouldDrop = false;
+            if (isWall) shouldDrop = true;
             hover.breakBlock(shouldDrop);
             this.resetBreaking();
             this.swing();
