@@ -301,6 +301,7 @@ const blockTypes = [
                 subtract: 6,
             }),
         ]),
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 19,
@@ -321,6 +322,7 @@ const blockTypes = [
                 subtract: 4,
             }),
         ]),
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 20,
@@ -334,6 +336,8 @@ const blockTypes = [
         breakByFluid: true,
         toolType: ToolType.Shears,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 21,
@@ -347,6 +351,8 @@ const blockTypes = [
         breakByFluid: true,
         toolType: ToolType.Shears,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 22,
@@ -359,6 +365,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 23,
@@ -371,6 +379,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 24,
@@ -383,6 +393,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 25,
@@ -395,6 +407,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 26,
@@ -407,6 +421,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 27,
@@ -419,6 +435,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 28,
@@ -431,6 +449,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 29,
@@ -443,6 +463,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 30,
@@ -455,6 +477,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 31,
@@ -467,6 +491,7 @@ const blockTypes = [
         fluid: true,
         dropWithoutTool: false,
         breakSound: Sounds.Water_Enter,
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 32,
@@ -696,6 +721,8 @@ const blockTypes = [
         animationSpeed: 0.03,
         fluid: true,
         dropWithoutTool: false,
+
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 54,

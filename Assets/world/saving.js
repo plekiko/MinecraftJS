@@ -1,5 +1,8 @@
 let currentSave = {
     playerPosition: new Vector2(),
+    gamemode: 0,
+    time: 0,
+    inventoryItems: [[]],
     seed: 0,
     chunks: new Map(),
     pendingBlocks: new Map(),
@@ -34,15 +37,30 @@ function SaveWorld() {
         savedChunks.push({
             x: chunk.x,
             biome: chunk.biome.name,
-            previousChunk: chunk.previousChunk.x,
+            previousChunk: chunk.previousChunk ? chunk.previousChunk.x : null,
             blocks: blocks,
             walls: walls,
         });
     });
     // savedChunks.splice(1, savedChunks.length - 1);
 
+    let playerInventory = [[]];
+
+    for (let i = 0; i < player.inventory.items.length; i++) {
+        playerInventory[i] = [];
+        for (let j = 0; j < player.inventory.items[i].length; j++) {
+            playerInventory[i][j] = player.inventory.items[i][j].item;
+        }
+    }
+
+    currentSave.time = time;
+
     if (player) {
         currentSave.playerPosition = JSON.stringify(player.position);
+
+        currentSave.inventoryItems = JSON.stringify(playerInventory);
+
+        currentSave.gamemode = player.gamemode;
     }
     currentSave.chunks = savedChunks;
     currentSave.seed = seed;
@@ -131,9 +149,27 @@ function LoadWorld(save) {
         chunks.set(chunk.x, constructedChunk);
     });
 
+    pendingBlocks = new Map();
+
+    time = currentSave.time;
+
     if (SPAWN_PLAYER) {
         const position = JSON.parse(currentSave.playerPosition);
         SpawnPlayer(new Vector2(position.x, position.y));
+
+        const playerInventory = JSON.parse(currentSave.inventoryItems);
+        for (let i = 0; i < playerInventory.length; i++) {
+            for (let j = 0; j < playerInventory[i].length; j++) {
+                player.inventory.items[i][j].item = new InventoryItem({
+                    blockId: playerInventory[i][j].blockId,
+                    itemId: playerInventory[i][j].itemId,
+                    count: playerInventory[i][j].count,
+                    props: playerInventory[i][j].props,
+                });
+            }
+        }
+
+        player.setGamemode(currentSave.gamemode);
     }
 
     setTimeout(() => {
