@@ -30,6 +30,10 @@ function SpawnPlayer(position = new Vector2(0, 0)) {
     hotbar = new Hotbar(player.inventory);
 }
 
+function ReverseY(y) {
+    return CHUNK_HEIGHT - y;
+}
+
 function calculateFPS(currentFrameTime) {
     if (!calculateFPS.lastUpdate) calculateFPS.lastUpdate = currentFrameTime;
     if (!calculateFPS.frameCount) calculateFPS.frameCount = 0;

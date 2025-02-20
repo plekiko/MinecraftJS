@@ -19,14 +19,14 @@ const worldStructureNoiseMap = new Noise(500, 1, 10);
 
 const worldTemperatureNoiseMap = new Noise(
     30, // Scale (size)
-    45, // Intensity
-    30
+    70, // Intensity
+    32
 );
 
 const worldWetnessNoiseMap = new Noise(
     30, // Scale (size)
-    55, // Intensity
-    30
+    40, // Intensity
+    21
 );
 
 const worldTreeNoiseMap = new Noise(
@@ -81,6 +81,38 @@ function PrintNoiseOutput(noise, count = 100) {
     // Print the minimum and maximum values
     console.log("Minimum Noise Value:", minValue);
     console.log("Maximum Noise Value:", maxValue);
+}
+
+function LocateBiome(biome) {
+    for (let i = 0; i < 10000; i++) {
+        let currentBiome = calculateChunkBiome(i);
+
+        if (currentBiome === biome) return i;
+
+        currentBiome = calculateChunkBiome(-i);
+
+        if (currentBiome === biome) return -i;
+    }
+
+    return false;
+}
+
+function BiomesInChunkCount(count) {
+    // store all biomes and print their count
+    let biomeCount = {};
+    for (let i = 0; i < count; i++) {
+        const biome = calculateChunkBiome(i);
+        if (!biomeCount[biome.name]) biomeCount[biome.name] = 1;
+        else biomeCount[biome.name]++;
+    }
+    console.log(biomeCount);
+
+    // then print in percentage the distribution of biomes
+    for (const biome in biomeCount) {
+        console.log(
+            `${biome}: ${((biomeCount[biome] / count) * 100).toFixed(2)}%`
+        );
+    }
 }
 
 function RegenerateWorld() {

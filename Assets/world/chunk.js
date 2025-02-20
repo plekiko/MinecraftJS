@@ -163,15 +163,36 @@ class Chunk {
         for (let x = 0; x < this.width; x++) {
             const height = this.getHeight(x);
 
-            for (let y = height; y > 0; y--) {
-                if (y > height - this.biome.secondLayerWidth) {
-                    this.setBlockType(x, y, this.biome.secondLayer);
-                } else {
-                    this.setBlockType(x, y, Blocks.Stone);
-                    this.setBlockType(x, y, Blocks.Stone, true);
-                }
+            // Draw the top layer (first level) with a constant thickness.
+            for (let y = height; y > height - this.biome.firstLayerWidth; y--) {
+                this.setBlockType(x, y, this.biome.topLayer);
             }
-            this.setBlockType(x, height, this.biome.topLayer);
+
+            // Draw the second layer immediately below the top layer.
+            for (
+                let y = height - this.biome.firstLayerWidth;
+                y >
+                height -
+                    this.biome.firstLayerWidth -
+                    this.biome.secondLayerWidth;
+                y--
+            ) {
+                this.setBlockType(x, y, this.biome.secondLayer);
+            }
+
+            // Fill the remaining depth with stone.
+            for (
+                let y =
+                    height -
+                    this.biome.firstLayerWidth -
+                    this.biome.secondLayerWidth;
+                y > 0;
+                y--
+            ) {
+                this.setBlockType(x, y, Blocks.Stone);
+                // Optionally set additional properties (e.g., variant) if needed.
+                this.setBlockType(x, y, Blocks.Stone, true);
+            }
         }
     }
 

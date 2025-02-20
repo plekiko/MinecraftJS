@@ -73,6 +73,8 @@ class Entity {
 
         this.noCollision = noCollision;
 
+        this.wasColliding = false;
+
         this.fallDistance = 0;
         this.fallDamage = fallDamage;
 
@@ -414,6 +416,8 @@ class Entity {
     }
 
     updatePositionWithVelocity() {
+        this.wasColliding = false;
+
         this.handleTargetVelocity();
 
         const nextPositionX = this.position.x + this.velocity.x * deltaTime;
@@ -437,11 +441,13 @@ class Entity {
 
         if (nextPositionX > this.position.x) {
             if (rightCollision) {
+                this.wasColliding = true;
                 this.velocity.x = 0;
             }
         }
         if (nextPositionX < this.position.x) {
             if (leftCollision) {
+                this.wasColliding = true;
                 this.velocity.x = 0;
             }
         }
@@ -460,11 +466,13 @@ class Entity {
         if (!upCollision) {
             if (downCollision) {
                 this.standingOnBlockType = downCollision.blockType;
+                this.wasColliding = true;
                 this.ground();
             } else {
                 this.grounded = false;
             }
         } else {
+            this.wasColliding = true;
             this.velocity.y = 0;
         }
 

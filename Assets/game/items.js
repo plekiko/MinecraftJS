@@ -548,6 +548,8 @@ const items = [
         name: "Snowball",
         sprite: "snowball",
         stackSize: 16,
+        projectile: "Snowball",
+        throwPower: 25,
     }),
     //#endregion
 ];

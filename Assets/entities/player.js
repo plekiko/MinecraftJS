@@ -67,13 +67,13 @@ class Player extends Entity {
     update() {
         this.interactLogic();
         this.movementLogic();
+        this.hoverBlockLogic();
         this.breakingAndPlacingLogic();
         this.updateEntity();
         this.flyingToggleLogic();
         this.collisionLogic();
         this.toggleLogic();
         this.dropLogic();
-        this.hoverBlockLogic();
         this.setHoldItem();
         this.hurtCooldownLogic();
 
@@ -163,6 +163,11 @@ class Player extends Entity {
 
         if (!item) return;
 
+        if (item.projectile) {
+            this.throwProjectile(item);
+            return;
+        }
+
         if (item.foodValue > 0) {
             this.eatFoodInHand();
         }
@@ -173,6 +178,29 @@ class Player extends Entity {
             item.itemId === Items.LavaBucket
         )
             this.useBucket();
+    }
+
+    throwProjectile(item) {
+        const projectile = Entities[item.projectile];
+
+        if (!projectile) return;
+
+        this.swing();
+
+        const mousePos = input.getMouseWorldPosition();
+
+        const direction = calculateDirection(this.position, mousePos);
+
+        summonEntity(projectile, structuredClone(this.position), {
+            velocity: new Vector2(
+                direction.x * item.throwPower * BLOCK_SIZE,
+                direction.y * item.throwPower * BLOCK_SIZE
+            ),
+        });
+
+        if (this.abilities.instaBuild) return;
+
+        this.removeFromCurrentSlot();
     }
 
     useBucket() {
@@ -187,6 +215,8 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.Bucket, count: 1 })
                 );
                 this.hoverBlock.setBlockType(Blocks.Water, true);
+
+                this.hoverBlock.updateSprite();
                 return;
             }
             if (this.holdItem.itemId === Items.LavaBucket) {
@@ -195,6 +225,8 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.Bucket, count: 1 })
                 );
                 this.hoverBlock.setBlockType(Blocks.Lava, true);
+
+                this.hoverBlock.updateSprite();
                 return;
             }
         }
@@ -281,16 +313,23 @@ class Player extends Entity {
     }
 
     teleport(position) {
-        this.position = position;
+        chat.message("Teleporting player to " + position.x + " " + position.y);
+
+        const newPosition = new Vector2(
+            position.x,
+            -position.y + CHUNK_HEIGHT * BLOCK_SIZE
+        );
+        this.position = newPosition;
     }
 
     interactLogic() {
         if (this.windowOpen) return;
 
-        if (!this.hoverBlock) return;
+        const rightClick = input.isRightMouseButtonPressed();
 
-        if (!input.isRightMouseButtonPressed() && !input.mouse.wheelDown)
-            return;
+        if (rightClick) this.useItemInHand();
+
+        if (!this.hoverBlock) return;
 
         const block = GetBlock(this.hoverBlock.blockType);
 
@@ -298,12 +337,9 @@ class Player extends Entity {
             this.handleQuickBlockSelect(block);
         }
 
-        if (!block.specialType) {
-            this.useItemInHand();
-            return;
-        }
-
         this.hoverBlock.interact(this);
+
+        if (!rightClick) return;
 
         this.swing();
 
@@ -384,7 +420,7 @@ class Player extends Entity {
     }
 
     hoverBlockLogic() {
-        if (this.oldHoverBlock != this.hoverBlock) {
+        if (this.oldHoverBlock !== this.hoverBlock) {
             this.oldHoverBlock = this.hoverBlock;
             this.resetBreaking();
         }
@@ -510,11 +546,14 @@ class Player extends Entity {
         if (!this.hoverBlock) return;
 
         if (input.isLeftMouseDown())
-            this.breakingLogic(
-                this.inventory.selectedItem?.toolType === ToolType.Hammer
-                    ? this.hoverWall
-                    : this.hoverBlock
-            );
+            if (
+                this.inventory.selectedItem &&
+                this.inventory.selectedItem.toolType === ToolType.Hammer
+            ) {
+                this.breakingLogic(this.hoverWall);
+            } else {
+                this.breakingLogic(this.hoverBlock);
+            }
         else {
             this.resetBreaking();
         }
@@ -751,7 +790,10 @@ class Player extends Entity {
 
         if (block.air || block.fluid) return;
 
-        if (!this.abilities.mayBuild || GetBlock(hover).hardness < 0) {
+        if (
+            !this.abilities.mayBuild ||
+            GetBlock(hover.blockType).hardness < 0
+        ) {
             this.resetBreaking();
             return;
         }

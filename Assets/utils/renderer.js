@@ -185,7 +185,9 @@ function DrawCoordinates() {
     drawText({
         text: `x: ${
             Math.round((player.position.x / BLOCK_SIZE) * 100) / 100
-        } y: ${Math.round((player.position.y / BLOCK_SIZE) * 100) / 100}`,
+        } y: ${
+            Math.round(ReverseY(player.position.y / BLOCK_SIZE) * 100) / 100
+        }`,
         x: 5,
         y: 20,
         size: 20,

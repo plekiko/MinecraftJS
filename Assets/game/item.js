@@ -13,6 +13,7 @@ class Item {
         foodValue = 0,
         playMusicInJukebox = null,
         projectile = null,
+        throwPower = 0,
     }) {
         this.itemId = itemId;
         this.name = name;
@@ -30,6 +31,7 @@ class Item {
         this.playMusicInJukebox = playMusicInJukebox;
 
         this.projectile = projectile;
+        this.throwPower = throwPower;
 
         this.fuelTime = fuelTime;
         this.smeltOutput = smeltOutput;

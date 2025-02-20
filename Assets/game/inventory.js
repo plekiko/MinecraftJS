@@ -452,7 +452,7 @@ class Inventory {
                 this.holdingItem &&
                 this.holdingItem.blockId === item.blockId &&
                 this.holdingItem.itemId === item.itemId &&
-                this.holdingItem.props === item.props;
+                this.arePropsEqual(this.holdingItem.props, item.props);
 
             // Calculate combined count only if holding the same item type
             const combinedCount = isSameType

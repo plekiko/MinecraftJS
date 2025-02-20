@@ -38,6 +38,15 @@ class Vector2 {
     }
 }
 
+function calculateDirection(positionA, positionB) {
+    const direction = new Vector2(
+        positionB.x - positionA.x,
+        positionB.y - positionA.y
+    ).normalize();
+
+    return direction;
+}
+
 class Transform {
     constructor(position = new Vector2(), size = new Vector2()) {
         this.position = position;
@@ -209,6 +218,19 @@ class Square {
     isAnimated() {
         return this.img.height > 16;
     }
+}
+
+function arePropsEqual(a, b) {
+    // Treat null/undefined as equal
+    if (!a && !b) return true;
+    if ((a && !b) || (!a && b)) return false;
+    const aKeys = Object.keys(a);
+    const bKeys = Object.keys(b);
+    if (aKeys.length !== bKeys.length) return false;
+    for (let key of aKeys) {
+        if (a[key] !== b[key]) return false;
+    }
+    return true;
 }
 
 function RandomRange(min, max) {

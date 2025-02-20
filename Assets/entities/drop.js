@@ -48,8 +48,14 @@ class Drop extends Entity {
 
         if (other.type !== EntityTypes.Drop) return;
 
-        const isSameBlock = other.blockId && other.blockId === this.blockId;
-        const isSameItem = other.itemId != null && other.itemId === this.itemId;
+        const isSameBlock =
+            other.blockId &&
+            other.blockId === this.blockId &&
+            arePropsEqual(other.props, this.props);
+        const isSameItem =
+            other.itemId != null &&
+            other.itemId === this.itemId &&
+            arePropsEqual(other.props, this.props);
 
         if (isSameBlock || isSameItem) {
             const maxStackSize = this.getStackSize();

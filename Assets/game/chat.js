@@ -16,7 +16,7 @@ class Chat {
         this.messageDuration = 8000;
 
         this.historyIndex = 0;
-        this.viewHistory = 10;
+        this.viewHistory = 15;
 
         this.loadLog();
     }
@@ -72,6 +72,31 @@ class Chat {
         if (loadedLog) this.chatLog = loadedLog;
     }
 
+    locateBiome(messageArray) {
+        if (!messageArray[1]) {
+            this.invalidCommand("/locatebiome <BiomeName>");
+            return;
+        }
+
+        const biomeName = messageArray[1];
+
+        const biome = Biomes[biomeName];
+
+        if (biome) {
+            const biomeChunkX = LocateBiome(biome);
+
+            if (!biomeChunkX) {
+                this.message("Biome not found.");
+                return;
+            }
+            const chunkPos = biomeChunkX * CHUNK_WIDTH;
+
+            chat.message(`Biome ${biomeName} found at ${chunkPos}.`);
+        } else {
+            this.message("Biome not found.");
+        }
+    }
+
     clearLog() {
         this.chatLog = [];
         this.saveLog();
@@ -121,6 +146,9 @@ class Chat {
             case "structure":
                 this.structure(messageArray);
                 break;
+            case "locatebiome":
+                this.locateBiome(messageArray);
+                break;
             default:
                 this.message("Invalid Command!");
                 break;
@@ -164,7 +192,7 @@ class Chat {
 
     summon(messageArray) {
         if (!messageArray[1] || !messageArray[2] || !messageArray[3]) {
-            this.invalidCommand("/summon <Entity> <x> <y>");
+            this.invalidCommand("/summon <Entity> <x> <y> <count>");
             return;
         }
 
@@ -181,6 +209,10 @@ class Chat {
 
         const position = this.getWorldPosition(new Vector2(x, y));
 
+        let count = parseInt(messageArray[4]);
+
+        if (!count || isNaN(count) || count < 1) count = 1;
+
         if (!position) {
             this.invalidCommand("/summon <Entity> <x> <y>");
             return;
@@ -189,7 +221,9 @@ class Chat {
         if (collections[category] && collections[category][itemName] != null) {
             const entity = collections[category][itemName];
 
-            summonEntity(entity, position);
+            for (let i = 0; i < count; i++) {
+                summonEntity(entity, structuredClone(position));
+            }
         } else {
             this.message("Entity not found.");
         }
@@ -286,15 +320,16 @@ class Chat {
         const commands = [
             "/help",
             "Category's: Blocks, Items, Entities",
-            "/give <Category.ItemName> [count]",
+            "/give <Category.ItemName> <count>",
             "/clear",
             "/clearlog",
             "/gamemode <Gamemode>",
             "/tp <x> <y>",
-            "/summon <Category.ItemName> <x> <y>",
+            "/summon <Category.ItemName> <x> <y> <count>",
             "/kill",
             "/time <1 - 7.5>",
             "/structure <StructureName>",
+            "/locatebiome <BiomeName>",
         ];
 
         // Print them one by one in chat
@@ -519,6 +554,13 @@ class Chat {
                         this.cursorPosition + 1
                     );
                     return;
+                }
+                if (key === "Minus") {
+                    this.currentMessage =
+                        this.currentMessage.slice(0, this.cursorPosition) +
+                        "-" +
+                        this.currentMessage.slice(this.cursorPosition);
+                    this.cursorPosition++;
                 }
                 if (this.currentMessage.length >= this.maxLenght) return;
 

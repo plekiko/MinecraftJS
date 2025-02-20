@@ -19,22 +19,7 @@ class Projectile extends Entity {
             velocity: velocity,
             ...props,
         });
-        this.damage = 1;
-    }
-    update() {
-        this.x += this.speed;
-        if (this.x > 800) {
-            this.destroy();
-        }
-    }
-    onCollision(entity) {
-        if (entity instanceof Enemy) {
-            entity.health -= this.damage;
-            this.destroy();
-        }
+        this.damage = damage;
     }
     hit() {}
-    update() {
-        this.updateEntity();
-    }
 }
