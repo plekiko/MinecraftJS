@@ -654,6 +654,8 @@ const blockTypes = [
         blockId: 47,
         name: "Quinten Blok",
         sprite: "quinten",
+        fluid: true,
+        updateSpeed: 0.2,
         fuelTime: 20,
         hardness: 12,
         breakSound: Sounds.Break_Stone,

@@ -442,7 +442,7 @@ class Inventory {
 
         if (input.shiftPressed) {
             // If shift-click transfer succeeded, exit.
-            if (this.handleShiftClick(array[y][x], array)) return;
+            if (array) if (this.handleShiftClick(array[y][x], array)) return;
         }
 
         // Specific handling for the crafting output slot

@@ -135,6 +135,29 @@ const recipes = [
         output: new InventoryItem({ itemId: Items.WoodSword, count: 1 }),
     }),
 
+    // Wooden Hammer
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.WoodHammer, count: 1 }),
+    }),
+
     //#endregion
 
     //#region Stone Tools
@@ -224,6 +247,29 @@ const recipes = [
             [new RecipeItem({ itemId: Items.Stick })],
         ],
         output: new InventoryItem({ itemId: Items.StoneSword, count: 1 }),
+    }),
+
+    // Stone Hammer
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+            ],
+            [
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.StoneHammer, count: 1 }),
     }),
 
     //#endregion
@@ -333,6 +379,29 @@ const recipes = [
         output: new InventoryItem({ itemId: Items.IronSword, count: 1 }),
     }),
 
+    // Iron Hammer
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.IronHammer, count: 1 }),
+    }),
+
     // Bucket
     new Recipe({
         type: RecipeType.Shaped,
@@ -440,6 +509,29 @@ const recipes = [
             [new RecipeItem({ itemId: Items.Stick })],
         ],
         output: new InventoryItem({ itemId: Items.DiamondSword, count: 1 }),
+    }),
+
+    // Diamond Hammer
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.Diamond }),
+                new RecipeItem({ itemId: Items.Diamond }),
+                new RecipeItem({ itemId: Items.Diamond }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.Diamond }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ itemId: Items.Diamond }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.DiamondHammer, count: 1 }),
     }),
 
     //#endregion
