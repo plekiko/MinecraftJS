@@ -5,6 +5,7 @@ let chunks_in_render_distance = new Map();
 let player;
 
 function removeEntity(entity) {
+    if (!entity) return;
     if (entity.myChunkX !== null) {
         chunks.get(entity.myChunkX).removeEntityFromChunk(entity);
     }

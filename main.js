@@ -10,12 +10,12 @@ chat = new Chat();
 //     return dialogText;
 // };
 
-if (SPAWN_PLAYER) {
-    setTimeout(() => {
-        SpawnPlayer();
-        // summonEntity(Zombie, structuredClone(player.position));
-    }, 100);
-}
+// if (SPAWN_PLAYER) {
+//     setTimeout(() => {
+//         SpawnPlayer();
+//         // summonEntity(Zombie, structuredClone(player.position));
+//     }, 100);
+// }
 
 function SpawnPlayer(position = new Vector2(0, 0)) {
     player = new Player({

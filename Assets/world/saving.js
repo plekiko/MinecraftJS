@@ -10,7 +10,7 @@ let currentSave = {
 
 // Assuming chunks, seed, pendingBlocks, etc. are defined elsewhere in the global scope
 
-function SaveWorld() {
+function SaveWorld(message = true) {
     let savedChunks = [];
 
     chunks.forEach((chunk) => {
@@ -67,8 +67,70 @@ function SaveWorld() {
     currentSave.pendingBlocks = pendingBlocks;
 
     const saveData = JSON.stringify(currentSave);
-    saveJSONToFile(saveData, "world");
+    // saveJSONToFile(saveData, "world");
+
+    let worldName = "world";
+    let id = Date.now();
+
+    let worlds = localStorage.getItem("worlds");
+    let selectedWorld = localStorage.getItem("selectedWorld");
+
+    if (selectedWorld) {
+        selectedWorld = JSON.parse(selectedWorld);
+        worldName = selectedWorld.name;
+        id = selectedWorld.id;
+    } else {
+        worldName = prompt("Enter world name: ", worldName);
+    }
+
+    worldData = {
+        id: id,
+        name: worldName,
+        lastPlayed: new Date().toLocaleString(),
+    };
+
+    if (worlds) {
+        worlds = JSON.parse(worlds);
+        if (worlds.find((world) => world.id === id)) {
+            worlds = worlds.filter((world) => world.id !== id);
+        }
+        worlds.push(worldData);
+    } else {
+        worlds = [worldData];
+    }
+
+    if (message) chat.message("World saved successfully!");
+
+    localStorage.setItem("worlds", JSON.stringify(worlds));
+
+    localStorage.setItem(id, saveData);
 }
+
+function LoadWorldFromLocalStorage() {
+    let selectedWorld = localStorage.getItem("selectedWorld");
+
+    if (selectedWorld) {
+        selectedWorld = JSON.parse(selectedWorld);
+    } else {
+        return;
+    }
+
+    const selectedWorldData = localStorage.getItem(selectedWorld.id);
+
+    if (!selectedWorldData) {
+        if (SPAWN_PLAYER) {
+            setTimeout(() => {
+                SpawnPlayer();
+                SaveWorld(false);
+            }, 100);
+        }
+        return;
+    }
+
+    LoadWorld(selectedWorldData);
+}
+
+LoadWorldFromLocalStorage();
 
 const saveJSONToFile = (obj, filename) => {
     const blob = new Blob([JSON.stringify(obj, null, 2)], {
@@ -154,22 +216,28 @@ function LoadWorld(save) {
     time = currentSave.time;
 
     if (SPAWN_PLAYER) {
-        const position = JSON.parse(currentSave.playerPosition);
-        SpawnPlayer(new Vector2(position.x, position.y));
+        removeEntity(player);
 
-        const playerInventory = JSON.parse(currentSave.inventoryItems);
-        for (let i = 0; i < playerInventory.length; i++) {
-            for (let j = 0; j < playerInventory[i].length; j++) {
-                player.inventory.items[i][j].item = new InventoryItem({
-                    blockId: playerInventory[i][j].blockId,
-                    itemId: playerInventory[i][j].itemId,
-                    count: playerInventory[i][j].count,
-                    props: playerInventory[i][j].props,
-                });
+        player = null;
+
+        setTimeout(() => {
+            const position = JSON.parse(currentSave.playerPosition);
+            SpawnPlayer(new Vector2(position.x, position.y));
+
+            const playerInventory = JSON.parse(currentSave.inventoryItems);
+            for (let i = 0; i < playerInventory.length; i++) {
+                for (let j = 0; j < playerInventory[i].length; j++) {
+                    player.inventory.items[i][j].item = new InventoryItem({
+                        blockId: playerInventory[i][j].blockId,
+                        itemId: playerInventory[i][j].itemId,
+                        count: playerInventory[i][j].count,
+                        props: playerInventory[i][j].props,
+                    });
+                }
             }
-        }
 
-        player.setGamemode(currentSave.gamemode);
+            player.setGamemode(currentSave.gamemode);
+        }, 100);
     }
 
     setTimeout(() => {

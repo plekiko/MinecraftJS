@@ -489,16 +489,26 @@ class Chunk {
 
     spawnTreeAt(tree, x, y) {
         if (y <= 3) return;
+
+        // Randomly choose to flip (mirroring) the structure.
+        const flip = RandomRange(0, 2) === 1; // flip is true 50% of the time
+
         const treeHeight = tree.length;
         for (let i = 0; i < treeHeight; i++) {
             const layerWidth = tree[i].length;
             for (let j = 0; j < layerWidth; j++) {
                 const block = tree[i][j];
+                // If flipped, mirror the column index.
+                if (block === Blocks.Air) continue;
+                const columnIndex = flip ? layerWidth - 1 - j : j;
+
+                // Calculate the world x-coordinate using the (possibly flipped) column index.
                 const worldX =
                     this.x +
                     x * BLOCK_SIZE -
                     Math.floor(layerWidth / 2) * BLOCK_SIZE +
-                    j * BLOCK_SIZE;
+                    columnIndex * BLOCK_SIZE;
+
                 const worldY = y * BLOCK_SIZE + i * BLOCK_SIZE;
                 this.setBlockTypeAtPosition(worldX, worldY, block);
             }
@@ -522,6 +532,7 @@ class Chunk {
             // Calculate local X relative to the target chunk.
             const localX = Math.floor((worldX - targetChunk.x) / BLOCK_SIZE);
             const localY = Math.floor(worldY / BLOCK_SIZE);
+
             targetChunk.setBlockType(localX, localY, blockType, wall, metaData);
         } else {
             // Buffer the block to place it once the chunk is generated.

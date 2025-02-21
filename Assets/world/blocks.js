@@ -711,7 +711,6 @@ const blockTypes = [
         breakSound: Sounds.Break_Glass,
         breakingSound: Sounds.Breaking_Glass,
         dropWithoutTool: false,
-        collision: false,
     }),
     new BlockType({
         blockId: 53,

@@ -1,11 +1,170 @@
+* {
+    image-rendering: optimizeSpeed;
+    image-rendering: pixelated; /* Chrome and modern browsers */
+}
+
 body {
     background-image: url("Assets/sprites/misc/End_Poem_background.webp");
     background-size: cover;
     height: 100vh;
     overflow: hidden;
+
+    margin: 0;
 }
 
-.container {
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("Assets/sprites/blocks/dirt.png");
+    background-size: 100px;
+    background-repeat: repeat;
+    filter: brightness(20%);
+
+    z-index: -2;
+}
+
+.world-buttons-container {
+    bottom: 0;
+
+    margin-bottom: 15px;
+    gap: 10px;
+
+    width: 50%;
+    height: 15%;
+    position: absolute;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    display: flex;
+}
+
+.world-select-container {
+    width: 100%;
+    height: 80%;
+
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.world-select-bar-container {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    z-index: -1;
+}
+
+.world-select-container-text {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+
+    z-index: 1;
+}
+
+.big-text {
+    font-family: "Pixel";
+    font-size: 2rem;
+    color: white;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+
+    padding: 20px;
+}
+
+.world-select-bar {
+    width: 100%;
+    height: 20%;
+
+    background-image: url("Assets/sprites/blocks/dirt.png");
+    background-size: 100px;
+    background-repeat: repeat;
+    filter: brightness(35%);
+
+    box-shadow: 0 0 20px 5px rgba(0, 0, 0, 1);
+}
+
+.world-container {
+    width: 95%;
+    height: 120px; /* Fixed height */
+    flex-shrink: 0; /* Prevent the container from shrinking */
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    box-sizing: border-box;
+
+    display: none;
+}
+
+.world-container.selected {
+    background-color: rgba(0, 0, 0, 0.6);
+
+    outline: solid rgb(210, 210, 210) 3px;
+}
+
+.world-image {
+    height: 100%;
+    user-select: none;
+    pointer-events: none;
+}
+
+.world-data-container {
+    display: flex;
+    flex-direction: column;
+
+    height: 100%;
+}
+
+.world-name {
+    font-family: "Pixel";
+    font-size: 2rem;
+    color: white;
+    user-select: none;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+}
+
+.world-date {
+    font-family: "Pixel";
+    font-size: 2rem;
+    user-select: none;
+    color: rgb(123, 123, 123);
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+}
+
+.world-select {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+    width: 50%;
+    height: 73%;
+
+    overflow-y: auto;
+
+    /* background-color: rosybrown; */
+}
+
+.menu-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -140,14 +299,23 @@ body {
     text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
     font-family: "Pixel";
     text-decoration: none;
-    font-size: 1.5rem;
+    font-size: 130%;
 
     cursor: pointer;
 
-    margin: 0;
+    background-color: transparent;
+    border: none;
 
-    image-rendering: optimizeSpeed;
-    image-rendering: pixelated; /* Chrome and modern browsers */
+    margin: 0;
+}
+
+.btn:disabled {
+    background-image: url("Assets/sprites/menu/menu_button_disabled.png");
+}
+
+.btn:disabled:hover {
+    cursor: auto;
+    background-image: url("Assets/sprites/menu/menu_button_disabled.png");
 }
 
 .btn:hover {

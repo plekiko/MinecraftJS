@@ -1,4 +1,16 @@
 const randomTextElement = document.querySelector(".splash");
+const menuContainer = document.querySelector(".menu-container");
+const worldsContainer = document.querySelector(".world-select");
+const worldContainer = document.querySelector(".world-container");
+const worldSelectContainer = document.querySelector(".world-select-container");
+const worldPlayButton = document.getElementById("play-selected-btn");
+const removeWorldButton = document.getElementById("remove-world-btn");
+const footer = document.querySelector(".footer");
+
+const panorama = document.querySelector(".panorama");
+
+let selectedWorld = null;
+
 let randomTexts = [];
 
 fetch("menu_text.json")
@@ -32,9 +44,11 @@ function buttonSound() {
 
 function PlayGame() {
     buttonSound();
-    setTimeout(() => {
-        window.location.href = "game.html";
-    }, 500);
+
+    menuContainer.style.display = "none";
+    panorama.style.display = "none";
+    worldSelectContainer.style.display = "flex";
+    footer.style.display = "none";
 }
 
 function PlayRandomMusic() {
@@ -57,6 +71,119 @@ function playMusic(track) {
     });
 }
 
+function populateWorlds() {
+    const worlds = JSON.parse(localStorage.getItem("worlds"));
+
+    worldsContainer.innerHTML = "";
+
+    if (worlds) {
+        worlds.forEach((world) => {
+            const worldElement = worldContainer.cloneNode(true);
+            const worldNameElement = worldElement.querySelector(".world-name");
+            const worldDateElement = worldElement.querySelector(".world-date");
+
+            worldNameElement.textContent = world.name;
+            worldDateElement.textContent = world.lastPlayed;
+
+            worldElement.style.display = "flex";
+
+            worldElement.addEventListener("click", () => {
+                selectWorld(world.id, worldElement);
+            });
+            worldsContainer.appendChild(worldElement);
+        });
+    }
+}
+
+function createNewWorld() {
+    let worldName = "world";
+    worldName = prompt("Enter world name: ", worldName);
+
+    if (!worldName) return;
+
+    localStorage.setItem(
+        "selectedWorld",
+        JSON.stringify({ id: Date.now(), name: worldName })
+    );
+
+    window.location.href = "game.html";
+}
+
+function getSavedWorld(id) {
+    const worlds = JSON.parse(localStorage.getItem("worlds"));
+
+    return worlds.find((world) => world.id === id);
+}
+
+removeWorldButton.disabled = true;
+function removeWorld() {
+    if (!selectedWorld) return;
+
+    const worlds = JSON.parse(localStorage.getItem("worlds"));
+
+    if (!worlds) return;
+
+    if (!confirm("Are you sure you want to delete this world?")) return;
+
+    localStorage.removeItem(selectedWorld);
+
+    localStorage.setItem(
+        "worlds",
+        JSON.stringify(worlds.filter((world) => world.id !== selectedWorld))
+    );
+
+    if (worlds.length === 1) {
+        worldPlayButton.disabled = true;
+        removeWorldButton.disabled = true;
+    }
+
+    populateWorlds();
+}
+
+function backToMenu() {
+    buttonSound();
+    menuContainer.style.display = "flex";
+    panorama.style.display = "block";
+    worldSelectContainer.style.display = "none";
+    footer.style.display = "block";
+}
+
+function playSelectedWorld() {
+    if (!selectedWorld) return;
+
+    localStorage.setItem(
+        "selectedWorld",
+        JSON.stringify({
+            id: selectedWorld,
+            name: getSavedWorld(selectedWorld).name,
+        })
+    );
+
+    buttonSound();
+
+    setInterval(() => {
+        window.location.href = "game.html";
+    }, 500);
+}
+
+function selectWorld(id, selectedElement) {
+    // Remove the 'selected' class from all world containers
+    const allWorldContainers = document.querySelectorAll(".world-container");
+    allWorldContainers.forEach((container) => {
+        container.classList.remove("selected");
+    });
+
+    selectedElement.classList.add("selected");
+
+    worldPlayButton.disabled = false;
+    removeWorldButton.disabled = false;
+
+    selectedWorld = id;
+}
+worldPlayButton.disabled = true;
+
 setTimeout(() => {
     PlayRandomMusic();
 }, 1000);
+
+populateWorlds();

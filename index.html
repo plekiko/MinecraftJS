@@ -20,7 +20,10 @@
             </div>
         </div>
 
-        <div class="container">
+        <div class="footer">
+            <p>Made by Plekiko - For the best experience use Firefox</p>
+        </div>
+        <div class="menu-container">
             <div class="title">
                 <div class="logo-container">
                     <div class="logo-column">
@@ -50,8 +53,54 @@
                 >
             </div>
         </div>
-        <div class="footer">
-            <p>Made by Plekiko - For the best experience use Firefox</p>
+
+        <div class="world-select-container">
+            <div class="world-select-container-text">
+                <div class="big-text">Select World</div>
+                <button onclick="backToMenu()" id="" class="btn">Back</button>
+                <div class="world-select">
+                    <div class="world-container">
+                        <img
+                            src="Assets/sprites/menu/worldPreview.png"
+                            class="world-image"
+                        />
+                        <div class="world-data-container">
+                            <div class="world-name">Test World</div>
+                            <div class="world-date">Right Now</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="world-buttons-container">
+                    <button
+                        onclick="createNewWorld()"
+                        id="create-new-btn"
+                        class="btn"
+                    >
+                        Create new world
+                    </button>
+                    <button
+                        onclick="playSelectedWorld()"
+                        id="play-selected-btn"
+                        class="btn"
+                    >
+                        Play selected world
+                    </button>
+                    <button
+                        onclick="removeWorld()"
+                        id="remove-world-btn"
+                        class="btn"
+                    >
+                        Remove selected world
+                    </button>
+                </div>
+            </div>
+            <div class="world-select-bar-container">
+                <div class="world-select-bar"></div>
+                <div class="world-select-bar"></div>
+            </div>
+
+            <div src="Assets/sprites/blocks/dirt.png" class="background"></div>
         </div>
     </body>
 
