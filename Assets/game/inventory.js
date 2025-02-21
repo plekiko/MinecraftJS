@@ -251,7 +251,16 @@ class Inventory {
             this.clearSlot(slot);
         }
 
-        // If transferring into a chest, update the underlying storage.
+        // Update the underlying storage if the original array is a storage.
+        if (array === this.storageSlots) {
+            for (let i = 0; i < this.storageSlots.length; i++) {
+                for (let j = 0; j < this.storageSlots[i].length; j++) {
+                    this.storage[i][j] = structuredClone(
+                        this.storageSlots[i][j].item
+                    );
+                }
+            }
+        }
         if (targetArray === this.storageSlots) {
             // Rebuild the chest storage from the storageSlots view.
             for (let i = 0; i < this.storageSlots.length; i++) {
@@ -346,6 +355,8 @@ class Inventory {
         ) {
             this.clearSlot(leftSlot);
             this.clearSlot(rightSlot);
+
+            playPositionalSound(player.position, "blocks/anvil_use.ogg");
         }
     }
 
