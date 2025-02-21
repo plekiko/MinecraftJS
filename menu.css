@@ -113,6 +113,8 @@ body {
     padding: 5px;
     box-sizing: border-box;
 
+    overflow: hidden;
+
     display: none;
 }
 
@@ -138,6 +140,7 @@ body {
 .world-name {
     font-family: "Pixel";
     font-size: 2rem;
+
     color: white;
     user-select: none;
     text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);

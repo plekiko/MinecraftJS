@@ -313,8 +313,6 @@ class Player extends Entity {
     }
 
     teleport(position) {
-        chat.message("Teleporting player to " + position.x + " " + position.y);
-
         const newPosition = new Vector2(
             position.x,
             -position.y + CHUNK_HEIGHT * BLOCK_SIZE
