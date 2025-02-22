@@ -19,7 +19,6 @@ class BlockType {
 
         updateSpeed = 0,
         chunkUpdate = false,
-        removeFromUpdatingWhenInactive = true,
 
         breakSound = Sounds.Break_Wood,
         breakingSound = Sounds.Breaking_Wood,
@@ -67,7 +66,6 @@ class BlockType {
 
         this.updateSpeed = updateSpeed;
         this.chunkUpdate = chunkUpdate;
-        this.removeFromUpdatingWhenInactive = removeFromUpdatingWhenInactive;
 
         this.fall = fall;
 

@@ -611,7 +611,6 @@ const blockTypes = [
         name: "Furnace",
         hardness: 8,
         updateSpeed: 1,
-        removeFromUpdatingWhenInactive: true,
         specialType: SpecialType.Furnace,
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
@@ -702,6 +701,7 @@ const blockTypes = [
         collision: false,
         specialType: SpecialType.SingleChest,
         chunkProtection: true,
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 52,
