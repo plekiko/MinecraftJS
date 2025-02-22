@@ -1067,7 +1067,7 @@ class Inventory {
 
     drawFurnaceExtras() {
         if (!this.furnace) return;
-        const furnaceData = this.interactedBlock.metaData;
+        const furnaceData = this.interactedBlock.metaData.props;
         if (!furnaceData) return;
         if (!furnaceData.isActive) return;
 

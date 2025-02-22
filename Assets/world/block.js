@@ -274,6 +274,9 @@ class Block extends Square {
                     // output
                     [new InventoryItem()],
                 ];
+                props.burningFuelTime = 0;
+                props.fuelProgression = 0;
+                props.progression = 0;
                 break;
             case SpecialType.SingleChest:
                 for (let y = 0; y < 3; y++) {
@@ -357,8 +360,8 @@ class Block extends Square {
         if (
             !this.metaData ||
             !this.metaData.props ||
-            !this.metaData.props.isActive ||
-            !this.metaData.props.progression
+            this.metaData.props.isActive === undefined ||
+            this.metaData.props.progression === undefined
         )
             return;
 
