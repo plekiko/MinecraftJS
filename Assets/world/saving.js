@@ -10,7 +10,7 @@ let currentSave = {
 
 // Assuming chunks, seed, pendingBlocks, etc. are defined elsewhere in the global scope
 
-function SaveWorld(message = true) {
+function SaveWorld(message = true, toFile = false) {
     let savedChunks = [];
 
     chunks.forEach((chunk) => {
@@ -69,6 +69,11 @@ function SaveWorld(message = true) {
     const saveData = JSON.stringify(currentSave);
     // saveJSONToFile(saveData, "world");
 
+    if (toFile) {
+        saveJSONToFile(saveData, "world");
+        return;
+    }
+
     let worldName = "world";
     let id = Date.now();
 
@@ -100,6 +105,8 @@ function SaveWorld(message = true) {
     }
 
     if (message) chat.message("World saved successfully!");
+
+    console.log(saveData);
 
     localStorage.setItem("worlds", JSON.stringify(worlds));
 
@@ -237,6 +244,8 @@ function LoadWorld(save) {
             }
 
             player.setGamemode(currentSave.gamemode);
+
+            SaveWorld(false);
         }, 100);
     }
 

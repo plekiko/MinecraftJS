@@ -71,12 +71,24 @@ function playMusic(track) {
     });
 }
 
+// Helper function to parse dates in the format "dd-mm-yyyy, hh:mm:ss"
+function parseDate(dateStr) {
+    const [datePart, timePart] = dateStr.split(", ");
+    const [day, month, year] = datePart.split("-").map(Number);
+    const [hour, minute, second] = timePart.split(":").map(Number);
+    // Note: Month in JavaScript's Date is 0-indexed, so subtract 1.
+    return new Date(year, month - 1, day, hour, minute, second);
+}
+
 function populateWorlds() {
     const worlds = JSON.parse(localStorage.getItem("worlds"));
-
     worldsContainer.innerHTML = "";
 
     if (worlds) {
+        worlds.sort(
+            (a, b) => parseDate(b.lastPlayed) - parseDate(a.lastPlayed)
+        );
+
         worlds.forEach((world) => {
             const worldElement = worldContainer.cloneNode(true);
             const worldNameElement = worldElement.querySelector(".world-name");
