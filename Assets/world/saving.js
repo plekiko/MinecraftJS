@@ -222,7 +222,7 @@ function LoadWorld(save) {
 
         setTimeout(() => {
             const position = JSON.parse(currentSave.playerPosition);
-            SpawnPlayer(new Vector2(position.x, position.y));
+            SpawnPlayer(new Vector2(position.x, position.y), false);
 
             const playerInventory = JSON.parse(currentSave.inventoryItems);
             for (let i = 0; i < playerInventory.length; i++) {

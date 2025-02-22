@@ -335,9 +335,9 @@ class Player extends Entity {
             this.handleQuickBlockSelect(block);
         }
 
-        this.hoverBlock.interact(this);
-
         if (!rightClick) return;
+
+        this.hoverBlock.interact(this);
 
         this.swing();
 

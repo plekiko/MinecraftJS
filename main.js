@@ -17,13 +17,13 @@ chat = new Chat();
 //     }, 100);
 // }
 
-function SpawnPlayer(position = new Vector2(0, 0)) {
+function SpawnPlayer(position = new Vector2(0, 0), setOnGround = true) {
     player = new Player({
         position: position,
         entities: entities,
     });
 
-    player.setOnGround();
+    if (setOnGround) player.setOnGround();
 
     entities.push(player);
 
