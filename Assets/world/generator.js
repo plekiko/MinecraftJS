@@ -323,6 +323,8 @@ function postProcessChunks() {
             chunk.generateTrees();
             chunk.generateGrass();
             chunk.generateBedrock();
+
+            chunk.calculateLighting();
         }
     });
     generateStructures();
@@ -444,15 +446,13 @@ function getBlockWorldPosition(block) {
 
 function GetBlockAtWorldPosition(worldX, worldY, wall = false) {
     const targetChunk = GetChunkForX(worldX);
+    if (!targetChunk || worldY >= CHUNK_HEIGHT * BLOCK_SIZE) return null;
 
-    if (targetChunk && worldY < CHUNK_HEIGHT * BLOCK_SIZE) {
-        const localX = targetChunk.getLocalX(Math.floor(worldX));
-        const localY = Math.floor(worldY / BLOCK_SIZE);
+    // Subtract the chunk's x offset from the worldX before dividing by BLOCK_SIZE.
+    const localX = Math.floor((worldX - targetChunk.x) / BLOCK_SIZE);
+    const localY = Math.floor(worldY / BLOCK_SIZE);
 
-        return targetChunk.getBlock(localX, localY, false, wall);
-    } else {
-        return null;
-    }
+    return targetChunk.getBlock(localX, localY, false, wall);
 }
 
 function checkAdjacentBlocks(position, wall = false) {

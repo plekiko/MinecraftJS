@@ -204,6 +204,7 @@ class Player extends Entity {
     }
 
     useBucket() {
+        if (!this.hoverBlock) return;
         const block = GetBlock(this.hoverBlock.blockType);
 
         // Placing
@@ -215,6 +216,7 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.Bucket, count: 1 })
                 );
                 this.hoverBlock.setBlockType(Blocks.Water, true);
+                // setBlockType(this.hoverBlock, Blocks.Water);
 
                 this.hoverBlock.updateSprite();
                 return;
@@ -225,6 +227,7 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.Bucket, count: 1 })
                 );
                 this.hoverBlock.setBlockType(Blocks.Lava, true);
+                // setBlockType(this.hoverBlock, Blocks.Lava);
 
                 this.hoverBlock.updateSprite();
                 return;
@@ -243,7 +246,18 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.LavaBucket, count: 1 })
                 );
 
-                this.hoverBlock.setBlockType(Blocks.Air);
+                const chunk = chunks.get(this.hoverBlock.chunkX);
+
+                if (!chunk) return;
+
+                chunk.setBlockType(
+                    this.hoverBlock.x,
+                    this.hoverBlock.y,
+                    Blocks.Air,
+                    false,
+                    null,
+                    false
+                );
             }
 
             // Lava
@@ -256,7 +270,18 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.WaterBucket, count: 1 })
                 );
 
-                this.hoverBlock.setBlockType(Blocks.Air);
+                const chunk = chunks.get(this.hoverBlock.chunkX);
+
+                if (!chunk) return;
+
+                chunk.setBlockType(
+                    this.hoverBlock.x,
+                    this.hoverBlock.y,
+                    Blocks.Air,
+                    false,
+                    null,
+                    false
+                );
             }
             // playPositionalSound(this.position, "items/bucket_fill.ogg");
         }
@@ -548,7 +573,7 @@ class Player extends Entity {
                 this.inventory.selectedItem &&
                 this.inventory.selectedItem.toolType === ToolType.Hammer
             ) {
-                this.breakingLogic(this.hoverWall);
+                this.breakingLogic(this.hoverWall, true);
             } else {
                 this.breakingLogic(this.hoverBlock);
             }
@@ -783,7 +808,7 @@ class Player extends Entity {
         this.lastBreakSoundTime = 0;
     }
 
-    breakingLogic(hover) {
+    breakingLogic(hover, wall = false) {
         let block = GetBlock(hover.blockType);
 
         if (block.air || block.fluid) return;
@@ -797,7 +822,7 @@ class Player extends Entity {
         }
 
         if (this.abilities.instaBuild) {
-            hover.breakBlock(false);
+            hover.breakBlock(false, wall);
             this.swing();
             return;
         }
@@ -858,7 +883,7 @@ class Player extends Entity {
             )
                 shouldDrop = false;
             if (isWall) shouldDrop = true;
-            hover.breakBlock(shouldDrop);
+            hover.breakBlock(shouldDrop, isWall);
             this.resetBreaking();
             this.swing();
         }

@@ -82,6 +82,8 @@ const Blocks = Object.freeze({
     SnowBlock: 60,
 
     GoldOre: 62,
+
+    Torch: 63,
 });
 
 const blockTypes = [
@@ -175,6 +177,7 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
         breakSound: Sounds.Break_Cloth,
         breakingSound: Sounds.Breaking_Cloth,
+        transparent: true,
     }),
     new BlockType({
         blockId: 10,
@@ -203,6 +206,7 @@ const blockTypes = [
                 subtract: 10,
             }),
         ]),
+        transparent: true,
     }),
     new BlockType({
         blockId: 12,
@@ -231,6 +235,7 @@ const blockTypes = [
                 subtract: 10,
             }),
         ]),
+        transparent: true,
     }),
     new BlockType({
         blockId: 14,
@@ -253,6 +258,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shears,
+        transparent: true,
     }),
     new BlockType({
         blockId: 16,
@@ -281,13 +287,13 @@ const blockTypes = [
                 subtract: 10,
             }),
         ]),
+        transparent: true,
     }),
     new BlockType({
         blockId: 18,
         sprite: "grass",
         name: "Grass",
         hardness: 0,
-        grassOffset: true,
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
@@ -302,13 +308,13 @@ const blockTypes = [
             }),
         ]),
         cannotBeConverted: true,
+        transparent: true,
     }),
     new BlockType({
         blockId: 19,
         sprite: "tallgrass",
         name: "Tall Grass",
         hardness: 0,
-        grassOffset: true,
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
@@ -323,6 +329,8 @@ const blockTypes = [
             }),
         ]),
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 20,
@@ -338,6 +346,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 21,
@@ -353,6 +363,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 22,
@@ -367,6 +379,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 23,
@@ -381,6 +395,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 24,
@@ -395,6 +411,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 25,
@@ -409,6 +427,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 26,
@@ -423,6 +443,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 27,
@@ -437,6 +459,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 28,
@@ -451,6 +475,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 29,
@@ -465,6 +491,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 30,
@@ -479,6 +507,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
 
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 31,
@@ -492,6 +522,8 @@ const blockTypes = [
         dropWithoutTool: false,
         breakSound: Sounds.Water_Enter,
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 32,
@@ -702,6 +734,8 @@ const blockTypes = [
         specialType: SpecialType.SingleChest,
         chunkProtection: true,
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 52,
@@ -711,6 +745,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Glass,
         breakingSound: Sounds.Breaking_Glass,
         dropWithoutTool: false,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 53,
@@ -723,7 +759,11 @@ const blockTypes = [
         fluid: true,
         dropWithoutTool: false,
 
+        lightLevel: 6,
+
         cannotBeConverted: true,
+
+        transparent: true,
     }),
     new BlockType({
         blockId: 54,
@@ -812,7 +852,6 @@ const blockTypes = [
         specialType: SpecialType.Converter,
         collision: false,
     }),
-    // Gold ore
     new BlockType({
         blockId: 62,
         sprite: "gold_ore",
@@ -825,6 +864,15 @@ const blockTypes = [
         requiredToolLevel: 13,
         dropWithoutTool: false,
         smeltOutput: { itemId: Items.GoldIngot },
+    }),
+    new BlockType({
+        blockId: 63,
+        sprite: "torch_on",
+        name: "Torch",
+        hardness: 0,
+        collision: false,
+        transparent: true,
+        lightLevel: 16,
     }),
 ];
 

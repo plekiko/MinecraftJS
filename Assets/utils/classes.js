@@ -70,7 +70,11 @@ class Square {
         this.outline = 0;
         this.dark = dark;
 
-        this.cutoff = 1;
+        this.brightness = 1;
+
+        this.lightLevel = 15; // 0-15
+
+        this.cutoff = 0;
 
         this.transform.size.x = BLOCK_SIZE;
         this.transform.size.y = BLOCK_SIZE;
@@ -93,20 +97,45 @@ class Square {
             if (this.isAnimated()) this.frameCount = this.img.height / 16;
     }
 
+    drawBrightness(ctx, camera) {
+        ctx.globalAlpha = 1 - this.getBrightness();
+        ctx.fillStyle = "black";
+        ctx.fillRect(
+            Math.round(-this.transform.size.x / 2 - camera.x),
+            Math.round(-this.transform.size.y / 2 - camera.y),
+            Math.round(this.transform.size.x),
+            Math.round(this.transform.size.y)
+        );
+        ctx.globalAlpha = this.alpha;
+    }
+
+    getBrightness() {
+        // Calculate the brightness of the block based on the light level
+        // 15 is fully bright, 0 is fully dark
+        return this.lightLevel / 15;
+    }
+
     draw(ctx, camera) {
-        if (!this.img) return;
-
-        ctx.save();
-        ctx.globalAlpha = this.alpha; // Apply the object's alpha transparency
-
-        // Translate to the center of the object
         const centerX = this.transform.position.x + this.transform.size.x / 2;
         const centerY = this.transform.position.y + this.transform.size.y / 2;
+        ctx.save();
         ctx.translate(centerX, centerY);
+
+        if (!this.img) {
+            if (this.lightLevel < 15) {
+                this.drawBrightness(ctx, camera, this.brightness);
+            }
+            ctx.restore();
+            return;
+        }
+
+        ctx.globalAlpha = this.alpha;
+
+        // Translate to the center of the object
 
         // Rotate if necessary
         if (this.transform.rotation !== 0) {
-            ctx.rotate((this.transform.rotation * Math.PI) / 180); // Convert degrees to radians
+            ctx.rotate((this.transform.rotation * Math.PI) / 180); // Convert degrees to radiansb
         }
 
         // Draw outline if present
@@ -125,12 +154,21 @@ class Square {
             ctx.fillStyle = this.color;
         }
 
+        // let drawSquareBrightness = true;
+        // const blockDef = this.blockType && GetBlock(this.blockType);
+        // if (blockDef && blockDef.transparent) {
+        //     drawSquareBrightness = false;
+        //     ctx.filter = `brightness(${this.getBrightness()})`;
+        // }
+
         // Draw the main object (image or fallback rect)
         if (this.img && (!this.frameCount || this.frameCount == 0)) {
             ctx.drawImage(
                 this.img,
-                -this.transform.size.x / 2 + this.drawOffset - camera.x,
-                -this.transform.size.y / 2 - camera.y,
+                Math.round(
+                    -this.transform.size.x / 2 + this.drawOffset - camera.x
+                ),
+                Math.round(-this.transform.size.y / 2 - camera.y),
                 16 * this.spriteScale,
                 16 * this.spriteScale
             );
@@ -140,8 +178,10 @@ class Square {
                 ctx.globalAlpha = 0.5;
                 ctx.fillStyle = "black";
                 ctx.fillRect(
-                    -this.transform.size.x / 2 + this.drawOffset - camera.x,
-                    -this.transform.size.y / 2 - camera.y,
+                    Math.round(
+                        -this.transform.size.x / 2 + this.drawOffset - camera.x
+                    ),
+                    Math.round(-this.transform.size.y / 2 - camera.y),
                     this.transform.size.x,
                     this.transform.size.y
                 );
@@ -153,6 +193,10 @@ class Square {
             this.drawAnimation(ctx, camera);
         }
 
+        if (this.lightLevel < 15) {
+            this.drawBrightness(ctx, camera);
+        }
+
         ctx.restore(); // Restore the context to its original state
     }
 
@@ -162,8 +206,10 @@ class Square {
             Math.floor(globalFrame * this.frameRate) % this.frameCount;
         const frameY = effectiveFrame * frameHeight;
 
-        const drawX = -this.transform.size.x / 2 + this.drawOffset - camera.x;
-        const drawY = -this.transform.size.y / 2 - camera.y;
+        const drawX = Math.round(
+            -this.transform.size.x / 2 + this.drawOffset - camera.x
+        );
+        const drawY = Math.round(-this.transform.size.y / 2 - camera.y);
         const drawWidth = 16 * this.spriteScale;
         const drawHeight = 16 * this.spriteScale;
 

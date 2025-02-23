@@ -6,6 +6,8 @@ var r = document.querySelector(":root");
 CANVAS.width = 1600;
 CANVAS.height = 900;
 ctx.imageSmoothingEnabled = false;
+ctx.webkitImageSmoothingEnabled = false;
+ctx.mozImageSmoothingEnabled = false;
 
 let drawingChunkBorders = false;
 let drawCamera = false;

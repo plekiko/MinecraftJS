@@ -11,6 +11,8 @@ class BlockType {
         drag = 40,
         collision = true,
 
+        transparent = false,
+
         cannotBeConverted = false,
 
         air = false,
@@ -38,6 +40,8 @@ class BlockType {
 
         breakWithoutBlockUnderneath = false,
 
+        lightLevel = 0,
+
         dropTable = null,
 
         fuelTime = null,
@@ -61,6 +65,10 @@ class BlockType {
         this.cannotBeConverted = cannotBeConverted;
 
         this.air = air;
+
+        this.lightLevel = lightLevel;
+
+        this.transparent = transparent;
 
         this.chunkProtection = chunkProtection;
 
@@ -137,7 +145,7 @@ function checkDissipation(block, worldPos) {
         block.metaData.props.waterLevel += 0.25;
         block.cutoff = block.metaData.props.waterLevel;
         if (block.metaData.props.waterLevel >= 0.85) {
-            block.setBlockType(Blocks.Air);
+            setBlockType(block, Blocks.Air);
             return true;
         }
     }
@@ -154,11 +162,18 @@ function flowDownward(block, worldPos) {
             below.breakBlock(GetBlock(below.blockType).dropWithoutTool);
         }
         below.setBlockType(block.blockType);
+
         below.metaData.props.isSource = false;
         below.metaData.props.waterLevel = 0;
         below.cutoff = below.metaData.props.waterLevel;
     }
     return below;
+}
+
+function setBlockType(block, type) {
+    const chunk = chunks.get(block.chunkX);
+    if (!chunk) return;
+    chunk.setBlockType(block.x, block.y, type, block.wall, null, false);
 }
 
 function verticalCheckAbove(block, worldPos) {
@@ -234,6 +249,7 @@ class Block extends Square {
             BLOCK_SIZE / 16,
             wall
         );
+        this.wall = wall;
         this.x = x;
         this.y = y;
         this.chunkX = chunkX;
@@ -343,6 +359,19 @@ class Block extends Square {
 
         if (block.fluid) {
             this.cutoff = this.metaData.props.waterLevel;
+        }
+
+        if (myChunk) {
+            myChunk.removeLightSource(new Vector2(this.x, this.y), false);
+            if (block.lightLevel > 0) {
+                myChunk.addLightSource(
+                    new Vector2(this.x, this.y),
+                    block.lightLevel,
+                    false
+                );
+            }
+
+            myChunk.calculateLighting();
         }
 
         this.updateSprite();
@@ -652,12 +681,14 @@ class Block extends Square {
         this.metaData.props.progression = 0;
     }
 
-    breakBlock(drop = false) {
+    breakBlock(drop = false, wall = false) {
         if (GetBlock(this.blockType).air) return;
 
-        if (chunks.has(this.chunkX)) {
-            chunks.get(this.chunkX).checkForBlockWithAirBeneath(this.x, this.y);
-        }
+        const chunk = chunks.get(this.chunkX);
+
+        if (!chunk) return;
+
+        chunk.checkForBlockWithAirBeneath(this.x, this.y);
 
         if (drop) this.dropBlock();
 
@@ -675,7 +706,10 @@ class Block extends Square {
             }
         }
 
-        this.setBlockType(Blocks.Air);
+        // this.setBlockType(Blocks.Air);
+        chunk.setBlockType(this.x, this.y, Blocks.Air, wall, null, false);
+
+        chunk.removeLightSource(new Vector2(this.x, this.y));
     }
 
     gravityBlock() {
@@ -771,6 +805,7 @@ class Block extends Square {
     updateSprite() {
         if (GetBlock(this.blockType).air) {
             this.alpha = 0;
+            this.img = null;
             return;
         }
 

@@ -687,6 +687,16 @@ class Entity {
         const centerX = this.position.x - camera.x + this.offset.x;
         const centerY = this.position.y - camera.y + this.offset.y;
 
+        // Get the block at this position
+        const blockLightLevel = this.getBlockAtPosition(
+            this.position.x,
+            this.position.y
+        )?.lightLevel;
+
+        if (blockLightLevel !== null) {
+            if (this.body) this.body.brightness = blockLightLevel / 15;
+        }
+
         if (this.body) {
             this.body.updatePosition({
                 x: centerX + this.hitbox.x / 4,
@@ -735,6 +745,10 @@ class Entity {
 
             const spriteOffsetX = (this.hitbox.x - spriteWidth) / 2;
             const spriteOffsetY = (this.hitbox.y - spriteHeight) / 2;
+
+            if (blockLightLevel !== null) {
+                ctx.filter = `brightness(${blockLightLevel / 15})`;
+            }
 
             ctx.drawImage(
                 this.img,

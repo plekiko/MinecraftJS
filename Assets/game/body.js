@@ -6,6 +6,8 @@ class Body {
         this.opacity = 1;
 
         this.flashingColor = null;
+
+        this.brightness = 1;
     }
 
     updatePosition(newPosition) {
@@ -60,7 +62,8 @@ class Body {
                 grounded,
                 lookDirection,
                 holdItem,
-                this.flashingColor
+                this.flashingColor,
+                this.brightness
             );
         }
 
@@ -155,11 +158,14 @@ class BodyPart {
         grounded,
         lookDirection,
         holdItem,
-        flashingColor
+        flashingColor,
+        brightness = 1
     ) {
         const img = this.loadSprite();
 
         ctx.save();
+
+        ctx.filter = `brightness(${brightness})`;
 
         this.applyTranslation(ctx);
 
