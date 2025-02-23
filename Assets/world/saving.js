@@ -106,8 +106,6 @@ function SaveWorld(message = true, toFile = false) {
 
     if (message) chat.message("World saved successfully!");
 
-    console.log(saveData);
-
     localStorage.setItem("worlds", JSON.stringify(worlds));
 
     localStorage.setItem(id, saveData);
