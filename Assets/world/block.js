@@ -370,8 +370,6 @@ class Block extends Square {
                     false
                 );
             }
-
-            myChunk.calculateLighting();
         }
 
         this.updateSprite();
@@ -708,8 +706,6 @@ class Block extends Square {
 
         // this.setBlockType(Blocks.Air);
         chunk.setBlockType(this.x, this.y, Blocks.Air, wall, null, false);
-
-        chunk.removeLightSource(new Vector2(this.x, this.y));
     }
 
     gravityBlock() {

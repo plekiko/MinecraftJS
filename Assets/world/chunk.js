@@ -653,7 +653,10 @@ class Chunk {
                 // If the block is opaque (i.e. not air and not transparent),
                 // degrade sky light faster (for example, subtract 3).
                 // Otherwise, if it is air or transparent, degrade it by 1.
-                if (!def.air && !def.transparent && def.collision) {
+                if (
+                    (!def.air && !def.transparent && def.collision) ||
+                    y > this.biome.heightNoise.min * 1.8
+                ) {
                     skyLight = Math.max(skyLight - 1, 1);
                     stopped = true;
                 } else {
@@ -697,16 +700,12 @@ class Chunk {
         const leftChunk = chunks.get(this.x - CHUNK_WIDTH * BLOCK_SIZE);
         const rightChunk = chunks.get(this.x + CHUNK_WIDTH * BLOCK_SIZE);
 
-        this.calculateLighting();
-
         // Calculate lighting for the chunks around this chunk
-
         if (leftChunk) leftChunk.calculateLighting();
         if (rightChunk) rightChunk.calculateLighting();
     }
 
     calculateSources() {
-        // if (chat) chat.message("Calculating light sources...");
         this.lightSources.forEach((source) => {
             this.calculateLightSource(source.pos, source.level);
         });

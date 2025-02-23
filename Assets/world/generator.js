@@ -324,7 +324,7 @@ function postProcessChunks() {
             chunk.generateGrass();
             chunk.generateBedrock();
 
-            chunk.calculateLighting();
+            // chunk.calculateLighting();
         }
     });
     generateStructures();
