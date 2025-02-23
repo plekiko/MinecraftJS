@@ -749,6 +749,15 @@ const recipes = [
         input: new RecipeItem({ blockId: Blocks.SnowBlock }),
         output: new InventoryItem({ itemId: Items.Snowball, count: 4 }),
     }),
+    // Torch
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [new RecipeItem({ itemId: Items.Coal })],
+            [new RecipeItem({ itemId: Items.Stick })],
+        ],
+        output: new InventoryItem({ blockId: Blocks.Torch, count: 4 }),
+    }),
 
     //#endregion
 ];
