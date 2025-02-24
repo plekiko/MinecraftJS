@@ -439,6 +439,7 @@ class Player extends Entity {
 
     openCraftingTable() {
         this.inventory.craftingTable = true;
+        this.inventory.interactedBlock = null;
         this.openInventory();
     }
 
@@ -451,8 +452,13 @@ class Player extends Entity {
 
     toggleLogic() {
         if (chat.inChat) return;
-        if (input.isKeyPressed("KeyE"))
-            this.windowOpen ? this.closeInventory() : this.openInventory();
+        if (input.isKeyPressed("KeyE")) {
+            if (this.windowOpen) this.closeInventory();
+            else {
+                this.inventory.interactedBlock = null;
+                this.openInventory();
+            }
+        }
     }
 
     openInventory() {
@@ -988,7 +994,8 @@ class Player extends Entity {
 
         this.noGravity = true;
 
-        if (input.isKeyDown("KeyW")) this.velocity.y = -4.7 * BLOCK_SIZE;
+        if (input.isKeyDown("KeyW") || input.isKeyDown("Space"))
+            this.velocity.y = -4.7 * BLOCK_SIZE;
         else if (input.isKeyDown("KeyS")) this.velocity.y = 4.7 * BLOCK_SIZE;
 
         if (!input.isKeyDown("KeyD") && !input.isKeyDown("KeyA")) return;

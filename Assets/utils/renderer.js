@@ -176,9 +176,6 @@ function DrawChunks(chunksMap) {
 
             const chunk = chunksMap.get(chunkX);
 
-            chunk.calculateLighting();
-            chunk.calculateLightingAround();
-
             chunk.draw(ctx, camera);
             DrawLate(chunk);
         }

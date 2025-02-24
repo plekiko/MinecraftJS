@@ -205,7 +205,8 @@ function LoadWorld(save) {
                     constructedChunk.addLightSource(
                         new Vector2(x, y),
                         GetBlock(constructedChunk.blocks[y][x].blockType)
-                            .lightLevel
+                            .lightLevel,
+                        false
                     );
                 }
                 // Walls
@@ -225,13 +226,6 @@ function LoadWorld(save) {
         }
 
         chunks.set(chunk.x, constructedChunk);
-    });
-
-    chunks.forEach((chunk) => {
-        chunk.updateSkyLight();
-    });
-    chunks.forEach((chunk) => {
-        chunk.calculateSources();
     });
 
     pendingBlocks = new Map();

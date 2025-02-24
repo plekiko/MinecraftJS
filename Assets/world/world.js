@@ -26,6 +26,9 @@ function tick() {
 
     chunks_in_render_distance.forEach((chunk) => {
         chunk.updateChunk();
+
+        chunk.calculateLighting();
+        chunk.calculateLightingAround();
     });
 }
 
