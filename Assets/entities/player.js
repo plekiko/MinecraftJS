@@ -209,8 +209,9 @@ class Player extends Entity {
 
         // Placing
         if (block.air || block.fluid) {
-            if (!this.checkBlockForPlacing(true)) return;
             if (this.holdItem.itemId === Items.WaterBucket) {
+                if (!this.checkBlockForPlacing(true)) return;
+
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
                     new InventoryItem({ itemId: Items.Bucket, count: 1 })
@@ -222,6 +223,8 @@ class Player extends Entity {
                 return;
             }
             if (this.holdItem.itemId === Items.LavaBucket) {
+                if (!this.checkBlockForPlacing(true)) return;
+
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
                     new InventoryItem({ itemId: Items.Bucket, count: 1 })

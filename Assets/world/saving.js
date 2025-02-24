@@ -228,7 +228,9 @@ function LoadWorld(save) {
         chunks.set(chunk.x, constructedChunk);
     });
 
-    pendingBlocks = new Map();
+    if (currentSave.pendingBlocks.length > 0)
+        pendingBlocks = currentSave.pendingBlocks;
+    else pendingBlocks = new Map();
 
     time = currentSave.time;
 

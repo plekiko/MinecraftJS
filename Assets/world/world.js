@@ -26,10 +26,60 @@ function tick() {
 
     chunks_in_render_distance.forEach((chunk) => {
         chunk.updateChunk();
-
-        chunk.calculateLighting();
-        chunk.calculateLightingAround();
     });
+
+    globalUpdateSkyLight();
+    globalRecalculateLight();
+}
+
+function globalRecalculateLight() {
+    // Build a global queue from every light source.
+    const queue = [];
+    for (let chunk of chunks.values()) {
+        for (let row of chunk.blocks) {
+            for (let block of row) {
+                const inherent = GetBlock(block.blockType).lightLevel || 0;
+                if (inherent > 0) {
+                    block.lightLevel = inherent;
+                    queue.push(block);
+                }
+            }
+        }
+    }
+
+    // Define 4-way neighbor offsets.
+    const offsets = [
+        { dx: -1, dy: 0 },
+        { dx: 1, dy: 0 },
+        { dx: 0, dy: -1 },
+        { dx: 0, dy: 1 },
+    ];
+
+    // Global flood–fill: propagate light from all sources across chunk boundaries.
+    while (queue.length > 0) {
+        const current = queue.shift();
+        const currentLevel = current.lightLevel;
+        if (currentLevel <= 1) continue;
+        const currentPosX = current.transform.position.x;
+        const currentPosY = current.transform.position.y;
+        for (const offset of offsets) {
+            const nx = currentPosX + offset.dx * BLOCK_SIZE;
+            const ny = currentPosY + offset.dy * BLOCK_SIZE;
+            const neighbor = GetBlockAtWorldPosition(nx, ny, false);
+            if (!neighbor) continue;
+            const newLight = currentLevel - 1;
+            if (neighbor.lightLevel < newLight) {
+                neighbor.lightLevel = newLight;
+                queue.push(neighbor);
+            }
+        }
+    }
+}
+
+function globalUpdateSkyLight() {
+    for (let chunk of chunks.values()) {
+        chunk.updateSkyLight();
+    }
 }
 
 function updateBlocks() {
