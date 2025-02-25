@@ -367,7 +367,7 @@ class Player extends Entity {
 
         this.hoverBlock.interact(this);
 
-        this.swing();
+        if (block.specialType !== null) this.swing();
 
         switch (block.specialType) {
             case SpecialType.CraftingTable:
@@ -859,6 +859,10 @@ class Player extends Entity {
 
         if (isWall)
             currentBlockHardness = 2 - this.inventory.selectedItem.toolLevel;
+
+        if (this.breakingTime === 0) {
+            this.hoverBlock.clicked(this);
+        }
 
         const soundInterval = 0.2;
         this.breakingTime += this.grounded ? deltaTime : deltaTime / 3;

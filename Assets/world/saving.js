@@ -160,9 +160,10 @@ function LoadWorld(save) {
     loadingWorld = true;
 
     // Reinitialize global variables
+    setSeed(currentSave.seed);
+
     chunks = new Map();
     // pendingBlocks = new Map();
-    setSeed(currentSave.seed);
 
     entities = [];
 
@@ -202,12 +203,6 @@ function LoadWorld(save) {
                     GetBlock(constructedChunk.blocks[y][x].blockType)
                         .lightLevel > 0
                 ) {
-                    constructedChunk.addLightSource(
-                        new Vector2(x, y),
-                        GetBlock(constructedChunk.blocks[y][x].blockType)
-                            .lightLevel,
-                        false
-                    );
                 }
                 // Walls
                 constructedChunk.setBlockType(

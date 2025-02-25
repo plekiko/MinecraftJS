@@ -84,6 +84,12 @@ const Blocks = Object.freeze({
     GoldOre: 62,
 
     Torch: 63,
+
+    NoteBlock: 64,
+
+    GoldBlock: 65,
+
+    RedstoneBlock: 66,
 });
 
 const blockTypes = [
@@ -128,6 +134,8 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         dropBlock: Blocks.Cobblestone,
         smeltOutput: { blockId: Blocks.SmoothStone },
+
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 5,
@@ -136,6 +144,8 @@ const blockTypes = [
         hardness: -1,
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
+
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 6,
@@ -147,6 +157,7 @@ const blockTypes = [
         toolType: ToolType.Shovel,
         smeltOutput: { blockId: Blocks.Glass },
         fall: true,
+        noteBlockSound: "snare",
     }),
     new BlockType({
         blockId: 7,
@@ -157,6 +168,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
+
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 8,
@@ -189,6 +202,7 @@ const blockTypes = [
         collision: false,
         hardness: 3,
         toolType: ToolType.Axe,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 11,
@@ -218,6 +232,7 @@ const blockTypes = [
         collision: false,
         hardness: 3,
         toolType: ToolType.Axe,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 13,
@@ -247,6 +262,7 @@ const blockTypes = [
         collision: false,
         hardness: 3,
         toolType: ToolType.Axe,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 15,
@@ -270,6 +286,7 @@ const blockTypes = [
         collision: false,
         hardness: 3,
         toolType: ToolType.Axe,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 17,
@@ -535,6 +552,7 @@ const blockTypes = [
         collision: false,
         hardness: 3,
         toolType: ToolType.Axe,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 33,
@@ -555,6 +573,7 @@ const blockTypes = [
         toolType: ToolType.Axe,
         category: BlockCategory.Planks,
         fuelTime: 15,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 35,
@@ -565,6 +584,8 @@ const blockTypes = [
         specialType: SpecialType.CraftingTable,
         collision: false,
         fuelTime: 15,
+
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 36,
@@ -574,6 +595,7 @@ const blockTypes = [
         toolType: ToolType.Axe,
         category: BlockCategory.Planks,
         fuelTime: 15,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 37,
@@ -583,6 +605,7 @@ const blockTypes = [
         toolType: ToolType.Axe,
         category: BlockCategory.Planks,
         fuelTime: 15,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 38,
@@ -592,6 +615,7 @@ const blockTypes = [
         toolType: ToolType.Axe,
         category: BlockCategory.Planks,
         fuelTime: 15,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 39,
@@ -601,6 +625,7 @@ const blockTypes = [
         toolType: ToolType.Axe,
         category: BlockCategory.Planks,
         fuelTime: 15,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 40,
@@ -612,6 +637,7 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
         smeltOutput: { blockId: Blocks.Stone },
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 41,
@@ -623,6 +649,7 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
         dropItem: Items.Coal,
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 42,
@@ -635,6 +662,7 @@ const blockTypes = [
         requiredToolLevel: 13.5,
         dropWithoutTool: false,
         smeltOutput: { itemId: Items.IronIngot },
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 43,
@@ -649,6 +677,7 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
         collision: false,
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 44,
@@ -659,6 +688,7 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 45,
@@ -669,6 +699,7 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 46,
@@ -704,6 +735,7 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 49,
@@ -736,6 +768,8 @@ const blockTypes = [
         cannotBeConverted: true,
 
         transparent: true,
+
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 52,
@@ -747,6 +781,8 @@ const blockTypes = [
         dropWithoutTool: false,
 
         transparent: true,
+
+        noteBlockSound: "hat",
     }),
     new BlockType({
         blockId: 53,
@@ -777,6 +813,7 @@ const blockTypes = [
         requiredToolLevel: 14.5,
         dropWithoutTool: false,
         smeltOutput: { itemId: Items.Diamond },
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 55,
@@ -799,10 +836,11 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         requiredToolLevel: 15,
         dropWithoutTool: false,
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 57,
-        sprite: "jukebox_side",
+        sprite: "jukebox_top",
         name: "Jukebox",
         hardness: 2.6,
         toolType: ToolType.Axe,
@@ -851,6 +889,7 @@ const blockTypes = [
         toolType: ToolType.Axe,
         specialType: SpecialType.Converter,
         collision: false,
+        noteBlockSound: "bass",
     }),
     new BlockType({
         blockId: 62,
@@ -864,6 +903,7 @@ const blockTypes = [
         requiredToolLevel: 13,
         dropWithoutTool: false,
         smeltOutput: { itemId: Items.GoldIngot },
+        noteBlockSound: "bd",
     }),
     new BlockType({
         blockId: 63,
@@ -873,6 +913,41 @@ const blockTypes = [
         collision: false,
         transparent: true,
         lightLevel: 16,
+    }),
+    new BlockType({
+        blockId: 64,
+        sprite: "noteblock",
+        name: "Note Block",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        specialType: SpecialType.NoteBlock,
+        collision: false,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
+        blockId: 65,
+        sprite: "gold_block",
+        name: "Gold Block",
+        hardness: 12,
+        requiredToolLevel: 13,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        noteBlockSound: "pling",
+    }),
+    new BlockType({
+        blockId: 66,
+        sprite: "redstone_block",
+        name: "Redstone Block",
+        hardness: 12,
+        requiredToolLevel: 13,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        lightLevel: 5,
+        noteBlockSound: "bd",
     }),
 ];
 

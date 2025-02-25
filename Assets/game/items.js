@@ -40,6 +40,7 @@ const Items = Object.freeze({
     Charcoal: 22,
     Diamond: 23,
     GoldIngot: 24,
+    RedstoneDust: 25,
 
     RawBeef: 30,
     CookedBeef: 31,
@@ -391,6 +392,12 @@ const items = [
         name: "Gold Ingot",
         sprite: "gold_ingot",
     }),
+    new Item({
+        itemId: 25,
+        name: "Redstone Dust",
+        sprite: "redstone_dust",
+    }),
+
     //#endregion
 
     //#region Food

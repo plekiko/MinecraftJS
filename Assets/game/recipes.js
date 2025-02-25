@@ -689,6 +689,34 @@ const recipes = [
         output: new InventoryItem({ itemId: Items.IronIngot, count: 9 }),
     }),
 
+    // Gold Block
+    new Recipe({
+        type: RecipeType.Filled,
+        input: new RecipeItem({ itemId: Items.GoldIngot }),
+        output: new InventoryItem({ blockId: Blocks.GoldBlock, count: 1 }),
+    }),
+
+    // Gold Ore
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ blockId: Blocks.GoldBlock }),
+        output: new InventoryItem({ itemId: Items.GoldIngot, count: 9 }),
+    }),
+
+    // Redstone Block
+    new Recipe({
+        type: RecipeType.Filled,
+        input: new RecipeItem({ itemId: Items.RedstoneDust }),
+        output: new InventoryItem({ blockId: Blocks.RedstoneBlock, count: 1 }),
+    }),
+
+    // Redstone Dust
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ blockId: Blocks.RedstoneBlock }),
+        output: new InventoryItem({ itemId: Items.RedstoneDust, count: 9 }),
+    }),
+
     // Diamond Block
     new Recipe({
         type: RecipeType.Filled,

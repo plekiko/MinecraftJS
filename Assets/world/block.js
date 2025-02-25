@@ -44,6 +44,8 @@ class BlockType {
 
         dropTable = null,
 
+        noteBlockSound = "harp",
+
         fuelTime = null,
         smeltOutput = null,
 
@@ -63,6 +65,8 @@ class BlockType {
         this.breakingSound = breakingSound;
 
         this.cannotBeConverted = cannotBeConverted;
+
+        this.noteBlockSound = noteBlockSound;
 
         this.air = air;
 
@@ -104,6 +108,7 @@ const SpecialType = Object.freeze({
     SingleChest: 3,
     Jukebox: 4,
     Converter: 5,
+    NoteBlock: 6,
 });
 
 const BlockCategory = Object.freeze({
@@ -309,6 +314,9 @@ class Block extends Square {
             case SpecialType.Converter:
                 storage = [[new InventoryItem(), new InventoryItem()]];
                 break;
+            case SpecialType.NoteBlock:
+                props.note = 0;
+                break;
         }
 
         if (storage.length > 0) {
@@ -359,17 +367,6 @@ class Block extends Square {
 
         if (block.fluid) {
             this.cutoff = this.metaData.props.waterLevel;
-        }
-
-        if (myChunk) {
-            myChunk.removeLightSource(new Vector2(this.x, this.y), false);
-            if (block.lightLevel > 0) {
-                myChunk.addLightSource(
-                    new Vector2(this.x, this.y),
-                    block.lightLevel,
-                    false
-                );
-            }
         }
 
         this.updateSprite();
@@ -498,6 +495,37 @@ class Block extends Square {
         }
     }
 
+    clicked(player) {
+        switch (GetBlock(this.blockType).specialType) {
+            case SpecialType.NoteBlock:
+                this.playNote();
+                break;
+        }
+    }
+
+    playNote() {
+        const sound = `notes/${this.getSoundBasedOfBlockBelow()}.ogg`;
+
+        const pitch = Math.pow(2, this.metaData.props.note / 12);
+
+        playPositionalSound(getBlockWorldPosition(this), sound, 13, 1, pitch);
+    }
+
+    getSoundBasedOfBlockBelow() {
+        const blockBelow = GetBlockAtWorldPosition(
+            this.transform.position.x,
+            this.transform.position.y + BLOCK_SIZE
+        );
+
+        if (!blockBelow) return "harp";
+
+        if (GetBlock(blockBelow.blockType).noteBlockSound) {
+            return GetBlock(blockBelow.blockType).noteBlockSound;
+        }
+
+        return "harp";
+    }
+
     interact(player) {
         const itemInHand = player.getSelectedSlotItem();
 
@@ -507,7 +535,19 @@ class Block extends Square {
             case SpecialType.Jukebox:
                 this.jukeBoxInteraction(GetItem(itemInHand.itemId), player);
                 break;
+            case SpecialType.NoteBlock:
+                this.noteBlockInteraction();
+                break;
         }
+    }
+
+    noteBlockInteraction() {
+        this.metaData.props.note++;
+        if (this.metaData.props.note > 24) this.metaData.props.note = 0;
+
+        chat.message("Playing note: " + this.metaData.props.note);
+
+        this.playNote();
     }
 
     jukeBoxInteraction(item, player) {

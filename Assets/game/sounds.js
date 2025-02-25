@@ -129,15 +129,42 @@ function removeAudio(audio) {
     playingAudio = playingAudio.filter((item) => item.audio !== audio);
 }
 
-// Play a positional sound using the Web Audio API with panning.
-function playPositionalSound(origin, sound, range = 10, maxVolume = 1) {
+// A fallback for non-positional sounds with pitch support.
+function playSound(sound, volume = 1, pitch = 1) {
+    const audio = new Audio("Assets/audio/sfx/" + sound);
+    audio.volume = volume;
+
+    // Disable pitch preservation so that playbackRate changes the pitch
+    audio.preservesPitch = false; // Standard (if supported)
+    audio.webkitPreservesPitch = false; // WebKit-specific
+    audio.mozPreservesPitch = false; // Firefox-specific
+
+    // Set the playbackRate (this changes both pitch and duration if pitch is not preserved)
+    audio.playbackRate = pitch;
+    audio.play();
+}
+
+// Play a positional sound using the Web Audio API with panning and pitch.
+function playPositionalSound(
+    origin,
+    sound,
+    range = 10,
+    maxVolume = 1,
+    pitch = 1
+) {
     if (!player) {
-        playSound(sound, maxVolume);
+        playSound(sound, maxVolume, pitch);
         return;
     }
 
     // Create an Audio element.
     const audioElem = new Audio("Assets/audio/sfx/" + sound);
+    // Set the pitch (playback rate) on the audio element.
+    audioElem.preservesPitch = false; // Standard (if supported)
+    audioElem.webkitPreservesPitch = false; // WebKit-specific
+    audioElem.mozPreservesPitch = false; // Firefox-specific
+
+    audioElem.playbackRate = pitch;
 
     // Create a MediaElementAudioSourceNode from the audio element.
     const sourceNode = audioCtx.createMediaElementSource(audioElem);
@@ -149,8 +176,7 @@ function playPositionalSound(origin, sound, range = 10, maxVolume = 1) {
     sourceNode.connect(panner);
     panner.connect(audioCtx.destination);
 
-    // Calculate distance and pan.
-    // Assuming player.position and origin are Vector2 objects.
+    // Calculate distance and volume.
     const distance = Vector2.Distance(player.position, origin);
     const volume =
         distance <= range * BLOCK_SIZE
@@ -160,14 +186,11 @@ function playPositionalSound(origin, sound, range = 10, maxVolume = 1) {
     audioElem.volume = volume;
 
     // Calculate pan value.
-    // For example, if origin.x is left of player.position.x, pan to the left (-1).
-    // We'll map the difference to the range [-1,1].
     const panDiff = (origin.x - player.position.x) / (range * BLOCK_SIZE);
-    // Clamp the pan value between -1 and 1.
     const panValue = Math.max(-1, Math.min(1, panDiff));
     panner.pan.value = panValue;
 
-    // Create an object to track this audio.
+    // Store this audio object for later updates.
     const audioObj = { audioElem, origin, range, maxVolume, panner };
     playingAudio.push(audioObj);
 
@@ -181,13 +204,6 @@ function playPositionalSound(origin, sound, range = 10, maxVolume = 1) {
     audioElem.play();
 
     return audioElem;
-}
-
-// A fallback for non-positional sounds.
-function playSound(sound, volume = 1) {
-    const audio = new Audio("Assets/audio/sfx/" + sound);
-    audio.volume = volume;
-    audio.play();
 }
 
 // This function can be called in your game loop to update volumes and panning

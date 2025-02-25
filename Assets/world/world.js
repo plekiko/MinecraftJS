@@ -40,7 +40,8 @@ function globalRecalculateLight() {
             for (let block of row) {
                 const inherent = GetBlock(block.blockType).lightLevel || 0;
                 if (inherent > 0) {
-                    block.lightLevel = inherent;
+                    if (block.lightLevel < inherent)
+                        block.lightLevel = inherent;
                     queue.push(block);
                 }
             }

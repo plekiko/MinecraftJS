@@ -23,8 +23,6 @@ class Chunk {
         this.update = [];
         this.spawnTime = 0;
 
-        this.lightSources = [];
-
         this.generateChunk();
     }
 
@@ -664,99 +662,6 @@ class Chunk {
                     skyLight = 15;
                 }
             }
-        }
-    }
-
-    addLightSource(pos, level, calculate = true) {
-        // If there already is a light source at this position, remove it.
-        this.lightSources = this.lightSources.filter(
-            (source) => source.pos.x !== pos.x || source.pos.y !== pos.y
-        );
-
-        this.lightSources.push({ pos, level });
-
-        if (calculate) this.calculateLighting();
-    }
-
-    removeLightSource(pos, calculate = true) {
-        const oldLength = this.lightSources.length;
-
-        this.lightSources = this.lightSources.filter(
-            (source) => source.pos.x !== pos.x || source.pos.y !== pos.y
-        );
-
-        if (this.lightSources.length !== oldLength)
-            if (calculate) this.calculateLightingAround();
-    }
-
-    calculateLighting() {
-        this.updateSkyLight();
-
-        this.calculateSources();
-    }
-
-    calculateLightingAround() {
-        // Get chunks around this chunk
-        const leftChunk = chunks.get(this.x - CHUNK_WIDTH * BLOCK_SIZE);
-        const rightChunk = chunks.get(this.x + CHUNK_WIDTH * BLOCK_SIZE);
-
-        // Calculate lighting for the chunks around this chunk
-        if (leftChunk) leftChunk.calculateLighting();
-        if (rightChunk) rightChunk.calculateLighting();
-    }
-
-    calculateSources() {
-        this.lightSources.forEach((source) => {
-            this.calculateLightSource(source.pos, source.level);
-        });
-    }
-
-    calculateLightSource(localPos, level) {
-        // Convert the local chunk position to global coordinates.
-        // (Assuming each block is BLOCK_SIZE pixels wide, and the chunk's x position is stored in this.x.)
-        const globalPos = {
-            x: this.x + localPos.x * BLOCK_SIZE,
-            y: localPos.y * BLOCK_SIZE,
-        };
-
-        const queue = [];
-        queue.push({ x: globalPos.x, y: globalPos.y, level: level });
-
-        const offsets = [
-            { dx: -1, dy: 0 },
-            { dx: 1, dy: 0 },
-            { dx: 0, dy: -1 },
-            { dx: 0, dy: 1 },
-        ];
-
-        while (queue.length > 0) {
-            const { x, y, level } = queue.shift();
-            if (level <= 0) continue;
-
-            // Get the block at the global position.
-            const block = GetBlockAtWorldPosition(x, y, false);
-            if (!block) continue;
-
-            // Only update if the new level is greater than the current light level.
-            if (block.lightLevel >= level) continue;
-            block.lightLevel = level;
-
-            // Enqueue the 4 neighbors with a decremented light level.
-            for (const offset of offsets) {
-                queue.push({
-                    x: x + offset.dx * BLOCK_SIZE,
-                    y: y + offset.dy * BLOCK_SIZE,
-                    level: level - 1,
-                });
-            }
-        }
-    }
-
-    setLightLevel(x, y, level) {
-        if (level <= 0) return;
-        const block = this.getBlock(x, y);
-        if (block && block.lightLevel < level) {
-            block.lightLevel = level;
         }
     }
 
