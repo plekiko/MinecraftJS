@@ -31,7 +31,7 @@ function HandleInput() {
 }
 
 function PrintBlockLogic() {
-    if (input.isLeftMouseDown()) {
+    if (input.isLeftMouseDown() || input.isRightMouseDown()) {
         const mousePos = input.getMousePositionOnBlockGrid();
         const block = GetBlockAtWorldPosition(mousePos.x, mousePos.y);
 

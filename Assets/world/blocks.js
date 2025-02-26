@@ -90,6 +90,7 @@ const Blocks = Object.freeze({
     GoldBlock: 65,
 
     RedstoneBlock: 66,
+    RedstoneDust: 67,
 });
 
 const blockTypes = [
@@ -913,6 +914,7 @@ const blockTypes = [
         collision: false,
         transparent: true,
         lightLevel: 16,
+        breakWithoutBlockUnderneath: true,
     }),
     new BlockType({
         blockId: 64,
@@ -948,6 +950,26 @@ const blockTypes = [
         dropWithoutTool: false,
         lightLevel: 5,
         noteBlockSound: "bd",
+
+        baseRedstoneOutput: 15,
+    }),
+    new BlockType({
+        blockId: 67,
+        name: "Redstone Dust",
+        sprite: "redstone_dust_on",
+        states: [
+            "redstone_dust_off",
+            "redstone_dust_on",
+            "redstone_dust_left",
+            "redstone_dust_right",
+            "redstone_dust_both",
+        ],
+        breakSound: Sounds.Break_Stone,
+        collision: false,
+        hardness: 0,
+        breakWithoutBlockUnderneath: true,
+        specialType: SpecialType.RedstoneDust,
+        chunkUpdate: true,
     }),
 ];
 

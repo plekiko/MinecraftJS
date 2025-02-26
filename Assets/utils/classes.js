@@ -71,6 +71,7 @@ class Square {
         this.dark = dark;
 
         this.brightness = 1;
+        this.filterBrightness = 100;
 
         this.lightLevel = 15; // 0-15
 
@@ -162,6 +163,10 @@ class Square {
         // }
 
         // Draw the main object (image or fallback rect)
+        if (this.filterBrightness < 100) {
+            ctx.filter = `brightness(${this.filterBrightness}%)`;
+        }
+
         if (this.img && (!this.frameCount || this.frameCount == 0)) {
             ctx.drawImage(
                 this.img,

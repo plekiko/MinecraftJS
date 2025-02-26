@@ -49,6 +49,8 @@ class BlockType {
         fuelTime = null,
         smeltOutput = null,
 
+        baseRedstoneOutput = 0,
+
         specialType = null,
     } = {}) {
         this.blockId = blockId;
@@ -71,6 +73,8 @@ class BlockType {
         this.air = air;
 
         this.lightLevel = lightLevel;
+
+        this.baseRedstoneOutput = baseRedstoneOutput;
 
         this.transparent = transparent;
 
@@ -109,6 +113,7 @@ const SpecialType = Object.freeze({
     Jukebox: 4,
     Converter: 5,
     NoteBlock: 6,
+    RedstoneDust: 7,
 });
 
 const BlockCategory = Object.freeze({
@@ -317,6 +322,9 @@ class Block extends Square {
             case SpecialType.NoteBlock:
                 props.note = 0;
                 break;
+            case SpecialType.RedstoneDust:
+                props.power = 0;
+                break;
         }
 
         if (storage.length > 0) {
@@ -364,6 +372,7 @@ class Block extends Square {
         this.cutoff = 0;
 
         this.frameCount = 0;
+        this.filterBrightness = 100;
 
         if (block.fluid) {
             this.cutoff = this.metaData.props.waterLevel;
@@ -372,9 +381,140 @@ class Block extends Square {
         this.updateSprite();
     }
 
+    redstoneDustLogic() {
+        // Get the current power.
+        const currentPower = this.metaData.props.power;
+
+        // Get the neighboring blocks.
+        const neighbors = [
+            GetBlockAtWorldPosition(
+                this.transform.position.x - BLOCK_SIZE,
+                this.transform.position.y
+            ),
+            GetBlockAtWorldPosition(
+                this.transform.position.x + BLOCK_SIZE,
+                this.transform.position.y
+            ),
+            GetBlockAtWorldPosition(
+                this.transform.position.x,
+                this.transform.position.y - BLOCK_SIZE
+            ),
+            GetBlockAtWorldPosition(
+                this.transform.position.x,
+                this.transform.position.y + BLOCK_SIZE
+            ),
+        ];
+        const diagonalNeighbors = [
+            GetBlockAtWorldPosition(
+                this.transform.position.x - BLOCK_SIZE,
+                this.transform.position.y - BLOCK_SIZE
+            ),
+            GetBlockAtWorldPosition(
+                this.transform.position.x + BLOCK_SIZE,
+                this.transform.position.y - BLOCK_SIZE
+            ),
+            GetBlockAtWorldPosition(
+                this.transform.position.x - BLOCK_SIZE,
+                this.transform.position.y + BLOCK_SIZE
+            ),
+            GetBlockAtWorldPosition(
+                this.transform.position.x + BLOCK_SIZE,
+                this.transform.position.y + BLOCK_SIZE
+            ),
+        ];
+
+        // If a neighboring block has a base redstone power, update the power.
+        let foundSource = false;
+        for (let neighbor of neighbors) {
+            if (!neighbor) continue;
+
+            if (GetBlock(neighbor.blockType).baseRedstoneOutput > 0) {
+                this.metaData.props.power = GetBlock(
+                    neighbor.blockType
+                ).baseRedstoneOutput;
+                foundSource = true;
+            }
+        }
+
+        // Get the highest power from the neighbors.
+        let highestPower = 0;
+
+        for (let neighbor of neighbors) {
+            if (!neighbor) continue;
+
+            if (
+                GetBlock(neighbor.blockType).specialType ===
+                SpecialType.RedstoneDust
+            ) {
+                highestPower = Math.max(
+                    highestPower,
+                    neighbor.metaData.props.power
+                );
+            }
+        }
+        for (let neighbor of diagonalNeighbors) {
+            if (!neighbor) continue;
+
+            if (
+                GetBlock(neighbor.blockType).specialType ===
+                SpecialType.RedstoneDust
+            ) {
+                highestPower = Math.max(
+                    highestPower,
+                    neighbor.metaData.props.power
+                );
+            }
+        }
+
+        // If the highest power is greater than the current power, update the power.
+        if (highestPower > currentPower) {
+            this.metaData.props.power = highestPower - 1;
+        } else {
+            if (!foundSource) {
+                this.metaData.props.power = 0;
+            }
+        }
+
+        // If there is redstone top left or top right, update the state.
+
+        const isTopLeftRedstone =
+            diagonalNeighbors[0] &&
+            GetBlock(diagonalNeighbors[0].blockType).specialType ===
+                SpecialType.RedstoneDust;
+        const isTopRightRedstone =
+            diagonalNeighbors[1] &&
+            GetBlock(diagonalNeighbors[1].blockType).specialType ===
+                SpecialType.RedstoneDust;
+
+        if (neighbors[2] && GetBlock(neighbors[2].blockType).air) {
+            if (isTopLeftRedstone && !isTopRightRedstone) {
+                this.setState(2);
+            } else {
+                if (isTopRightRedstone && !isTopLeftRedstone) {
+                    this.setState(3);
+                } else {
+                    if (isTopRightRedstone && isTopLeftRedstone) {
+                        this.setState(4);
+                    } else {
+                        this.setState(1);
+                    }
+                }
+            }
+        } else {
+            this.setState(1);
+        }
+
+        // 0-100% brightness based on power level.
+        // 0 power = 0% brightness, 15 power = 100% brightness.
+        this.filterBrightness = (this.metaData.props.power / 15) * 100;
+    }
+
     update() {
         if (GetBlock(this.blockType).specialType === SpecialType.Furnace)
             this.furnaceLogic();
+
+        if (GetBlock(this.blockType).specialType === SpecialType.RedstoneDust)
+            this.redstoneDustLogic();
 
         if (GetBlock(this.blockType).fluid) {
             this.updateSprite();
