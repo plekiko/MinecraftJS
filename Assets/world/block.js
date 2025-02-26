@@ -282,6 +282,11 @@ class Block extends Square {
             return;
         }
 
+        if (block.baseRedstoneOutput > 0) {
+            props.power = block.baseRedstoneOutput;
+            this.metaData = new Metadata({ props: props });
+        }
+
         if (!block.specialType) return;
 
         const specialType = GetBlock(this.blockType).specialType;
@@ -381,140 +386,9 @@ class Block extends Square {
         this.updateSprite();
     }
 
-    redstoneDustLogic() {
-        // Get the current power.
-        const currentPower = this.metaData.props.power;
-
-        // Get the neighboring blocks.
-        const neighbors = [
-            GetBlockAtWorldPosition(
-                this.transform.position.x - BLOCK_SIZE,
-                this.transform.position.y
-            ),
-            GetBlockAtWorldPosition(
-                this.transform.position.x + BLOCK_SIZE,
-                this.transform.position.y
-            ),
-            GetBlockAtWorldPosition(
-                this.transform.position.x,
-                this.transform.position.y - BLOCK_SIZE
-            ),
-            GetBlockAtWorldPosition(
-                this.transform.position.x,
-                this.transform.position.y + BLOCK_SIZE
-            ),
-        ];
-        const diagonalNeighbors = [
-            GetBlockAtWorldPosition(
-                this.transform.position.x - BLOCK_SIZE,
-                this.transform.position.y - BLOCK_SIZE
-            ),
-            GetBlockAtWorldPosition(
-                this.transform.position.x + BLOCK_SIZE,
-                this.transform.position.y - BLOCK_SIZE
-            ),
-            GetBlockAtWorldPosition(
-                this.transform.position.x - BLOCK_SIZE,
-                this.transform.position.y + BLOCK_SIZE
-            ),
-            GetBlockAtWorldPosition(
-                this.transform.position.x + BLOCK_SIZE,
-                this.transform.position.y + BLOCK_SIZE
-            ),
-        ];
-
-        // If a neighboring block has a base redstone power, update the power.
-        let foundSource = false;
-        for (let neighbor of neighbors) {
-            if (!neighbor) continue;
-
-            if (GetBlock(neighbor.blockType).baseRedstoneOutput > 0) {
-                this.metaData.props.power = GetBlock(
-                    neighbor.blockType
-                ).baseRedstoneOutput;
-                foundSource = true;
-            }
-        }
-
-        // Get the highest power from the neighbors.
-        let highestPower = 0;
-
-        for (let neighbor of neighbors) {
-            if (!neighbor) continue;
-
-            if (
-                GetBlock(neighbor.blockType).specialType ===
-                SpecialType.RedstoneDust
-            ) {
-                highestPower = Math.max(
-                    highestPower,
-                    neighbor.metaData.props.power
-                );
-            }
-        }
-        for (let neighbor of diagonalNeighbors) {
-            if (!neighbor) continue;
-
-            if (
-                GetBlock(neighbor.blockType).specialType ===
-                SpecialType.RedstoneDust
-            ) {
-                highestPower = Math.max(
-                    highestPower,
-                    neighbor.metaData.props.power
-                );
-            }
-        }
-
-        // If the highest power is greater than the current power, update the power.
-        if (highestPower > currentPower) {
-            this.metaData.props.power = highestPower - 1;
-        } else {
-            if (!foundSource) {
-                this.metaData.props.power = 0;
-            }
-        }
-
-        // If there is redstone top left or top right, update the state.
-
-        const isTopLeftRedstone =
-            diagonalNeighbors[0] &&
-            GetBlock(diagonalNeighbors[0].blockType).specialType ===
-                SpecialType.RedstoneDust;
-        const isTopRightRedstone =
-            diagonalNeighbors[1] &&
-            GetBlock(diagonalNeighbors[1].blockType).specialType ===
-                SpecialType.RedstoneDust;
-
-        if (neighbors[2] && GetBlock(neighbors[2].blockType).air) {
-            if (isTopLeftRedstone && !isTopRightRedstone) {
-                this.setState(2);
-            } else {
-                if (isTopRightRedstone && !isTopLeftRedstone) {
-                    this.setState(3);
-                } else {
-                    if (isTopRightRedstone && isTopLeftRedstone) {
-                        this.setState(4);
-                    } else {
-                        this.setState(1);
-                    }
-                }
-            }
-        } else {
-            this.setState(1);
-        }
-
-        // 0-100% brightness based on power level.
-        // 0 power = 0% brightness, 15 power = 100% brightness.
-        this.filterBrightness = (this.metaData.props.power / 15) * 100;
-    }
-
     update() {
         if (GetBlock(this.blockType).specialType === SpecialType.Furnace)
             this.furnaceLogic();
-
-        if (GetBlock(this.blockType).specialType === SpecialType.RedstoneDust)
-            this.redstoneDustLogic();
 
         if (GetBlock(this.blockType).fluid) {
             this.updateSprite();
@@ -679,6 +553,63 @@ class Block extends Square {
                 this.noteBlockInteraction();
                 break;
         }
+    }
+
+    redstoneDustUpdateState() {
+        // Only run if this block is redstone dust.
+        const def = GetBlock(this.blockType);
+        if (def.specialType !== SpecialType.RedstoneDust) return;
+
+        let connection = 1;
+
+        // Use the block's global position.
+        const pos = this.transform.position;
+        const bx = pos.x;
+        const by = pos.y;
+
+        const north = GetBlockAtWorldPosition(bx, by - BLOCK_SIZE);
+
+        // For diagonal connections, we want to only consider them if the adjacent cardinal blocks are not blocking.
+        const northWest = GetBlockAtWorldPosition(
+            bx - BLOCK_SIZE,
+            by - BLOCK_SIZE
+        );
+        const northEast = GetBlockAtWorldPosition(
+            bx + BLOCK_SIZE,
+            by - BLOCK_SIZE
+        );
+
+        // Helper function that returns true if a block is redstone dust.
+        const isRedstoneDust = (block) => {
+            return (
+                block &&
+                GetBlock(block.blockType).specialType ===
+                    SpecialType.RedstoneDust
+            );
+        };
+
+        if (
+            isRedstoneDust(northEast) &&
+            (north ? GetBlock(north.blockType).air : true)
+        ) {
+            connection = 3;
+        }
+        if (
+            isRedstoneDust(northWest) &&
+            (north ? GetBlock(north.blockType).air : true)
+        )
+            connection = 2;
+        if (
+            isRedstoneDust(northEast) &&
+            isRedstoneDust(northWest) &&
+            (north ? GetBlock(north.blockType).air : true)
+        )
+            connection = 4;
+
+        // 0 power = 0% brightness, 15 power = 100% brightness.
+        this.filterBrightness = (this.metaData.props.power * 100) / 15;
+
+        this.setState(connection);
     }
 
     noteBlockInteraction() {

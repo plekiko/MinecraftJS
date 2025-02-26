@@ -951,7 +951,7 @@ const blockTypes = [
         lightLevel: 5,
         noteBlockSound: "bd",
 
-        baseRedstoneOutput: 15,
+        baseRedstoneOutput: 16,
     }),
     new BlockType({
         blockId: 67,
