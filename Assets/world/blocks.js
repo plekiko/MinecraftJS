@@ -91,6 +91,7 @@ const Blocks = Object.freeze({
 
     RedstoneBlock: 66,
     RedstoneDust: 67,
+    RedstoneLamp: 68,
 });
 
 const blockTypes = [
@@ -923,7 +924,6 @@ const blockTypes = [
         hardness: 2.6,
         toolType: ToolType.Axe,
         specialType: SpecialType.NoteBlock,
-        collision: false,
         noteBlockSound: "bass",
     }),
     new BlockType({
@@ -970,6 +970,20 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
         specialType: SpecialType.RedstoneDust,
         chunkUpdate: true,
+    }),
+    new BlockType({
+        blockId: 68,
+        name: "Redstone Lamp",
+        sprite: "redstone_lamp_off",
+        states: ["redstone_lamp_off", "redstone_lamp_on"],
+        hardness: 12,
+        requiredToolLevel: 13,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        noteBlockSound: "bd",
+        specialType: SpecialType.RedstoneLamp,
     }),
 ];
 

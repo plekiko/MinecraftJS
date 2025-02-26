@@ -114,6 +114,7 @@ const SpecialType = Object.freeze({
     Converter: 5,
     NoteBlock: 6,
     RedstoneDust: 7,
+    RedstoneLamp: 8,
 });
 
 const BlockCategory = Object.freeze({
@@ -264,8 +265,43 @@ class Block extends Square {
         this.y = y;
         this.chunkX = chunkX;
         this.blockType = blockType;
+        this.lightSourceLevel = 0;
+        this.powered = false;
 
         this.updateSprite();
+    }
+
+    power() {
+        if (!this.powered) {
+            this.powered = true;
+        } else {
+            return;
+        }
+
+        switch (GetBlock(this.blockType).specialType) {
+            case SpecialType.RedstoneLamp:
+                this.lightSourceLevel = 8;
+                this.setState(1);
+                break;
+            case SpecialType.NoteBlock:
+                this.playNote();
+                break;
+        }
+    }
+
+    unpower() {
+        if (this.powered) {
+            this.powered = false;
+        } else {
+            return;
+        }
+
+        switch (GetBlock(this.blockType).specialType) {
+            case SpecialType.RedstoneLamp:
+                this.lightSourceLevel = 0;
+                this.setState(0);
+                break;
+        }
     }
 
     setMetaData() {
@@ -292,6 +328,7 @@ class Block extends Square {
         const specialType = GetBlock(this.blockType).specialType;
 
         if (specialType == SpecialType.CraftingTable) return;
+        if (specialType == SpecialType.RedstoneLamp) return;
 
         switch (specialType) {
             case SpecialType.Furnace:
@@ -335,7 +372,6 @@ class Block extends Square {
         if (storage.length > 0) {
             props.storage = storage;
         }
-
         this.metaData = new Metadata({ props: props });
     }
 
@@ -353,6 +389,10 @@ class Block extends Square {
 
         this.blockType = blockType;
         const block = GetBlock(blockType);
+
+        this.lightSourceLevel = block.lightLevel;
+
+        this.powered = false;
 
         if (myChunk) {
             if (block.chunkUpdate) {
@@ -608,6 +648,8 @@ class Block extends Square {
 
         // 0 power = 0% brightness, 15 power = 100% brightness.
         this.filterBrightness = (this.metaData.props.power * 100) / 15;
+
+        this.lightSourceLevel = this.metaData.props.power / 5;
 
         this.setState(connection);
     }

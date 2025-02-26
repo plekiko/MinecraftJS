@@ -137,12 +137,11 @@ function DrawBreakAndPlaceCursor(inRange = false) {
     const mouseX = input.getMousePositionOnBlockGrid().x;
     const mouseY = input.getMousePositionOnBlockGrid().y;
 
-    if (player.inventory.selectedBlock) {
+    const selectedBlock = player.inventory.selectedBlock;
+
+    if (selectedBlock) {
         drawImage({
-            url:
-                "Assets/sprites/blocks/" +
-                player.inventory.selectedBlock.sprite +
-                ".png",
+            url: "Assets/sprites/blocks/" + selectedBlock.sprite + ".png",
             x: mouseX - Math.floor(camera.x),
             y: mouseY - Math.floor(camera.y),
             scale: BLOCK_SIZE / 16,
