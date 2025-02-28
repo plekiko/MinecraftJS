@@ -104,8 +104,8 @@ class Hotbar {
         for (let i = 0; i < this.inventory.items[3].length; i++) {
             const slot = {
                 position: {
-                    x: CANVAS.width / 2 - 239 + i * 60, // Exact original X position and 60px gap
-                    y: CANVAS.height - 75 + 14, // Adjusted to align items with hotbar slots
+                    x: CANVAS.width / 2 - 240 + i * 60, // Exact original X position and 60px gap
+                    y: CANVAS.height - 75 + 12, // Adjusted to align items with hotbar slots
                 },
                 item: this.inventory.items[3][i].item,
             };
@@ -130,7 +130,7 @@ class Hotbar {
             ".png";
 
         // If block, get the default draw cutoff
-        let cutoff = 1;
+        let cutoff = 0;
         if (item.blockId) cutoff = GetBlock(item.blockId).defaultCutoff;
 
         // Draw the sprite
@@ -138,7 +138,7 @@ class Hotbar {
             url: spritePath,
             x: slotX,
             y: slotY,
-            scale: 2.5,
+            scale: 2.7,
             centerX: true,
             dark: item.props?.wall === true,
             sizeY: 16 - cutoff * 16,

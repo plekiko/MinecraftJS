@@ -287,9 +287,6 @@ class BodyPart {
 
         if (!sprite) return;
 
-        const img = new Image();
-        img.src = sprite;
-
         ctx.save();
 
         ctx.translate(this.holdOrigin.x, this.holdOrigin.y);
@@ -303,13 +300,21 @@ class BodyPart {
 
         const scale = isTool ? 0.8 : 0.5;
 
-        ctx.drawImage(
-            img,
-            (-img.width * scale * (BLOCK_SIZE / 16)) / 2,
-            (-img.height * scale * (BLOCK_SIZE / 16)) / 2,
-            img.width * (BLOCK_SIZE / 16) * scale,
-            img.height * (BLOCK_SIZE / 16) * scale
-        );
+        let cutoff = 0;
+        // If it is a block, get the default draw cutoff
+        console.log(holdItem);
+        if (holdItem.blockId) {
+            cutoff = GetBlock(holdItem.blockId).defaultCutoff;
+        }
+
+        drawImage({
+            url: sprite,
+            x: (-16 * scale * (BLOCK_SIZE / 16)) / 2,
+            y: (-16 * scale * (BLOCK_SIZE / 16)) / 2,
+            scale: (BLOCK_SIZE / 16) * scale,
+            centerX: false,
+            sizeY: 16 - cutoff * 16,
+        });
 
         ctx.restore();
     }

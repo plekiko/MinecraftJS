@@ -1159,6 +1159,10 @@ class Inventory {
                 : "items/" + GetItem(holdingItem.itemId).sprite) +
             ".png";
 
+        let cutoff = 0;
+        if (holdingItem.blockId)
+            cutoff = GetBlock(holdingItem.blockId).defaultCutoff;
+
         image = drawImage({
             url: spritePath,
             x: mousePos.x,
@@ -1166,6 +1170,7 @@ class Inventory {
             scale: 2.5,
             centerX: false,
             dark: holdingItem.props.wall === true,
+            sizeY: 16 - cutoff * 16,
         });
 
         if (holdingItem.count <= 1) return;
@@ -1206,7 +1211,7 @@ class Inventory {
             ".png";
 
         // If block get the default draw cutoff
-        let cutoff = 1;
+        let cutoff = 0;
         if (item.blockId) cutoff = GetBlock(item.blockId).defaultCutoff;
 
         // Draw the sprite
