@@ -41,17 +41,17 @@ function globalRecalculateRedstone() {
             for (let block of row) {
                 const def = GetBlock(block.blockType);
                 if (def.specialType === SpecialType.RedstoneDust) {
-                    block.metaData.props.power = 0;
-                    block.powered = false; // Make sure each redstone dust starts unpowered.
+                    // Reset dust power.
+                    block.redstoneOutput = 0;
+                    block.powered = false;
                 }
             }
         }
     }
 
     // 2. Build a global queue seeded with constant power sources and any dust that already has power.
-    // We work in global (world) pixel coordinates.
     let queue = [];
-    // Propagation will check all 8 directions.
+    // Offsets for all eight directions.
     const offsets = [
         { dx: -BLOCK_SIZE, dy: 0 },
         { dx: BLOCK_SIZE, dy: 0 },
@@ -67,18 +67,17 @@ function globalRecalculateRedstone() {
         for (let row of chunk.blocks) {
             for (let block of row) {
                 const def = GetBlock(block.blockType);
-                // For constant sources, use their defined power.
+                // For constant sources, their redstoneOutput is already set.
                 if (block.redstoneOutput && block.redstoneOutput > 0) {
-                    block.metaData.props.power = block.redstoneOutput;
                     queue.push({
                         globalX: block.transform.position.x,
                         globalY: block.transform.position.y,
                     });
                 }
-                // Also seed any redstone dust that already has power.
+                // Also seed any redstone dust that already has output.
                 else if (
                     def.specialType === SpecialType.RedstoneDust &&
-                    block.metaData.props.power > 0
+                    block.redstoneOutput > 0
                 ) {
                     queue.push({
                         globalX: block.transform.position.x,
@@ -89,27 +88,24 @@ function globalRecalculateRedstone() {
         }
     }
 
-    // 3. Propagate redstone power globally via a flood-fill.
+    // 3. Propagate redstone power via flood-fill.
     while (queue.length > 0) {
         const { globalX, globalY } = queue.shift();
         const block = GetBlockAtWorldPosition(globalX, globalY, false);
         if (!block) continue;
-        const currentPower = block.metaData.props.power;
+        const currentPower = block.redstoneOutput;
         if (currentPower <= 1) continue; // Cannot propagate further
 
-        // Check all eight neighbors.
         for (const offset of offsets) {
             const nx = globalX + offset.dx;
             const ny = globalY + offset.dy;
             const neighbor = GetBlockAtWorldPosition(nx, ny, false);
             if (!neighbor) continue;
             const nDef = GetBlock(neighbor.blockType);
-            // Only propagate through redstone dust.
             if (nDef.specialType !== SpecialType.RedstoneDust) continue;
-            // A neighbor should receive power one less than the current.
             const candidatePower = currentPower - 1;
-            if (candidatePower > neighbor.metaData.props.power) {
-                neighbor.metaData.props.power = candidatePower;
+            if (candidatePower > neighbor.redstoneOutput) {
+                neighbor.redstoneOutput = candidatePower;
                 queue.push({
                     globalX: neighbor.transform.position.x,
                     globalY: neighbor.transform.position.y,
@@ -119,10 +115,9 @@ function globalRecalculateRedstone() {
     }
 
     // 4. Update each redstone dust block’s "powered" state.
-    // A block is considered powered if either it has power > 0
-    // or at least one of its 8 neighbors (including diagonals) has power > 0.
+    // We check the block itself and its neighbors.
     const neighborOffsets = [
-        { dx: 0, dy: 0 }, // itself
+        { dx: 0, dy: 0 },
         { dx: -BLOCK_SIZE, dy: 0 },
         { dx: BLOCK_SIZE, dy: 0 },
         { dx: 0, dy: -BLOCK_SIZE },
@@ -137,15 +132,6 @@ function globalRecalculateRedstone() {
                 if (block.redstoneOutput > 0) {
                     powered = true;
                 }
-                // If the block itself has any power, mark it as powered.
-                if (
-                    block.metaData &&
-                    block.metaData.props &&
-                    block.metaData.props.power > 0
-                ) {
-                    powered = true;
-                }
-                // Check all eight neighbors.
                 const globalX = block.transform.position.x;
                 const globalY = block.transform.position.y;
                 for (const off of neighborOffsets) {
@@ -154,11 +140,7 @@ function globalRecalculateRedstone() {
                         globalY + off.dy,
                         false
                     );
-                    if (
-                        nb &&
-                        (block.redstoneOutput > 0 ||
-                            (nb.metaData && nb.metaData.props.power > 0))
-                    ) {
+                    if (nb && nb.redstoneOutput > 0) {
                         powered = true;
                     }
                 }
@@ -167,7 +149,6 @@ function globalRecalculateRedstone() {
                 } else {
                     block.unpower();
                 }
-                // Finally, update the block's visual connection state.
                 block.redstoneDustUpdateState();
             }
         }

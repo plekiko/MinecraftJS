@@ -371,8 +371,9 @@ class Block extends Square {
                 props.note = 0;
                 break;
             case SpecialType.RedstoneDust:
-                props.power = 0;
-                break;
+                return;
+            case SpecialType.PressurePlate:
+                return;
         }
 
         if (storage.length > 0) {
@@ -510,7 +511,7 @@ class Block extends Square {
     pressurePlateLogic() {
         this.cutoff = 0.95;
 
-        this.redstoneOutput = 15;
+        this.redstoneOutput = 16;
 
         playPositionalSound(
             getBlockWorldPosition(this),
@@ -523,7 +524,7 @@ class Block extends Square {
     endPressurePlateLogic() {
         this.cutoff = GetBlock(this.blockType).defaultCutoff;
 
-        this.redstoneOutput = GetBlock(this.blockType).baseRedstoneOutput;
+        this.redstoneOutput = 0;
     }
 
     setState(index) {
@@ -722,9 +723,9 @@ class Block extends Square {
             connection = 4;
 
         // 0 power = 0% brightness, 15 power = 100% brightness.
-        this.filterBrightness = (this.metaData.props.power * 100) / 15;
+        this.filterBrightness = (this.redstoneOutput * 100) / 15;
 
-        this.lightSourceLevel = this.metaData.props.power / 5;
+        this.lightSourceLevel = this.redstoneOutput / 5;
 
         this.setState(connection);
     }

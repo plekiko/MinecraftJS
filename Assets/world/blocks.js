@@ -958,7 +958,7 @@ const blockTypes = [
         states: ["redstone_lamp_off", "redstone_lamp_on"],
         hardness: 12,
         requiredToolLevel: 13,
-        breakSound: Sounds.Break_Stone,
+        breakSound: Sounds.Break_Glass,
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
