@@ -16,6 +16,7 @@ class Drop extends Entity {
             position: position,
             hitbox: new Vector2(BLOCK_SIZE / 1.5, BLOCK_SIZE / 1.5),
             sprite: spritePath,
+            cutoff: GetBlock(blockId)?.defaultCutoff || 0,
             bouncing: true,
             type: EntityTypes.Drop,
             float: true,

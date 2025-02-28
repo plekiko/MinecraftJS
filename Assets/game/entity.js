@@ -19,6 +19,7 @@ class Entity {
         noGravity = false,
         invulnerable = false,
         sprite = null,
+        cutoff = 0,
         spriteScale = 2,
         dark = false,
         outline = 0,
@@ -68,6 +69,7 @@ class Entity {
         this.playWaterEnterSound = playWaterEnterSound;
         this.direction = direction;
         this.sprite = sprite;
+        this.cutoff = cutoff;
         this.body = body;
         this.dark = dark;
         this.img = new Image();
@@ -838,24 +840,64 @@ class Entity {
                 ctx.filter = `brightness(${blockLightLevel / 15})`;
             }
 
-            ctx.drawImage(
-                this.img,
-                spriteOffsetX,
-                spriteOffsetY,
-                spriteWidth,
-                spriteHeight
-            );
+            if (this.cutoff > 0 && this.cutoff <= 1) {
+                // Calculate the visible height (bottom portion)
+                const visibleFraction = 1 - this.cutoff; // e.g., cutoff 0.5 => 0.5 visible
+                const visibleHeight = spriteHeight * visibleFraction;
 
-            if (this.dark) {
-                ctx.globalAlpha = 0.2;
-                ctx.fillStyle = "black";
-                ctx.fillRect(
+                ctx.save();
+                ctx.beginPath();
+                // Clip to show only the bottom portion
+                ctx.rect(
+                    spriteOffsetX,
+                    spriteOffsetY + (spriteHeight - visibleHeight), // Start at bottom minus visible height
+                    spriteWidth,
+                    visibleHeight
+                );
+                ctx.clip();
+
+                // Draw the full sprite, but only the bottom portion will show
+                ctx.drawImage(
+                    this.img,
                     spriteOffsetX,
                     spriteOffsetY,
                     spriteWidth,
                     spriteHeight
                 );
+
+                if (this.dark) {
+                    ctx.globalAlpha = 0.2;
+                    ctx.fillStyle = "black";
+                    ctx.fillRect(
+                        spriteOffsetX,
+                        spriteOffsetY + (spriteHeight - visibleHeight),
+                        spriteWidth,
+                        visibleHeight
+                    );
+                }
+                ctx.restore();
+            } else {
+                // No cutoff: draw full sprite
+                ctx.drawImage(
+                    this.img,
+                    spriteOffsetX,
+                    spriteOffsetY,
+                    spriteWidth,
+                    spriteHeight
+                );
+
+                if (this.dark) {
+                    ctx.globalAlpha = 0.2;
+                    ctx.fillStyle = "black";
+                    ctx.fillRect(
+                        spriteOffsetX,
+                        spriteOffsetY,
+                        spriteWidth,
+                        spriteHeight
+                    );
+                }
             }
+            ctx.globalAlpha = 1; // Reset alpha
         }
 
         ctx.restore();
