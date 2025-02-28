@@ -13,19 +13,14 @@ class Entity {
         hitbox = new Vector2(1, 1),
         velocity = new Vector2(),
         targetVelocity = new Vector2(),
-
+        maxStepHeight = BLOCK_SIZE / 2,
         acceleration = 90,
-
         maxVelocity = new Vector2(1000, 1000),
-
         noGravity = false,
-
         invulnerable = false,
-
         sprite = null,
-        spriteScale = BLOCK_SIZE / 32,
+        spriteScale = BLOCK_SIZE / 2,
         dark = false,
-
         outline = 0,
         color = "black",
         opacity = 1,
@@ -34,28 +29,17 @@ class Entity {
         type = EntityTypes.Entity,
         stepSize = 1,
         footstepSounds = null,
-
         noCollision = false,
-
         myChunkX = null,
-
         canSwim = true,
-
         offset = new Vector2(),
-
         float = false,
         playWaterEnterSound = true,
-
         forceDirection = false,
-
         fallDamage = false,
-
         body = null,
-
         despawn = true,
-
         direction = 1,
-
         holdItem = new InventoryItem(),
     } = {}) {
         this.position = position;
@@ -68,83 +52,55 @@ class Entity {
         this.grounded = false;
         this.standingOnBlockType = null;
         this.noGravity = noGravity;
-
+        this.maxStepHeight = maxStepHeight;
         this.myChunkX = myChunkX;
-
         this.noCollision = noCollision;
-
         this.wasColliding = false;
-
         this.fallDistance = 0;
         this.fallDamage = fallDamage;
-
         this.invulnerable = invulnerable;
         this.type = type;
-
         this.canSwim = canSwim;
-
         this.isGettingKnockback = false;
         this.knockBackBuffer = false;
-
         this.forceDirection = forceDirection;
-
         this.float = float;
         this.playWaterEnterSound = playWaterEnterSound;
-
         this.direction = direction;
-
         this.sprite = sprite;
         this.body = body;
         this.dark = dark;
-
         this.img = new Image();
         this.img.src = sprite ? sprite : "";
-
         this.despawn = despawn;
-
         this.spriteScale = spriteScale;
         this.outline = outline;
         this.color = color;
         this.opacity = opacity;
         this.originalColor = color;
         this.drag = drag;
-
         this.bouncing = bouncing;
         this.offset = offset;
-
         this.lookDirection = 0;
-
         this.swimming = false;
-
         this.originDate = Date.now();
-
         this.stepCounter = 0;
         this.stepSize = stepSize;
         this.footstepSounds = footstepSounds;
-
         this.wasCollidingWithBlocks = [];
-
         this.holdItem = holdItem;
-
         this.shouldAddForce = { x: 0, y: 0 };
-
         this.hurtCooldown = 0.3;
     }
 
     rotateToPoint(targetPosition, objectPosition) {
-        // Calculate the object's center point (if needed)
         const centerX = objectPosition.x;
         const centerY = objectPosition.y;
-
-        // Calculate the difference in x and y positions between the target and object
         const dx = targetPosition.x - centerX;
         const dy = targetPosition.y - centerY;
-
-        // Calculate the angle in radians and convert to degrees
         const angle = Math.atan2(dy, dx);
         const rotationInDegrees = (angle * 180) / Math.PI;
-
-        return rotationInDegrees; // Return the calculated rotation in degrees
+        return rotationInDegrees;
     }
 
     addForce(x = 0, y = 0) {
@@ -156,7 +112,6 @@ class Entity {
         ) {
             return;
         }
-
         this.shouldAddForce.x += x * BLOCK_SIZE;
         this.shouldAddForce.y += y * BLOCK_SIZE;
     }
@@ -181,18 +136,13 @@ class Entity {
             futureY + this.hitbox.y
         );
 
-        // Helper function to check collision with cutoff
         const checkBlockWithCutoff = (block, x, y) => {
             if (!block || !this.isSolid(block.blockType)) return null;
             const def = GetBlock(block.blockType);
-            if (!def.collision) return null; // Only solid blocks affect movement
-
-            // Calculate effective top edge based on cutoff
+            if (!def.collision) return null;
             const effectiveHeight = BLOCK_SIZE * (1 - block.cutoff);
             const blockTopY =
                 block.transform.position.y + (BLOCK_SIZE - effectiveHeight);
-
-            // Check if entity's bottom Y intersects the block's effective top
             if (
                 y >= blockTopY &&
                 y <= block.transform.position.y + BLOCK_SIZE
@@ -218,7 +168,6 @@ class Entity {
             );
             if (collision) return collision;
         }
-
         return null;
     }
 
@@ -237,12 +186,9 @@ class Entity {
             if (!block || !this.isSolid(block.blockType)) return null;
             const def = GetBlock(block.blockType);
             if (!def.collision) return null;
-
             const effectiveHeight = BLOCK_SIZE * (1 - block.cutoff);
             const blockTopY =
                 block.transform.position.y + (BLOCK_SIZE - effectiveHeight);
-
-            // Check if entity's Y range overlaps the block's effective height
             if (
                 this.position.y + this.hitbox.y > blockTopY &&
                 this.position.y < block.transform.position.y + BLOCK_SIZE &&
@@ -268,7 +214,6 @@ class Entity {
             checkBlockWithCutoff(blockLeftTop, futureX, this.position.y)
         )
             return blockLeftTop;
-
         return null;
     }
 
@@ -290,12 +235,9 @@ class Entity {
             if (!block || !this.isSolid(block.blockType)) return null;
             const def = GetBlock(block.blockType);
             if (!def.collision) return null;
-
             const effectiveHeight = BLOCK_SIZE * (1 - block.cutoff);
             const blockTopY =
                 block.transform.position.y + (BLOCK_SIZE - effectiveHeight);
-
-            // Check if entity's Y range overlaps the block's effective height
             if (
                 this.position.y + this.hitbox.y > blockTopY &&
                 this.position.y < block.transform.position.y + BLOCK_SIZE &&
@@ -333,7 +275,6 @@ class Entity {
             )
         )
             return blockRightTop;
-
         return null;
     }
 
@@ -350,7 +291,6 @@ class Entity {
         if (blockUpRight && this.isSolid(blockUpRight.blockType)) {
             return blockUpRight;
         }
-
         return null;
     }
 
@@ -370,37 +310,27 @@ class Entity {
 
     damage(damage) {
         if (this.hurtCooldown) return false;
-
         this.hurtCooldown = 0.3;
-
         this.flashColor();
-
-        // Insert armor checks etc
         this.decreaseHealth(damage);
-
         return true;
     }
 
     forceDamage(damage) {
         this.flashColor();
-
         this.decreaseHealth(damage);
     }
 
     decreaseHealth(amount) {
         if (this.health === undefined) return;
-
         this.health -= amount;
-
         if (this.health <= 0) this.die();
-
         return this.health;
     }
 
     addHealth(amount) {
         this.health += amount;
         if (this.health > this.maxHealth) this.health = this.maxHealth;
-
         return this.health;
     }
 
@@ -415,16 +345,13 @@ class Entity {
         const groundLevel = currentChunk.findGroundLevel(this.getXInChunk());
         if (groundLevel === 0) return false;
         const y = (CHUNK_HEIGHT - groundLevel) * BLOCK_SIZE - this.hitbox.y - 1;
-
         this.position.y = y;
     }
 
     getXInChunk() {
         const chunkOriginX = this.getCurrentChunk().x;
         const relativeX = this.position.x - chunkOriginX;
-
         const xInChunk = Math.floor(relativeX / BLOCK_SIZE);
-
         return xInChunk;
     }
 
@@ -436,7 +363,6 @@ class Entity {
             }, duration * 1000);
             return;
         }
-
         this.body.flashColor(color, duration);
     }
 
@@ -445,9 +371,7 @@ class Entity {
             Math.floor(this.position.x / (CHUNK_WIDTH * BLOCK_SIZE)) *
             CHUNK_WIDTH *
             BLOCK_SIZE;
-
         if (!chunks.has(chunkPosition)) return null;
-
         return chunks.get(chunkPosition);
     }
 
@@ -467,16 +391,13 @@ class Entity {
 
     swing() {
         if (!this.body) return;
-
         this.body.swing();
     }
 
     bounceSprite() {
         this.offset.y = 0;
-
         if (!this.bouncing) return;
         if (!this.grounded) return;
-
         this.offset.y = Math.sin((Date.now() - this.originDate) / 120) * 1.5;
     }
 
@@ -488,33 +409,24 @@ class Entity {
     calculateForce() {
         this.velocity.x += this.shouldAddForce.x;
         this.velocity.y += this.shouldAddForce.y;
-
         this.shouldAddForce = { x: 0, y: 0 };
     }
 
     handleTargetVelocity() {
         if (this.isGettingKnockback) return;
-
         if (this.targetVelocity.x === 0) return;
-
         if (this.velocity.x < this.targetVelocity.x) {
             this.velocity.x += this.acceleration * BLOCK_SIZE * deltaTime;
-
-            // Clamp to avoid overshoot
             if (this.velocity.x > this.targetVelocity.x) {
                 this.velocity.x = this.targetVelocity.x;
             }
         }
-
         if (this.velocity.x > this.targetVelocity.x) {
             this.velocity.x -= this.acceleration * BLOCK_SIZE * deltaTime;
-
-            // Clamp to avoid overshoot
             if (this.velocity.x < this.targetVelocity.x) {
                 this.velocity.x = this.targetVelocity.x;
             }
         }
-
         this.targetVelocity = new Vector2();
     }
 
@@ -531,7 +443,6 @@ class Entity {
 
         if (this.noCollision) {
             this.calculateForce();
-
             this.position.x += this.velocity.x * deltaTime;
             this.position.y += this.velocity.y * deltaTime;
             return;
@@ -542,22 +453,87 @@ class Entity {
 
         if (!this.forceDirection) this.direction = this.velocity.x < 0 ? -1 : 1;
 
+        let steppedUp = false;
+
         if (nextPositionX > this.position.x) {
-            if (rightCollision) {
-                this.wasColliding = true;
-                this.velocity.x = 0;
+            // Moving right
+            if (rightCollision && this.grounded) {
+                const effectiveHeight =
+                    BLOCK_SIZE * (1 - rightCollision.cutoff);
+                const blockTopY =
+                    rightCollision.transform.position.y +
+                    (BLOCK_SIZE - effectiveHeight);
+                const entityBottomY = this.position.y + this.hitbox.y;
+                const heightDifference = entityBottomY - blockTopY; // Positive means block is above (lower Y)
+
+                if (
+                    heightDifference > 0 && // Block is above entity
+                    heightDifference <= this.maxStepHeight // Within step height
+                ) {
+                    const newY = blockTopY - this.hitbox.y; // New top position after stepping
+                    const checkAbove = this.checkUpCollision(newY); // Check ceiling clearance
+
+                    const blockAboveSlab = GetBlockAtWorldPosition(
+                        rightCollision.transform.position.x,
+                        blockTopY - BLOCK_SIZE
+                    );
+
+                    if (
+                        !checkAbove &&
+                        (!blockAboveSlab ||
+                            !GetBlock(blockAboveSlab.blockType).collision)
+                    ) {
+                        // No ceiling or block above slab
+                        this.position.y = newY;
+                        this.velocity.y = 0;
+                        this.position.x += 3;
+                        steppedUp = true;
+                    }
+                }
+                if (!steppedUp) {
+                    this.wasColliding = true;
+                    this.velocity.x = 0;
+                }
             }
         }
         if (nextPositionX < this.position.x) {
-            if (leftCollision) {
-                this.wasColliding = true;
-                this.velocity.x = 0;
+            // Moving left
+            if (leftCollision && this.grounded) {
+                const effectiveHeight = BLOCK_SIZE * (1 - leftCollision.cutoff);
+                const blockTopY =
+                    leftCollision.transform.position.y +
+                    (BLOCK_SIZE - effectiveHeight);
+                const entityBottomY = this.position.y + this.hitbox.y;
+                const heightDifference = entityBottomY - blockTopY;
+
+                if (
+                    heightDifference > 0 &&
+                    heightDifference <= this.maxStepHeight
+                ) {
+                    const newY = blockTopY - this.hitbox.y;
+                    const checkAbove = this.checkUpCollision(newY);
+                    const blockAboveSlab = GetBlockAtWorldPosition(
+                        leftCollision.transform.position.x,
+                        blockTopY - BLOCK_SIZE
+                    );
+
+                    if (
+                        !checkAbove &&
+                        (!blockAboveSlab ||
+                            !GetBlock(blockAboveSlab.blockType).collision)
+                    ) {
+                        this.position.y = newY;
+                        this.velocity.y = 0;
+                        this.position.x -= 3;
+                        steppedUp = true;
+                    }
+                }
+                if (!steppedUp) {
+                    this.wasColliding = true;
+                    this.velocity.x = 0;
+                }
             }
         }
-
-        // if (!this.grounded) {
-        //     this.velocity.y += this.drag * deltaTime;
-        // }
 
         this.clampVerticalVelocity();
 
@@ -566,7 +542,6 @@ class Entity {
 
         const collidingBlocks = this.isCollidingWithBlockType();
 
-        // Call the end entity collision function on all colliding blocks that we collided with but no longer are
         this.wasCollidingWithBlocks.forEach((block) => {
             if (!collidingBlocks.includes(block)) {
                 block.endEntityCollision(this);
@@ -584,11 +559,17 @@ class Entity {
         });
 
         if (!upCollision) {
-            if (downCollision) {
+            if (downCollision && !steppedUp) {
+                // Skip if stepped up
                 this.standingOnBlockType = downCollision.blockType;
                 this.wasColliding = true;
+                const effectiveHeight = BLOCK_SIZE * (1 - downCollision.cutoff);
+                const blockTopY =
+                    downCollision.transform.position.y +
+                    (BLOCK_SIZE - effectiveHeight);
+                this.position.y = blockTopY - this.hitbox.y;
                 this.ground();
-            } else {
+            } else if (!steppedUp) {
                 this.grounded = false;
             }
         } else {
@@ -596,7 +577,7 @@ class Entity {
             this.velocity.y = 0;
         }
 
-        this.fluidLogic(collidingBlocks);
+        this.fluidLogic(collidingBlocks, deltaTime);
 
         this.calculateForce();
 
@@ -604,16 +585,18 @@ class Entity {
             this.fallDistance += (this.velocity.y / BLOCK_SIZE) * deltaTime;
         else this.fallDistance = 0;
 
-        this.position.x += this.velocity.x * deltaTime;
-        this.position.y += this.velocity.y * deltaTime;
+        if (!leftCollision && !rightCollision) {
+            this.position.x += this.velocity.x * deltaTime;
+        }
+        if (!downCollision && !upCollision && !steppedUp) {
+            this.position.y += this.velocity.y * deltaTime;
+        }
     }
 
     ground() {
         this.velocity.y = 0;
         this.grounded = true;
-
         this.takeFallDamage();
-
         this.drag = GetBlock(this.standingOnBlockType).drag;
         if (this.knockBackBuffer) {
             this.isGettingKnockback = false;
@@ -624,30 +607,23 @@ class Entity {
 
     takeFallDamage() {
         if (!this.fallDamage) return;
-
         if (this.fallDistance < 2) return;
-
         const damage = Math.round(this.fallDistance - 2);
-
         if (this.fallDistance < 4)
             playPositionalSound(this.position, "misc/fallsmall.ogg");
         else playPositionalSound(this.position, "misc/fallbig.ogg");
-
         this.hit(damage);
     }
 
-    fluidLogic(collidingBlocks) {
+    fluidLogic(collidingBlocks, deltaTime) {
         this.swimming = false;
-
         const isCollidingWithFluid =
             this.filterBlocksByProperty(collidingBlocks, "fluid").length > 0;
-
         if (isCollidingWithFluid && this.canSwim) {
             this.grounded = false;
             if (!this.swimming) {
                 this.enterFluid();
             }
-
             if (this.float) this.floatLogic();
         }
     }
@@ -659,9 +635,7 @@ class Entity {
     playFootstepSounds() {
         if (!this.grounded || Math.abs(this.velocity.x) === 0) return;
         if (!this.standingOnBlockType) return;
-
         this.stepCounter += Math.abs(this.velocity.x / 100) * deltaTime;
-
         if (this.stepCounter >= this.stepSize) {
             if (!this.footstepSounds) {
                 const block = GetBlock(this.standingOnBlockType);
@@ -670,7 +644,6 @@ class Entity {
                 this.stepCounter -= this.stepSize;
                 return;
             }
-
             PlayRandomSoundFromArray({
                 array: this.footstepSounds,
                 volume: 0.2,
@@ -678,7 +651,6 @@ class Entity {
                 range: 6,
                 origin: this.position,
             });
-
             this.stepCounter -= this.stepSize;
         }
     }
@@ -697,20 +669,16 @@ class Entity {
 
     isCollidingWithBlockType() {
         const collidingBlocks = [];
-
-        // Define the range of grid coordinates covered by the entity's hitbox
         const startX = Math.floor(this.position.x / BLOCK_SIZE);
         const endX = Math.floor((this.position.x + this.hitbox.x) / BLOCK_SIZE);
         const startY = Math.floor(this.position.y / BLOCK_SIZE);
         const endY = Math.floor((this.position.y + this.hitbox.y) / BLOCK_SIZE);
 
-        // Iterate over all grid cells covered by the entity's hitbox
         for (let x = startX; x <= endX; x++) {
             for (let y = startY; y <= endY; y++) {
                 const blockX = x * BLOCK_SIZE;
                 const blockY = y * BLOCK_SIZE;
                 const block = GetBlockAtWorldPosition(blockX, blockY);
-
                 if (block && block.blockType) {
                     const effectiveHeight = BLOCK_SIZE * (1 - block.cutoff);
                     const blockTopY =
@@ -719,15 +687,13 @@ class Entity {
                     const entityBottomY = this.position.y + this.hitbox.y;
                     const entityTopY = this.position.y;
 
-                    // Check if entity’s X range overlaps block’s X
                     const xOverlap =
                         this.position.x < blockX + BLOCK_SIZE &&
                         this.position.x + this.hitbox.x > blockX;
 
-                    // Check if entity’s Y range overlaps block’s effective Y (inverted Y-axis)
                     const yOverlap =
-                        entityBottomY > blockTopY && // Entity bottom below block top (higher Y)
-                        entityTopY < blockY + BLOCK_SIZE; // Entity top above block bottom (lower Y)
+                        entityBottomY > blockTopY &&
+                        entityTopY < blockY + BLOCK_SIZE;
 
                     if (xOverlap && yOverlap) {
                         collidingBlocks.push(block);
@@ -735,8 +701,7 @@ class Entity {
                 }
             }
         }
-
-        return collidingBlocks; // Return all colliding blocks
+        return collidingBlocks;
     }
 
     filterBlocksByProperty(blocks, property) {
@@ -764,9 +729,7 @@ class Entity {
 
     enterFluid() {
         this.swimming = true;
-
         if (this.velocity.y > BLOCK_SIZE * 5) this.playWaterEnterSFX();
-
         if (this.float && this.velocity.y > BLOCK_SIZE * 3) {
             this.velocity.y /= 1.1;
         }
@@ -785,7 +748,6 @@ class Entity {
     applyDrag() {
         if (this.targetVelocity.x !== 0) return;
         if (this.isGettingKnockback) return;
-        // if (!this.grounded) return;
         if (this.velocity.x > 0) {
             this.velocity.x -=
                 this.drag *
@@ -817,11 +779,9 @@ class Entity {
 
     draw(ctx) {
         ctx.save();
-
         const centerX = this.position.x - camera.x + this.offset.x;
         const centerY = this.position.y - camera.y + this.offset.y;
 
-        // Get the block at this position
         const blockLightLevel = this.getBlockAtPosition(
             this.position.x,
             this.position.y
@@ -851,11 +811,6 @@ class Entity {
 
         ctx.translate(centerX, centerY);
 
-        // if (!this.sprite || this.sprite == "") {
-        //     ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-        //     ctx.fillRect(0, 0, this.hitbox.x, this.hitbox.y);
-        // }
-
         if (this.rotation) {
             ctx.rotate((this.rotation * Math.PI) / 180);
         }
@@ -876,7 +831,6 @@ class Entity {
         } else if (this.img) {
             const spriteWidth = this.img.width * this.spriteScale;
             const spriteHeight = this.img.height * this.spriteScale;
-
             const spriteOffsetX = (this.hitbox.x - spriteWidth) / 2;
             const spriteOffsetY = (this.hitbox.y - spriteHeight) / 2;
 
@@ -909,18 +863,12 @@ class Entity {
 
     drawHitbox(ctx) {
         ctx.save();
-
         const centerX = this.position.x - camera.x + this.offset.x;
         const centerY = this.position.y - camera.y + this.offset.y;
-
         ctx.translate(centerX, centerY);
-
         ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
         ctx.lineWidth = 2;
-
-        // Draw the hollow square
         ctx.strokeRect(0, 0, this.hitbox.x, this.hitbox.y);
-
         ctx.restore();
     }
 }
