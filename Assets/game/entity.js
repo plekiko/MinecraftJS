@@ -19,7 +19,7 @@ class Entity {
         noGravity = false,
         invulnerable = false,
         sprite = null,
-        spriteScale = BLOCK_SIZE / 2,
+        spriteScale = 2,
         dark = false,
         outline = 0,
         color = "black",
