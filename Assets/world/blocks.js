@@ -84,6 +84,7 @@ const Blocks = Object.freeze({
     GoldOre: 62,
 
     Torch: 63,
+    RedstoneTorch: 69,
 
     NoteBlock: 64,
 
@@ -985,6 +986,19 @@ const blockTypes = [
         dropWithoutTool: false,
         noteBlockSound: "bd",
         specialType: SpecialType.RedstoneLamp,
+    }),
+    // Redstone Torch
+    new BlockType({
+        blockId: 69,
+        name: "Redstone Torch",
+        sprite: "redstone_torch_on",
+        states: ["redstone_torch_off", "redstone_torch_on"],
+        hardness: 0,
+        collision: false,
+        transparent: true,
+        lightLevel: 7,
+        breakWithoutBlockUnderneath: true,
+        baseRedstoneOutput: 15
     }),
 ];
 
