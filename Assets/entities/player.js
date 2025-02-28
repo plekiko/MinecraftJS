@@ -210,7 +210,7 @@ class Player extends Entity {
         // Placing
         if (block.air || block.fluid) {
             if (this.holdItem.itemId === Items.WaterBucket) {
-                if (!this.checkBlockForPlacing(true)) return;
+                if (!this.checkBlockForPlacing(GetBlock(Blocks.Water))) return;
 
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
@@ -223,7 +223,7 @@ class Player extends Entity {
                 return;
             }
             if (this.holdItem.itemId === Items.LavaBucket) {
-                if (!this.checkBlockForPlacing(true)) return;
+                if (!this.checkBlockForPlacing(Blocks.Lava)) return;
 
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
@@ -672,11 +672,7 @@ class Player extends Entity {
         const isWall = this.getSelectedSlotItem().props?.wall;
 
         if (!isWall) {
-            if (
-                !this.checkBlockForPlacing(
-                    this.inventory.selectedBlock.collision
-                )
-            )
+            if (!this.checkBlockForPlacing(this.inventory.selectedBlock))
                 return;
         } else {
             if (!this.checkWallForPlacing()) return;
@@ -734,7 +730,8 @@ class Player extends Entity {
     getSelectedSlotItem() {
         return this.inventory.items[3][this.inventory.currentSlot].item;
     }
-    checkBlockForPlacing(collision) {
+
+    checkBlockForPlacing(block) {
         const isAir = GetBlock(this.hoverBlock.blockType).air;
         const isFluid = GetBlock(this.hoverBlock.blockType).fluid;
 
@@ -750,7 +747,7 @@ class Player extends Entity {
 
         let collidingWithEntity = false;
 
-        if (collision) {
+        if (block.collision) {
             for (let i = 0; i < this.entities.length; i++) {
                 const entity = this.entities[i];
                 if (entity.type === 0) continue;
@@ -769,6 +766,22 @@ class Player extends Entity {
         }
 
         const isAdjacentToBlock = checkAdjacentBlocks(mousePos);
+
+        console.log(block);
+        if (block.breakWithoutBlockUnderneath) {
+            const blockBeneath = GetBlockAtWorldPosition(
+                this.hoverBlock.transform.position.x,
+                this.hoverBlock.transform.position.y + BLOCK_SIZE
+            );
+
+            if (!blockBeneath) return false;
+
+            const blockBeneathDef = GetBlock(blockBeneath.blockType);
+
+            if (!blockBeneathDef.collision) return false;
+
+            if (blockBeneathDef.defaultCutoff > 0) return false;
+        }
 
         return (isAir || isFluid) && !collidingWithEntity && isAdjacentToBlock;
     }
