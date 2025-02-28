@@ -17,7 +17,6 @@ const Blocks = Object.freeze({
     AcaciaLeaves: 15,
     BirchLog: 16,
     BirchLeaves: 17,
-
     Grass: 18,
     TallGrass: 19,
     DeadBush: 20,
@@ -31,75 +30,63 @@ const Blocks = Object.freeze({
     FlowerDandelion: 28,
     FlowerDaisy: 29,
     FlowerAllium: 30,
-
     Water: 31,
-
     JungleLog: 32,
     JungleLeaves: 33,
     OakPlanks: 34,
-
     CraftingTable: 35,
     Converter: 61,
-
     SprucePlanks: 36,
     AcaciaPlanks: 37,
     BirchPlanks: 38,
     JunglePlanks: 39,
-
     Cobblestone: 40,
     MossyCobblestone: 58,
-
     CoalOre: 41,
     IronOre: 42,
     Furnace: 43,
-
     SmoothStone: 44,
     StoneBricks: 45,
-
     Jelte: 46,
     Quinten: 47,
-
     CoalBlock: 48,
     IronBlock: 49,
-
     IceBlock: 50,
-
     Chest: 51,
-
     Glass: 52,
-
     Lava: 53,
-
     DiamondOre: 54,
     DiamondBlock: 55,
-
     Obsidian: 56,
-
     Jukebox: 57,
-
     StructureAir: 59,
-
     SnowBlock: 60,
-
     GoldOre: 62,
-
     Torch: 63,
     RedstoneTorch: 69,
-
     NoteBlock: 64,
-
     GoldBlock: 65,
-
     RedstoneBlock: 66,
     RedstoneDust: 67,
     RedstoneLamp: 68,
-
     StonePressurePlate: 70,
 
     TestSlab: 71,
+    StoneSlab: 72,
+    OakSlab: 73,
+    SpruceSlab: 74,
+    AcaciaSlab: 75,
+    BirchSlab: 76,
+    JungleSlab: 77,
+    CobblestoneSlab: 78,
+    SandstoneSlab: 79,
+    StoneBrickSlab: 80,
+    MossyCobblestoneSlab: 81,
+    SmoothStoneSlab: 82,
 });
 
 const blockTypes = [
+    //#region Basic Blocks
     new BlockType({ blockId: 0, name: "Air", collision: false, air: true }),
     new BlockType({
         blockId: 1,
@@ -141,7 +128,6 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         dropBlock: Blocks.Cobblestone,
         smeltOutput: { blockId: Blocks.SmoothStone },
-
         noteBlockSound: "bd",
     }),
     new BlockType({
@@ -151,7 +137,6 @@ const blockTypes = [
         hardness: -1,
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
-
         noteBlockSound: "bd",
     }),
     new BlockType({
@@ -175,7 +160,6 @@ const blockTypes = [
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
-
         noteBlockSound: "bd",
     }),
     new BlockType({
@@ -199,6 +183,9 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Cloth,
         transparent: true,
     }),
+    //#endregion
+
+    //#region Trees and Logs
     new BlockType({
         blockId: 10,
         sprite: "log_oak",
@@ -314,6 +301,32 @@ const blockTypes = [
         transparent: true,
     }),
     new BlockType({
+        blockId: 32,
+        sprite: "log_jungle",
+        name: "Jungle Log",
+        category: BlockCategory.Logs,
+        smeltOutput: { itemId: Items.Charcoal },
+        fuelTime: 15,
+        collision: false,
+        hardness: 3,
+        toolType: ToolType.Axe,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
+        blockId: 33,
+        sprite: "leaves_jungle_opaque",
+        name: "Jungle Leaves",
+        collision: false,
+        dropWithoutTool: false,
+        hardness: 0.5,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
+    }),
+    //#endregion
+
+    //#region Vegetation
+    new BlockType({
         blockId: 18,
         sprite: "grass",
         name: "Grass",
@@ -353,7 +366,6 @@ const blockTypes = [
             }),
         ]),
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -368,9 +380,7 @@ const blockTypes = [
         breakByFluid: true,
         toolType: ToolType.Shears,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -385,9 +395,7 @@ const blockTypes = [
         breakByFluid: true,
         toolType: ToolType.Shears,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -401,9 +409,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -417,9 +423,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -433,9 +437,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -449,9 +451,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -465,9 +465,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -481,9 +479,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -497,9 +493,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -513,9 +507,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
@@ -529,11 +521,12 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
-
         cannotBeConverted: true,
-
         transparent: true,
     }),
+    //#endregion
+
+    //#region Liquids
     new BlockType({
         blockId: 31,
         sprite: "water_still",
@@ -546,32 +539,25 @@ const blockTypes = [
         dropWithoutTool: false,
         breakSound: Sounds.Water_Enter,
         cannotBeConverted: true,
-
         transparent: true,
     }),
     new BlockType({
-        blockId: 32,
-        sprite: "log_jungle",
-        name: "Jungle Log",
-        category: BlockCategory.Logs,
-        smeltOutput: { itemId: Items.Charcoal },
-        fuelTime: 15,
-        collision: false,
-        hardness: 3,
-        toolType: ToolType.Axe,
-        noteBlockSound: "bass",
-    }),
-    new BlockType({
-        blockId: 33,
-        sprite: "leaves_jungle_opaque",
-        name: "Jungle Leaves",
-        collision: false,
+        blockId: 53,
+        sprite: "lava_still",
+        name: "Lava",
+        updateSpeed: 0.05,
+        chunkUpdate: true,
+        hardness: -2,
+        animationSpeed: 0.03,
+        fluid: true,
         dropWithoutTool: false,
-        hardness: 0.5,
-        breakSound: Sounds.Break_Grass,
-        breakingSound: Sounds.Breaking_Grass,
-        toolType: ToolType.Shears,
+        lightLevel: 6,
+        cannotBeConverted: true,
+        transparent: true,
     }),
+    //#endregion
+
+    //#region Planks and Crafted Blocks
     new BlockType({
         blockId: 34,
         sprite: "planks_oak",
@@ -591,7 +577,6 @@ const blockTypes = [
         specialType: SpecialType.CraftingTable,
         collision: false,
         fuelTime: 15,
-
         noteBlockSound: "bass",
     }),
     new BlockType({
@@ -635,6 +620,64 @@ const blockTypes = [
         noteBlockSound: "bass",
     }),
     new BlockType({
+        blockId: 43,
+        sprite: "furnace_front_off",
+        states: ["furnace_front_off", "furnace_front_on"],
+        name: "Furnace",
+        hardness: 8,
+        updateSpeed: 1,
+        specialType: SpecialType.Furnace,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        collision: false,
+        noteBlockSound: "bd",
+    }),
+    new BlockType({
+        blockId: 51,
+        name: "Chest",
+        sprite: "chest",
+        hardness: 2.6,
+        collision: false,
+        specialType: SpecialType.SingleChest,
+        chunkProtection: true,
+        cannotBeConverted: true,
+        transparent: true,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
+        blockId: 57,
+        sprite: "jukebox_top",
+        name: "Jukebox",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        specialType: SpecialType.Jukebox,
+        collision: false,
+    }),
+    new BlockType({
+        blockId: 61,
+        sprite: "smithing_table_side",
+        name: "Converter",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        specialType: SpecialType.Converter,
+        collision: false,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
+        blockId: 64,
+        sprite: "noteblock",
+        name: "Note Block",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        specialType: SpecialType.NoteBlock,
+        noteBlockSound: "bass",
+    }),
+    //#endregion
+
+    //#region Stone and Ores
+    new BlockType({
         blockId: 40,
         sprite: "cobblestone",
         name: "Cobblestone",
@@ -672,21 +715,6 @@ const blockTypes = [
         noteBlockSound: "bd",
     }),
     new BlockType({
-        blockId: 43,
-        sprite: "furnace_front_off",
-        states: ["furnace_front_off", "furnace_front_on"],
-        name: "Furnace",
-        hardness: 8,
-        updateSpeed: 1,
-        specialType: SpecialType.Furnace,
-        breakSound: Sounds.Break_Stone,
-        breakingSound: Sounds.Breaking_Stone,
-        toolType: ToolType.Pickaxe,
-        dropWithoutTool: false,
-        collision: false,
-        noteBlockSound: "bd",
-    }),
-    new BlockType({
         blockId: 44,
         sprite: "stone_slab_top",
         name: "Smooth Stone",
@@ -709,30 +737,6 @@ const blockTypes = [
         noteBlockSound: "bd",
     }),
     new BlockType({
-        blockId: 46,
-        name: "Jelte Blok",
-        sprite: "jelte",
-        fuelTime: 20,
-        hardness: 12,
-        breakSound: Sounds.Break_Stone,
-        breakingSound: Sounds.Breaking_Stone,
-        toolType: ToolType.Pickaxe,
-        dropWithoutTool: false,
-    }),
-    new BlockType({
-        blockId: 47,
-        name: "Quinten Blok",
-        sprite: "quinten",
-        fluid: true,
-        updateSpeed: 0.2,
-        fuelTime: 20,
-        hardness: 12,
-        breakSound: Sounds.Break_Stone,
-        breakingSound: Sounds.Breaking_Stone,
-        toolType: ToolType.Pickaxe,
-        dropWithoutTool: false,
-    }),
-    new BlockType({
         blockId: 48,
         name: "Coal Block",
         sprite: "coal_block",
@@ -753,60 +757,6 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
-    }),
-    new BlockType({
-        blockId: 50,
-        name: "Ice Block",
-        sprite: "ice",
-        hardness: 1,
-        breakSound: Sounds.Break_Glass,
-        breakingSound: Sounds.Breaking_Stone,
-        dropWithoutTool: false,
-        drag: 3,
-    }),
-    new BlockType({
-        blockId: 51,
-        name: "Chest",
-        sprite: "chest",
-        hardness: 2.6,
-        collision: false,
-        specialType: SpecialType.SingleChest,
-        chunkProtection: true,
-        cannotBeConverted: true,
-
-        transparent: true,
-
-        noteBlockSound: "bass",
-    }),
-    new BlockType({
-        blockId: 52,
-        sprite: "glass",
-        name: "Glass",
-        hardness: 1,
-        breakSound: Sounds.Break_Glass,
-        breakingSound: Sounds.Breaking_Glass,
-        dropWithoutTool: false,
-
-        transparent: true,
-
-        noteBlockSound: "hat",
-    }),
-    new BlockType({
-        blockId: 53,
-        sprite: "lava_still",
-        name: "Lava",
-        updateSpeed: 0.05,
-        chunkUpdate: true,
-        hardness: -2,
-        animationSpeed: 0.03,
-        fluid: true,
-        dropWithoutTool: false,
-
-        lightLevel: 6,
-
-        cannotBeConverted: true,
-
-        transparent: true,
     }),
     new BlockType({
         blockId: 54,
@@ -846,15 +796,6 @@ const blockTypes = [
         noteBlockSound: "bd",
     }),
     new BlockType({
-        blockId: 57,
-        sprite: "jukebox_top",
-        name: "Jukebox",
-        hardness: 2.6,
-        toolType: ToolType.Axe,
-        specialType: SpecialType.Jukebox,
-        collision: false,
-    }),
-    new BlockType({
         blockId: 58,
         sprite: "cobblestone_mossy",
         name: "Mossy Cobblestone",
@@ -863,6 +804,80 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 62,
+        sprite: "gold_ore",
+        name: "Gold Ore",
+        hardness: 10,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropItem: Items.GoldIngot,
+        requiredToolLevel: 13,
+        dropWithoutTool: false,
+        smeltOutput: { itemId: Items.GoldIngot },
+        noteBlockSound: "bd",
+    }),
+    new BlockType({
+        blockId: 65,
+        sprite: "gold_block",
+        name: "Gold Block",
+        hardness: 12,
+        requiredToolLevel: 13,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        noteBlockSound: "pling",
+    }),
+    //#endregion
+
+    //#region Special Blocks
+    new BlockType({
+        blockId: 46,
+        name: "Jelte Blok",
+        sprite: "jelte",
+        fuelTime: 20,
+        hardness: 12,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 47,
+        name: "Quinten Blok",
+        sprite: "quinten",
+        fluid: true,
+        updateSpeed: 0.2,
+        fuelTime: 20,
+        hardness: 12,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 50,
+        name: "Ice Block",
+        sprite: "ice",
+        hardness: 1,
+        breakSound: Sounds.Break_Glass,
+        breakingSound: Sounds.Breaking_Stone,
+        dropWithoutTool: false,
+        drag: 3,
+    }),
+    new BlockType({
+        blockId: 52,
+        sprite: "glass",
+        name: "Glass",
+        hardness: 1,
+        breakSound: Sounds.Break_Glass,
+        breakingSound: Sounds.Breaking_Glass,
+        dropWithoutTool: false,
+        transparent: true,
+        noteBlockSound: "hat",
     }),
     new BlockType({
         blockId: 59,
@@ -888,30 +903,9 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Snow,
         toolType: ToolType.Shovel,
     }),
-    new BlockType({
-        blockId: 61,
-        sprite: "smithing_table_side",
-        name: "Converter",
-        hardness: 2.6,
-        toolType: ToolType.Axe,
-        specialType: SpecialType.Converter,
-        collision: false,
-        noteBlockSound: "bass",
-    }),
-    new BlockType({
-        blockId: 62,
-        sprite: "gold_ore",
-        name: "Gold Ore",
-        hardness: 10,
-        breakSound: Sounds.Break_Stone,
-        breakingSound: Sounds.Breaking_Stone,
-        toolType: ToolType.Pickaxe,
-        dropItem: Items.GoldIngot,
-        requiredToolLevel: 13,
-        dropWithoutTool: false,
-        smeltOutput: { itemId: Items.GoldIngot },
-        noteBlockSound: "bd",
-    }),
+    //#endregion
+
+    //#region Redstone
     new BlockType({
         blockId: 63,
         sprite: "torch_on",
@@ -922,27 +916,6 @@ const blockTypes = [
         lightLevel: 16,
         breakWithoutBlockUnderneath: true,
         cannotBeConverted: true,
-    }),
-    new BlockType({
-        blockId: 64,
-        sprite: "noteblock",
-        name: "Note Block",
-        hardness: 2.6,
-        toolType: ToolType.Axe,
-        specialType: SpecialType.NoteBlock,
-        noteBlockSound: "bass",
-    }),
-    new BlockType({
-        blockId: 65,
-        sprite: "gold_block",
-        name: "Gold Block",
-        hardness: 12,
-        requiredToolLevel: 13,
-        breakSound: Sounds.Break_Stone,
-        breakingSound: Sounds.Breaking_Stone,
-        toolType: ToolType.Pickaxe,
-        dropWithoutTool: false,
-        noteBlockSound: "pling",
     }),
     new BlockType({
         blockId: 66,
@@ -956,7 +929,6 @@ const blockTypes = [
         dropWithoutTool: false,
         lightLevel: 5,
         noteBlockSound: "bd",
-
         baseRedstoneOutput: 16,
     }),
     new BlockType({
@@ -993,7 +965,6 @@ const blockTypes = [
         noteBlockSound: "bd",
         specialType: SpecialType.RedstoneLamp,
     }),
-    // Redstone Torch
     new BlockType({
         blockId: 69,
         name: "Redstone Torch",
@@ -1007,7 +978,6 @@ const blockTypes = [
         baseRedstoneOutput: 15,
         cannotBeConverted: true,
     }),
-    // Stone Pressure Plate
     new BlockType({
         blockId: 70,
         name: "Stone Pressure Plate",
@@ -1018,7 +988,9 @@ const blockTypes = [
         specialType: SpecialType.PressurePlate,
         defaultCutoff: 0.9,
     }),
-    // test slab
+    //#endregion
+
+    //#region Slabs
     new BlockType({
         blockId: 71,
         name: "Test Slab",
@@ -1026,6 +998,144 @@ const blockTypes = [
         hardness: 4,
         defaultCutoff: 0.5,
     }),
+    new BlockType({
+        blockId: 72,
+        name: "Stone Slab",
+        sprite: "stone",
+        hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bd",
+    }),
+    new BlockType({
+        blockId: 73,
+        name: "Oak Slab",
+        sprite: "planks_oak",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        breakSound: Sounds.Break_Wood,
+        breakingSound: Sounds.Breaking_Wood,
+        category: BlockCategory.Planks,
+        fuelTime: 15,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
+        blockId: 74,
+        name: "Spruce Slab",
+        sprite: "planks_spruce",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        breakSound: Sounds.Break_Wood,
+        breakingSound: Sounds.Breaking_Wood,
+        category: BlockCategory.Planks,
+        fuelTime: 15,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
+        blockId: 75,
+        name: "Acacia Slab",
+        sprite: "planks_acacia",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        breakSound: Sounds.Break_Wood,
+        breakingSound: Sounds.Breaking_Wood,
+        category: BlockCategory.Planks,
+        fuelTime: 15,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
+        blockId: 76,
+        name: "Birch Slab",
+        sprite: "planks_birch",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        breakSound: Sounds.Break_Wood,
+        breakingSound: Sounds.Breaking_Wood,
+        category: BlockCategory.Planks,
+        fuelTime: 15,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
+        blockId: 77,
+        name: "Jungle Slab",
+        sprite: "planks_jungle",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        breakSound: Sounds.Break_Wood,
+        breakingSound: Sounds.Breaking_Wood,
+        category: BlockCategory.Planks,
+        fuelTime: 15,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
+        blockId: 78,
+        name: "Cobblestone Slab",
+        sprite: "cobblestone",
+        hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bd",
+    }),
+    new BlockType({
+        blockId: 79,
+        name: "Sandstone Slab",
+        sprite: "sandstone_normal",
+        hardness: 7.5,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bd",
+    }),
+    new BlockType({
+        blockId: 80,
+        name: "Stone Brick Slab",
+        sprite: "stonebrick",
+        hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bd",
+    }),
+    new BlockType({
+        blockId: 81,
+        name: "Mossy Cobblestone Slab",
+        sprite: "cobblestone_mossy",
+        hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bd",
+    }),
+    new BlockType({
+        blockId: 82,
+        name: "Smooth Stone Slab",
+        sprite: "stone_slab_side",
+        hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bd",
+    }),
+    //#endregion
 ];
 
 const blockMap = new Map(blockTypes.map((block) => [block.blockId, block]));

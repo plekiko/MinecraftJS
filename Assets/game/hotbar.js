@@ -1,9 +1,7 @@
 class Hotbar {
     constructor(inventory = null) {
         this.inventory = inventory;
-
         this.currentSlot = 0;
-
         this.flashingHearts = false;
         this.flashCounter = 0;
         this.previousHealth = 0;
@@ -49,7 +47,7 @@ class Hotbar {
         // Check for Half Heart
         if (health % 2 !== 0) {
             drawImage({
-                url: "Assets/sprites/gui/half_heart.png", // Use the half-heart sprite
+                url: "Assets/sprites/gui/half_heart.png",
                 x: hotbar.x + Math.floor(health / 2) * 9 * 2.9 + 12,
                 y: hotbar.y - 35,
                 scale: 3,
@@ -66,7 +64,7 @@ class Hotbar {
             scale: 3,
         });
 
-        // Draw current slot
+        // Draw current slot selector
         drawImage({
             url: "Assets/sprites/gui/selected-slot.png",
             x: CANVAS.width / 2 - 240 + this.currentSlot * 60,
@@ -75,7 +73,6 @@ class Hotbar {
         });
 
         this.drawItems();
-
         this.drawHearts(player.health, player.maxHealth, hotbar);
     }
 
@@ -105,52 +102,58 @@ class Hotbar {
 
     drawItems() {
         for (let i = 0; i < this.inventory.items[3].length; i++) {
-            const item = this.inventory.items[3][i].item;
-            if (item.blockId !== null) {
-                this.drawBlock(item.blockId, i, item.props.wall === true);
-                this.drawCount(item.count, i);
-            } else {
-                if (item.itemId != null) {
-                    this.drawItem(item.itemId, i);
-                    this.drawCount(item.count, i);
-                }
-            }
+            const slot = {
+                position: {
+                    x: CANVAS.width / 2 - 239 + i * 60, // Exact original X position and 60px gap
+                    y: CANVAS.height - 75 + 14, // Adjusted to align items with hotbar slots
+                },
+                item: this.inventory.items[3][i].item,
+            };
+            this.drawSlot(slot);
         }
     }
 
-    drawBlock(blockId, slot, dark = false) {
-        const block = GetBlock(blockId);
+    drawSlot(slot) {
+        const item = slot.item;
 
-        this.drawInSlot("blocks/" + block.sprite + ".png", slot, dark);
-    }
+        if (item.count <= 0) return;
+        if (!item.blockId && item.itemId === null) return;
 
-    drawItem(itemId, slot) {
-        const item = GetItem(itemId);
+        const slotX = slot.position.x;
+        const slotY = slot.position.y;
 
-        this.drawInSlot("items/" + item.sprite + ".png", slot);
-    }
+        const spritePath =
+            "Assets/sprites/" +
+            (item.blockId
+                ? "blocks/" + GetBlock(item.blockId).sprite
+                : "items/" + GetItem(item.itemId).sprite) +
+            ".png";
 
-    drawCount(count, slot) {
-        if (count <= 1) return;
-        ctx.fillStyle = "rgb(0, 0, 0, .7)";
-        ctx.font = "25px Pixel";
+        // If block, get the default draw cutoff
+        let cutoff = 1;
+        if (item.blockId) cutoff = GetBlock(item.blockId).defaultCutoff;
 
-        drawText({
-            text: count,
-            x: CANVAS.width / 2 - 213 + slot * 60,
-            y: CANVAS.height - 17,
-        });
-    }
-
-    drawInSlot(sprite, slot, dark = false) {
-        const path = "Assets/sprites/" + sprite;
-
+        // Draw the sprite
         drawImage({
-            url: path,
-            x: CANVAS.width / 2 - 240 + slot * 60,
-            y: CANVAS.height - 64,
-            scale: 2.8,
-            dark: dark,
+            url: spritePath,
+            x: slotX,
+            y: slotY,
+            scale: 2.5,
+            centerX: true,
+            dark: item.props?.wall === true,
+            sizeY: 16 - cutoff * 16,
+        });
+
+        if (item.count <= 1) return;
+
+        // Draw the count (unchanged, as text position is correct)
+        drawText({
+            text: item.count,
+            x: slotX + 27,
+            y: slotY + 58 - 14, // Adjusted to maintain original count position relative to new item Y
+            size: 25,
+            color: "white",
+            shadow: true,
         });
     }
 

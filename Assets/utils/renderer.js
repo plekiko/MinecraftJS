@@ -147,6 +147,7 @@ function DrawBreakAndPlaceCursor(inRange = false) {
             scale: BLOCK_SIZE / 16,
             centerX: false,
             opacity: 0.5,
+            sizeY: 16 - selectedBlock.defaultCutoff * 16,
         });
     }
 
