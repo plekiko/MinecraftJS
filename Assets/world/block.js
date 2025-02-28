@@ -407,6 +407,31 @@ class Block extends Square {
             }
         }
 
+        // const neighbors = [
+        //     GetBlockAtWorldPosition(
+        //         this.transform.position.x - BLOCK_SIZE,
+        //         this.transform.position.y
+        //     ),
+        //     GetBlockAtWorldPosition(
+        //         this.transform.position.x + BLOCK_SIZE,
+        //         this.transform.position.y
+        //     ),
+        //     GetBlockAtWorldPosition(
+        //         this.transform.position.x,
+        //         this.transform.position.y - BLOCK_SIZE
+        //     ),
+        //     GetBlockAtWorldPosition(
+        //         this.transform.position.x,
+        //         this.transform.position.y + BLOCK_SIZE
+        //     ),
+        // ];
+
+        // for (let neighbor of neighbors) {
+        //     if (neighbor) {
+        //         neighbor.update();
+        //     }
+        // }
+
         this.metaData = undefined;
         this.setMetaData();
         if (block.updateSpeed > 0 && !block.chunkUpdate)

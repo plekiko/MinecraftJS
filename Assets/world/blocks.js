@@ -965,6 +965,7 @@ const blockTypes = [
             "redstone_dust_both",
         ],
         breakSound: Sounds.Break_Stone,
+        breakByFluid: true,
         collision: false,
         hardness: 0,
         breakWithoutBlockUnderneath: true,

@@ -175,6 +175,11 @@ function globalRecalculateRedstone() {
     }
 }
 
+let blocksToUpdate = [];
+function updateBlockAfterTick(block, amount = 1) {
+    blocksToUpdate.push({ block: block, after: amount });
+}
+
 function globalRecalculateLight() {
     // Build a global queue from every light source.
     const queue = [];
