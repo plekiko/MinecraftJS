@@ -122,6 +122,8 @@ class Entity {
         this.stepSize = stepSize;
         this.footstepSounds = footstepSounds;
 
+        this.wasCollidingWithBlocks = [];
+
         this.holdItem = holdItem;
 
         this.shouldAddForce = { x: 0, y: 0 };
@@ -179,11 +181,42 @@ class Entity {
             futureY + this.hitbox.y
         );
 
-        if (blockBelowLeft && this.isSolid(blockBelowLeft.blockType)) {
-            return blockBelowLeft;
+        // Helper function to check collision with cutoff
+        const checkBlockWithCutoff = (block, x, y) => {
+            if (!block || !this.isSolid(block.blockType)) return null;
+            const def = GetBlock(block.blockType);
+            if (!def.collision) return null; // Only solid blocks affect movement
+
+            // Calculate effective top edge based on cutoff
+            const effectiveHeight = BLOCK_SIZE * (1 - block.cutoff);
+            const blockTopY =
+                block.transform.position.y + (BLOCK_SIZE - effectiveHeight);
+
+            // Check if entity's bottom Y intersects the block's effective top
+            if (
+                y >= blockTopY &&
+                y <= block.transform.position.y + BLOCK_SIZE
+            ) {
+                return block;
+            }
+            return null;
+        };
+
+        if (blockBelowLeft) {
+            const collision = checkBlockWithCutoff(
+                blockBelowLeft,
+                this.position.x,
+                futureY + this.hitbox.y
+            );
+            if (collision) return collision;
         }
-        if (blockBelowRight && this.isSolid(blockBelowRight.blockType)) {
-            return blockBelowRight;
+        if (blockBelowRight) {
+            const collision = checkBlockWithCutoff(
+                blockBelowRight,
+                this.position.x + this.hitbox.x,
+                futureY + this.hitbox.y
+            );
+            if (collision) return collision;
         }
 
         return null;
@@ -200,13 +233,42 @@ class Entity {
         );
         const blockLeftTop = this.getBlockAtPosition(futureX, this.position.y);
 
+        const checkBlockWithCutoff = (block, x, y) => {
+            if (!block || !this.isSolid(block.blockType)) return null;
+            const def = GetBlock(block.blockType);
+            if (!def.collision) return null;
+
+            const effectiveHeight = BLOCK_SIZE * (1 - block.cutoff);
+            const blockTopY =
+                block.transform.position.y + (BLOCK_SIZE - effectiveHeight);
+
+            // Check if entity's Y range overlaps the block's effective height
+            if (
+                this.position.y + this.hitbox.y > blockTopY &&
+                this.position.y < block.transform.position.y + BLOCK_SIZE &&
+                x < block.transform.position.x + BLOCK_SIZE
+            ) {
+                return block;
+            }
+            return null;
+        };
+
         if (
-            (blockLeft && this.isSolid(blockLeft.blockType)) ||
-            (blockLeftBottom && this.isSolid(blockLeftBottom.blockType)) ||
-            (blockLeftTop && this.isSolid(blockLeftTop.blockType))
-        ) {
+            blockLeft &&
+            checkBlockWithCutoff(blockLeft, futureX, this.position.y)
+        )
             return blockLeft;
-        }
+        if (
+            blockLeftBottom &&
+            checkBlockWithCutoff(blockLeftBottom, futureX, this.position.y)
+        )
+            return blockLeftBottom;
+        if (
+            blockLeftTop &&
+            checkBlockWithCutoff(blockLeftTop, futureX, this.position.y)
+        )
+            return blockLeftTop;
+
         return null;
     }
 
@@ -224,13 +286,54 @@ class Entity {
             this.position.y
         );
 
+        const checkBlockWithCutoff = (block, x, y) => {
+            if (!block || !this.isSolid(block.blockType)) return null;
+            const def = GetBlock(block.blockType);
+            if (!def.collision) return null;
+
+            const effectiveHeight = BLOCK_SIZE * (1 - block.cutoff);
+            const blockTopY =
+                block.transform.position.y + (BLOCK_SIZE - effectiveHeight);
+
+            // Check if entity's Y range overlaps the block's effective height
+            if (
+                this.position.y + this.hitbox.y > blockTopY &&
+                this.position.y < block.transform.position.y + BLOCK_SIZE &&
+                x > block.transform.position.x
+            ) {
+                return block;
+            }
+            return null;
+        };
+
         if (
-            (blockRight && this.isSolid(blockRight.blockType)) ||
-            (blockRightBottom && this.isSolid(blockRightBottom.blockType)) ||
-            (blockRightTop && this.isSolid(blockRightTop.blockType))
-        ) {
+            blockRight &&
+            checkBlockWithCutoff(
+                blockRight,
+                futureX + this.hitbox.x,
+                this.position.y
+            )
+        )
             return blockRight;
-        }
+        if (
+            blockRightBottom &&
+            checkBlockWithCutoff(
+                blockRightBottom,
+                futureX + this.hitbox.x,
+                this.position.y
+            )
+        )
+            return blockRightBottom;
+        if (
+            blockRightTop &&
+            checkBlockWithCutoff(
+                blockRightTop,
+                futureX + this.hitbox.x,
+                this.position.y
+            )
+        )
+            return blockRightTop;
+
         return null;
     }
 
@@ -463,6 +566,23 @@ class Entity {
 
         const collidingBlocks = this.isCollidingWithBlockType();
 
+        // Call the end entity collision function on all colliding blocks that we collided with but no longer are
+        this.wasCollidingWithBlocks.forEach((block) => {
+            if (!collidingBlocks.includes(block)) {
+                block.endEntityCollision(this);
+                this.wasCollidingWithBlocks =
+                    this.wasCollidingWithBlocks.filter((b) => b !== block);
+            }
+        });
+
+        collidingBlocks.forEach((block) => {
+            block.entityCollision(this);
+            if (!this.wasCollidingWithBlocks.includes(block)) {
+                block.startEntityCollision(this);
+                this.wasCollidingWithBlocks.push(block);
+            }
+        });
+
         if (!upCollision) {
             if (downCollision) {
                 this.standingOnBlockType = downCollision.blockType;
@@ -476,7 +596,7 @@ class Entity {
             this.velocity.y = 0;
         }
 
-        this.fluidLogic(collidingBlocks, deltaTime);
+        this.fluidLogic(collidingBlocks);
 
         this.calculateForce();
 
@@ -516,7 +636,7 @@ class Entity {
         this.hit(damage);
     }
 
-    fluidLogic(collidingBlocks, deltaTime) {
+    fluidLogic(collidingBlocks) {
         this.swimming = false;
 
         const isCollidingWithFluid =
@@ -587,17 +707,31 @@ class Entity {
         // Iterate over all grid cells covered by the entity's hitbox
         for (let x = startX; x <= endX; x++) {
             for (let y = startY; y <= endY; y++) {
-                // Get the block at the current grid position
-                const block = GetBlockAtWorldPosition(
-                    x * BLOCK_SIZE,
-                    y * BLOCK_SIZE
-                );
-                if (
-                    block &&
-                    block.blockType &&
-                    GetBlock(block.blockType).collision
-                ) {
-                    collidingBlocks.push(block);
+                const blockX = x * BLOCK_SIZE;
+                const blockY = y * BLOCK_SIZE;
+                const block = GetBlockAtWorldPosition(blockX, blockY);
+
+                if (block && block.blockType) {
+                    const effectiveHeight = BLOCK_SIZE * (1 - block.cutoff);
+                    const blockTopY =
+                        block.transform.position.y +
+                        (BLOCK_SIZE - effectiveHeight);
+                    const entityBottomY = this.position.y + this.hitbox.y;
+                    const entityTopY = this.position.y;
+
+                    // Check if entity’s X range overlaps block’s X
+                    const xOverlap =
+                        this.position.x < blockX + BLOCK_SIZE &&
+                        this.position.x + this.hitbox.x > blockX;
+
+                    // Check if entity’s Y range overlaps block’s effective Y (inverted Y-axis)
+                    const yOverlap =
+                        entityBottomY > blockTopY && // Entity bottom below block top (higher Y)
+                        entityTopY < blockY + BLOCK_SIZE; // Entity top above block bottom (lower Y)
+
+                    if (xOverlap && yOverlap) {
+                        collidingBlocks.push(block);
+                    }
                 }
             }
         }

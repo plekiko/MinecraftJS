@@ -11,6 +11,8 @@ class BlockType {
         drag = 40,
         collision = true,
 
+        defaultCutoff = 0,
+
         transparent = false,
 
         cannotBeConverted = false,
@@ -66,6 +68,8 @@ class BlockType {
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
 
+        this.defaultCutoff = defaultCutoff;
+
         this.cannotBeConverted = cannotBeConverted;
 
         this.noteBlockSound = noteBlockSound;
@@ -115,6 +119,7 @@ const SpecialType = Object.freeze({
     NoteBlock: 6,
     RedstoneDust: 7,
     RedstoneLamp: 8,
+    PressurePlate: 9,
 });
 
 const BlockCategory = Object.freeze({
@@ -267,6 +272,7 @@ class Block extends Square {
         this.blockType = blockType;
         this.lightSourceLevel = 0;
         this.powered = false;
+        this.redstoneOutput = 0;
 
         this.updateSprite();
     }
@@ -444,9 +450,15 @@ class Block extends Square {
         this.frameCount = 0;
         this.filterBrightness = 100;
 
+        if (block.defaultCutoff > 0) {
+            this.cutoff = block.defaultCutoff;
+        }
+
         if (block.fluid) {
             this.cutoff = this.metaData.props.waterLevel;
         }
+
+        this.redstoneOutput = block.baseRedstoneOutput;
 
         this.updateSprite();
     }
@@ -474,6 +486,44 @@ class Block extends Square {
         }
 
         this.metaData.props.progression += 1 / TICK_SPEED;
+    }
+
+    entityCollision(entity) {}
+
+    // Callbacks for entities
+    endEntityCollision(entity) {
+        switch (GetBlock(this.blockType).specialType) {
+            case SpecialType.PressurePlate:
+                this.endPressurePlateLogic();
+                break;
+        }
+    }
+
+    startEntityCollision(entity) {
+        switch (GetBlock(this.blockType).specialType) {
+            case SpecialType.PressurePlate:
+                this.pressurePlateLogic();
+                break;
+        }
+    }
+
+    pressurePlateLogic() {
+        this.cutoff = 0.95;
+
+        this.redstoneOutput = 15;
+
+        playPositionalSound(
+            getBlockWorldPosition(this),
+            "blocks/wood_click.ogg",
+            10,
+            0.4
+        );
+    }
+
+    endPressurePlateLogic() {
+        this.cutoff = GetBlock(this.blockType).defaultCutoff;
+
+        this.redstoneOutput = GetBlock(this.blockType).baseRedstoneOutput;
     }
 
     setState(index) {
@@ -977,7 +1027,9 @@ class Block extends Square {
     }
 
     updateSprite() {
-        if (GetBlock(this.blockType).air) {
+        const block = GetBlock(this.blockType);
+
+        if (block.air) {
             this.alpha = 0;
             this.img = null;
             return;
@@ -985,9 +1037,9 @@ class Block extends Square {
 
         this.alpha = 1;
 
-        this.frameRate = GetBlock(this.blockType).animationSpeed;
+        this.frameRate = block.animationSpeed;
 
-        this.setSprite("blocks/" + GetBlock(this.blockType).sprite + ".png");
+        this.setSprite("blocks/" + block.sprite + ".png");
     }
 }
 

@@ -68,8 +68,8 @@ function globalRecalculateRedstone() {
             for (let block of row) {
                 const def = GetBlock(block.blockType);
                 // For constant sources, use their defined power.
-                if (def.baseRedstoneOutput && def.baseRedstoneOutput > 0) {
-                    block.metaData.props.power = def.baseRedstoneOutput;
+                if (block.redstoneOutput && block.redstoneOutput > 0) {
+                    block.metaData.props.power = block.redstoneOutput;
                     queue.push({
                         globalX: block.transform.position.x,
                         globalY: block.transform.position.y,
@@ -132,10 +132,9 @@ function globalRecalculateRedstone() {
     for (const chunk of chunks_in_render_distance.values()) {
         for (let row of chunk.blocks) {
             for (let block of row) {
-                const def = GetBlock(block.blockType);
                 let powered = false;
                 // Constant sources are always powered.
-                if (def.baseRedstoneOutput > 0) {
+                if (block.redstoneOutput > 0) {
                     powered = true;
                 }
                 // If the block itself has any power, mark it as powered.
@@ -157,7 +156,7 @@ function globalRecalculateRedstone() {
                     );
                     if (
                         nb &&
-                        (def.baseRedstoneOutput > 0 ||
+                        (block.redstoneOutput > 0 ||
                             (nb.metaData && nb.metaData.props.power > 0))
                     ) {
                         powered = true;

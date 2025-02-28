@@ -93,6 +93,10 @@ const Blocks = Object.freeze({
     RedstoneBlock: 66,
     RedstoneDust: 67,
     RedstoneLamp: 68,
+
+    StonePressurePlate: 70,
+
+    TestSlab: 71,
 });
 
 const blockTypes = [
@@ -917,6 +921,7 @@ const blockTypes = [
         transparent: true,
         lightLevel: 16,
         breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 64,
@@ -972,6 +977,7 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
         specialType: SpecialType.RedstoneDust,
         chunkUpdate: true,
+        cannotBeConverted: true,
     }),
     new BlockType({
         blockId: 68,
@@ -998,7 +1004,27 @@ const blockTypes = [
         transparent: true,
         lightLevel: 7,
         breakWithoutBlockUnderneath: true,
-        baseRedstoneOutput: 15
+        baseRedstoneOutput: 15,
+        cannotBeConverted: true,
+    }),
+    // Stone Pressure Plate
+    new BlockType({
+        blockId: 70,
+        name: "Stone Pressure Plate",
+        sprite: "stone",
+        hardness: 4,
+        collision: false,
+        breakWithoutBlockUnderneath: true,
+        specialType: SpecialType.PressurePlate,
+        defaultCutoff: 0.9,
+    }),
+    // test slab
+    new BlockType({
+        blockId: 71,
+        name: "Test Slab",
+        sprite: "planks_oak",
+        hardness: 4,
+        defaultCutoff: 0.5,
     }),
 ];
 

@@ -132,11 +132,9 @@ class Square {
 
         ctx.globalAlpha = this.alpha;
 
-        // Translate to the center of the object
-
         // Rotate if necessary
         if (this.transform.rotation !== 0) {
-            ctx.rotate((this.transform.rotation * Math.PI) / 180); // Convert degrees to radiansb
+            ctx.rotate((this.transform.rotation * Math.PI) / 180);
         }
 
         // Draw outline if present
@@ -151,49 +149,57 @@ class Square {
                 this.transform.size.x + this.outline * 2,
                 this.transform.size.y + this.outline * 2
             );
-
             ctx.fillStyle = this.color;
         }
 
-        // let drawSquareBrightness = true;
-        // const blockDef = this.blockType && GetBlock(this.blockType);
-        // if (blockDef && blockDef.transparent) {
-        //     drawSquareBrightness = false;
-        //     ctx.filter = `brightness(${this.getBrightness()})`;
-        // }
-
-        // Draw the main object (image or fallback rect)
+        // Apply filter if needed
         if (this.filterBrightness < 100) {
             ctx.filter = `brightness(${this.filterBrightness}%)`;
         }
 
-        if (this.img && (!this.frameCount || this.frameCount == 0)) {
-            ctx.drawImage(
-                this.img,
-                Math.round(
-                    -this.transform.size.x / 2 + this.drawOffset - camera.x
-                ),
-                Math.round(-this.transform.size.y / 2 - camera.y),
-                16 * this.spriteScale,
-                16 * this.spriteScale
-            );
+        // Determine drawing values (common for animated and non-animated)
+        const drawX = Math.round(
+            -this.transform.size.x / 2 + this.drawOffset - camera.x
+        );
+        const drawY = Math.round(-this.transform.size.y / 2 - camera.y);
+        const drawWidth = 16 * this.spriteScale;
+        const drawHeight = 16 * this.spriteScale;
 
-            // Apply dark overlay if required
+        // Non-animated drawing branch with cutoff support
+        if (this.img && (!this.frameCount || this.frameCount === 0)) {
+            if (this.cutoff > 0) {
+                // Calculate the visible fraction based on cutoff
+                // console.log(this.cutoff);
+
+                const visibleFraction = 1 - this.cutoff;
+                const visibleHeight = drawHeight * visibleFraction;
+
+                ctx.save();
+                ctx.beginPath();
+                // // Clip away the top part so that only the lower visibleHeight is drawn
+                ctx.rect(
+                    drawX,
+                    drawY + (drawHeight - visibleHeight),
+                    drawWidth,
+                    visibleHeight
+                );
+                ctx.clip();
+
+                ctx.drawImage(this.img, drawX, drawY, drawWidth, drawHeight);
+                ctx.restore();
+            } else {
+                // No cutoff, draw normally
+                ctx.drawImage(this.img, drawX, drawY, drawWidth, drawHeight);
+            }
             if (this.dark) {
                 ctx.globalAlpha = 0.5;
                 ctx.fillStyle = "black";
-                ctx.fillRect(
-                    Math.round(
-                        -this.transform.size.x / 2 + this.drawOffset - camera.x
-                    ),
-                    Math.round(-this.transform.size.y / 2 - camera.y),
-                    this.transform.size.x,
-                    this.transform.size.y
-                );
+                ctx.fillRect(drawX, drawY, drawWidth, drawHeight);
                 ctx.globalAlpha = this.alpha;
             }
         }
 
+        // Animated drawing branch remains the same
         if (this.img && this.frameCount > 0) {
             this.drawAnimation(ctx, camera);
         }
