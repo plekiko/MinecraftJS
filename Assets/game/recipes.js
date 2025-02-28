@@ -818,6 +818,45 @@ const recipes = [
     }),
     //#endregion
 
+    //#region Redstone
+    // Redstone Torch
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [new RecipeItem({ itemId: Items.RedstoneDust })],
+            [new RecipeItem({ itemId: Items.Stick })],
+        ],
+        output: new InventoryItem({ blockId: Blocks.RedstoneTorch, count: 1 }),
+    }),
+    // Wood Pressure Plate
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+        ],
+        output: new InventoryItem({
+            blockId: Blocks.WoodPressurePlate,
+            count: 1,
+        }),
+    }),
+    // Stone Pressure Plate
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockId: Blocks.Stone }),
+                new RecipeItem({ blockId: Blocks.Stone }),
+            ],
+        ],
+        output: new InventoryItem({
+            blockId: Blocks.StonePressurePlate,
+            count: 1,
+        }),
+    }),
+
     //#region Misc
     // Jukebox
     new Recipe({

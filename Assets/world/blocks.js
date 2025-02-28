@@ -70,6 +70,7 @@ const Blocks = Object.freeze({
     RedstoneDust: 67,
     RedstoneLamp: 68,
     StonePressurePlate: 70,
+    WoodPressurePlate: 83,
 
     TestSlab: 71,
     StoneSlab: 72,
@@ -988,6 +989,18 @@ const blockTypes = [
         specialType: SpecialType.PressurePlate,
         defaultCutoff: 0.9,
     }),
+    // Wood Pressure Plate
+    new BlockType({
+        blockId: 83,
+        name: "Wood Pressure Plate",
+        sprite: "planks_oak",
+        hardness: 2.6,
+        collision: false,
+        breakWithoutBlockUnderneath: true,
+        specialType: SpecialType.PressurePlate,
+        defaultCutoff: 0.9,
+    }),
+
     //#endregion
 
     //#region Slabs

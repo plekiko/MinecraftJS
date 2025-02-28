@@ -1178,7 +1178,7 @@ class Inventory {
         drawText({
             text: holdingItem.count,
             x: image.x + image.sizeX + 5,
-            y: image.y + image.sizeY + 3,
+            y: mousePos.y + 45,
         });
     }
 
