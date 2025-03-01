@@ -856,6 +856,56 @@ const recipes = [
             count: 1,
         }),
     }),
+    // Redstone Dust
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ itemId: Items.RedstoneDust }),
+        output: new InventoryItem({ blockId: Blocks.RedstoneDust, count: 1 }),
+    }),
+    // Note Block
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ itemId: Items.RedstoneDust }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.NoteBlock, count: 1 }),
+    }),
+    // Redstone Lamp
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockId: Blocks.Glass }),
+                new RecipeItem({ blockId: Blocks.Glass }),
+                new RecipeItem({ blockId: Blocks.Glass }),
+            ],
+            [
+                new RecipeItem({ blockId: Blocks.Glass }),
+                new RecipeItem({ itemId: Items.RedstoneDust }),
+                new RecipeItem({ blockId: Blocks.Glass }),
+            ],
+            [
+                new RecipeItem({ blockId: Blocks.Glass }),
+                new RecipeItem({ blockId: Blocks.Glass }),
+                new RecipeItem({ blockId: Blocks.Glass }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.RedstoneLamp, count: 1 }),
+    }),
 
     //#region Misc
     // Jukebox
@@ -917,6 +967,28 @@ const recipes = [
             [new RecipeItem({ itemId: Items.Stick })],
         ],
         output: new InventoryItem({ blockId: Blocks.Torch, count: 4 }),
+    }),
+    // Golden Apple
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.GoldIngot }),
+                new RecipeItem({ itemId: Items.GoldIngot }),
+                new RecipeItem({ itemId: Items.GoldIngot }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.GoldIngot }),
+                new RecipeItem({ itemId: Items.Apple }),
+                new RecipeItem({ itemId: Items.GoldIngot }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.GoldIngot }),
+                new RecipeItem({ itemId: Items.GoldIngot }),
+                new RecipeItem({ itemId: Items.GoldIngot }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.GoldenApple, count: 1 }),
     }),
     //#endregion
 ];

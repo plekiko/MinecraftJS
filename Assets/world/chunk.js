@@ -463,6 +463,20 @@ class Chunk {
             200000,
             25
         );
+        this.generateOre(
+            worldRedstoneNoiseMap,
+            ORE_THRESHOLDS.redstone,
+            Blocks.RedstoneOre,
+            300000,
+            30
+        );
+        this.generateOre(
+            worldGoldNoiseMap,
+            ORE_THRESHOLDS.gold,
+            Blocks.GoldOre,
+            400000,
+            25
+        );
     }
 
     generateOre(noise, threshold, block, offset, height = CHUNK_HEIGHT) {

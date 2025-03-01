@@ -62,6 +62,16 @@ const worldDiamondNoiseMap = new Noise(
     6.8, // Intensity
     5
 );
+const worldRedstoneNoiseMap = new Noise(
+    100, // Scale (size)
+    6.5, // Intensity
+    5
+);
+const worldGoldNoiseMap = new Noise(
+    100, // Scale (size)
+    6.5, // Intensity
+    5
+);
 
 function PrintNoiseOutput(noise, count = 100) {
     // Initialize variables to track min and max
