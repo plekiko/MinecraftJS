@@ -61,6 +61,8 @@ function SaveWorld(message = true, toFile = false) {
         currentSave.inventoryItems = JSON.stringify(playerInventory);
 
         currentSave.gamemode = player.gamemode;
+
+        currentSave.health = player.health;
     }
     currentSave.chunks = savedChunks;
     currentSave.seed = seed;
@@ -251,6 +253,8 @@ function LoadWorld(save) {
             }
 
             player.setGamemode(currentSave.gamemode);
+
+            if (currentSave.health) player.health = currentSave.health;
 
             SaveWorld(false);
         }, 100);
