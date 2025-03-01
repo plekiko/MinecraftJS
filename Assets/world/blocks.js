@@ -820,7 +820,6 @@ const blockTypes = [
         dropWithoutTool: false,
         smeltOutput: { itemId: Items.GoldIngot },
         noteBlockSound: "bd",
-        lightLevel: 3,
     }),
     new BlockType({
         blockId: 65,
