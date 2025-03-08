@@ -667,7 +667,7 @@ class Chunk {
                 // Otherwise, if it is air or transparent, degrade it by 1.
                 if (
                     (!def.air && !def.transparent && def.collision) ||
-                    y > this.biome.heightNoise.min * 1.8
+                    y > CHUNK_HEIGHT - (TERRAIN_HEIGHT + this.biome.waterLevel)
                 ) {
                     skyLight = Math.max(skyLight - 1, 1);
                     stopped = true;
