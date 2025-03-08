@@ -119,6 +119,11 @@ function LoadWorldFromLocalStorage() {
     if (selectedWorld) {
         selectedWorld = JSON.parse(selectedWorld);
     } else {
+        if (SPAWN_PLAYER) {
+            setTimeout(() => {
+                SpawnPlayer();
+            }, 100);
+        }
         return;
     }
 

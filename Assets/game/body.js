@@ -302,7 +302,6 @@ class BodyPart {
 
         let cutoff = 0;
         // If it is a block, get the default draw cutoff
-        console.log(holdItem);
         if (holdItem.blockId) {
             cutoff = GetBlock(holdItem.blockId).defaultCutoff;
         }

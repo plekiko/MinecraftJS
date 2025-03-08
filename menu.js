@@ -108,17 +108,17 @@ function populateWorlds() {
 }
 
 function createNewWorld() {
-    let worldName = "world";
+    let worldName = "New World";
     worldName = prompt("Enter world name: ", worldName);
 
-    if (!worldName) return;
+    if (!worldName) worldName = "New World";
 
     localStorage.setItem(
         "selectedWorld",
         JSON.stringify({ id: Date.now(), name: worldName })
     );
 
-    window.location.href = "game.html";
+    window.location.href = "./game.html";
 }
 
 function getSavedWorld(id) {
