@@ -130,6 +130,7 @@ function LoadWorldFromLocalStorage() {
     const selectedWorldData = localStorage.getItem(selectedWorld.id);
 
     if (!selectedWorldData) {
+        if (selectedWorld.seed) LoadCustomSeed(selectedWorld.seed);
         if (SPAWN_PLAYER) {
             setTimeout(() => {
                 SpawnPlayer();
@@ -167,7 +168,7 @@ function LoadWorld(save) {
     loadingWorld = true;
 
     // Reinitialize global variables
-    setSeed(currentSave.seed);
+    LoadCustomSeed(currentSave.seed);
 
     chunks = new Map();
     // pendingBlocks = new Map();
@@ -181,7 +182,7 @@ function LoadWorld(save) {
         const constructedChunk = new Chunk(
             chunk.x,
             CHUNK_WIDTH,
-            Biomes[chunk.biome],
+            Biomes[chunk.biome] ? Biomes[chunk.biome] : Biomes.Plains,
             previousChunk,
             pendingBlocks,
             worldGrassNoiseMap,

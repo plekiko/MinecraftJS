@@ -43,8 +43,75 @@ class Chunk {
 
     generateChunk() {
         if (this.generated) return;
+
         this.generateArray(); // Initialize blocks
+
+        if (specialWorldProps.void) {
+            this.generated = true;
+
+            if (specialWorldProps.skyblock && this.x == 0) {
+                this.generateSkyBlock();
+                return;
+            }
+
+            if (this.x == 0) this.generateVoidBlock();
+
+            return;
+        }
+
         this.generateHeight(); // Generate terrain height
+    }
+
+    generateVoidBlock() {
+        this.setBlockType(0, CHUNK_HEIGHT / 2, Blocks.Glass);
+    }
+
+    generateSkyBlock() {
+        const length = 4;
+
+        // Grass layer
+        for (
+            let i = -BLOCK_SIZE * length;
+            i < BLOCK_SIZE * length;
+            i += BLOCK_SIZE
+        ) {
+            this.setBlockTypeAtPosition(
+                i,
+                (CHUNK_HEIGHT / 2) * BLOCK_SIZE,
+                Blocks.GrassBlock
+            );
+        }
+
+        // Dirt layers 2 thick
+        for (
+            let y = (CHUNK_HEIGHT / 2) * BLOCK_SIZE - BLOCK_SIZE;
+            y > (CHUNK_HEIGHT / 2) * BLOCK_SIZE - BLOCK_SIZE * 3;
+            y -= BLOCK_SIZE
+        ) {
+            for (
+                let i = -BLOCK_SIZE * length;
+                i < BLOCK_SIZE * length;
+                i += BLOCK_SIZE
+            ) {
+                this.setBlockTypeAtPosition(i, y, Blocks.Dirt);
+            }
+        }
+
+        // Chest
+        GenerateChestWithLoot(
+            new LootTable([
+                new LootItem({ itemId: Items.WaterBucket, maxCount: 1 }),
+                new LootItem({ itemId: Items.LavaBucket, maxCount: 1 }),
+            ]),
+            -BLOCK_SIZE * 3,
+            (CHUNK_HEIGHT / 2) * BLOCK_SIZE + BLOCK_SIZE,
+            this
+        );
+
+        // Tree
+        setTimeout(() => {
+            this.spawnTreeAt(Trees.Oak.variants[1], 2, CHUNK_HEIGHT / 2 + 1);
+        }, 10);
     }
 
     getHeight(x) {
@@ -164,7 +231,11 @@ class Chunk {
 
     generateHeight() {
         for (let x = 0; x < this.width; x++) {
-            const height = this.getHeight(x);
+            let height = this.getHeight(x);
+
+            if (specialWorldProps.flat) {
+                height = CHUNK_HEIGHT / 2;
+            }
 
             // Draw the top layer (first level) with a constant thickness.
             for (let y = height; y > height - this.biome.firstLayerWidth; y--) {
@@ -648,6 +719,8 @@ class Chunk {
     //#region Lighting
 
     updateSkyLight() {
+        if (specialWorldProps.void) return;
+
         // Loop over every column in the chunk.
         for (let x = 0; x < this.width; x++) {
             // Start at full sky light (15) at the top.

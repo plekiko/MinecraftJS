@@ -1,10 +1,14 @@
 let chunks = new Map();
 let pendingBlocks = new Map();
 
-let seed = Math.floor(Math.random() * 1000000);
+let seed = 0;
 // let seed = 0;
 
 tooloud.Perlin.setSeed(seed);
+
+let specialWorldProps = {};
+
+let forceToBiome = null;
 
 function setSeed(newSeed) {
     seed = newSeed;
@@ -105,6 +109,55 @@ function LocateBiome(biome) {
     }
 
     return false;
+}
+
+function LoadCustomSeed(seed) {
+    setSeed(seed);
+
+    switch (seed) {
+        case "flat":
+            specialWorldProps.flat = true;
+            break;
+
+        case "void":
+            specialWorldProps.void = true;
+            break;
+
+        case "skyblock":
+            specialWorldProps.void = true;
+            specialWorldProps.skyblock = true;
+            break;
+
+        //#region Biome Forces
+        case "desert":
+            forceToBiome = Biomes.Desert;
+            break;
+        case "mountain":
+            forceToBiome = Biomes.Mountain;
+            break;
+        case "forest":
+            forceToBiome = Biomes.Forest;
+            break;
+        case "plains":
+            forceToBiome = Biomes.Plains;
+            break;
+        case "swamp":
+            forceToBiome = Biomes.Swamp;
+            break;
+        case "jungle":
+            forceToBiome = Biomes.Jungle;
+            break;
+        case "savanna":
+            forceToBiome = Biomes.Savanna;
+            break;
+        case "taiga":
+            forceToBiome = Biomes.Taiga;
+            break;
+        case "tundra":
+            forceToBiome = Biomes.Tundra;
+            break;
+        //#endregion
+    }
 }
 
 function BiomesInChunkCount(count) {
@@ -291,7 +344,18 @@ function calculateChunkBiome(chunkIndex) {
     const temp = worldTemperatureNoiseMap.getNoise(chunkIndex, 20000);
     const wetness = worldWetnessNoiseMap.getNoise(chunkIndex, 10000);
     const mountains = worldMountainsNoiseMap.getNoise(chunkIndex, 30000);
-    return GetBiomeForNoise(temp, wetness, mountains);
+
+    let toBeReturned = Biomes.Plains;
+
+    toBeReturned = GetBiomeForNoise(temp, wetness, mountains);
+
+    if (specialWorldProps.flat) toBeReturned = Biomes.Plains;
+
+    if (forceToBiome != null) toBeReturned = forceToBiome;
+
+    if (!toBeReturned) toBeReturned = Biomes.Plains;
+
+    return toBeReturned;
 }
 
 function getNeighborBiomeData(currentIndex, cameraIndex) {
@@ -323,15 +387,30 @@ function GetChunk(worldX) {
 }
 
 function postProcessChunks() {
+    if (specialWorldProps.void) {
+        chunks.forEach((chunk) => {
+            chunk.applyBufferedBlocks();
+        });
+        return;
+    }
+
     chunks.forEach((chunk) => {
         if (!chunk.generated) {
             chunk.generateOres();
-            chunk.generateCaves();
+
+            if (!specialWorldProps.flat) {
+                chunk.generateCaves();
+            }
+
             chunk.applyBufferedBlocks();
             chunk.generateWater();
             chunk.spawnMobs(day);
-            chunk.generateTrees();
-            chunk.generateGrass();
+
+            if (!specialWorldProps.flat) {
+                chunk.generateTrees();
+                chunk.generateGrass();
+            }
+
             chunk.generateBedrock();
 
             // chunk.calculateLighting();

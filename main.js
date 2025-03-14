@@ -17,7 +17,10 @@ chat = new Chat();
 //     }, 100);
 // }
 
-function SpawnPlayer(position = new Vector2(0, 0), setOnGround = true) {
+function SpawnPlayer(
+    position = new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
+    setOnGround = true
+) {
     player = new Player({
         position: position,
         entities: entities,
@@ -55,6 +58,12 @@ function summonEntity(entity, position, props) {
 }
 
 function gameLoop() {
+    // Pause the game if the window is not focused
+    if (!document.hasFocus()) {
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+
     const currentFrameTime = performance.now();
     deltaTime = (currentFrameTime - lastFrameTime) / 1000;
     passedTime += deltaTime;

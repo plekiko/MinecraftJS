@@ -48,8 +48,8 @@ const BiomeMobs = Object.freeze({
 });
 
 const Biomes = Object.freeze({
-    Planes: new Biome({
-        name: "Planes",
+    Plains: new Biome({
+        name: "Plains",
         heightNoise: NoisePresets.Flat,
         topLayer: Blocks.GrassBlock,
         secondLayer: Blocks.Dirt,

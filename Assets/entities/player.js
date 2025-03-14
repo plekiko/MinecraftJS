@@ -152,7 +152,7 @@ class Player extends Entity {
     respawn() {
         this.velocity = new Vector2();
         this.shouldAddForce = new Vector2();
-        this.teleport(new Vector2(0, 0));
+        this.teleport(new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE));
         this.setOnGround();
         this.setGamemode();
     }
@@ -974,7 +974,7 @@ class Player extends Entity {
     handleSwimming() {
         if (this.wasSwimming && !this.swimming) {
             // Exited Water
-            if (this.velocity.y < 0) this.addForce(0, -1.5);
+            if (this.velocity.y < 0) this.addForce(0, -3);
             this.wasSwimming = false;
         }
 

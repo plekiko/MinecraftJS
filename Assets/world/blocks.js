@@ -225,7 +225,7 @@ const blockTypes = [
             }),
             new LootItem({
                 blockId: Blocks.OakSapling,
-                subtract: 12,
+                subtract: 8,
             }),
         ]),
         transparent: true,
@@ -259,7 +259,7 @@ const blockTypes = [
             }),
             new LootItem({
                 blockId: Blocks.SpruceSapling,
-                subtract: 12,
+                subtract: 8,
             }),
         ]),
         transparent: true,
@@ -290,7 +290,7 @@ const blockTypes = [
         dropTable: new LootTable([
             new LootItem({
                 blockId: Blocks.AcaciaSapling,
-                subtract: 12,
+                subtract: 8,
             }),
         ]),
     }),
@@ -323,7 +323,7 @@ const blockTypes = [
             }),
             new LootItem({
                 blockId: Blocks.BirchSapling,
-                subtract: 12,
+                subtract: 8,
             }),
         ]),
         transparent: true,
@@ -354,7 +354,7 @@ const blockTypes = [
         dropTable: new LootTable([
             new LootItem({
                 blockId: Blocks.JungleSapling,
-                subtract: 12,
+                subtract: 8,
             }),
         ]),
     }),

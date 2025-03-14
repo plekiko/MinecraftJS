@@ -1,8 +1,8 @@
-const RENDER_DISTANCE = 1; // In Chunks
+const RENDER_DISTANCE = 2; // In Chunks
 const ENTITY_UPDATE_DISTANCE = 50; // In Blocks
 const CHUNK_WIDTH = 16;
 const CHUNK_HEIGHT = 110; // 150
-const BLOCK_SIZE = 64; // 64
+const BLOCK_SIZE = 32; // 64
 const CAVES_THRESHOLD = 4;
 const TERRAIN_HEIGHT = 30; // 50
 const WATER_LEVEL = 25;
@@ -29,7 +29,7 @@ const ORE_THRESHOLDS = {
     gold: 1.4,
 };
 
-const SPAWN_PLAYER = true;
+const SPAWN_PLAYER = false;
 
 let globalFrame = 0;
 let updatingBlocks = []; //eg furnace

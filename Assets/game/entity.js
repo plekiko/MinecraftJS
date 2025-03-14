@@ -406,6 +406,7 @@ class Entity {
 
     tickUpdate() {
         this.fireLogic();
+        this.voidLogic();
     }
 
     fireLogic() {
@@ -427,8 +428,15 @@ class Entity {
             this.filterBlocksByProperty(this.collidingWithBlocks, "fire")
                 .length > 0
         ) {
+            // Check for lava
+            if (
+                this.filterBlocksByProperty(this.collidingWithBlocks, "fluid")
+            ) {
+                this.fire = 100;
+            }
+
             if (this.fire >= 100) {
-                fire = 100;
+                this.fire = 100;
             } else {
                 this.fire += 4;
             }
@@ -441,7 +449,10 @@ class Entity {
                 "extinguishEntity"
             ).length > 0
         ) {
-            this.fire = this.fireMin;
+            if (this.fire > this.fireMin) {
+                playPositionalSound(this.position, "blocks/fizz.ogg");
+                this.fire = this.fireMin;
+            }
         }
 
         if (this.fire > this.fireMin) {
@@ -460,6 +471,12 @@ class Entity {
         if (this.fireDamageTimer >= 10) {
             this.hit(1);
             this.fireDamageTimer = 0;
+        }
+    }
+
+    voidLogic() {
+        if (this.position.y > CHUNK_HEIGHT * BLOCK_SIZE) {
+            this.hit(2);
         }
     }
 

@@ -109,13 +109,17 @@ function populateWorlds() {
 
 function createNewWorld() {
     let worldName = "New World";
+    let seed = "";
     worldName = prompt("Enter world name: ", worldName);
+    seed = prompt("Enter world seed (leave empty for a random seed): ", seed);
+
+    if (!seed) seed = Math.floor(Math.random() * 100000000);
 
     if (!worldName) worldName = "New World";
 
     localStorage.setItem(
         "selectedWorld",
-        JSON.stringify({ id: Date.now(), name: worldName })
+        JSON.stringify({ id: Date.now(), name: worldName, seed: seed })
     );
 
     window.location.href = "./game.html";
@@ -144,10 +148,8 @@ function removeWorld() {
         JSON.stringify(worlds.filter((world) => world.id !== selectedWorld))
     );
 
-    if (worlds.length === 1) {
-        worldPlayButton.disabled = true;
-        removeWorldButton.disabled = true;
-    }
+    removeWorldButton.disabled = true;
+    worldPlayButton.disabled = true;
 
     populateWorlds();
 }

@@ -149,6 +149,12 @@ class Chat {
             case "locatebiome":
                 this.locateBiome(messageArray);
                 break;
+            case "seed":
+                this.message(`Seed: ${seed}`);
+
+                navigator.clipboard.writeText(seed);
+                this.message("Seed copied to clipboard.");
+                break;
             default:
                 this.message("Invalid Command!");
                 break;
@@ -332,6 +338,7 @@ class Chat {
             "/time <1 - 7.5>",
             "/structure <StructureName>",
             "/locatebiome <BiomeName>",
+            "/seed",
         ];
 
         // Print them one by one in chat
