@@ -218,6 +218,8 @@ class Chat {
             return;
         }
 
+        position.y = -position.y + CHUNK_HEIGHT * BLOCK_SIZE;
+
         if (collections[category] && collections[category][itemName] != null) {
             const entity = collections[category][itemName];
 

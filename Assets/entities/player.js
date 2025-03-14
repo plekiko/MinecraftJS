@@ -767,7 +767,6 @@ class Player extends Entity {
 
         const isAdjacentToBlock = checkAdjacentBlocks(mousePos);
 
-        console.log(block);
         if (block.breakWithoutBlockUnderneath) {
             const blockBeneath = GetBlockAtWorldPosition(
                 this.hoverBlock.transform.position.x,
