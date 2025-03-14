@@ -19,6 +19,8 @@ class BlockType {
 
         cannotBeConverted = false,
 
+        saplingOutcome = null,
+
         extinguishEntity = false,
 
         air = false,
@@ -114,6 +116,8 @@ class BlockType {
         this.smeltOutput = smeltOutput;
 
         this.specialType = specialType;
+
+        this.saplingOutcome = saplingOutcome;
     }
 }
 
@@ -336,6 +340,11 @@ class Block extends Square {
             this.metaData = new Metadata({ props: props });
         }
 
+        if (block.saplingOutcome) {
+            props.growth = 0;
+            this.metaData = new Metadata({ props: props });
+        }
+
         if (!block.specialType) return;
 
         const specialType = GetBlock(this.blockType).specialType;
@@ -480,9 +489,18 @@ class Block extends Square {
             this.simulateWaterFlow();
         }
 
+        if (!this.metaData || !this.metaData.props) return;
+
+        if (this.metaData.props.growth !== undefined) {
+            this.metaData.props.growth++;
+
+            if (this.metaData.props.growth >= 2400) {
+                this.saplingGrow();
+                return;
+            }
+        }
+
         if (
-            !this.metaData ||
-            !this.metaData.props ||
             this.metaData.props.isActive === undefined ||
             this.metaData.props.progression === undefined
         )
@@ -494,6 +512,30 @@ class Block extends Square {
         }
 
         this.metaData.props.progression += 1 / TICK_SPEED;
+    }
+
+    saplingGrow() {
+        const outcome = GetBlock(this.blockType).saplingOutcome;
+
+        if (!outcome) return;
+
+        // Get tree type using Trees enum
+        const treeType = Trees[outcome];
+
+        if (!treeType) return;
+
+        const randomVariant =
+            treeType.variants[RandomRange(0, treeType.variants.length)];
+
+        GetChunkForX(this.chunkX).spawnTreeAt(
+            randomVariant,
+            this.x,
+            this.calculateY()
+        );
+    }
+
+    calculateY() {
+        return CHUNK_HEIGHT - this.y - 1;
     }
 
     entityCollision(entity) {}

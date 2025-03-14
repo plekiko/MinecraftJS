@@ -87,6 +87,12 @@ const Blocks = Object.freeze({
     SmoothStoneSlab: 82,
 
     Fire: 85,
+
+    OakSapling: 90,
+    SpruceSapling: 91,
+    BirchSapling: 92,
+    JungleSapling: 93,
+    AcaciaSapling: 94,
 });
 
 const blockTypes = [
@@ -215,7 +221,11 @@ const blockTypes = [
         dropTable: new LootTable([
             new LootItem({
                 itemId: Items.Apple,
-                subtract: 10,
+                subtract: 15,
+            }),
+            new LootItem({
+                blockId: Blocks.OakSapling,
+                subtract: 12,
             }),
         ]),
         transparent: true,
@@ -245,7 +255,11 @@ const blockTypes = [
         dropTable: new LootTable([
             new LootItem({
                 itemId: Items.Apple,
-                subtract: 10,
+                subtract: 15,
+            }),
+            new LootItem({
+                blockId: Blocks.SpruceSapling,
+                subtract: 12,
             }),
         ]),
         transparent: true,
@@ -273,6 +287,12 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shears,
         transparent: true,
+        dropTable: new LootTable([
+            new LootItem({
+                blockId: Blocks.AcaciaSapling,
+                subtract: 12,
+            }),
+        ]),
     }),
     new BlockType({
         blockId: 16,
@@ -299,7 +319,11 @@ const blockTypes = [
         dropTable: new LootTable([
             new LootItem({
                 itemId: Items.Apple,
-                subtract: 10,
+                subtract: 15,
+            }),
+            new LootItem({
+                blockId: Blocks.BirchSapling,
+                subtract: 12,
             }),
         ]),
         transparent: true,
@@ -326,6 +350,13 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shears,
+
+        dropTable: new LootTable([
+            new LootItem({
+                blockId: Blocks.JungleSapling,
+                subtract: 12,
+            }),
+        ]),
     }),
     //#endregion
 
@@ -1183,6 +1214,95 @@ const blockTypes = [
         breakSound: ["blocks/fizz"],
         ambientSound: "blocks/fire",
     }),
+    //#endregion
+
+    //#region Saplings
+    new BlockType({
+        blockId: 90,
+        name: "Oak Sapling",
+        sprite: "sapling_oak",
+        hardness: 0,
+        collision: false,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        dropWithoutTool: false,
+        breakByFluid: true,
+        breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
+        transparent: true,
+
+        saplingOutcome: "Oak",
+        updateSpeed: 1,
+    }),
+    new BlockType({
+        blockId: 91,
+        name: "Spruce Sapling",
+        sprite: "sapling_spruce",
+        hardness: 0,
+        collision: false,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        dropWithoutTool: false,
+        breakByFluid: true,
+        breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
+        transparent: true,
+
+        saplingOutcome: "Spruce",
+        updateSpeed: 1,
+    }),
+    new BlockType({
+        blockId: 92,
+        name: "Birch Sapling",
+        sprite: "sapling_birch",
+        hardness: 0,
+        collision: false,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        dropWithoutTool: false,
+        breakByFluid: true,
+        breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
+        transparent: true,
+
+        saplingOutcome: "Birch",
+        updateSpeed: 1,
+    }),
+    new BlockType({
+        blockId: 93,
+        name: "Jungle Sapling",
+        sprite: "sapling_jungle",
+        hardness: 0,
+        collision: false,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        dropWithoutTool: false,
+        breakByFluid: true,
+        breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
+        transparent: true,
+
+        saplingOutcome: "Jungle",
+        updateSpeed: 1,
+    }),
+    new BlockType({
+        blockId: 94,
+        name: "Acacia Sapling",
+        sprite: "sapling_acacia",
+        hardness: 0,
+        collision: false,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        dropWithoutTool: false,
+        breakByFluid: true,
+        breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
+        transparent: true,
+
+        saplingOutcome: "Acacia",
+        updateSpeed: 1,
+    }),
+
     //#endregion
 ];
 

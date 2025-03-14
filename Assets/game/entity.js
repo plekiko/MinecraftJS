@@ -434,8 +434,6 @@ class Entity {
             }
         }
 
-        chat.message(this.fire);
-
         // When touching Water
         if (
             this.filterBlocksByProperty(

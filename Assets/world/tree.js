@@ -258,6 +258,67 @@ const Trees = Object.freeze({
         ],
     ]),
 
+    Jungle: new Tree([
+        [
+            [
+                Blocks.Air,
+                Blocks.JungleLog,
+                Blocks.JungleLog,
+                Blocks.JungleLog,
+                Blocks.Air,
+                Blocks.Air,
+            ], // New top (original bottom trunk)
+            [
+                Blocks.Air,
+                Blocks.Air,
+                Blocks.JungleLog,
+                Blocks.JungleLog,
+                Blocks.Air,
+                Blocks.Air,
+            ],
+            [
+                Blocks.Air,
+                Blocks.Air,
+                Blocks.JungleLog,
+                Blocks.Air,
+                Blocks.Air,
+                Blocks.Air,
+            ],
+            [
+                Blocks.Air,
+                Blocks.JungleLeaves,
+                Blocks.JungleLog,
+                Blocks.JungleLeaves,
+                Blocks.Air,
+                Blocks.Air,
+            ],
+            [
+                Blocks.JungleLeaves,
+                Blocks.JungleLeaves,
+                Blocks.JungleLeaves,
+                Blocks.JungleLeaves,
+                Blocks.JungleLeaves,
+                Blocks.JungleLeaves,
+            ],
+            [
+                Blocks.Air,
+                Blocks.JungleLeaves,
+                Blocks.JungleLeaves,
+                Blocks.JungleLeaves,
+                Blocks.JungleLeaves,
+                Blocks.Air,
+            ],
+            [
+                Blocks.Air,
+                Blocks.JungleLeaves,
+                Blocks.JungleLeaves,
+                Blocks.JungleLeaves,
+                Blocks.Air,
+                Blocks.Air,
+            ], // New bottom (original top leaves)
+        ],
+    ]),
+
     BigJungle: new Tree([
         [
             [Blocks.JungleLog, Blocks.JungleLog],
@@ -356,5 +417,5 @@ const Trees = Object.freeze({
             ],
             [Blocks.JungleLeaves, Blocks.JungleLeaves],
         ],
-    ])
+    ]),
 });
