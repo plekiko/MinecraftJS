@@ -416,6 +416,13 @@ class Entity {
             return;
         }
 
+        if (this.type === EntityTypes.Drop) {
+            if (this.fireDamageTimer >= 9) {
+                removeEntity(this);
+                return;
+            }
+        }
+
         if (
             this.filterBlocksByProperty(this.collidingWithBlocks, "fire")
                 .length > 0
@@ -861,6 +868,12 @@ class Entity {
     }
 
     draw(ctx) {
+        this.drawEntity(ctx);
+
+        this.drawFire(ctx);
+    }
+
+    drawEntity(ctx) {
         ctx.save();
         const centerX = this.position.x - camera.x + this.offset.x;
         const centerY = this.position.y - camera.y + this.offset.y;
@@ -889,7 +902,7 @@ class Entity {
                 this.holdItem
             );
 
-            this.drawFire(ctx);
+            // this.drawFire(ctx);
 
             ctx.restore();
             return;
@@ -981,7 +994,7 @@ class Entity {
                     );
                 }
 
-                this.drawFire(ctx);
+                // this.drawFire(ctx);
 
                 ctx.restore();
             }
