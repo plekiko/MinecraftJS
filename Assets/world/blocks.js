@@ -1181,6 +1181,7 @@ const blockTypes = [
         breakByFluid: true,
         dropWithoutTool: false,
         breakSound: ["blocks/fizz"],
+        ambientSound: "blocks/fire",
     }),
     //#endregion
 ];
