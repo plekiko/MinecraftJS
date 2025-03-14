@@ -410,6 +410,12 @@ class Entity {
 
     fireLogic() {
         // When standing on Fire or Lava
+        if (this.noCollision) {
+            this.fire = this.fireMin;
+            this.hasVisualFire = false;
+            return;
+        }
+
         if (
             this.filterBlocksByProperty(this.collidingWithBlocks, "fire")
                 .length > 0
