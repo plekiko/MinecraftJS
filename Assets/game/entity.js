@@ -427,8 +427,14 @@ class Entity {
             this.filterBlocksByProperty(this.collidingWithBlocks, "fire")
                 .length > 0
         ) {
-            this.fire = 100;
+            if (this.fire >= 100) {
+                fire = 100;
+            } else {
+                this.fire += 4;
+            }
         }
+
+        chat.message(this.fire);
 
         // When touching Water
         if (
