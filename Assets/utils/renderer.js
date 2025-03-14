@@ -475,57 +475,89 @@ function drawImage({
     centerX = true,
     centerY = false,
     opacity = 1,
-    sizeY = null,
     sizeX = null,
+    sizeY = null,
     dark = false,
-}) {
+    fixAnimation = false,
+    frame = 0,
+} = {}) {
     const img = new Image();
     img.src = url;
 
-    ctx.globalAlpha = opacity;
+    // Function to handle the actual drawing
+    function drawFrame() {
+        ctx.globalAlpha = opacity;
 
-    // Determine the source width and height for cropping
-    const sourceWidth = sizeX !== null ? sizeX : img.width;
-    const sourceHeight = sizeY !== null ? sizeY : img.height;
+        let sourceWidth, sourceHeight, sourceX, sourceY, drawWidth, drawHeight;
 
-    // Calculate the scaled width and height for drawing
-    const drawWidth = sourceWidth * scale;
-    const drawHeight = sourceHeight * scale;
+        if (fixAnimation) {
+            // Fixed 16x16 animation mode
+            sourceWidth = 16;
+            sourceHeight = 16;
+            sourceX = 0; // Assuming vertical sprite sheet
+            sourceY = frame * 16; // Frame offset for animation
+            drawWidth = sourceWidth * scale;
+            drawHeight = sourceHeight * scale;
+        } else {
+            // Original behavior
+            sourceWidth = sizeX !== null ? sizeX : img.width;
+            sourceHeight = sizeY !== null ? sizeY : img.height;
+            sourceX = 0;
+            sourceY = img.height; // Original start Y (bottom of image)
+            drawWidth = sourceWidth * scale;
+            drawHeight = sourceHeight * scale;
+        }
 
-    ctx.drawImage(
-        img,
-        0, // Start x position in the source image (crop start)
-        img.height, // Start y position in the source image (crop start)
-        sourceWidth, // Width of the source to draw (crop width)
-        -sourceHeight, // Height of the source to draw (crop height)
-        centerX ? x - drawWidth / 2 : x, // x position on canvas
-        centerY
+        // Adjust position based on centering
+        const drawX = centerX ? x - drawWidth / 2 : x;
+        const drawY = fixAnimation
+            ? centerY
+                ? y - drawHeight / 2
+                : y // Simplified for 16x16
+            : centerY
             ? y - drawHeight / 2 + (sizeY ? (img.height - sizeY) * scale : 0)
-            : y + (sizeY ? (img.height - sizeY) * scale : 0), // y position on canvas
-        drawWidth, // Width on the canvas (scaled)
-        drawHeight // Height on the canvas (scaled)
-    );
+            : y + (sizeY ? (img.height - sizeY) * scale : 0);
 
-    if (dark) {
-        ctx.globalAlpha = 0.4;
-        ctx.fillStyle = "black";
-        ctx.fillRect(
-            centerX ? x - drawWidth / 2 : x,
-            centerY
-                ? y -
-                      drawHeight / 2 +
-                      (sizeY ? (img.height - sizeY) * scale : 0)
-                : y + (sizeY ? (img.height - sizeY) * scale : 0),
-            drawWidth,
-            drawHeight
+        // Draw the image
+        ctx.drawImage(
+            img,
+            sourceX, // Source x
+            sourceY, // Source y
+            sourceWidth, // Source width
+            fixAnimation ? sourceHeight : -sourceHeight, // Positive for animation, negative for original
+            drawX, // Canvas x
+            drawY, // Canvas y
+            drawWidth, // Scaled width
+            drawHeight // Scaled height
         );
+
+        // Apply dark overlay if specified
+        if (dark) {
+            ctx.globalAlpha = 0.4;
+            ctx.fillStyle = "black";
+            ctx.fillRect(drawX, drawY, drawWidth, drawHeight);
+        }
+
+        ctx.globalAlpha = 1;
     }
 
-    ctx.globalAlpha = 1;
+    // Handle image loading
+    if (img.complete) {
+        drawFrame(); // Draw immediately if loaded
+    } else {
+        img.onload = () => {
+            drawFrame(); // Draw once loaded
+        };
+    }
 
+    // Return drawn position and size
+    const drawWidth =
+        (fixAnimation ? 16 : sizeX !== null ? sizeX : img.width) * scale;
+    const drawHeight =
+        (fixAnimation ? 16 : sizeY !== null ? sizeY : img.height) * scale;
     return {
-        x: centerX ? x - (sourceWidth / 2) * scale : x,
-        y: centerY ? y - (sourceWidth / 2) * scale : y,
+        x: centerX ? x - drawWidth / 2 : x,
+        y: centerY ? y - drawHeight / 2 : y, // Simplified return for consistency
         sizeX: drawWidth,
         sizeY: drawHeight,
     };

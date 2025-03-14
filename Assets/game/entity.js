@@ -42,6 +42,8 @@ class Entity {
         despawn = true,
         direction = 1,
         holdItem = new InventoryItem(),
+
+        fire = -20,
     } = {}) {
         this.position = position;
         this.rotation = rotation;
@@ -67,6 +69,7 @@ class Entity {
         this.forceDirection = forceDirection;
         this.float = float;
         this.playWaterEnterSound = playWaterEnterSound;
+        this.collidingWithBlocks = [];
         this.direction = direction;
         this.sprite = sprite;
         this.cutoff = cutoff;
@@ -93,6 +96,17 @@ class Entity {
         this.holdItem = holdItem;
         this.shouldAddForce = { x: 0, y: 0 };
         this.hurtCooldown = 0.3;
+
+        this.hasVisualFire = false;
+        this.fire = fire;
+        this.fireMin = fire;
+        this.fireDamageTimer = 0;
+
+        this.fireSprite = new SimpleSprite({
+            sprite: "blocks/fire_layer_0.png",
+            transform: new Transform(),
+            frameRate: 4,
+        });
     }
 
     rotateToPoint(targetPosition, objectPosition) {
@@ -107,10 +121,8 @@ class Entity {
 
     addForce(x = 0, y = 0) {
         if (
-            this.filterBlocksByProperty(
-                this.isCollidingWithBlockType(),
-                "collision"
-            ).length > 0
+            this.filterBlocksByProperty(this.collidingWithBlocks, "collision")
+                .length > 0
         ) {
             return;
         }
@@ -338,6 +350,7 @@ class Entity {
 
     die() {
         this.health = 0;
+        this.fire = this.fireMin;
         this.dieEvent();
     }
 
@@ -389,6 +402,48 @@ class Entity {
         this.playFootstepSounds();
         this.hurtCooldownLogic();
         if (this.body) this.body.updateBody();
+    }
+
+    tickUpdate() {
+        this.fireLogic();
+    }
+
+    fireLogic() {
+        // When standing on Fire or Lava
+        if (
+            this.filterBlocksByProperty(this.collidingWithBlocks, "fire")
+                .length > 0
+        ) {
+            this.fire = 100;
+        }
+
+        // When touching Water
+        if (
+            this.filterBlocksByProperty(
+                this.collidingWithBlocks,
+                "extinguishEntity"
+            ).length > 0
+        ) {
+            this.fire = this.fireMin;
+        }
+
+        if (this.fire > this.fireMin) {
+            this.fire--;
+        }
+
+        if (this.fire <= 0) {
+            this.hasVisualFire = false;
+            this.fireDamageTimer = 0;
+            return;
+        } else {
+            this.hasVisualFire = true;
+        }
+
+        this.fireDamageTimer++;
+        if (this.fireDamageTimer >= 10) {
+            this.hit(1);
+            this.fireDamageTimer = 0;
+        }
     }
 
     swing() {
@@ -542,7 +597,9 @@ class Entity {
         const upCollision = this.checkUpCollision(nextPositionY);
         const downCollision = this.checkDownCollision(nextPositionY);
 
-        const collidingBlocks = this.isCollidingWithBlockType();
+        this.collidingWithBlocks = this.isCollidingWithBlockType();
+
+        const collidingBlocks = this.collidingWithBlocks;
 
         this.wasCollidingWithBlocks.forEach((block) => {
             if (!collidingBlocks.includes(block)) {
@@ -669,7 +726,7 @@ class Entity {
         });
     }
 
-    isCollidingWithBlockType() {
+    isCollidingWithBlockType(blockType = null) {
         const collidingBlocks = [];
         const startX = Math.floor(this.position.x / BLOCK_SIZE);
         const endX = Math.floor((this.position.x + this.hitbox.x) / BLOCK_SIZE);
@@ -682,6 +739,11 @@ class Entity {
                 const blockY = y * BLOCK_SIZE;
                 const block = GetBlockAtWorldPosition(blockX, blockY);
                 if (block && block.blockType) {
+                    // If blockType is specified, skip blocks that don't match
+                    if (blockType !== null && block.blockType !== blockType) {
+                        continue;
+                    }
+
                     const effectiveHeight = BLOCK_SIZE * (1 - block.cutoff);
                     const blockTopY =
                         block.transform.position.y +
@@ -779,6 +841,19 @@ class Entity {
         }
     }
 
+    drawFire(ctx) {
+        if (!this.hasVisualFire) return;
+
+        const fireX = this.position.x;
+        const fireY = this.position.y;
+        const fireSize = new Vector2(this.hitbox.x, this.hitbox.y);
+
+        this.fireSprite.transform.position = new Vector2(fireX, fireY);
+        this.fireSprite.transform.size = fireSize;
+
+        this.fireSprite.draw(ctx, camera);
+    }
+
     draw(ctx) {
         ctx.save();
         const centerX = this.position.x - camera.x + this.offset.x;
@@ -807,6 +882,9 @@ class Entity {
                 this.lookDirection,
                 this.holdItem
             );
+
+            this.drawFire(ctx);
+
             ctx.restore();
             return;
         }
@@ -896,6 +974,10 @@ class Entity {
                         spriteHeight
                     );
                 }
+
+                this.drawFire(ctx);
+
+                ctx.restore();
             }
             ctx.globalAlpha = 1; // Reset alpha
         }

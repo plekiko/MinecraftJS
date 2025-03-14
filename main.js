@@ -96,7 +96,7 @@ function dayNightCycle() {
     }
 }
 
-function updateEntities() {
+function updateEntities(tick = false) {
     const cameraFarX =
         camera.getWorldX(camera.x) - ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
     const cameraNearX =
@@ -104,14 +104,16 @@ function updateEntities() {
 
     entities.forEach((entity) => {
         if (entity === player) {
-            entity.update();
+            if (tick) entity.tickUpdate();
+            else entity.update();
             return;
         }
         if (
             entity.position.x >= cameraFarX &&
             entity.position.x <= cameraNearX
         ) {
-            entity.update();
+            if (tick) entity.tickUpdate();
+            else entity.update();
         }
     });
 }

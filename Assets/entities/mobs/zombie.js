@@ -42,6 +42,10 @@ class Zombie extends Mob {
         this.aiUpdate();
 
         this.hitPlayerLogic();
+
+        if (day) {
+            this.fire = 100;
+        }
     }
 
     hitPlayerLogic() {
@@ -56,7 +60,7 @@ class Zombie extends Mob {
         this.attackCooldown = 1;
     }
 
-    hit(damage, hitfromX = 0, kb = 5) {
+    hit(damage, hitfromX = 0, kb = 0) {
         if (!this.health) return;
         if (!this.damage(damage)) return;
 

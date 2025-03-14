@@ -1171,6 +1171,7 @@ class Inventory {
             centerX: false,
             dark: holdingItem.props.wall === true,
             sizeY: 16 - cutoff * 16,
+            fixAnimation: cutoff === 0,
         });
 
         if (holdingItem.count <= 1) return;
@@ -1223,6 +1224,7 @@ class Inventory {
             centerX: false,
             dark: item.props.wall === true,
             sizeY: 16 - cutoff * 16,
+            fixAnimation: cutoff === 0,
         });
 
         if (item.count <= 1) return;

@@ -139,6 +139,7 @@ class Player extends Entity {
         if (!this.health) return;
         if (!this.abilities.hasHealth) return;
         if (!this.damage(damage)) return;
+        if (this.invulnerable) return;
         this.knockBack(hitfromX, kb);
 
         PlayRandomSoundFromArray({

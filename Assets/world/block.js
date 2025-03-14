@@ -15,7 +15,11 @@ class BlockType {
 
         transparent = false,
 
+        fire = false,
+
         cannotBeConverted = false,
+
+        extinguishEntity = false,
 
         air = false,
 
@@ -67,6 +71,9 @@ class BlockType {
         this.collision = collision;
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
+
+        this.fire = fire;
+        this.extinguishEntity = extinguishEntity;
 
         this.defaultCutoff = defaultCutoff;
 

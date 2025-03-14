@@ -85,6 +85,8 @@ const Blocks = Object.freeze({
     StoneBrickSlab: 80,
     MossyCobblestoneSlab: 81,
     SmoothStoneSlab: 82,
+
+    Fire: 85,
 });
 
 const blockTypes = [
@@ -542,6 +544,7 @@ const blockTypes = [
         breakSound: Sounds.Water_Enter,
         cannotBeConverted: true,
         transparent: true,
+        extinguishEntity: true,
     }),
     new BlockType({
         blockId: 53,
@@ -556,6 +559,7 @@ const blockTypes = [
         lightLevel: 6,
         cannotBeConverted: true,
         transparent: true,
+        fire: true,
     }),
     //#endregion
 
@@ -1160,6 +1164,23 @@ const blockTypes = [
         dropWithoutTool: false,
         defaultCutoff: 0.5,
         noteBlockSound: "bd",
+    }),
+    //#endregion
+    //#region Misc
+    new BlockType({
+        blockId: 85,
+        name: "Fire",
+        sprite: "fire_layer_0",
+        hardness: 0,
+        collision: false,
+        lightLevel: 10,
+        breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
+        animationSpeed: 0.3,
+        fire: true,
+        breakByFluid: true,
+        dropWithoutTool: false,
+        breakSound: ["blocks/fizz"],
     }),
     //#endregion
 ];

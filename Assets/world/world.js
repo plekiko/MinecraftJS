@@ -24,6 +24,8 @@ function tick() {
 
     updatePositionalAudioVolumes();
 
+    updateEntities(true);
+
     chunks_in_render_distance.forEach((chunk) => {
         chunk.updateChunk();
     });

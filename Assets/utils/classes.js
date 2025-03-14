@@ -277,6 +277,66 @@ class Square {
     }
 }
 
+class SimpleSprite {
+    constructor({ sprite, transform, alpha = 1, frameRate = 0 }) {
+        this.sprite = sprite;
+        this.img = new Image();
+        this.img.src = "Assets/sprites/" + sprite;
+        this.transform = transform;
+        this.alpha = alpha;
+        this.frameRate = frameRate;
+        this.frameCount = this.img.height / 16;
+    }
+
+    draw(ctx, camera) {
+        const centerX = this.transform.position.x + this.transform.size.x / 2;
+        const centerY = this.transform.position.y + this.transform.size.y / 2;
+        ctx.save();
+        ctx.translate(centerX, centerY);
+
+        // Rotate if necessary
+        if (this.transform.rotation !== 0) {
+            ctx.rotate((this.transform.rotation * Math.PI) / 180);
+        }
+
+        // Draw the sprite
+        ctx.globalAlpha = this.alpha;
+
+        if (this.frameCount > 1) {
+            this.drawAnimation(ctx, camera);
+        } else {
+            ctx.drawImage(
+                this.img,
+                -this.transform.size.x / 2 - camera.x,
+                -this.transform.size.y / 2 - camera.y,
+                this.transform.size.x,
+                this.transform.size.y
+            );
+        }
+
+        ctx.restore();
+    }
+
+    drawAnimation(ctx, camera) {
+        const frameHeight = 16;
+        const effectiveFrame =
+            Math.floor(globalFrame / this.frameRate) % this.frameCount;
+        const frameY = effectiveFrame * frameHeight;
+
+        ctx.drawImage(
+            this.img,
+            0,
+            frameY,
+            16,
+            frameHeight,
+            -this.transform.size.x / 2 - camera.x,
+            -this.transform.size.y / 2 - camera.y,
+            this.transform.size.x,
+            this.transform.size.y
+        );
+    }
+}
+
 function arePropsEqual(a, b) {
     // Treat null/undefined as equal
     if (!a && !b) return true;
