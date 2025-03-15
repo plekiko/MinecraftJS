@@ -33,6 +33,11 @@ class Zombie extends Mob {
                     maxCount: 1,
                     subtract: 20,
                 }),
+                new LootItem({
+                    itemId: Items.Carrot,
+                    maxCount: 1,
+                    subtract: 15,
+                }),
             ]),
         });
     }
