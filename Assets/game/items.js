@@ -54,6 +54,8 @@ const Items = Object.freeze({
     Bread: 37,
     Carrot: 38,
     GoldenCarrot: 39,
+    Potato: 40,
+    BakedPotato: 41,
 
     Leather: 50,
     Bone: 51,
@@ -484,6 +486,20 @@ const items = [
         name: "Golden Carrot",
         sprite: "carrot_golden",
         foodValue: 6,
+    }),
+    new Item({
+        itemId: 40,
+        name: "Potato",
+        sprite: "potato",
+        foodValue: 2,
+        placeBlock: 102,
+        smeltOutput: { itemId: 41 },
+    }),
+    new Item({
+        itemId: 41,
+        name: "Baked Potato",
+        sprite: "potato_baked",
+        foodValue: 5,
     }),
     //#endregion
 

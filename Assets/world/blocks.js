@@ -98,6 +98,7 @@ const Blocks = Object.freeze({
 
     Wheat: 100,
     Carrot: 101,
+    Potato: 102,
 
     HayBale: 120,
 });
@@ -1400,6 +1401,7 @@ const blockTypes = [
     //#endregion
 
     //#region Crops
+    // Wheat
     new BlockType({
         blockId: 100,
         name: "Wheat",
@@ -1479,6 +1481,47 @@ const blockTypes = [
         cropOutcome: new LootTable([
             new LootItem({
                 itemId: Items.Carrot,
+                maxCount: 3,
+                subtract: 2,
+            }),
+        ]),
+
+        cropSpeed: 600,
+
+        updateSpeed: 1,
+    }),
+
+    // Potato
+    new BlockType({
+        blockId: 102,
+        name: "Potato",
+        sprite: "potatoes_stage_0",
+
+        states: [
+            "potatoes_stage_0",
+            "potatoes_stage_1",
+            "potatoes_stage_2",
+            "potatoes_stage_3",
+        ],
+
+        hardness: 0,
+        collision: false,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        breakByFluid: true,
+        breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
+        transparent: true,
+
+        onlyPlacableOn: [Blocks.Farmland],
+
+        blockOffset: { x: 0, y: 0.1 },
+
+        dropItem: Items.Potato,
+
+        cropOutcome: new LootTable([
+            new LootItem({
+                itemId: Items.Potato,
                 maxCount: 3,
                 subtract: 2,
             }),

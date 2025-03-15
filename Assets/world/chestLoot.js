@@ -155,4 +155,66 @@ const ChestLoot = Object.freeze({
             subtract: 8,
         }),
     ]),
+    WitchHut: new LootTable([
+        new LootItem({
+            itemId: Items.Bone,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.RottenFlesh,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.Bucket,
+            maxCount: 1,
+            subtract: 3,
+        }),
+        new LootItem({
+            itemId: Items.IronIngot,
+            maxCount: 3,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.MusicDisc11,
+            maxCount: 1,
+            subtract: 10,
+        }),
+        new LootItem({
+            itemId: Items.Diamond,
+            maxCount: 2,
+            subtract: 5,
+        }),
+        new LootItem({
+            itemId: Items.Stick,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            blockId: Blocks.DeadBush,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.RedstoneDust,
+            maxCount: 5,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.Potato,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.Carrot,
+            maxCount: 2,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.GoldIngot,
+            maxCount: 1,
+            subtract: 4,
+        }),
+    ]),
 });

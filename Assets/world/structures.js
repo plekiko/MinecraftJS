@@ -194,7 +194,7 @@ const Structures = Object.freeze({
                 Blocks.OakLog,
                 Blocks.StructureAir,
                 Blocks.StructureAir,
-                Blocks.StructureAir,
+                ChestLoot.WitchHut,
                 Blocks.CraftingTable,
                 Blocks.OakLog,
                 Blocks.Air,
