@@ -410,8 +410,8 @@ function postProcessChunks() {
             chunk.spawnMobs(day);
 
             if (!specialWorldProps.flat) {
-                chunk.generateGrass();
                 chunk.generateTrees();
+                chunk.generateGrass();
             }
 
             chunk.generateBedrock();
