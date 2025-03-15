@@ -740,7 +740,8 @@ class Player extends Entity {
             blockToPlace.blockId,
             isWall,
             null,
-            false
+            false,
+            true
         );
 
         // Play appropriate break sound

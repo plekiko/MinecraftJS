@@ -688,7 +688,8 @@ class Chunk {
         blockType,
         wall = false,
         metaData = null,
-        calculate = true
+        calculate = true,
+        updateBlocks = false
     ) {
         const array = wall ? this.walls : this.blocks;
 
@@ -709,23 +710,28 @@ class Chunk {
                     }
                 }
 
-                const blockBeneath = GetBlock(
-                    this.getBlock(x, y + 1, calculate, wall)?.blockType
-                );
+                if (updateBlocks) {
+                    const blockBeneath = GetBlock(
+                        this.getBlock(x, y + 1, calculate, wall)?.blockType
+                    );
 
-                if (blockBeneath && blockBeneath.changeToBlockWithBlockAbove) {
                     if (
-                        !GetBlock(blockType).cropOutcome &&
-                        !GetBlock(blockType).air
+                        blockBeneath &&
+                        blockBeneath.changeToBlockWithBlockAbove
                     ) {
-                        this.setBlockType(
-                            x,
-                            y + 1,
-                            blockBeneath.changeToBlockWithBlockAbove,
-                            wall,
-                            metaData,
-                            calculate
-                        );
+                        if (
+                            !GetBlock(blockType).cropOutcome &&
+                            !GetBlock(blockType).air
+                        ) {
+                            this.setBlockType(
+                                x,
+                                y + 1,
+                                blockBeneath.changeToBlockWithBlockAbove,
+                                wall,
+                                metaData,
+                                calculate
+                            );
+                        }
                     }
                 }
 

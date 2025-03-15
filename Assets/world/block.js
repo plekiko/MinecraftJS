@@ -218,7 +218,7 @@ function flowDownward(block, worldPos) {
 function setBlockType(block, type) {
     const chunk = chunks.get(block.chunkX);
     if (!chunk) return;
-    chunk.setBlockType(block.x, block.y, type, block.wall, null, false);
+    chunk.setBlockType(block.x, block.y, type, block.wall, null, false, true);
 }
 
 function verticalCheckAbove(block, worldPos) {
