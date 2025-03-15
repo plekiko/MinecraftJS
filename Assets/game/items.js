@@ -41,6 +41,8 @@ const Items = Object.freeze({
     Diamond: 23,
     GoldIngot: 24,
     RedstoneDust: 25,
+    GoldNugget: 26,
+    IronNugget: 27,
 
     RawBeef: 30,
     CookedBeef: 31,
@@ -50,6 +52,8 @@ const Items = Object.freeze({
     RottenFlesh: 35,
     GoldenApple: 36,
     Bread: 37,
+    Carrot: 38,
+    GoldenCarrot: 39,
 
     Leather: 50,
     Bone: 51,
@@ -404,6 +408,17 @@ const items = [
         placeBlock: 67,
     }),
 
+    new Item({
+        itemId: 26,
+        name: "Gold Nugget",
+        sprite: "gold_nugget",
+    }),
+    new Item({
+        itemId: 27,
+        name: "Iron Nugget",
+        sprite: "iron_nugget",
+    }),
+
     //#endregion
 
     //#region Food
@@ -456,6 +471,19 @@ const items = [
         name: "Bread",
         sprite: "bread",
         foodValue: 5,
+    }),
+    new Item({
+        itemId: 38,
+        name: "Carrot",
+        sprite: "carrot",
+        foodValue: 3,
+        placeBlock: 101,
+    }),
+    new Item({
+        itemId: 39,
+        name: "Golden Carrot",
+        sprite: "carrot_golden",
+        foodValue: 6,
     }),
     //#endregion
 

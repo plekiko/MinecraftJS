@@ -630,7 +630,7 @@ const recipes = [
         input: new RecipeItem({ itemId: Items.IronIngot }),
         output: new InventoryItem({ blockId: Blocks.IronBlock, count: 1 }),
     }),
-    // Iron Ore
+    // Iron Ingot from Iron Block
     new Recipe({
         type: RecipeType.Shapeless,
         input: new RecipeItem({ blockId: Blocks.IronBlock }),
@@ -642,7 +642,7 @@ const recipes = [
         input: new RecipeItem({ itemId: Items.GoldIngot }),
         output: new InventoryItem({ blockId: Blocks.GoldBlock, count: 1 }),
     }),
-    // Gold Ore
+    // Gold Ingot from Gold Block
     new Recipe({
         type: RecipeType.Shapeless,
         input: new RecipeItem({ blockId: Blocks.GoldBlock }),
@@ -671,6 +671,30 @@ const recipes = [
         type: RecipeType.Shapeless,
         input: new RecipeItem({ blockId: Blocks.DiamondBlock }),
         output: new InventoryItem({ itemId: Items.Diamond, count: 9 }),
+    }),
+    // Gold Nugget
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ itemId: Items.GoldIngot }),
+        output: new InventoryItem({ itemId: Items.GoldNugget, count: 9 }),
+    }),
+    // Iron Nugget
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ itemId: Items.IronIngot }),
+        output: new InventoryItem({ itemId: Items.IronNugget, count: 9 }),
+    }),
+    // Gold Ingot from Gold Nuggets
+    new Recipe({
+        type: RecipeType.Filled,
+        input: new RecipeItem({ itemId: Items.GoldNugget }),
+        output: new InventoryItem({ itemId: Items.GoldIngot, count: 1 }),
+    }),
+    // Iron Ingot from Iron Nuggets
+    new Recipe({
+        type: RecipeType.Filled,
+        input: new RecipeItem({ itemId: Items.IronNugget }),
+        output: new InventoryItem({ itemId: Items.IronIngot, count: 1 }),
     }),
     //#endregion
 
@@ -916,6 +940,29 @@ const recipes = [
             ],
         ],
         output: new InventoryItem({ itemId: Items.Bread, count: 1 }),
+    }),
+
+    // Golden Carrot
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.GoldNugget }),
+                new RecipeItem({ itemId: Items.GoldNugget }),
+                new RecipeItem({ itemId: Items.GoldNugget }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.GoldNugget }),
+                new RecipeItem({ itemId: Items.Carrot }),
+                new RecipeItem({ itemId: Items.GoldNugget }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.GoldNugget }),
+                new RecipeItem({ itemId: Items.GoldNugget }),
+                new RecipeItem({ itemId: Items.GoldNugget }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.GoldenCarrot, count: 1 }),
     }),
 
     //#region Misc

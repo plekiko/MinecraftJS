@@ -97,6 +97,7 @@ const Blocks = Object.freeze({
     AcaciaSapling: 94,
 
     Wheat: 100,
+    Carrot: 101,
 
     HayBale: 120,
 });
@@ -1442,6 +1443,47 @@ const blockTypes = [
                 subtract: 1,
             }),
         ]),
+        cropSpeed: 600,
+
+        updateSpeed: 1,
+    }),
+
+    // Carrot
+    new BlockType({
+        blockId: 101,
+        name: "Carrot",
+        sprite: "carrots_stage_0",
+
+        states: [
+            "carrots_stage_0",
+            "carrots_stage_1",
+            "carrots_stage_2",
+            "carrots_stage_3",
+        ],
+
+        hardness: 0,
+        collision: false,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        breakByFluid: true,
+        breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
+        transparent: true,
+
+        onlyPlacableOn: [Blocks.Farmland],
+
+        blockOffset: { x: 0, y: 0.1 },
+
+        dropItem: Items.Carrot,
+
+        cropOutcome: new LootTable([
+            new LootItem({
+                itemId: Items.Carrot,
+                maxCount: 3,
+                subtract: 2,
+            }),
+        ]),
+
         cropSpeed: 600,
 
         updateSpeed: 1,

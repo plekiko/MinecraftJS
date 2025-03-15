@@ -713,17 +713,20 @@ class Chunk {
                     this.getBlock(x, y + 1, calculate, wall)?.blockType
                 );
 
-                console.log(blockBeneath);
-
                 if (blockBeneath && blockBeneath.changeToBlockWithBlockAbove) {
-                    this.setBlockType(
-                        x,
-                        y + 1,
-                        blockBeneath.changeToBlockWithBlockAbove,
-                        wall,
-                        metaData,
-                        calculate
-                    );
+                    if (
+                        !GetBlock(blockType).cropOutcome &&
+                        !GetBlock(blockType).air
+                    ) {
+                        this.setBlockType(
+                            x,
+                            y + 1,
+                            blockBeneath.changeToBlockWithBlockAbove,
+                            wall,
+                            metaData,
+                            calculate
+                        );
+                    }
                 }
 
                 block.dark = wall;
