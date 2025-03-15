@@ -173,12 +173,41 @@ class Player extends Entity {
             this.eatFoodInHand();
         }
 
+        if (item.toolType === ToolType.Hoe) {
+            this.useHoe();
+        }
+
         if (
             item.itemId === Items.Bucket ||
             item.itemId === Items.WaterBucket ||
             item.itemId === Items.LavaBucket
         )
             this.useBucket();
+    }
+
+    useHoe() {
+        if (!this.hoverBlock) return;
+
+        const block = GetBlock(this.hoverBlock.blockType);
+
+        if (!block.hoeAble) return;
+
+        const blockAbove = GetBlockAtWorldPosition(
+            this.hoverBlock.transform.position.x,
+            this.hoverBlock.transform.position.y - BLOCK_SIZE
+        );
+
+        if (blockAbove && !GetBlock(blockAbove.blockType).air) return;
+
+        this.swing();
+
+        PlayRandomSoundFromArray({
+            array: Sounds.Break_Gravel,
+            positional: true,
+            origin: this.position,
+        });
+
+        setBlockType(this.hoverBlock, Blocks.Farmland);
     }
 
     throwProjectile(item) {
@@ -668,61 +697,91 @@ class Player extends Entity {
 
     placingLogic() {
         if (!this.abilities.mayBuild) return;
-        if (!this.inventory.selectedBlock) return;
 
-        const isWall = this.getSelectedSlotItem().props?.wall;
-
-        if (!isWall) {
-            if (!this.checkBlockForPlacing(this.inventory.selectedBlock))
-                return;
-        } else {
-            if (!this.checkWallForPlacing()) return;
+        // Check if holding either a block or an item with placeBlock property
+        if (
+            !this.inventory.selectedBlock &&
+            (!this.inventory.selectedItem ||
+                !this.inventory.selectedItem.placeBlock)
+        ) {
+            return;
         }
 
-        // this.hoverBlock.setBlockType(this.inventory.selectedBlock.blockId);
+        // Get the selected item or block
+        const selectedItem =
+            this.inventory.selectedItem || this.inventory.selectedBlock;
 
+        // Determine what block to place based on what's held
+        const blockToPlace = selectedItem.placeBlock
+            ? GetBlock(selectedItem.placeBlock)
+            : selectedItem;
+
+        // Check if it's a wall item/block
+        const isWall = this.getSelectedSlotItem().props?.wall;
+
+        // Validate placement based on wall or regular block
+        if (!isWall) {
+            if (!this.checkBlockForPlacing(blockToPlace)) {
+                return;
+            }
+        } else {
+            if (!this.checkWallForPlacing()) {
+                return;
+            }
+        }
+
+        // Get the target chunk
         const chunk = chunks.get(this.hoverBlock.chunkX);
 
+        // Place the block
         chunk.setBlockType(
             this.hoverBlock.x,
             this.hoverBlock.y,
-            this.inventory.selectedBlock.blockId,
+            blockToPlace.blockId,
             isWall,
             null,
             false
         );
 
-        if (!isWall) this.hoverBlock.playBreakSound();
-        else this.hoverWall.playBreakSound();
+        // Play appropriate break sound
+        if (!isWall) {
+            this.hoverBlock.playBreakSound();
+        } else {
+            this.hoverWall.playBreakSound();
+        }
 
         this.swing();
 
+        // Early return for walls
         if (isWall) {
-            if (this.abilities.instaBuild) return;
-            this.removeFromCurrentSlot();
+            if (!this.abilities.instaBuild) {
+                this.removeFromCurrentSlot();
+            }
             return;
         }
 
+        // Check block beneath for non-wall blocks
         const blockBeneath = chunks
             .get(this.hoverBlock.chunkX)
             .getBlockTypeData(this.hoverBlock.x, this.hoverBlock.y + 1, false);
 
-        if (!blockBeneath) return;
-        if (!blockBeneath.collision) {
+        if (!blockBeneath || blockBeneath.air) {
             if (
-                this.inventory.selectedBlock.breakWithoutBlockUnderneath &&
-                this.inventory.selectedBlock.onlyPlacableOn?.length === 0
-            )
-                this.hoverBlock.breakBlock(
-                    this.inventory.selectedBlock.dropWithoutTool
-                );
-            if (this.inventory.selectedBlock.fall)
+                blockToPlace.breakWithoutBlockUnderneath &&
+                (!blockToPlace.onlyPlacableOn ||
+                    blockToPlace.onlyPlacableOn.length === 0)
+            ) {
+                this.hoverBlock.breakBlock(blockToPlace.dropWithoutTool);
+            }
+            if (blockToPlace.fall) {
                 this.hoverBlock.gravityBlock();
+            }
         }
 
-        if (this.abilities.instaBuild) return;
-
-        this.removeFromCurrentSlot();
+        // Remove from inventory if not in insta-build mode
+        if (!this.abilities.instaBuild) {
+            this.removeFromCurrentSlot();
+        }
     }
 
     removeFromCurrentSlot(count = 1) {
@@ -784,7 +843,11 @@ class Player extends Entity {
             if (!blockBeneathDef.collision && block.onlyPlacableOn === null)
                 return false;
 
-            if (blockBeneathDef.defaultCutoff > 0) return false;
+            if (
+                blockBeneathDef.defaultCutoff > 0 &&
+                block.onlyPlacableOn === null
+            )
+                return false;
         }
 
         if (block.onlyPlacableOn?.length > 0) {

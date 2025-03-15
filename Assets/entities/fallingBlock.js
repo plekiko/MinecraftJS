@@ -52,12 +52,9 @@ class FallingBlock extends Entity {
 
             // chat.message(position.x, position.y);
 
-            SetBlockTypeAtPosition(
-                position.x,
-                position.y,
-                this.blockType,
-                false
-            );
+            const myBlock = this.getBlockAtPosition(position.x, position.y);
+
+            setBlockType(myBlock, this.blockType);
         } else {
             this.lastVelocityY = this.velocity.y / 2;
         }

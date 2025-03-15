@@ -6,14 +6,19 @@ class BlockType {
         name = "New block",
         hardness = -2,
         grassOffset = false,
+        blockOffset = { x: 0, y: 0 },
         animationSpeed = null,
         fluid = false,
         drag = 40,
         collision = true,
 
+        hoeAble = false,
+
         defaultCutoff = 0,
 
         transparent = false,
+
+        changeToBlockWithBlockAbove = null,
 
         fire = false,
 
@@ -61,6 +66,9 @@ class BlockType {
         baseRedstoneOutput = 0,
 
         specialType = null,
+
+        cropOutcome = null,
+        cropSpeed = 20, // 20 ticks per second
     } = {}) {
         this.blockId = blockId;
         this.sprite = sprite;
@@ -68,12 +76,17 @@ class BlockType {
         this.name = name;
         this.hardness = hardness;
         this.grassOffset = grassOffset;
+        this.blockOffset = blockOffset;
         this.animationSpeed = animationSpeed;
         this.fluid = fluid;
         this.drag = drag;
         this.collision = collision;
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
+
+        this.changeToBlockWithBlockAbove = changeToBlockWithBlockAbove;
+
+        this.hoeAble = hoeAble;
 
         this.fire = fire;
         this.extinguishEntity = extinguishEntity;
@@ -120,6 +133,9 @@ class BlockType {
         this.specialType = specialType;
 
         this.saplingOutcome = saplingOutcome;
+
+        this.cropOutcome = cropOutcome;
+        this.cropSpeed = cropSpeed;
     }
 }
 
@@ -332,7 +348,6 @@ class Block extends Square {
         if (block.fluid) {
             props.isSource = true;
             props.waterLevel = 0;
-
             this.metaData = new Metadata({ props: props });
             return;
         }
@@ -342,6 +357,14 @@ class Block extends Square {
             this.metaData = new Metadata({ props: props });
         }
 
+        // Initialize crop metadata
+        if (block.cropOutcome) {
+            props.growth = 0;
+            props.stage = 0; // Current growth stage
+            this.metaData = new Metadata({ props: props });
+            return;
+        }
+
         if (block.saplingOutcome) {
             props.growth = 0;
             this.metaData = new Metadata({ props: props });
@@ -349,22 +372,19 @@ class Block extends Square {
 
         if (!block.specialType) return;
 
-        const specialType = GetBlock(this.blockType).specialType;
+        const specialType = block.specialType;
 
-        if (specialType == SpecialType.CraftingTable) return;
-        if (specialType == SpecialType.RedstoneLamp) return;
+        if (specialType === SpecialType.CraftingTable) return;
+        if (specialType === SpecialType.RedstoneLamp) return;
 
         switch (specialType) {
             case SpecialType.Furnace:
                 storage = [
                     [
-                        // input
-                        new InventoryItem(),
-                        // fuel
-                        new InventoryItem(),
+                        new InventoryItem(), // input
+                        new InventoryItem(), // fuel
                     ],
-                    // output
-                    [new InventoryItem()],
+                    [new InventoryItem()], // output
                 ];
                 props.burningFuelTime = 0;
                 props.fuelProgression = 0;
@@ -493,7 +513,19 @@ class Block extends Square {
 
         if (!this.metaData || !this.metaData.props) return;
 
-        if (this.metaData.props.growth !== undefined) {
+        const blockDef = GetBlock(this.blockType);
+
+        // Handle crop growth
+        if (blockDef.cropOutcome) {
+            this.handleCropGrowth(blockDef);
+            return; // Exit early to avoid other updates interfering
+        }
+
+        // Existing sapling logic
+        if (
+            this.metaData.props.growth !== undefined &&
+            blockDef.saplingOutcome
+        ) {
             this.metaData.props.growth++;
 
             if (this.metaData.props.growth >= 2400) {
@@ -514,6 +546,39 @@ class Block extends Square {
         }
 
         this.metaData.props.progression += 1 / TICK_SPEED;
+    }
+
+    handleCropGrowth(blockDef) {
+        // Initialize crop growth properties if not set
+        if (this.metaData.props.growth === undefined) {
+            this.metaData.props.growth = 0;
+            this.metaData.props.stage = 0;
+        }
+
+        // Increment growth every tick
+        if (this.lightLevel > 5) this.metaData.props.growth++;
+
+        // Calculate total stages from states array
+        const totalStages = blockDef.states.length;
+        const ticksPerStage = blockDef.cropSpeed; // Number of ticks per growth stage
+
+        // Calculate current stage based on growth progress
+        const currentStage = Math.min(
+            Math.floor(this.metaData.props.growth / ticksPerStage),
+            totalStages - 1
+        );
+
+        // Update sprite if stage has changed
+        if (this.metaData.props.stage !== currentStage) {
+            this.metaData.props.stage = currentStage;
+            this.setState(currentStage);
+        }
+
+        // // Check if fully grown
+        // if (currentStage === totalStages - 1) {
+        //     // Fully grown, ready to harvest
+        //     // We'll let breaking the block handle the loot (no auto-harvest)
+        // }
     }
 
     saplingGrow() {
@@ -968,9 +1033,18 @@ class Block extends Square {
 
         chunk.checkForBlockWithAirBeneath(this.x, this.y);
 
-        if (drop) this.dropBlock();
+        const blockDef = GetBlock(this.blockType);
 
-        if (GetBlock(this.blockType).dropTable) this.dropTable();
+        // Handle crop loot when fully grown
+        if (blockDef.cropOutcome) {
+            if (this.metaData?.props?.stage === blockDef.states.length - 1)
+                this.dropCropLoot(blockDef);
+            else this.dropBlock();
+        } else if (drop) {
+            this.dropBlock();
+        }
+
+        if (blockDef.dropTable) this.dropTable();
 
         this.playBreakSound();
 
@@ -984,8 +1058,26 @@ class Block extends Square {
             }
         }
 
-        // this.setBlockType(Blocks.Air);
         chunk.setBlockType(this.x, this.y, Blocks.Air, wall, null, false);
+    }
+
+    dropCropLoot(blockDef) {
+        const loot = blockDef.cropOutcome.getRandomLoot();
+
+        loot.forEach((item) => {
+            summonEntity(
+                Drop,
+                new Vector2(
+                    this.transform.position.x + RandomRange(0, BLOCK_SIZE / 3),
+                    this.transform.position.y + BLOCK_SIZE / 4
+                ),
+                {
+                    blockId: item.blockId,
+                    itemId: item.itemId,
+                    count: item.count,
+                }
+            );
+        });
     }
 
     gravityBlock() {

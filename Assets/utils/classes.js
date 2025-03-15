@@ -157,11 +157,20 @@ class Square {
             ctx.filter = `brightness(${this.filterBrightness}%)`;
         }
 
+        const offset = this.blockType
+            ? GetBlock(this.blockType).blockOffset
+            : { x: 0, y: 0 };
+
         // Determine drawing values (common for animated and non-animated)
         const drawX = Math.round(
-            -this.transform.size.x / 2 + this.drawOffset - camera.x
+            -this.transform.size.x / 2 +
+                this.drawOffset -
+                camera.x +
+                offset.x * BLOCK_SIZE
         );
-        const drawY = Math.round(-this.transform.size.y / 2 - camera.y);
+        const drawY = Math.round(
+            -this.transform.size.y / 2 - camera.y + offset.y * BLOCK_SIZE
+        );
         const drawWidth = 16 * this.spriteScale;
         const drawHeight = 16 * this.spriteScale;
 

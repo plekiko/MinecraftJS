@@ -14,6 +14,8 @@ class Item {
         playMusicInJukebox = null,
         projectile = null,
         throwPower = 0,
+
+        placeBlock = null,
     }) {
         this.itemId = itemId;
         this.name = name;
@@ -37,6 +39,8 @@ class Item {
         this.smeltOutput = smeltOutput;
 
         this.heldInHand = heldInHand;
+
+        this.placeBlock = placeBlock;
     }
 }
 

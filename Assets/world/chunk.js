@@ -709,6 +709,23 @@ class Chunk {
                     }
                 }
 
+                const blockBeneath = GetBlock(
+                    this.getBlock(x, y + 1, calculate, wall)?.blockType
+                );
+
+                console.log(blockBeneath);
+
+                if (blockBeneath && blockBeneath.changeToBlockWithBlockAbove) {
+                    this.setBlockType(
+                        x,
+                        y + 1,
+                        blockBeneath.changeToBlockWithBlockAbove,
+                        wall,
+                        metaData,
+                        calculate
+                    );
+                }
+
                 block.dark = wall;
                 block.wall = wall;
                 if (metaData !== null) block.metaData = metaData;
@@ -721,32 +738,47 @@ class Chunk {
     updateSkyLight() {
         if (specialWorldProps.void) return;
 
-        // Loop over every column in the chunk.
+        // Calculate a smooth day-night factor based on time (1 to 7.3)
+        // Map time to a 0-1 cycle where:
+        // - 1.0 to 3.5: Day (brightening)
+        // - 3.5 to 6.5: Night (darkening)
+        // - 6.5 to 7.3: Day (brightening again)
+        const cycleTime = (time - 1) / (7.3 - 1); // Normalize time to 0-1 range
+        const dayNightFactor = (Math.cos(cycleTime * 2 * Math.PI) + 1) / 2; // Cosine wave from 0 to 1
+
+        // Maximum skylight (15 during day, scales down to 1 at night)
+        const maxSkyLight = Math.floor(1 + 14 * dayNightFactor); // 15 at peak day, 1 at peak night
+
+        // Loop over every column in the chunk
         for (let x = 0; x < this.width; x++) {
-            // Start at full sky light (15) at the top.
-            let skyLight = 15;
+            // Start with the time-adjusted skylight level
+            let skyLight = maxSkyLight;
             let stopped = false;
-            // Loop from the top (row 0) downward.
+
+            // Loop from top (row 0) downward
             for (let y = 0; y < this.height; y++) {
                 const block = this.blocks[y][x];
-                // Set the current block's light level.
+                // Set the current block's light level
                 block.lightLevel = skyLight;
 
-                // Get the block definition.
+                // Get the block definition
                 const def = GetBlock(block.blockType);
 
-                // If the block is opaque (i.e. not air and not transparent),
-                // degrade sky light faster (for example, subtract 3).
-                // Otherwise, if it is air or transparent, degrade it by 1.
+                // Adjust skylight based on block properties
                 if (
                     (!def.air && !def.transparent && def.collision) ||
                     y > CHUNK_HEIGHT - (TERRAIN_HEIGHT + this.biome.waterLevel)
                 ) {
+                    // Opaque blocks or below water level: degrade faster and stop full light propagation
                     skyLight = Math.max(skyLight - 1, 1);
                     stopped = true;
                 } else {
-                    if (stopped) continue;
-                    skyLight = 15;
+                    // Transparent or air blocks: reset to max skylight if not stopped
+                    if (!stopped) {
+                        skyLight = maxSkyLight;
+                    } else {
+                        skyLight = Math.max(skyLight - 1, 1); // Gradual decrease after obstruction
+                    }
                 }
             }
         }

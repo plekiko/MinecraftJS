@@ -49,11 +49,14 @@ const Items = Object.freeze({
     Apple: 34,
     RottenFlesh: 35,
     GoldenApple: 36,
+    Bread: 37,
 
     Leather: 50,
     Bone: 51,
 
     Seeds: 100,
+
+    Wheat: 110,
 
     MusicDisc13: 2256,
     MusicDiscCat: 2257,
@@ -397,6 +400,8 @@ const items = [
         itemId: 25,
         name: "Redstone Dust",
         sprite: "redstone_dust",
+
+        placeBlock: 67,
     }),
 
     //#endregion
@@ -446,6 +451,12 @@ const items = [
         sprite: "apple_golden",
         foodValue: 7,
     }),
+    new Item({
+        itemId: 37,
+        name: "Bread",
+        sprite: "bread",
+        foodValue: 5,
+    }),
     //#endregion
 
     //#region Mob Drops
@@ -466,6 +477,16 @@ const items = [
         itemId: 100,
         name: "Seeds",
         sprite: "seeds_wheat",
+
+        placeBlock: 100,
+    }),
+    //#endregion
+
+    //#region Crops
+    new Item({
+        itemId: 110,
+        name: "Wheat",
+        sprite: "wheat",
     }),
     //#endregion
 

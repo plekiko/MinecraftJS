@@ -856,12 +856,6 @@ const recipes = [
             count: 1,
         }),
     }),
-    // Redstone Dust
-    new Recipe({
-        type: RecipeType.Shapeless,
-        input: new RecipeItem({ itemId: Items.RedstoneDust }),
-        output: new InventoryItem({ blockId: Blocks.RedstoneDust, count: 1 }),
-    }),
     // Note Block
     new Recipe({
         type: RecipeType.Shaped,
@@ -905,6 +899,23 @@ const recipes = [
             ],
         ],
         output: new InventoryItem({ blockId: Blocks.RedstoneLamp, count: 1 }),
+    }),
+
+    //#endregion
+
+    //#region Food
+
+    // Bread
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.Wheat }),
+                new RecipeItem({ itemId: Items.Wheat }),
+                new RecipeItem({ itemId: Items.Wheat }),
+            ],
+        ],
+        output: new InventoryItem({ itemId: Items.Bread, count: 1 }),
     }),
 
     //#region Misc
@@ -989,6 +1000,12 @@ const recipes = [
             ],
         ],
         output: new InventoryItem({ itemId: Items.GoldenApple, count: 1 }),
+    }),
+    // Hay Bale
+    new Recipe({
+        type: RecipeType.Filled,
+        input: new RecipeItem({ itemId: Items.Wheat }),
+        output: new InventoryItem({ blockId: Blocks.HayBale, count: 1 }),
     }),
     //#endregion
 ];

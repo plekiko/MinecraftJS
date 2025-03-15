@@ -88,11 +88,17 @@ const Blocks = Object.freeze({
 
     Fire: 85,
 
+    Farmland: 86,
+
     OakSapling: 90,
     SpruceSapling: 91,
     BirchSapling: 92,
     JungleSapling: 93,
     AcaciaSapling: 94,
+
+    Wheat: 100,
+
+    HayBale: 120,
 });
 
 const blockTypes = [
@@ -107,6 +113,8 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shovel,
         dropBlock: Blocks.Dirt,
+        hoeAble: true,
+        changeToBlockWithBlockAbove: Blocks.Dirt,
     }),
     new BlockType({
         blockId: 2,
@@ -116,6 +124,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Gravel,
         breakingSound: Sounds.Breaking_Gravel,
         toolType: ToolType.Shovel,
+        hoeAble: true,
     }),
     new BlockType({
         blockId: 3,
@@ -126,6 +135,8 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shovel,
         dropBlock: Blocks.Dirt,
+        hoeAble: true,
+        changeToBlockWithBlockAbove: Blocks.Dirt,
     }),
     new BlockType({
         blockId: 4,
@@ -181,6 +192,7 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Snow,
         toolType: ToolType.Shovel,
         dropBlock: Blocks.Dirt,
+        changeToBlockWithBlockAbove: Blocks.Dirt,
     }),
     new BlockType({
         blockId: 9,
@@ -363,6 +375,7 @@ const blockTypes = [
     //#endregion
 
     //#region Vegetation
+    // Grass
     new BlockType({
         blockId: 18,
         sprite: "grass",
@@ -384,6 +397,7 @@ const blockTypes = [
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Tall Grass
     new BlockType({
         blockId: 19,
         sprite: "tallgrass",
@@ -402,9 +416,13 @@ const blockTypes = [
                 subtract: 4,
             }),
         ]),
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Dead Bush
     new BlockType({
         blockId: 20,
         sprite: "deadbush",
@@ -417,9 +435,13 @@ const blockTypes = [
         breakByFluid: true,
         toolType: ToolType.Shears,
         breakWithoutBlockUnderneath: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Fern
     new BlockType({
         blockId: 21,
         sprite: "fern",
@@ -432,9 +454,13 @@ const blockTypes = [
         breakByFluid: true,
         toolType: ToolType.Shears,
         breakWithoutBlockUnderneath: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Red Tulip
     new BlockType({
         blockId: 22,
         sprite: "flower_tulip_red",
@@ -446,9 +472,13 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // White Tulip
     new BlockType({
         blockId: 23,
         sprite: "flower_tulip_white",
@@ -460,9 +490,13 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Pink Tulip
     new BlockType({
         blockId: 24,
         sprite: "flower_tulip_pink",
@@ -474,9 +508,13 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Orange Tulip
     new BlockType({
         blockId: 25,
         sprite: "flower_tulip_orange",
@@ -488,9 +526,13 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Rose
     new BlockType({
         blockId: 26,
         sprite: "flower_rose",
@@ -502,9 +544,13 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Blue Orchid
     new BlockType({
         blockId: 27,
         sprite: "flower_blue_orchid",
@@ -516,9 +562,12 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Dandelion
     new BlockType({
         blockId: 28,
         sprite: "flower_dandelion",
@@ -530,9 +579,12 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Daisy
     new BlockType({
         blockId: 29,
         sprite: "flower_oxeye_daisy",
@@ -544,9 +596,12 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
+    // Allium
     new BlockType({
         blockId: 30,
         sprite: "flower_allium",
@@ -558,6 +613,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         breakWithoutBlockUnderneath: true,
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
         cannotBeConverted: true,
         transparent: true,
     }),
@@ -1199,6 +1256,7 @@ const blockTypes = [
         noteBlockSound: "bd",
     }),
     //#endregion
+
     //#region Misc
     new BlockType({
         blockId: 85,
@@ -1216,6 +1274,32 @@ const blockTypes = [
         breakSound: ["blocks/fizz"],
         ambientSound: "blocks/fire",
     }),
+    new BlockType({
+        blockId: 86,
+        name: "Farmland",
+        sprite: "dirt",
+        hardness: 0.6,
+        breakSound: Sounds.Break_Gravel,
+        breakingSound: Sounds.Breaking_Gravel,
+        toolType: ToolType.Shovel,
+        dropBlock: Blocks.Dirt,
+
+        defaultCutoff: 0.1,
+
+        changeToBlockWithBlockAbove: Blocks.Dirt,
+
+        cannotBeConverted: true,
+        transparent: true,
+    }),
+    new BlockType({
+        blockId: 120,
+        name: "Hay Bale",
+        sprite: "hay_block_side",
+        hardness: 2,
+        breakSound: Sounds.Break_Cloth,
+        breakingSound: Sounds.Breaking_Cloth,
+        toolType: ToolType.Hoe,
+    }),
     //#endregion
 
     //#region Saplings
@@ -1231,6 +1315,8 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
         cannotBeConverted: true,
         transparent: true,
+
+        blockOffset: { x: 0, y: 0.05 },
 
         onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
 
@@ -1307,6 +1393,57 @@ const blockTypes = [
         onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
 
         saplingOutcome: "Acacia",
+        updateSpeed: 1,
+    }),
+
+    //#endregion
+
+    //#region Crops
+    new BlockType({
+        blockId: 100,
+        name: "Wheat",
+        sprite: "wheat_stage_0",
+
+        states: [
+            "wheat_stage_0",
+            "wheat_stage_1",
+            "wheat_stage_2",
+            "wheat_stage_3",
+            "wheat_stage_4",
+            "wheat_stage_5",
+            "wheat_stage_6",
+            "wheat_stage_7",
+        ],
+
+        hardness: 0,
+        collision: false,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        breakByFluid: true,
+        breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
+        transparent: true,
+
+        onlyPlacableOn: [Blocks.Farmland],
+
+        blockOffset: { x: 0, y: 0.1 },
+
+        dropItem: Items.Seeds,
+
+        cropOutcome: new LootTable([
+            new LootItem({
+                itemId: Items.Wheat,
+                maxCount: 3,
+                subtract: 2,
+            }),
+            new LootItem({
+                itemId: Items.Seeds,
+                maxCount: 2,
+                subtract: 1,
+            }),
+        ]),
+        cropSpeed: 600,
+
         updateSpeed: 1,
     }),
 
