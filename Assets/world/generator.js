@@ -113,7 +113,7 @@ function LocateBiome(biome) {
 
 function LoadCustomSeed(seed) {
     // Set seed to lowercase
-    seed = seed.toLowerCase();
+    seed = seed.toString().toLowerCase();
 
     setSeed(seed);
 
@@ -410,13 +410,11 @@ function postProcessChunks() {
             chunk.spawnMobs(day);
 
             if (!specialWorldProps.flat) {
-                chunk.generateTrees();
                 chunk.generateGrass();
+                chunk.generateTrees();
             }
 
             chunk.generateBedrock();
-
-            // chunk.calculateLighting();
         }
     });
     generateStructures();
