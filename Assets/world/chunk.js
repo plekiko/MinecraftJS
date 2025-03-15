@@ -719,10 +719,7 @@ class Chunk {
                         blockBeneath &&
                         blockBeneath.changeToBlockWithBlockAbove
                     ) {
-                        if (
-                            !GetBlock(blockType).cropOutcome &&
-                            !GetBlock(blockType).air
-                        ) {
+                        if (GetBlock(blockType).collision) {
                             this.setBlockType(
                                 x,
                                 y + 1,
