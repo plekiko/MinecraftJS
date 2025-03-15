@@ -192,6 +192,8 @@ const blockTypes = [
         breakSound: Sounds.Break_Cloth,
         breakingSound: Sounds.Breaking_Cloth,
         transparent: true,
+
+        onlyPlacableOn: [Blocks.Sand, Blocks.Cactus],
     }),
     //#endregion
 
@@ -1225,11 +1227,12 @@ const blockTypes = [
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
-        dropWithoutTool: false,
         breakByFluid: true,
         breakWithoutBlockUnderneath: true,
         cannotBeConverted: true,
         transparent: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
 
         saplingOutcome: "Oak",
         updateSpeed: 1,
@@ -1242,11 +1245,12 @@ const blockTypes = [
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
-        dropWithoutTool: false,
         breakByFluid: true,
         breakWithoutBlockUnderneath: true,
         cannotBeConverted: true,
         transparent: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
 
         saplingOutcome: "Spruce",
         updateSpeed: 1,
@@ -1259,11 +1263,12 @@ const blockTypes = [
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
-        dropWithoutTool: false,
         breakByFluid: true,
         breakWithoutBlockUnderneath: true,
         cannotBeConverted: true,
         transparent: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
 
         saplingOutcome: "Birch",
         updateSpeed: 1,
@@ -1276,11 +1281,12 @@ const blockTypes = [
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
-        dropWithoutTool: false,
         breakByFluid: true,
         breakWithoutBlockUnderneath: true,
         cannotBeConverted: true,
         transparent: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
 
         saplingOutcome: "Jungle",
         updateSpeed: 1,
@@ -1293,11 +1299,12 @@ const blockTypes = [
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
-        dropWithoutTool: false,
         breakByFluid: true,
         breakWithoutBlockUnderneath: true,
         cannotBeConverted: true,
         transparent: true,
+
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
 
         saplingOutcome: "Acacia",
         updateSpeed: 1,

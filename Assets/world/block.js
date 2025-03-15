@@ -47,6 +47,7 @@ class BlockType {
         dropItem = null,
 
         breakWithoutBlockUnderneath = false,
+        onlyPlacableOn = null,
 
         lightLevel = 0,
 
@@ -101,6 +102,7 @@ class BlockType {
         this.ambientSound = ambientSound;
 
         this.breakWithoutBlockUnderneath = breakWithoutBlockUnderneath;
+        this.onlyPlacableOn = onlyPlacableOn;
 
         this.toolType = toolType;
         this.dropWithoutTool = dropWithoutTool;

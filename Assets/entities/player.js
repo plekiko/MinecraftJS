@@ -709,7 +709,10 @@ class Player extends Entity {
 
         if (!blockBeneath) return;
         if (!blockBeneath.collision) {
-            if (this.inventory.selectedBlock.breakWithoutBlockUnderneath)
+            if (
+                this.inventory.selectedBlock.breakWithoutBlockUnderneath &&
+                this.inventory.selectedBlock.onlyPlacableOn?.length === 0
+            )
                 this.hoverBlock.breakBlock(
                     this.inventory.selectedBlock.dropWithoutTool
                 );
@@ -768,19 +771,27 @@ class Player extends Entity {
 
         const isAdjacentToBlock = checkAdjacentBlocks(mousePos);
 
-        if (block.breakWithoutBlockUnderneath) {
-            const blockBeneath = GetBlockAtWorldPosition(
-                this.hoverBlock.transform.position.x,
-                this.hoverBlock.transform.position.y + BLOCK_SIZE
-            );
+        const blockBeneath = GetBlockAtWorldPosition(
+            this.hoverBlock.transform.position.x,
+            this.hoverBlock.transform.position.y + BLOCK_SIZE
+        );
 
+        if (block.breakWithoutBlockUnderneath) {
             if (!blockBeneath) return false;
 
             const blockBeneathDef = GetBlock(blockBeneath.blockType);
 
-            if (!blockBeneathDef.collision) return false;
+            if (!blockBeneathDef.collision && block.onlyPlacableOn === null)
+                return false;
 
             if (blockBeneathDef.defaultCutoff > 0) return false;
+        }
+
+        if (block.onlyPlacableOn?.length > 0) {
+            if (!blockBeneath) return false;
+
+            if (!block.onlyPlacableOn.includes(blockBeneath.blockType))
+                return false;
         }
 
         return (isAir || isFluid) && !collidingWithEntity && isAdjacentToBlock;

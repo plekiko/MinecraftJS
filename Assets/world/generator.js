@@ -112,6 +112,9 @@ function LocateBiome(biome) {
 }
 
 function LoadCustomSeed(seed) {
+    // Set seed to lowercase
+    seed = seed.toLowerCase();
+
     setSeed(seed);
 
     switch (seed) {
