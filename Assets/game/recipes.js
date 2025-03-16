@@ -965,6 +965,8 @@ const recipes = [
         output: new InventoryItem({ itemId: Items.GoldenCarrot, count: 1 }),
     }),
 
+    //#endregion
+
     //#region Misc
     // Jukebox
     new Recipe({
@@ -1053,6 +1055,12 @@ const recipes = [
         type: RecipeType.Filled,
         input: new RecipeItem({ itemId: Items.Wheat }),
         output: new InventoryItem({ blockId: Blocks.HayBale, count: 1 }),
+    }),
+    // Wheat
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ blockId: Blocks.HayBale }),
+        output: new InventoryItem({ itemId: Items.Wheat, count: 9 }),
     }),
     //#endregion
 ];

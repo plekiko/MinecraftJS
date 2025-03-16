@@ -1063,6 +1063,7 @@ const blockTypes = [
         specialType: SpecialType.RedstoneDust,
         chunkUpdate: true,
         cannotBeConverted: true,
+        dropItem: Items.RedstoneDust,
     }),
     new BlockType({
         blockId: 68,

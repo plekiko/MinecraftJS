@@ -21,5 +21,21 @@ class Projectile extends Entity {
         });
         this.damage = damage;
     }
+
+    update() {
+        this.updateEntity();
+
+        const other = this.entityCollision(EntityTypes.Mob);
+
+        if (other) {
+            if (this.damage > 0) other.hit(this.damage);
+            this.dieEvent();
+        }
+
+        if (this.wasColliding) {
+            this.dieEvent();
+        }
+    }
+
     hit() {}
 }

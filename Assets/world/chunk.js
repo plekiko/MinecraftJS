@@ -102,6 +102,7 @@ class Chunk {
             new LootTable([
                 new LootItem({ itemId: Items.WaterBucket, maxCount: 1 }),
                 new LootItem({ itemId: Items.LavaBucket, maxCount: 1 }),
+                new LootItem({ itemId: Items.Seeds, maxCount: 3 }),
             ]),
             -BLOCK_SIZE * 3,
             (CHUNK_HEIGHT / 2) * BLOCK_SIZE + BLOCK_SIZE,
