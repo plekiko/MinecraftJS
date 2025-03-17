@@ -784,6 +784,7 @@ class Chunk {
             for (let y = 0; y < this.height; y++) {
                 const block = this.blocks[y][x];
                 block.lightLevel = skyLight;
+                block.sunLight = false;
 
                 const def = GetBlock(block.blockType);
 
@@ -796,6 +797,7 @@ class Chunk {
                 } else {
                     if (!stopped) {
                         skyLight = maxSkyLight;
+                        block.sunLight = true;
                     } else {
                         skyLight = Math.max(skyLight - 1, 1);
                     }

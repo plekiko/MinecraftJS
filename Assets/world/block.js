@@ -59,6 +59,7 @@ class BlockType {
         onlyPlacableOn = null,
 
         lightLevel = 0,
+        sunLight = false,
 
         dropTable = null,
 
@@ -108,6 +109,7 @@ class BlockType {
         this.air = air;
 
         this.lightLevel = lightLevel;
+        this.sunLight = sunLight;
 
         this.baseRedstoneOutput = baseRedstoneOutput;
 

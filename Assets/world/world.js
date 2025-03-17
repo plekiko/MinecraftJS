@@ -172,8 +172,10 @@ function globalRecalculateLight() {
             for (let block of row) {
                 const inherent = block.lightSourceLevel || 0;
                 if (inherent > 0) {
-                    if (block.lightLevel < inherent)
+                    if (block.lightLevel < inherent) {
                         block.lightLevel = inherent;
+                        block.sunLight = false;
+                    }
                     queue.push(block);
                 }
             }
@@ -203,6 +205,7 @@ function globalRecalculateLight() {
             const newLight = currentLevel - 1;
             if (neighbor.lightLevel < newLight) {
                 neighbor.lightLevel = newLight;
+                neighbor.sunLight = false;
                 queue.push(neighbor);
             }
         }

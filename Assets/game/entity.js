@@ -899,6 +899,11 @@ class Entity {
             ?.lightLevel;
     }
 
+    getSunLight() {
+        return this.getBlockAtPosition(this.position.x, this.position.y)
+            ?.sunLight;
+    }
+
     drawEntity(ctx) {
         ctx.save();
         const centerX = this.position.x - camera.x + this.offset.x;
