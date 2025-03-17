@@ -1,13 +1,10 @@
 // ----- CONFIGURATION -----
-const gridRows = 16;
-const gridCols = 16;
 const canvas = document.getElementById("gridCanvas");
 const ctx = canvas.getContext("2d");
-const cellSize = canvas.width / gridCols;
-
-const blockAverageColorCache = {};
 
 ctx.imageSmoothingEnabled = false;
+
+const blockAverageColorCache = {};
 
 // Global flag to show grid lines.
 let showGrid = true;
@@ -15,22 +12,59 @@ let showGrid = true;
 // Global flag for wall mode (false = main blocks, true = wall layer)
 let wallMode = false;
 
-// The 2D array structure for main blocks.
+// Default grid size
+let gridRows = 16;
+let gridCols = 16;
+let cellSize = canvas.width / gridCols;
+
+// The 2D array structure for main blocks and walls
 let structureGrid = [];
-// The 2D array structure for walls.
 let wallsGrid = [];
-for (let r = 0; r < gridRows; r++) {
-    structureGrid[r] = [];
-    wallsGrid[r] = [];
-    for (let c = 0; c < gridCols; c++) {
-        structureGrid[r][c] = Blocks.Air;
-        wallsGrid[r][c] = Blocks.Air;
+function initializeGrids(rows, cols) {
+    structureGrid = [];
+    wallsGrid = [];
+    for (let r = 0; r < rows; r++) {
+        structureGrid[r] = [];
+        wallsGrid[r] = [];
+        for (let c = 0; c < cols; c++) {
+            structureGrid[r][c] = Blocks.Air;
+            wallsGrid[r][c] = Blocks.Air;
+        }
     }
 }
+initializeGrids(gridRows, gridCols);
 
 // The currently selected block from the palette.
-// Can be a number (block id) or a string (e.g. "ChestLoot.Spawner").
 let activeBlockId = 34;
+
+// ----- GRID SIZE DROPDOWN -----
+const controlsDiv = document.querySelector(".controls");
+const sizeSelect = document.createElement("select");
+sizeSelect.id = "gridSizeSelect";
+const sizeOptions = [
+    { value: "8x8", rows: 8, cols: 8 },
+    { value: "16x16", rows: 16, cols: 16 },
+    { value: "24x24", rows: 24, cols: 24 },
+    { value: "32x32", rows: 32, cols: 32 },
+    { value: "64x64", rows: 64, cols: 64 },
+];
+sizeOptions.forEach((option) => {
+    const opt = document.createElement("option");
+    opt.value = `${option.rows}x${option.cols}`;
+    opt.textContent = option.value;
+    if (option.rows === 16 && option.cols === 16) opt.selected = true; // Default to 16x16
+    sizeSelect.appendChild(opt);
+});
+controlsDiv.insertBefore(sizeSelect, document.getElementById("exportBtn"));
+
+sizeSelect.addEventListener("change", (e) => {
+    const [rows, cols] = e.target.value.split("x").map(Number);
+    gridRows = rows;
+    gridCols = cols;
+    cellSize = canvas.width / gridCols;
+    initializeGrids(gridRows, gridCols);
+    drawGrid();
+});
 
 // ----- DRAWING THE GRID -----
 function drawGrid() {
@@ -47,7 +81,6 @@ function drawGrid() {
                         const img = new Image();
                         img.src =
                             "Assets/sprites/blocks/" + block.sprite + ".png";
-                        // Optionally, you might draw walls with a slight offset or different opacity.
                         ctx.drawImage(
                             img,
                             c * cellSize,
@@ -88,7 +121,7 @@ function drawGrid() {
         }
     }
 
-    // Draw main blocks.
+    // Draw main blocks
     for (let r = 0; r < gridRows; r++) {
         for (let c = 0; c < gridCols; c++) {
             const cell = structureGrid[r][c];
@@ -132,7 +165,7 @@ function drawGrid() {
         }
     }
 
-    // Draw grid lines if enabled.
+    // Draw grid lines if enabled
     if (showGrid) {
         ctx.strokeStyle = "rgba(0,0,0,0.3)";
         for (let r = 0; r <= gridRows; r++) {
@@ -154,7 +187,7 @@ drawGrid();
 
 // ----- CONTINUOUS PAINTING INTERACTION -----
 let isPainting = false;
-let currentAction = null; // "place" or "remove"
+let currentAction = null;
 
 function handlePaint(e) {
     const rect = canvas.getBoundingClientRect();
@@ -299,7 +332,6 @@ function saveBuildsToLocalStorage(builds) {
     localStorage.setItem(BUILD_STORAGE_KEY, JSON.stringify(builds));
 }
 
-// Save the entire grid (both blocks and walls).
 const buildNameInput = document.getElementById("buildName");
 document.getElementById("saveBuildBtn").addEventListener("click", () => {
     const buildName = buildNameInput.value.trim();
@@ -330,7 +362,6 @@ function updateSavedBuildsList() {
         }
         const buildEntry = document.createElement("div");
         buildEntry.className = "build-entry";
-        // Generate a preview canvas for the main blocks.
         const previewCanvas = generatePreviewCanvas({
             blocks: builds[buildName].blocks,
         });
@@ -351,8 +382,20 @@ function updateSavedBuildsList() {
         buildEntry.appendChild(removeBtn);
         buildEntry.addEventListener("click", () => {
             const buildData = builds[buildName];
-            structureGrid = buildData.blocks;
-            if (buildData.walls) wallsGrid = buildData.walls;
+            const buildRows = buildData.blocks.length;
+            const buildCols = buildData.blocks[0].length;
+            if (buildRows > gridRows || buildCols > gridCols) {
+                alert("Build is too large for current grid size!");
+                return;
+            }
+            initializeGrids(gridRows, gridCols); // Reset current grid
+            for (let r = 0; r < buildRows; r++) {
+                for (let c = 0; c < buildCols; c++) {
+                    structureGrid[r][c] = buildData.blocks[r][c];
+                    if (buildData.walls)
+                        wallsGrid[r][c] = buildData.walls[r][c];
+                }
+            }
             buildNameInput.value = buildName;
             drawGrid();
         });
@@ -361,8 +404,6 @@ function updateSavedBuildsList() {
 }
 
 updateSavedBuildsList();
-
-// Global cache for computed average colors by block id.
 
 let updateTimeout;
 function scheduleSavedBuildsUpdate() {
@@ -450,18 +491,14 @@ function generatePreviewCanvas(
 updateSavedBuildsList();
 
 // ----- EXPORT FUNCTIONALITY -----
-// Export only the bounding box (width and height) that covers the non-Air cells
-// in either the main blocks grid or the walls grid.
 document.getElementById("exportBtn").addEventListener("click", () => {
     let minRow = gridRows,
         maxRow = -1,
         minCol = gridCols,
         maxCol = -1;
 
-    // Loop over every cell in both grids
     for (let r = 0; r < gridRows; r++) {
         for (let c = 0; c < gridCols; c++) {
-            // Check if either the main grid or the walls grid has a non-Air cell.
             if (
                 structureGrid[r][c] !== Blocks.Air ||
                 wallsGrid[r][c] !== Blocks.Air
@@ -474,10 +511,8 @@ document.getElementById("exportBtn").addEventListener("click", () => {
         }
     }
 
-    // If nothing was placed, exit.
     if (maxRow < minRow || maxCol < minCol) return;
 
-    // Create trimmed arrays for both grids.
     const trimmedBlocks = [];
     const trimmedWalls = [];
     for (let r = minRow; r <= maxRow; r++) {
@@ -485,7 +520,6 @@ document.getElementById("exportBtn").addEventListener("click", () => {
         trimmedWalls.push(wallsGrid[r].slice(minCol, maxCol + 1));
     }
 
-    // Convert cell values: If number, convert using GetBlock; if string, output as is.
     const convertGrid = (grid) =>
         grid.map((row) =>
             row.map((cell) => {
@@ -508,7 +542,6 @@ document.getElementById("exportBtn").addEventListener("click", () => {
         walls: trimmedNamesWalls,
     };
 
-    // Convert exportData to JSON and then remove braces and quotes if needed.
     exportData = JSON.stringify(exportData, null, 2);
     exportData = exportData.replace(/{/g, "").replace(/}/g, "");
     exportData = exportData.replace(/"/g, "");
@@ -531,12 +564,7 @@ document.getElementById("copyBtn").addEventListener("click", () => {
 
 // ----- CLEAN FUNCTIONALITY -----
 document.getElementById("cleanBtn").addEventListener("click", () => {
-    for (let r = 0; r < gridRows; r++) {
-        for (let c = 0; c < gridCols; c++) {
-            structureGrid[r][c] = Blocks.Air;
-            wallsGrid[r][c] = Blocks.Air;
-        }
-    }
+    initializeGrids(gridRows, gridCols);
     drawGrid();
 });
 
@@ -547,10 +575,8 @@ document.getElementById("toggleGridBtn").addEventListener("click", () => {
 });
 
 // ----- TOGGLE WALL MODE FUNCTIONALITY -----
-// This button toggles between drawing main blocks and walls.
 document.getElementById("toggleWallModeBtn").addEventListener("click", () => {
     wallMode = !wallMode;
-    // Update button label
     document.getElementById("toggleWallModeBtn").textContent =
         "Wall Mode: " + (wallMode ? "ON" : "OFF");
 });

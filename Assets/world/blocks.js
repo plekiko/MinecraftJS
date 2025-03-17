@@ -47,8 +47,8 @@ const Blocks = Object.freeze({
     Furnace: 43,
     SmoothStone: 44,
     StoneBricks: 45,
-    Jelte: 46,
-    Quinten: 47,
+    JelteBlock: 46,
+    QuintenBlock: 47,
     CoalBlock: 48,
     IronBlock: 49,
     IceBlock: 50,
@@ -937,7 +937,7 @@ const blockTypes = [
     //#region Special Blocks
     new BlockType({
         blockId: 46,
-        name: "Jelte Blok",
+        name: "Jelte Block",
         sprite: "jelte",
         fuelTime: 20,
         hardness: 12,
@@ -948,7 +948,7 @@ const blockTypes = [
     }),
     new BlockType({
         blockId: 47,
-        name: "Quinten Blok",
+        name: "Quinten Block",
         sprite: "quinten",
         fluid: true,
         updateSpeed: 0.2,
