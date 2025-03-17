@@ -59,10 +59,10 @@ function summonEntity(entity, position, props) {
 
 function gameLoop() {
     // Pause the game if the window is not focused
-    if (!document.hasFocus()) {
-        requestAnimationFrame(gameLoop);
-        return;
-    }
+    // if (!document.hasFocus()) {
+    //     requestAnimationFrame(gameLoop);
+    //     return;
+    // }
 
     const currentFrameTime = performance.now();
     deltaTime = (currentFrameTime - lastFrameTime) / 1000;

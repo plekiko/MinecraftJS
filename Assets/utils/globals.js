@@ -17,6 +17,8 @@ const mobSpawnDelay = { min: 10, max: 120 };
 
 let passedTime = 0;
 
+let lighting = true;
+
 let time = 1;
 const dayNightSpeed = 0.01;
 let day = true;

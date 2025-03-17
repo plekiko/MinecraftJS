@@ -446,6 +446,18 @@ function generateStructures() {
                 );
             });
 
+            // 50/50 change to make it underground
+            const underground = Math.random() < 0.5;
+
+            // Filter out structures that are not underground if the chunk is underground
+            candidates.filter((name) => {
+                const structure = Structures[name];
+                return (
+                    structure.underground === underground &&
+                    underground === true
+                );
+            });
+
             if (candidates.length === 0) return;
 
             const randomName = candidates[RandomRange(0, candidates.length)];

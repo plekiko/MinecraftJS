@@ -48,7 +48,7 @@ class Zombie extends Mob {
 
         this.hitPlayerLogic();
 
-        if (day) {
+        if (this.getLightLevel() > 3) {
             this.fire = 100;
         }
     }

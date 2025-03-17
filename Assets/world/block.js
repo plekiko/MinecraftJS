@@ -34,6 +34,8 @@ class BlockType {
 
         chunkProtection = false,
 
+        spawnerType = null,
+
         updateSpeed = 0,
         chunkUpdate = false,
 
@@ -87,6 +89,8 @@ class BlockType {
         this.breakingSound = breakingSound;
 
         this.changeToBlockWithBlockAbove = changeToBlockWithBlockAbove;
+
+        this.spawnerType = spawnerType;
 
         this.hoeAble = hoeAble;
 
@@ -361,6 +365,16 @@ class Block extends Square {
             this.metaData = new Metadata({ props: props });
         }
 
+        if (block.spawnerType !== null) {
+            props.spawnDelay = RandomRange(100, 300);
+            props.spawnTimer = 0;
+            props.spawnLimit = 3;
+            props.spawnedMobs = [];
+            this.metaData = new Metadata({ props: props });
+
+            return;
+        }
+
         // Initialize crop metadata
         if (block.cropOutcome) {
             props.growth = 0;
@@ -507,17 +521,18 @@ class Block extends Square {
     }
 
     update() {
-        if (GetBlock(this.blockType).specialType === SpecialType.Furnace)
-            this.furnaceLogic();
+        const blockDef = GetBlock(this.blockType);
 
-        if (GetBlock(this.blockType).fluid) {
+        if (blockDef.specialType === SpecialType.Furnace) this.furnaceLogic();
+
+        if (blockDef.fluid) {
             this.updateSprite();
             this.simulateWaterFlow();
         }
 
-        if (!this.metaData || !this.metaData.props) return;
+        if (blockDef.spawnerType) this.handleSpawner();
 
-        const blockDef = GetBlock(this.blockType);
+        if (!this.metaData || !this.metaData.props) return;
 
         // Handle crop growth
         if (blockDef.cropOutcome) {
@@ -550,6 +565,53 @@ class Block extends Square {
         }
 
         this.metaData.props.progression += 1 / TICK_SPEED;
+    }
+
+    handleSpawner() {
+        const props = this.metaData.props;
+        const blockDef = GetBlock(this.blockType);
+
+        // Clean up despawned or dead mobs from the tracking array
+        props.spawnedMobs = props.spawnedMobs.filter(
+            (mob) => mob && !mob.despawn && mob.health > 0
+        );
+
+        // Check if we can spawn more entities
+        if (props.spawnedMobs.length >= props.spawnLimit) return;
+
+        props.spawnTimer++;
+
+        // Check if it's time to spawn
+        if (props.spawnTimer >= props.spawnDelay) {
+            let spawnCount = props.spawnLimit - props.spawnedMobs.length;
+
+            if (spawnCount <= 0) return;
+
+            for (let i = 0; i < spawnCount; i++)
+                this.spawnEntity(blockDef.spawnerType);
+            props.spawnTimer = 0;
+            props.spawnDelay = RandomRange(100, 300);
+        }
+    }
+
+    spawnEntity(entityTypeName) {
+        const spawnPos = getBlockWorldPosition(this);
+
+        // Add slight offset to prevent spawning directly inside the block
+        const offsetX = RandomRange(-BLOCK_SIZE / 2, BLOCK_SIZE / 2);
+
+        const entityType = Entities[entityTypeName];
+
+        if (!entityType) return;
+
+        const entity = summonEntity(
+            entityType,
+            new Vector2(spawnPos.x + offsetX, spawnPos.y)
+        );
+
+        if (!entity) return;
+
+        this.metaData.props.spawnedMobs.push(entity);
     }
 
     handleCropGrowth(blockDef) {

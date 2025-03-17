@@ -30,8 +30,10 @@ function tick() {
         chunk.updateChunk();
     });
 
-    globalUpdateSkyLight();
-    globalRecalculateLight();
+    if (lighting) {
+        globalUpdateSkyLight();
+        globalRecalculateLight();
+    }
 
     globalRecalculateRedstone();
 }

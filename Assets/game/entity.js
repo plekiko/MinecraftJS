@@ -894,15 +894,17 @@ class Entity {
         this.drawFire(ctx);
     }
 
+    getLightLevel() {
+        return this.getBlockAtPosition(this.position.x, this.position.y)
+            ?.lightLevel;
+    }
+
     drawEntity(ctx) {
         ctx.save();
         const centerX = this.position.x - camera.x + this.offset.x;
         const centerY = this.position.y - camera.y + this.offset.y;
 
-        const blockLightLevel = this.getBlockAtPosition(
-            this.position.x,
-            this.position.y
-        )?.lightLevel;
+        const blockLightLevel = this.getLightLevel();
 
         if (blockLightLevel !== null) {
             if (this.body) this.body.brightness = blockLightLevel / 15;

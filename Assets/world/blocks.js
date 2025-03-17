@@ -101,6 +101,8 @@ const Blocks = Object.freeze({
     Potato: 102,
 
     HayBale: 120,
+
+    ZombieSpawner: 500,
 });
 
 const blockTypes = [
@@ -1533,6 +1535,22 @@ const blockTypes = [
         cropSpeed: 600,
 
         updateSpeed: 1,
+    }),
+
+    //#endregion
+
+    //#region Spawners
+    new BlockType({
+        blockId: 500,
+        name: "Zombie Spawner",
+        sprite: "mob_spawner",
+        hardness: 6,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        dropWithoutTool: false,
+        spawnerType: "Zombie",
+        updateSpeed: 1,
+        collision: false,
     }),
 
     //#endregion
