@@ -195,6 +195,7 @@ const blockTypes = [
         toolType: ToolType.Shovel,
         dropBlock: Blocks.Dirt,
         changeToBlockWithBlockAbove: Blocks.Dirt,
+        hoeAble: true,
     }),
     new BlockType({
         blockId: 9,

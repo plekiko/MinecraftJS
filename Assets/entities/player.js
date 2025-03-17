@@ -169,20 +169,24 @@ class Player extends Entity {
             return;
         }
 
-        if (item.foodValue > 0) {
-            this.eatFoodInHand();
-        }
-
         if (item.toolType === ToolType.Hoe) {
             this.useHoe();
+            return;
+        }
+
+        if (item.foodValue > 0) {
+            this.eatFoodInHand();
+            return;
         }
 
         if (
             item.itemId === Items.Bucket ||
             item.itemId === Items.WaterBucket ||
             item.itemId === Items.LavaBucket
-        )
+        ) {
             this.useBucket();
+            return;
+        }
     }
 
     useHoe() {
