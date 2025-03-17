@@ -100,7 +100,7 @@ class Chunk {
         // Chest
         GenerateChestWithLoot(
             new LootTable([
-                new LootItem({ itemId: Items.WaterBucket, maxCount: 1 }),
+                new LootItem({ blockId: Blocks.IceBlock, maxCount: 1 }),
                 new LootItem({ itemId: Items.LavaBucket, maxCount: 1 }),
                 new LootItem({ itemId: Items.Seeds, maxCount: 3 }),
             ]),

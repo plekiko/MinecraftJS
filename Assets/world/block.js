@@ -20,6 +20,8 @@ class BlockType {
 
         changeToBlockWithBlockAbove = null,
 
+        changeToBlockWhenBroken = null,
+
         fire = false,
 
         cannotBeConverted = false,
@@ -87,6 +89,8 @@ class BlockType {
         this.changeToBlockWithBlockAbove = changeToBlockWithBlockAbove;
 
         this.hoeAble = hoeAble;
+
+        this.changeToBlockWhenBroken = changeToBlockWhenBroken;
 
         this.fire = fire;
         this.extinguishEntity = extinguishEntity;
@@ -1059,6 +1063,10 @@ class Block extends Square {
         }
 
         chunk.setBlockType(this.x, this.y, Blocks.Air, wall, null, false);
+
+        if (blockDef.changeToBlockWhenBroken) {
+            setBlockType(this, blockDef.changeToBlockWhenBroken);
+        }
     }
 
     dropCropLoot(blockDef) {

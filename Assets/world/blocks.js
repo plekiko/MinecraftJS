@@ -966,6 +966,7 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         dropWithoutTool: false,
         drag: 3,
+        changeToBlockWhenBroken: Blocks.Water,
     }),
     new BlockType({
         blockId: 52,
