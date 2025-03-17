@@ -573,7 +573,7 @@ class Block extends Square {
 
         // Clean up despawned or dead mobs from the tracking array
         props.spawnedMobs = props.spawnedMobs.filter(
-            (mob) => mob && !mob.despawn && mob.health > 0
+            (mob) => mob && mob.health > 0
         );
 
         // Check if we can spawn more entities
