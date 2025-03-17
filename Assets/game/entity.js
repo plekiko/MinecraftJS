@@ -418,7 +418,7 @@ class Entity {
         }
 
         if (this.type === EntityTypes.Drop) {
-            if (this.fireDamageTimer >= 20) {
+            if (this.fireDamageTimer >= 9) {
                 removeEntity(this);
                 return;
             }

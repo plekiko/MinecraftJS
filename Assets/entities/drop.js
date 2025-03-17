@@ -34,7 +34,7 @@ class Drop extends Entity {
 
         setTimeout(() => {
             this.isReady = true;
-        }, 1500);
+        }, 500);
     }
 
     getStackSize() {
