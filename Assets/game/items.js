@@ -29,11 +29,17 @@ const Items = Object.freeze({
     DiamondHoe: 43,
     DiamondSword: 44,
 
+    GoldenAxe: 45,
+    GoldenPickaxe: 46,
+    GoldenShovel: 47,
+    GoldenHoe: 48,
+    GoldenSword: 49,
+
     WoodHammer: 1000,
     StoneHammer: 1001,
     IronHammer: 1002,
     DiamondHammer: 1003,
-    GoldHammer: 1004,
+    GoldenHammer: 1004,
 
     Coal: 20,
     IronIngot: 21,
@@ -319,6 +325,58 @@ const items = [
 
     //#endregion
 
+    //#region Golden Tools
+    new Item({
+        itemId: 45,
+        name: "Golden Axe",
+        sprite: "gold_axe",
+        toolType: ToolType.Axe,
+        toolLevel: 3.5,
+        heldInHand: true,
+        stackSize: 1,
+        baseDamage: 2.7,
+    }),
+    new Item({
+        itemId: 46,
+        name: "Golden Pickaxe",
+        sprite: "gold_pickaxe",
+        toolType: ToolType.Pickaxe,
+        toolLevel: 14.5,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 47,
+        name: "Golden Shovel",
+        sprite: "gold_shovel",
+        toolType: ToolType.Shovel,
+        toolLevel: 1.25,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 48,
+        name: "Golden Hoe",
+        sprite: "gold_hoe",
+        toolType: ToolType.Hoe,
+        toolLevel: 3,
+        heldInHand: true,
+        stackSize: 1,
+    }),
+    new Item({
+        itemId: 49,
+        name: "Golden Sword",
+        sprite: "gold_sword",
+        toolType: ToolType.Sword,
+        toolLevel: 3,
+        heldInHand: true,
+        stackSize: 1,
+        baseDamage: 3,
+    }),
+    //#endregion
+
+    //#endregion
+
     //#region Hammers
 
     new Item({
@@ -465,7 +523,7 @@ const items = [
     new Item({
         itemId: 36,
         name: "Golden Apple",
-        sprite: "apple_golden",
+        sprite: "apple_gold",
         foodValue: 7,
     }),
     new Item({
@@ -484,7 +542,7 @@ const items = [
     new Item({
         itemId: 39,
         name: "Golden Carrot",
-        sprite: "carrot_golden",
+        sprite: "carrot_gold",
         foodValue: 6,
     }),
     new Item({

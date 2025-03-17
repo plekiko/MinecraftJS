@@ -18,6 +18,11 @@ class Player extends Entity {
         foodTickTimer = 0,
         score = 0,
         xpLevel = 0,
+
+        eating = false,
+        eatTimer = 0,
+        eatTime = 1,
+
         inventory = new Inventory(),
         entities,
     }) {
@@ -41,6 +46,10 @@ class Player extends Entity {
         this.xpLevel = xpLevel;
 
         this.gamemode = gamemode;
+
+        this.eating = eating;
+        this.eatTimer = eatTimer;
+        this.eatTime = eatTime;
 
         this.inventory = inventory;
 
@@ -76,6 +85,7 @@ class Player extends Entity {
         this.dropLogic();
         this.setHoldItem();
         this.hurtCooldownLogic();
+        this.processEating();
 
         if (this.windowOpen) this.inventory.update();
     }
@@ -324,23 +334,58 @@ class Player extends Entity {
         }
     }
 
-    eatFoodInHand() {
-        if (this.health >= this.maxHealth) return;
+    processEating() {
+        if (!this.eating) return;
 
         const item = GetItem(this.holdItem.itemId);
+        if (!item || item.foodValue <= 0) {
+            this.eating = false;
+            return;
+        }
 
-        if (!item) return;
+        if (!input.isRightMouseDown()) {
+            this.eating = false;
+            this.eatTimer = 0;
+            return;
+        }
 
+        this.eatTimer += deltaTime;
+
+        if (this.eatTimer % 0.2 < deltaTime) {
+            PlayRandomSoundFromArray({
+                array: Sounds.Player_Eat,
+                positional: true,
+                origin: this.position,
+                volume: 0.5,
+            });
+        }
+
+        // Check if eating is complete
+        if (this.eatTimer >= this.eatTime) {
+            this.finishEating(item);
+        }
+    }
+
+    finishEating(item) {
         this.addHealth(item.foodValue);
+        this.eating = false;
+        this.eatTimer = 0;
 
-        PlayRandomSoundFromArray({
-            array: Sounds.Player_Eat,
-            positional: true,
-            origin: this.position,
-            volume: 0.5,
-        });
+        // Play eating sound
+        playPositionalSound(this.position, "player/burp.ogg");
 
-        this.removeFromCurrentSlot();
+        if (!this.abilities.instaBuild) {
+            this.removeFromCurrentSlot();
+        }
+    }
+
+    // Modified original eatFoodInHand to be simpler since it's now handled by finishEating
+    eatFoodInHand() {
+        // This method is no longer needed directly but keeping it for compatibility
+        const item = GetItem(this.holdItem.itemId);
+        if (!item) return;
+        this.eating = true;
+        this.eatTimer = 0;
     }
 
     dropAllItems() {

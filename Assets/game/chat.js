@@ -155,10 +155,31 @@ class Chat {
                 navigator.clipboard.writeText(seed);
                 this.message("Seed copied to clipboard.");
                 break;
+            case "hit":
+                if (!player) break;
+                this.hitPlayer(messageArray);
             default:
                 this.message("Invalid Command!");
                 break;
         }
+    }
+
+    hitPlayer(messageArray) {
+        if (!player) return;
+
+        if (!messageArray[1]) {
+            this.invalidCommand("/hit <damage>");
+            return;
+        }
+
+        const damage = parseInt(messageArray[1]);
+
+        if (isNaN(damage)) {
+            this.invalidCommand("/hit <damage>");
+            return;
+        }
+
+        player.hit(damage);
     }
 
     setTime(messageArray) {
@@ -339,6 +360,7 @@ class Chat {
             "/structure <StructureName>",
             "/locatebiome <BiomeName>",
             "/seed",
+            "/hit <damage>",
         ];
 
         // Print them one by one in chat
