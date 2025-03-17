@@ -152,7 +152,11 @@ class Chat {
             case "seed":
                 this.message(`Seed: ${seed}`);
 
-                navigator.clipboard.writeText(seed);
+                if (!navigator?.clipboard) {
+                    console.log("Clipboard API not available");
+                } else {
+                    navigator.clipboard.writeText(seed);
+                }
                 this.message("Seed copied to clipboard.");
                 break;
             case "hit":
