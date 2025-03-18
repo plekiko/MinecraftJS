@@ -73,6 +73,8 @@ const Blocks = Object.freeze({
     WoodPressurePlate: 83,
     RedstoneOre: 84,
 
+    MossyStoneBricks: 300,
+
     TestSlab: 71,
     StoneSlab: 72,
     OakSlab: 73,
@@ -834,6 +836,17 @@ const blockTypes = [
         blockId: 45,
         sprite: "stonebrick",
         name: "Stone Bricks",
+        hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        noteBlockSound: "bd",
+    }),
+    new BlockType({
+        blockId: 300,
+        name: "Mossy Stone Bricks",
+        sprite: "stonebrick_mossy",
         hardness: 8,
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,

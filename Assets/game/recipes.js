@@ -1073,4 +1073,23 @@ const recipes = [
         output: new InventoryItem({blockId: Blocks.Ladder, count: 3}),
     }),
     //#endregion
+
+    //#region Mossy Blocks
+    // Mossy Cobblestone
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [new RecipeItem({ blockId: Blocks.Cobblestone }), new RecipeItem({ blockId: Blocks.Vines })],
+        ],
+        output: new InventoryItem({ blockId: Blocks.MossyCobblestone, count: 1 }),
+    }),
+    // Mossy Stone Bricks
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [new RecipeItem({ blockId: Blocks.StoneBricks }), new RecipeItem({ blockId: Blocks.Vines })],
+        ],
+        output: new InventoryItem({ blockId: Blocks.MossyStoneBricks, count: 1 }),
+    }),
+    //#endregion
 ];

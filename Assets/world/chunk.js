@@ -573,36 +573,49 @@ class Chunk {
     getRandomTreeFromBiome() {
         const trees = this.biome.treeType;
         const variants = trees[RandomRange(0, trees.length)].variants;
+        
         return variants[RandomRange(0, variants.length)];
     }
 
     spawnTreeAt(tree, x, y) {
         if (y <= 3) return;
 
+        // Select a random variant from the tree
+        const structure = tree.blocks; // Get the block layout
+    
         // Randomly choose to flip (mirroring) the structure.
         const flip = RandomRange(0, 2) === 1; // flip is true 50% of the time
-
-        const treeHeight = tree.length;
+    
+        const treeHeight = structure.length;
+        const treeWidth = structure[0].length;
+    
+        // Calculate the bottom center of the tree
+        const offsetX = Math.floor(treeWidth / 2) * BLOCK_SIZE;
+        const offsetY = 0; // Bottom-most row is the base
+    
         for (let i = 0; i < treeHeight; i++) {
-            const layerWidth = tree[i].length;
+            const layerWidth = structure[i].length;
             for (let j = 0; j < layerWidth; j++) {
-                const block = tree[i][j];
+                const flippedI = treeHeight - i - 1;
+                
+                const block = structure[flippedI][j];
+
+                console.log(block)
+
+                if (block === Blocks.Air) continue; // Skip air blocks
+
                 // If flipped, mirror the column index.
-                if (block === Blocks.Air) continue;
                 const columnIndex = flip ? layerWidth - 1 - j : j;
-
-                // Calculate the world x-coordinate using the (possibly flipped) column index.
-                const worldX =
-                    this.x +
-                    x * BLOCK_SIZE -
-                    Math.floor(layerWidth / 2) * BLOCK_SIZE +
-                    columnIndex * BLOCK_SIZE;
-
-                const worldY = y * BLOCK_SIZE + i * BLOCK_SIZE;
+                
+                // Calculate the world coordinates
+                const worldX = this.x + x * BLOCK_SIZE - offsetX + columnIndex * BLOCK_SIZE;
+                const worldY = y * BLOCK_SIZE - offsetY + i * BLOCK_SIZE;
+                
                 this.setBlockTypeAtPosition(worldX, worldY, block);
             }
         }
     }
+
 
     setBlockTypeAtPosition(
         worldX,

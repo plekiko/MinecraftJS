@@ -514,10 +514,15 @@ document.getElementById("exportBtn").addEventListener("click", () => {
     if (maxRow < minRow || maxCol < minCol) return;
 
     const trimmedBlocks = [];
-    const trimmedWalls = [];
+    let trimmedWalls = [];
     for (let r = minRow; r <= maxRow; r++) {
         trimmedBlocks.push(structureGrid[r].slice(minCol, maxCol + 1));
         trimmedWalls.push(wallsGrid[r].slice(minCol, maxCol + 1));
+    }
+
+    // If a grid is only air blocks, don't export anything
+    if (trimmedWalls.every((row) => row.every((cell) => cell === Blocks.Air))) {
+        trimmedWalls = null;
     }
 
     const convertGrid = (grid) =>
@@ -535,12 +540,26 @@ document.getElementById("exportBtn").addEventListener("click", () => {
         );
 
     const trimmedNamesBlocks = convertGrid(trimmedBlocks);
-    const trimmedNamesWalls = convertGrid(trimmedWalls);
+    let trimmedNamesWalls;
 
-    let exportData = {
-        blocks: trimmedNamesBlocks,
-        walls: trimmedNamesWalls,
-    };
+    if (trimmedWalls) {
+        trimmedNamesWalls = convertGrid(trimmedWalls);
+    } else {
+        trimmedNamesWalls = null;
+    }
+
+    let exportData;
+
+    if (!trimmedNamesWalls) {
+        exportData = {
+            blocks: trimmedNamesBlocks,
+        };
+    } else {
+        exportData = {
+            blocks: trimmedNamesBlocks,
+            walls: trimmedNamesWalls,
+        };
+    }
 
     exportData = JSON.stringify(exportData, null, 2);
     exportData = exportData.replace(/{/g, "").replace(/}/g, "");
