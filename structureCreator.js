@@ -573,7 +573,13 @@ document.getElementById("copyBtn").addEventListener("click", () => {
     navigator.clipboard
         .writeText(outputText)
         .then(() => {
-            // alert("Blocks array copied to clipboard!");
+            // alert("Blocks array copied to clipboard!");`
+            document.getElementById("copyBtn").textContent = "Copied!";
+
+            setTimeout(() => {
+                document.getElementById("copyBtn").textContent =
+                    "Copy to Clipboard";
+            }, 500);
         })
         .catch((err) => {
             console.error("Error copying text: ", err);
