@@ -1357,7 +1357,6 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shears,
-        breakWithoutBlockUnderneath: true,
         dropWithoutTool: false,
         cannotBeConverted: true,
         transparent: true,
