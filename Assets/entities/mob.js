@@ -81,6 +81,11 @@ class Mob extends Entity {
 
     agressionBehaviour() {
         if (!player) return;
+        if (!player.abilities.hasHealth) {
+            this.state = aiState.Wander;
+            return;
+        }
+
         if (
             Math.abs(Vector2.Distance(this.position, player.position)) <=
             this.ai.agressionArea
@@ -226,6 +231,6 @@ const AI = Object.freeze({
     Zombie: new aiType({
         moveTimeRange: { min: 3, max: 7 },
         agressionLevel: Agression.Agressive,
-        agressionArea: 15,
+        agressionArea: 11,
     }),
 });
