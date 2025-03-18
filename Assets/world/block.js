@@ -18,6 +18,8 @@ class BlockType {
 
         defaultCutoff = 0,
 
+        noPriority = false,
+
         transparent = false,
 
         changeToBlockWithBlockAbove = null,
@@ -98,6 +100,8 @@ class BlockType {
         this.hoeAble = hoeAble;
 
         this.changeToBlockWhenBroken = changeToBlockWhenBroken;
+
+        this.noPriority = noPriority;
 
         this.climable = climable;
 

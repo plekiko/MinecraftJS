@@ -1365,7 +1365,7 @@ const blockTypes = [
         blockId: 124,
         name: "Vines",
         sprite: "vine",
-        hardness: .3,
+        hardness: 0.5,
         collision: false,
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
@@ -1374,6 +1374,7 @@ const blockTypes = [
         cannotBeConverted: true,
         transparent: true,
         climable: true,
+        noPriority: true,
     }),
 
     //#endregion

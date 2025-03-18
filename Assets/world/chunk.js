@@ -465,6 +465,7 @@ class Chunk {
         const y = this.findGroundLevel(x, false, true); // Find valid ground level
         if (!GetBlock(this.getBlockType(x, y)).air) return;
         const randomTree = this.getRandomTreeFromBiome(); // Pick a random tree
+        if (!randomTree) return;
         this.spawnTreeAt(randomTree, x, y); // Spawn the tree at the position
     }
 
@@ -573,7 +574,7 @@ class Chunk {
     getRandomTreeFromBiome() {
         const trees = this.biome.treeType;
         const variants = trees[RandomRange(0, trees.length)].variants;
-        
+
         return variants[RandomRange(0, variants.length)];
     }
 
@@ -582,40 +583,55 @@ class Chunk {
 
         // Select a random variant from the tree
         const structure = tree.blocks; // Get the block layout
-    
+
         // Randomly choose to flip (mirroring) the structure.
         const flip = RandomRange(0, 2) === 1; // flip is true 50% of the time
-    
+
         const treeHeight = structure.length;
         const treeWidth = structure[0].length;
-    
+
         // Calculate the bottom center of the tree
         const offsetX = Math.floor(treeWidth / 2) * BLOCK_SIZE;
         const offsetY = 0; // Bottom-most row is the base
-    
+
         for (let i = 0; i < treeHeight; i++) {
             const layerWidth = structure[i].length;
             for (let j = 0; j < layerWidth; j++) {
                 const flippedI = treeHeight - i - 1;
-                
-                const block = structure[flippedI][j];
 
-                console.log(block)
+                const block = structure[flippedI][j];
 
                 if (block === Blocks.Air) continue; // Skip air blocks
 
                 // If flipped, mirror the column index.
                 const columnIndex = flip ? layerWidth - 1 - j : j;
-                
+
                 // Calculate the world coordinates
-                const worldX = this.x + x * BLOCK_SIZE - offsetX + columnIndex * BLOCK_SIZE;
+                const worldX =
+                    this.x +
+                    x * BLOCK_SIZE -
+                    offsetX +
+                    columnIndex * BLOCK_SIZE;
                 const worldY = y * BLOCK_SIZE - offsetY + i * BLOCK_SIZE;
-                
+
+                if (GetBlock(block).noPriority) {
+                    // Check if there already is a block at this position
+
+                    const blockAtPos = GetBlockAtWorldPosition(
+                        worldX,
+                        CHUNK_HEIGHT * BLOCK_SIZE - worldY - BLOCK_SIZE
+                    );
+
+                    if (blockAtPos)
+                        if (!GetBlock(blockAtPos.blockType)?.air) {
+                            continue;
+                        }
+                }
+
                 this.setBlockTypeAtPosition(worldX, worldY, block);
             }
         }
     }
-
 
     setBlockTypeAtPosition(
         worldX,

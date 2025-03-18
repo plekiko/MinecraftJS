@@ -147,8 +147,8 @@ function LoadCustomSeed(seed) {
         case "swamp":
             forceToBiome = Biomes.Swamp;
             break;
-        case "jungle":
-            forceToBiome = Biomes.Jungle;
+        case "jungle" || "rainforest":
+            forceToBiome = Biomes.RainForest;
             break;
         case "savanna":
             forceToBiome = Biomes.Savanna;
