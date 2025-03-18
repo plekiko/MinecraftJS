@@ -1062,5 +1062,15 @@ const recipes = [
         input: new RecipeItem({ blockId: Blocks.HayBale }),
         output: new InventoryItem({ itemId: Items.Wheat, count: 9 }),
     }),
+    // Ladder
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [new RecipeItem({itemId: Items.Stick}), new RecipeItem({count: 0}), new RecipeItem({itemId: Items.Stick})],
+            [new RecipeItem({itemId: Items.Stick}), new RecipeItem({itemId: Items.Stick}), new RecipeItem({itemId: Items.Stick})],
+            [new RecipeItem({itemId: Items.Stick}), new RecipeItem({count: 0}), new RecipeItem({itemId: Items.Stick})],
+        ],
+        output: new InventoryItem({blockId: Blocks.Ladder, count: 3}),
+    }),
     //#endregion
 ];
