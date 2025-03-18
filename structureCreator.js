@@ -384,7 +384,12 @@ function updateSavedBuildsList() {
             const buildRows = buildData.blocks.length;
             const buildCols = buildData.blocks[0].length;
             if (buildRows > gridRows || buildCols > gridCols) {
-                alert("Build is too large for current grid size!");
+                alert(
+                    "Build is too large for current grid size! Should be " +
+                        buildRows +
+                        "x" +
+                        buildCols
+                );
                 return;
             }
             initializeGrids(gridRows, gridCols); // Reset current grid
@@ -626,7 +631,12 @@ if (buildDataParam) {
     const buildRows = buildData.blocks.length;
     const buildCols = buildData.blocks[0].length;
     if (buildRows > gridRows || buildCols > gridCols) {
-        alert("Build is too large for current grid size!");
+        alert(
+            "Build is too large for current grid size! Should be " +
+                buildRows +
+                "x" +
+                buildCols
+        );
     } else {
         initializeGrids(gridRows, gridCols); // Reset current grid
         for (let r = 0; r < buildRows; r++) {
