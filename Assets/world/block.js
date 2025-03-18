@@ -14,6 +14,8 @@ class BlockType {
 
         hoeAble = false,
 
+        climable = false,
+
         defaultCutoff = 0,
 
         transparent = false,
@@ -96,6 +98,8 @@ class BlockType {
         this.hoeAble = hoeAble;
 
         this.changeToBlockWhenBroken = changeToBlockWhenBroken;
+
+        this.climable = climable;
 
         this.fire = fire;
         this.extinguishEntity = extinguishEntity;

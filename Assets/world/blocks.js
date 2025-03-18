@@ -1345,6 +1345,7 @@ const blockTypes = [
         transparent: true,
         collision: false,
         cannotBeConverted: true,
+        climable: true,
     }),
     // Vines
     new BlockType({
@@ -1360,6 +1361,7 @@ const blockTypes = [
         dropWithoutTool: false,
         cannotBeConverted: true,
         transparent: true,
+        climable: true,
     }),
 
     //#endregion

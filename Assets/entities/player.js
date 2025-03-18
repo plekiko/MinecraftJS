@@ -66,6 +66,8 @@ class Player extends Entity {
         this.hoverBlock = null;
         this.oldHoverBlock = null;
 
+        this.climbing = false;
+
         this.hoverWall = null;
 
         this.entities = entities;
@@ -75,6 +77,7 @@ class Player extends Entity {
 
     update() {
         this.interactLogic();
+        this.climbingCollisingLogic();
         this.movementLogic();
         this.hoverBlockLogic();
         this.breakingAndPlacingLogic();
@@ -379,7 +382,6 @@ class Player extends Entity {
         }
     }
 
-    // Modified original eatFoodInHand to be simpler since it's now handled by finishEating
     eatFoodInHand() {
         // This method is no longer needed directly but keeping it for compatibility
         const item = GetItem(this.holdItem.itemId);
@@ -614,6 +616,22 @@ class Player extends Entity {
         }
 
         removeEntity(drop);
+    }
+
+    climbingCollisingLogic() {
+        // Get the blocks using types
+        const blockTypes = this.collidingWithBlocks;
+
+        const climableBlocks = this.filterBlocksByProperty(blockTypes, "climable");
+
+        // Add Sounds
+
+        if (climableBlocks.length === 0) {
+            this.climbing = false;
+            return;    
+        }
+
+        this.climbing = true;
     }
 
     drop(item, count = item.count) {
@@ -1048,11 +1066,21 @@ class Player extends Entity {
         if (!this.canMove) return;
         this.handleHorizontalMovement();
         this.handleJump();
+        this.handleClimbing();
         this.handleFlying();
         this.lookAtCursor();
 
         // this.applyDeltaTime();
     }
+
+    handleClimbing() {
+        // Climbing logic
+        if(!this.climbing) return;
+
+        if (input.isKeyDown("KeyW"))
+            this.velocity.y = -this.abilities.walkSpeed / 2 * BLOCK_SIZE;
+        else this.velocity.y = this.abilities.walkSpeed / 4 * BLOCK_SIZE;
+        }
 
     lookAtCursor() {
         const mousePosition = input.getMousePosition();
