@@ -17,6 +17,11 @@
                 margin: 0 0 20px;
             }
 
+            .title {
+                margin-top: 250px;
+                color: #fff;
+            }
+
             /* Editor Panel */
             .editor {
                 flex: 3;
@@ -29,6 +34,8 @@
                 justify-content: center;
             }
             #gridCanvas {
+                margin-top: 10px;
+                
                 border: 2px solid #333;
                 background-image: linear-gradient(#74b3ff, #d47147);
                 image-rendering: pixelated;
@@ -201,11 +208,21 @@
                 font-size: 0.9rem;
                 color: #e8e8e8;
             }
+
+            #buildSearch {
+                width: 100%;
+                padding: 5px;
+                margin-bottom: 10px;
+                border: 1px solid #555;
+                border-radius: 4px;
+                background: #444;
+                color: #e8e8e8;
+            }
         </style>
     </head>
     <body>
         <div class="editor">
-            <h1 class="title" style="color: #fff">Structure Creator</h1>
+            <h1 class="title">Structure Creator</h1>
             <canvas id="gridCanvas" width="512" height="512"></canvas>
             <div class="controls">
                 <button id="exportBtn">Export Structure</button>
@@ -227,14 +244,6 @@
                     type="text"
                     id="buildSearch"
                     placeholder="Search saved builds..."
-                    style="
-                        width: 100%;
-                        padding: 5px;
-                        margin-top: 10px;
-                        margin-bottom: 10px;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                    "
                 />
                 <div id="savedBuilds"></div>
             </div>

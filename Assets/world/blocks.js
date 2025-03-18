@@ -101,6 +101,10 @@ const Blocks = Object.freeze({
     Potato: 102,
 
     HayBale: 120,
+    CarvedSandstone: 121,
+    SmoothSandstone: 122,
+    Ladder: 123,
+    Vines: 124,
 
     ZombieSpawner: 500,
 });
@@ -1307,6 +1311,57 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Cloth,
         toolType: ToolType.Hoe,
     }),
+    new BlockType({
+        blockId: 121,
+        name: "Carved Sandstone",
+        sprite: "sandstone_carved",
+        hardness: 7.5,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    // Smooth Sandstone
+    new BlockType({
+        blockId: 122,
+        name: "Smooth Sandstone",
+        sprite: "sandstone_smooth",
+        hardness: 7.5,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    // Ladder
+    new BlockType({
+        blockId: 123,
+        name: "Ladder",
+        sprite: "ladder",
+        hardness: 0.4,
+        breakSound: Sounds.Break_Wood,
+        breakingSound: Sounds.Breaking_Wood,
+        toolType: ToolType.Axe,
+        dropWithoutTool: false,
+        transparent: true,
+        collision: false,
+        cannotBeConverted: true,
+    }),
+    // Vines
+    new BlockType({
+        blockId: 124,
+        name: "Vines",
+        sprite: "vine",
+        hardness: .3,
+        collision: false,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
+        breakWithoutBlockUnderneath: true,
+        dropWithoutTool: false,
+        cannotBeConverted: true,
+        transparent: true,
+    }),
+
     //#endregion
 
     //#region Saplings

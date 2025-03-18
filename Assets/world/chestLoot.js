@@ -154,6 +154,26 @@ const ChestLoot = Object.freeze({
             maxCount: 6,
             subtract: 8,
         }),
+        new LootItem({
+            itemId: Items.RedstoneDust,
+            maxCount: 5,
+            subtract: 4,
+        }),
+        new LootItem({
+            itemId: Items.GoldenApple,
+            maxCount: 1,
+            subtract: 2,
+        }),
+        new LootItem({
+            itemId: Items.GoldIngot,
+            maxCount: 4,
+            subtract: 8,
+        }),
+        new LootItem({
+            itemId: Items.Leather,
+            maxCount: 3,
+            subtract: 6,
+        }),
     ]),
     WitchHut: new LootTable([
         new LootItem({
