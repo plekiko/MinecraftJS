@@ -44,7 +44,7 @@
                 text-align: center;
                 margin-bottom: 10px;
             }
-            .controls button {
+            .simple-button {
                 background: #333;
                 color: #fff;
                 border: none;
@@ -55,14 +55,16 @@
                 font-size: 1rem;
                 transition: background 0.2s, transform 0.2s;
             }
-            .controls button:hover {
+
+            .simple-button:hover {
                 background: #555;
                 transform: translateY(-2px);
             }
             pre#output {
                 margin-top: 10px;
-                background: #fff;
                 padding: 50px;
+
+                color: rgb(253, 255, 221);
 
                 width: 30%;
 
@@ -224,13 +226,24 @@
             <h1 class="title">Structure Creator</h1>
             <canvas id="gridCanvas" width="512" height="512"></canvas>
             <div class="controls">
-                <button id="exportBtn">Export Structure</button>
-                <button id="copyBtn">Copy Blocks Array</button>
-                <button id="cleanBtn">Clean Grid</button>
-                <button id="toggleGridBtn">Toggle Grid</button>
-                <button id="toggleWallModeBtn">Wall Mode: OFF</button>
+                <button id="exportBtn" class="simple-button">
+                    Export Structure
+                </button>
+                <button id="cleanBtn" class="simple-button">Clean Grid</button>
+                <button id="toggleGridBtn" class="simple-button">
+                    Toggle Grid
+                </button>
+                <button id="shareBtn" class="simple-button">
+                    Share Structure
+                </button>
+                <button id="toggleWallModeBtn" class="simple-button">
+                    Wall Mode: OFF
+                </button>
             </div>
             <pre id="output"></pre>
+            <button id="copyBtn" class="simple-button">
+                Copy to Clipboard
+            </button>
             <div class="build-save-load">
                 <input
                     type="text"

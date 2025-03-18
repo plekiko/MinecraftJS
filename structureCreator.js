@@ -319,7 +319,6 @@ for (const key in ChestLoot) {
         });
     });
 }
-
 // ----- LOCAL STORAGE: SAVE & LOAD BUILDS -----
 const BUILD_STORAGE_KEY = "savedBuilds";
 
@@ -599,3 +598,40 @@ document.getElementById("toggleWallModeBtn").addEventListener("click", () => {
     document.getElementById("toggleWallModeBtn").textContent =
         "Wall Mode: " + (wallMode ? "ON" : "OFF");
 });
+
+// ----- SHARE FUNCTIONALITY -----
+document.getElementById("shareBtn").addEventListener("click", () => {
+    const buildData = {
+        blocks: structureGrid,
+        walls: wallsGrid,
+    };
+    const url = new URL(window.location.href);
+    url.searchParams.set("build", JSON.stringify(buildData));
+    navigator.clipboard.writeText(url.href).then(() => {
+        alert("Link copied to clipboard!");
+    });
+});
+
+// ----- LOAD BUILD FROM URL -----
+const urlParams = new URLSearchParams(window.location.search);
+const buildDataParam = urlParams.get("build");
+if (buildDataParam) {
+    const buildData = JSON.parse(buildDataParam);
+    const buildRows = buildData.blocks.length;
+    const buildCols = buildData.blocks[0].length;
+    if (buildRows > gridRows || buildCols > gridCols) {
+        alert("Build is too large for current grid size!");
+    } else {
+        initializeGrids(gridRows, gridCols); // Reset current grid
+        for (let r = 0; r < buildRows; r++) {
+            for (let c = 0; c < buildCols; c++) {
+                structureGrid[r][c] = buildData.blocks[r][c];
+                if (buildData.walls) wallsGrid[r][c] = buildData.walls[r][c];
+            }
+        }
+        drawGrid();
+    }
+    setTimeout(() => {
+        drawGrid();
+    }, 1000);
+}
