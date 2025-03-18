@@ -18,6 +18,9 @@ const Trees = Object.freeze({
             ],
         },
         {
+            blocks: [[Blocks.Cactus], [Blocks.Cactus]],
+        },
+        {
             blocks: [[Blocks.Cactus]],
         },
     ]),
