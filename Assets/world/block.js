@@ -12,6 +12,8 @@ class BlockType {
         drag = 40,
         collision = true,
 
+        stackSize = 64,
+
         hoeAble = false,
 
         climable = false,
@@ -93,6 +95,8 @@ class BlockType {
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
 
+        this.stackSize = stackSize;
+
         this.changeToBlockWithBlockAbove = changeToBlockWithBlockAbove;
 
         this.spawnerType = spawnerType;
@@ -167,6 +171,7 @@ const SpecialType = Object.freeze({
     RedstoneDust: 7,
     RedstoneLamp: 8,
     PressurePlate: 9,
+    Hopper: 10,
 });
 
 const BlockCategory = Object.freeze({
@@ -440,6 +445,17 @@ class Block extends Square {
                 return;
             case SpecialType.PressurePlate:
                 return;
+            case SpecialType.Hopper:
+                storage = [
+                    [
+                        new InventoryItem(),
+                        new InventoryItem(),
+                        new InventoryItem(),
+                        new InventoryItem(),
+                        new InventoryItem(),
+                    ],
+                ];
+                break;
         }
 
         if (storage.length > 0) {
@@ -480,31 +496,6 @@ class Block extends Square {
             }
         }
 
-        // const neighbors = [
-        //     GetBlockAtWorldPosition(
-        //         this.transform.position.x - BLOCK_SIZE,
-        //         this.transform.position.y
-        //     ),
-        //     GetBlockAtWorldPosition(
-        //         this.transform.position.x + BLOCK_SIZE,
-        //         this.transform.position.y
-        //     ),
-        //     GetBlockAtWorldPosition(
-        //         this.transform.position.x,
-        //         this.transform.position.y - BLOCK_SIZE
-        //     ),
-        //     GetBlockAtWorldPosition(
-        //         this.transform.position.x,
-        //         this.transform.position.y + BLOCK_SIZE
-        //     ),
-        // ];
-
-        // for (let neighbor of neighbors) {
-        //     if (neighbor) {
-        //         neighbor.update();
-        //     }
-        // }
-
         this.metaData = undefined;
         this.setMetaData();
         if (block.updateSpeed > 0 && !block.chunkUpdate)
@@ -539,6 +530,8 @@ class Block extends Square {
             this.updateSprite();
             this.simulateWaterFlow();
         }
+
+        if (blockDef.specialType === SpecialType.Hopper) this.hopperLogic();
 
         if (blockDef.spawnerType) this.handleSpawner();
 
@@ -575,6 +568,226 @@ class Block extends Square {
         }
 
         this.metaData.props.progression += 1 / TICK_SPEED;
+    }
+
+    hopperLogic() {
+        const props = this.metaData.props;
+        if (!props.storage) return;
+
+        const storage = props.storage;
+
+        // Check block above for storage (pulling items)
+        const above = GetBlockAtWorldPosition(
+            this.transform.position.x,
+            this.transform.position.y - BLOCK_SIZE
+        );
+        let transferredFromAbove = false;
+
+        if (
+            above &&
+            above.metaData &&
+            above.metaData.props &&
+            above.metaData.props.storage &&
+            GetBlock(above.blockType).specialType !== SpecialType.Hopper // Skip if above is a hopper
+        ) {
+            const aboveStorage = above.metaData.props.storage;
+
+            // Scan above storage to pull one item
+            for (let ay = 0; ay < aboveStorage.length; ay++) {
+                for (let ax = 0; ax < aboveStorage[ay].length; ax++) {
+                    const aboveItem = aboveStorage[ay][ax];
+                    if (
+                        !aboveItem ||
+                        aboveItem.count <= 0 ||
+                        (aboveItem.itemId === null && !aboveItem.blockId)
+                    ) {
+                        continue;
+                    }
+
+                    // Try to add to hopper's storage
+                    for (let y = 0; y < storage.length; y++) {
+                        for (let x = 0; x < storage[y].length; x++) {
+                            const hopperItem = storage[y][x];
+
+                            // Empty slot in hopper
+                            if (
+                                hopperItem.itemId === null &&
+                                !hopperItem.blockId
+                            ) {
+                                hopperItem.itemId = aboveItem.itemId;
+                                hopperItem.blockId = aboveItem.blockId;
+                                hopperItem.props = structuredClone(
+                                    aboveItem.props || {}
+                                );
+                                hopperItem.count = 1;
+
+                                aboveItem.count--;
+                                if (aboveItem.count <= 0) {
+                                    aboveItem.itemId = null;
+                                    aboveItem.blockId = null;
+                                    aboveItem.props = null;
+                                }
+
+                                transferredFromAbove = true;
+                                break;
+                            }
+
+                            // Stackable slot in hopper
+                            if (
+                                hopperItem.itemId === aboveItem.itemId &&
+                                hopperItem.blockId === aboveItem.blockId &&
+                                arePropsEqual(hopperItem.props, aboveItem.props)
+                            ) {
+                                const stackSize =
+                                    this.getSlotItem(hopperItem)?.stackSize ||
+                                    64;
+                                if (hopperItem.count < stackSize) {
+                                    hopperItem.count++;
+                                    aboveItem.count--;
+
+                                    if (aboveItem.count <= 0) {
+                                        aboveItem.itemId = null;
+                                        aboveItem.blockId = null;
+                                        aboveItem.props = null;
+                                    }
+
+                                    transferredFromAbove = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (transferredFromAbove) break;
+                    }
+                    if (transferredFromAbove) {
+                        // Sync with player's inventory if this hopper's UI is open
+                        if (
+                            player.windowOpen &&
+                            player.inventory.interactedBlock === this
+                        ) {
+                            player.inventory.syncStorageSlots();
+                        }
+                        break;
+                    }
+                }
+                if (transferredFromAbove) break;
+            }
+        }
+
+        // Check block below for storage (pushing items)
+        const below = GetBlockAtWorldPosition(
+            this.transform.position.x,
+            this.transform.position.y + BLOCK_SIZE
+        );
+
+        if (
+            !below ||
+            !below.metaData ||
+            !below.metaData.props ||
+            !below.metaData.props.storage
+        ) {
+            return; // No valid container below
+        }
+
+        const belowStorage = below.metaData.props.storage;
+
+        // Initialize or reset lastScannedSlot if invalid
+        if (
+            !props.lastScannedSlot ||
+            props.lastScannedSlot.y >= storage.length ||
+            props.lastScannedSlot.x >= storage[props.lastScannedSlot.y]?.length
+        ) {
+            props.lastScannedSlot = { y: 0, x: 0 };
+        }
+
+        let transferredBelow = false;
+        let scannedAll = true;
+
+        // Scan from last position to push items below
+        for (let y = 0; y < storage.length; y++) {
+            const startX =
+                y === props.lastScannedSlot.y ? props.lastScannedSlot.x : 0;
+            for (let x = startX; x < storage[y].length; x++) {
+                const item = storage[y][x];
+                if (
+                    !item ||
+                    item.count <= 0 ||
+                    (item.itemId === null && !item.blockId)
+                ) {
+                    continue;
+                }
+
+                scannedAll = false;
+
+                for (let by = 0; by < belowStorage.length; by++) {
+                    for (let bx = 0; bx < belowStorage[by].length; bx++) {
+                        const belowItem = belowStorage[by][bx];
+
+                        if (belowItem.itemId === null && !belowItem.blockId) {
+                            belowItem.itemId = item.itemId;
+                            belowItem.blockId = item.blockId;
+                            belowItem.props = structuredClone(item.props || {});
+                            belowItem.count = 1;
+
+                            item.count--;
+                            if (item.count <= 0) {
+                                item.itemId = null;
+                                item.blockId = null;
+                                item.props = null;
+                            }
+
+                            props.lastScannedSlot = {
+                                y,
+                                x: (x + 1) % storage[y].length,
+                            };
+                            transferredBelow = true;
+                            break;
+                        }
+
+                        if (
+                            belowItem.itemId === item.itemId &&
+                            belowItem.blockId === item.blockId &&
+                            arePropsEqual(belowItem.props, item.props)
+                        ) {
+                            const stackSize =
+                                this.getSlotItem(belowItem)?.stackSize || 64;
+                            if (belowItem.count < stackSize) {
+                                belowItem.count++;
+                                item.count--;
+
+                                if (item.count <= 0) {
+                                    item.itemId = null;
+                                    item.blockId = null;
+                                    item.props = null;
+                                }
+
+                                props.lastScannedSlot = {
+                                    y,
+                                    x: (x + 1) % storage[y].length,
+                                };
+                                transferredBelow = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (transferredBelow) break;
+                }
+                if (transferredBelow) {
+                    // Sync with player's inventory if this hopper's UI is open
+                    if (
+                        player.windowOpen &&
+                        player.inventory.interactedBlock === this
+                    ) {
+                        player.inventory.syncStorageSlots();
+                    }
+                    break;
+                }
+            }
+            if (transferredBelow) break;
+        }
+
+        if (!transferredBelow && scannedAll) {
+            props.lastScannedSlot = { y: 0, x: 0 };
+        }
     }
 
     handleSpawner() {
@@ -753,7 +966,7 @@ class Block extends Square {
             input &&
             input.smeltOutput
         ) {
-            if (fuel) {
+            if (fuel && fuel.fuelTime) {
                 this.metaData.props.burningFuelTime = fuel.fuelTime;
                 this.removeOneFromStack(storage[0][1]);
             } else {

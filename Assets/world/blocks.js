@@ -63,15 +63,17 @@ const Blocks = Object.freeze({
     SnowBlock: 60,
     GoldOre: 62,
     Torch: 63,
+    GoldBlock: 65,
+
     RedstoneTorch: 69,
     NoteBlock: 64,
-    GoldBlock: 65,
     RedstoneBlock: 66,
     RedstoneDust: 67,
     RedstoneLamp: 68,
     StonePressurePlate: 70,
     WoodPressurePlate: 83,
     RedstoneOre: 84,
+    Hopper: 87,
 
     MossyStoneBricks: 300,
 
@@ -1130,6 +1132,20 @@ const blockTypes = [
         breakWithoutBlockUnderneath: true,
         specialType: SpecialType.PressurePlate,
         defaultCutoff: 0.9,
+    }),
+    // Hopper
+    new BlockType({
+        blockId: 87,
+        name: "Hopper",
+        sprite: "hopper_down",
+        hardness: 8,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        specialType: SpecialType.Hopper,
+        noteBlockSound: "bd",
+        updateSpeed: 0.6,
     }),
 
     //#endregion

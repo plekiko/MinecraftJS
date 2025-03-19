@@ -463,6 +463,9 @@ class Player extends Entity {
             case SpecialType.Converter:
                 this.openConverter();
                 break;
+            case SpecialType.Hopper:
+                this.openHopper();
+                break;
         }
     }
 
@@ -470,6 +473,14 @@ class Player extends Entity {
         const storage = this.hoverBlock.metaData.props.storage;
 
         this.inventory.openConverter(storage);
+        this.inventory.interactedBlock = this.hoverBlock;
+        this.openInventory();
+    }
+
+    openHopper() {
+        const storage = this.hoverBlock.metaData.props.storage;
+
+        this.inventory.openHopper(storage);
         this.inventory.interactedBlock = this.hoverBlock;
         this.openInventory();
     }
@@ -622,13 +633,16 @@ class Player extends Entity {
         // Get the blocks using types
         const blockTypes = this.collidingWithBlocks;
 
-        const climableBlocks = this.filterBlocksByProperty(blockTypes, "climable");
+        const climableBlocks = this.filterBlocksByProperty(
+            blockTypes,
+            "climable"
+        );
 
         // Add Sounds
 
         if (climableBlocks.length === 0) {
             this.climbing = false;
-            return;    
+            return;
         }
 
         this.climbing = true;
@@ -1075,12 +1089,12 @@ class Player extends Entity {
 
     handleClimbing() {
         // Climbing logic
-        if(!this.climbing) return;
+        if (!this.climbing) return;
 
         if (input.isKeyDown("KeyW"))
-            this.velocity.y = -this.abilities.walkSpeed / 2 * BLOCK_SIZE;
-        else this.velocity.y = this.abilities.walkSpeed / 4 * BLOCK_SIZE;
-        }
+            this.velocity.y = (-this.abilities.walkSpeed / 2) * BLOCK_SIZE;
+        else this.velocity.y = (this.abilities.walkSpeed / 4) * BLOCK_SIZE;
+    }
 
     lookAtCursor() {
         const mousePosition = input.getMousePosition();

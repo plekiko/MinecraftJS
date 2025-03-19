@@ -131,6 +131,13 @@ function LoadCustomSeed(seed) {
             specialWorldProps.skyblock = true;
             break;
 
+        case "redstone":
+            specialWorldProps.flat = true;
+            specialWorldProps.noMobs = true;
+            specialWorldProps.redstone = true;
+            specialWorldProps.noStructures = true;
+            break;
+
         //#region Biome Forces
         case "desert":
             forceToBiome = Biomes.Desert;
@@ -407,7 +414,8 @@ function postProcessChunks() {
 
             chunk.applyBufferedBlocks();
             chunk.generateWater();
-            chunk.spawnMobs(day);
+
+            if (!specialWorldProps.noMobs) chunk.spawnMobs(day);
 
             if (!specialWorldProps.flat) {
                 chunk.generateTrees();
@@ -417,6 +425,9 @@ function postProcessChunks() {
             chunk.generateBedrock();
         }
     });
+
+    if (specialWorldProps.noStructures) return;
+
     generateStructures();
 }
 

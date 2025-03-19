@@ -238,6 +238,14 @@ class Chunk {
                 height = CHUNK_HEIGHT / 2;
             }
 
+            if (specialWorldProps.redstone) {
+                // Set all blocks to Sandstone
+                for (let y = 0; y < height; y++) {
+                    this.setBlockType(x, y, Blocks.SandStone);
+                }
+                continue;
+            }
+
             // Draw the top layer (first level) with a constant thickness.
             for (let y = height; y > height - this.biome.firstLayerWidth; y--) {
                 this.setBlockType(x, y, this.biome.topLayer);

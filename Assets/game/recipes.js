@@ -578,6 +578,28 @@ const recipes = [
         ],
         output: new InventoryItem({ blockId: Blocks.Converter, count: 1 }),
     }),
+    // Hopper
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ blockId: Blocks.Chest }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.IronIngot }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.Hopper, count: 1 }),
+    }),
     //#endregion
 
     // Stone Bricks
@@ -1066,11 +1088,23 @@ const recipes = [
     new Recipe({
         type: RecipeType.Shaped,
         input: [
-            [new RecipeItem({itemId: Items.Stick}), new RecipeItem({count: 0}), new RecipeItem({itemId: Items.Stick})],
-            [new RecipeItem({itemId: Items.Stick}), new RecipeItem({itemId: Items.Stick}), new RecipeItem({itemId: Items.Stick})],
-            [new RecipeItem({itemId: Items.Stick}), new RecipeItem({count: 0}), new RecipeItem({itemId: Items.Stick})],
+            [
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ itemId: Items.Stick }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+            ],
         ],
-        output: new InventoryItem({blockId: Blocks.Ladder, count: 3}),
+        output: new InventoryItem({ blockId: Blocks.Ladder, count: 3 }),
     }),
     //#endregion
 
@@ -1079,17 +1113,29 @@ const recipes = [
     new Recipe({
         type: RecipeType.Shaped,
         input: [
-            [new RecipeItem({ blockId: Blocks.Cobblestone }), new RecipeItem({ blockId: Blocks.Vines })],
+            [
+                new RecipeItem({ blockId: Blocks.Cobblestone }),
+                new RecipeItem({ blockId: Blocks.Vines }),
+            ],
         ],
-        output: new InventoryItem({ blockId: Blocks.MossyCobblestone, count: 1 }),
+        output: new InventoryItem({
+            blockId: Blocks.MossyCobblestone,
+            count: 1,
+        }),
     }),
     // Mossy Stone Bricks
     new Recipe({
         type: RecipeType.Shaped,
         input: [
-            [new RecipeItem({ blockId: Blocks.StoneBricks }), new RecipeItem({ blockId: Blocks.Vines })],
+            [
+                new RecipeItem({ blockId: Blocks.StoneBricks }),
+                new RecipeItem({ blockId: Blocks.Vines }),
+            ],
         ],
-        output: new InventoryItem({ blockId: Blocks.MossyStoneBricks, count: 1 }),
+        output: new InventoryItem({
+            blockId: Blocks.MossyStoneBricks,
+            count: 1,
+        }),
     }),
     //#endregion
 ];
