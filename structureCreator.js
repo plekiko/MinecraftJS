@@ -363,6 +363,7 @@ function updateSavedBuildsList() {
         buildEntry.className = "build-entry";
         const previewCanvas = generatePreviewCanvas({
             blocks: builds[buildName].blocks,
+            walls: builds[buildName].walls,
         });
         buildEntry.appendChild(previewCanvas);
         const label = document.createElement("span");
@@ -469,6 +470,7 @@ function generatePreviewCanvas(
     const pctx = previewCanvas.getContext("2d");
     pctx.clearRect(0, 0, previewWidth, previewHeight);
     const blocks = buildData.blocks;
+    const walls = buildData.walls;
     const rows = blocks.length;
     const cols = blocks[0].length;
     const cellW = previewWidth / cols;
@@ -476,10 +478,20 @@ function generatePreviewCanvas(
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             const cell = blocks[r][c];
+            const wallCell = walls ? walls[r][c] : Blocks.Air;
+
             let fillColor = "#74b3ff";
+
+            if (!GetBlock(wallCell).air) {
+                fillColor = getBlockAverageColor(GetBlock(wallCell), "#74b3ff");
+
+                pctx.fillStyle = fillColor;
+                pctx.fillRect(c * cellW, r * cellH, cellW, cellH);
+            }
+
             if (typeof cell === "number") {
                 const block = GetBlock(cell);
-                if (block && block.name) {
+                if (block && block.name && !block.air) {
                     fillColor = getBlockAverageColor(block, "#74b3ff");
                 }
             } else if (typeof cell === "string") {
