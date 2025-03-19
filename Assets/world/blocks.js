@@ -1146,6 +1146,7 @@ const blockTypes = [
         specialType: SpecialType.Hopper,
         noteBlockSound: "bd",
         updateSpeed: 0.6,
+        defaultCutoff: 0.08,
     }),
 
     //#endregion
