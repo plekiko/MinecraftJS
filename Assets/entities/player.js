@@ -970,7 +970,21 @@ class Player extends Entity {
         )
             return;
 
-        this.drop(this.inventory.items[3][this.inventory.currentSlot].item, 1);
+        if (input.isKeyDown("ShiftLeft")) {
+            this.drop(
+                this.getSelectedSlotItem(),
+                this.getSelectedSlotItem().count
+            );
+            this.inventory.removeItem(
+                3,
+                this.inventory.currentSlot,
+                this.getSelectedSlotItem().count,
+                this.inventory.items
+            );
+            return;
+        }
+
+        this.drop(this.getSelectedSlotItem(), 1);
 
         this.inventory.removeItem(
             3,

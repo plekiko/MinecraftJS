@@ -524,16 +524,21 @@ class Block extends Square {
     update() {
         const blockDef = GetBlock(this.blockType);
 
-        if (blockDef.specialType === SpecialType.Furnace) this.furnaceLogic();
-
         if (blockDef.fluid) {
             this.updateSprite();
             this.simulateWaterFlow();
         }
 
-        if (blockDef.specialType === SpecialType.Hopper) this.hopperLogic();
-
         if (blockDef.spawnerType) this.handleSpawner();
+
+        switch (blockDef.specialType) {
+            case SpecialType.Hopper:
+                this.hopperLogic();
+                break;
+            case SpecialType.Furnace:
+                this.furnaceLogic();
+                break;
+        }
 
         if (!this.metaData || !this.metaData.props) return;
 
@@ -576,6 +581,80 @@ class Block extends Square {
 
         const storage = props.storage;
 
+        // Check for item drops above the hopper
+        let transferredFromDrop = false;
+        const dropEntities = this.getItemDropsAbove(); // Placeholder function
+
+        if (dropEntities && dropEntities.length > 0) {
+            for (const drop of dropEntities) {
+                const dropItem = drop;
+                if (
+                    !dropItem ||
+                    dropItem.count <= 0 ||
+                    (dropItem.itemId === null && !dropItem.blockId)
+                ) {
+                    continue;
+                }
+
+                // Try to add to hopper's storage
+                for (let y = 0; y < storage.length; y++) {
+                    for (let x = 0; x < storage[y].length; x++) {
+                        const hopperItem = storage[y][x];
+
+                        // Empty slot in hopper
+                        if (hopperItem.itemId === null && !hopperItem.blockId) {
+                            hopperItem.itemId = dropItem.itemId;
+                            hopperItem.blockId = dropItem.blockId;
+                            hopperItem.props = structuredClone(
+                                dropItem.props || {}
+                            );
+                            hopperItem.count = 1;
+
+                            dropItem.count--;
+                            if (dropItem.count <= 0) {
+                                removeEntity(drop);
+                            }
+
+                            transferredFromDrop = true;
+                            break;
+                        }
+
+                        // Stackable slot in hopper
+                        if (
+                            hopperItem.itemId === dropItem.itemId &&
+                            hopperItem.blockId === dropItem.blockId &&
+                            arePropsEqual(hopperItem.props, dropItem.props)
+                        ) {
+                            const stackSize =
+                                this.getSlotItem(hopperItem)?.stackSize || 64;
+                            if (hopperItem.count < stackSize) {
+                                hopperItem.count++;
+                                dropItem.count--;
+
+                                if (dropItem.count <= 0) {
+                                    drop.destroy(); // Remove the drop entity from the world
+                                }
+
+                                transferredFromDrop = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (transferredFromDrop) break;
+                }
+                if (transferredFromDrop) {
+                    // Sync with player's inventory if this hopper's UI is open
+                    if (
+                        player.windowOpen &&
+                        player.inventory.interactedBlock === this
+                    ) {
+                        player.inventory.syncStorageSlots();
+                    }
+                    break; // Only process one drop per tick to avoid overloading
+                }
+            }
+        }
+
         // Check block above for storage (pulling items)
         const above = GetBlockAtWorldPosition(
             this.transform.position.x,
@@ -592,7 +671,6 @@ class Block extends Square {
         ) {
             const aboveStorage = above.metaData.props.storage;
 
-            // Scan above storage to pull one item
             for (let ay = 0; ay < aboveStorage.length; ay++) {
                 for (let ax = 0; ax < aboveStorage[ay].length; ax++) {
                     const aboveItem = aboveStorage[ay][ax];
@@ -604,12 +682,10 @@ class Block extends Square {
                         continue;
                     }
 
-                    // Try to add to hopper's storage
                     for (let y = 0; y < storage.length; y++) {
                         for (let x = 0; x < storage[y].length; x++) {
                             const hopperItem = storage[y][x];
 
-                            // Empty slot in hopper
                             if (
                                 hopperItem.itemId === null &&
                                 !hopperItem.blockId
@@ -632,7 +708,6 @@ class Block extends Square {
                                 break;
                             }
 
-                            // Stackable slot in hopper
                             if (
                                 hopperItem.itemId === aboveItem.itemId &&
                                 hopperItem.blockId === aboveItem.blockId &&
@@ -659,7 +734,6 @@ class Block extends Square {
                         if (transferredFromAbove) break;
                     }
                     if (transferredFromAbove) {
-                        // Sync with player's inventory if this hopper's UI is open
                         if (
                             player.windowOpen &&
                             player.inventory.interactedBlock === this
@@ -690,7 +764,6 @@ class Block extends Square {
 
         const belowStorage = below.metaData.props.storage;
 
-        // Initialize or reset lastScannedSlot if invalid
         if (
             !props.lastScannedSlot ||
             props.lastScannedSlot.y >= storage.length ||
@@ -702,7 +775,6 @@ class Block extends Square {
         let transferredBelow = false;
         let scannedAll = true;
 
-        // Scan from last position to push items below
         for (let y = 0; y < storage.length; y++) {
             const startX =
                 y === props.lastScannedSlot.y ? props.lastScannedSlot.x : 0;
@@ -772,7 +844,6 @@ class Block extends Square {
                     if (transferredBelow) break;
                 }
                 if (transferredBelow) {
-                    // Sync with player's inventory if this hopper's UI is open
                     if (
                         player.windowOpen &&
                         player.inventory.interactedBlock === this
@@ -788,6 +859,44 @@ class Block extends Square {
         if (!transferredBelow && scannedAll) {
             props.lastScannedSlot = { y: 0, x: 0 };
         }
+    }
+
+    getItemDropsAbove() {
+        const entitiesOnBlock = this.checkCollisionWithEntity({
+            x: 0,
+            y: -BLOCK_SIZE / 2,
+        });
+        return entitiesOnBlock.filter(
+            (entity) => entity.type === EntityTypes.Drop
+        );
+    }
+
+    checkCollisionWithEntity(offset = { x: 0, y: 0 }) {
+        const blockPos = getBlockWorldPosition(this);
+        const blockRect = {
+            x: blockPos.x + offset.x,
+            y: blockPos.y + offset.y,
+            width: BLOCK_SIZE,
+            height: BLOCK_SIZE,
+        };
+
+        const collidingEntities = entities.filter((entity) => {
+            const entityRect = {
+                x: entity.position.x,
+                y: entity.position.y,
+                width: entity.hitbox.x,
+                height: entity.hitbox.y,
+            };
+
+            return (
+                blockRect.x < entityRect.x + entityRect.width &&
+                blockRect.x + blockRect.width > entityRect.x &&
+                blockRect.y < entityRect.y + entityRect.height &&
+                blockRect.y + blockRect.height > entityRect.y
+            );
+        });
+
+        return collidingEntities;
     }
 
     handleSpawner() {
