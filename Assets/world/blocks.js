@@ -74,6 +74,7 @@ const Blocks = Object.freeze({
     WoodPressurePlate: 83,
     RedstoneOre: 84,
     Hopper: 87,
+    Lever: 88,
 
     MossyStoneBricks: 300,
 
@@ -1147,6 +1148,18 @@ const blockTypes = [
         noteBlockSound: "bd",
         updateSpeed: 0.6,
         defaultCutoff: 0.08,
+    }),
+    // Lever
+    new BlockType({
+        blockId: 88,
+        name: "Lever",
+        sprite: "lever_off",
+        states: ["lever_off", "lever_on"],
+        hardness: 3,
+        toolType: ToolType.Pickaxe,
+        collision: false,
+        breakWithoutBlockUnderneath: true,
+        specialType: SpecialType.Lever,
     }),
 
     //#endregion

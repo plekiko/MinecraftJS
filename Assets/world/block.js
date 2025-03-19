@@ -172,6 +172,7 @@ const SpecialType = Object.freeze({
     RedstoneLamp: 8,
     PressurePlate: 9,
     Hopper: 10,
+    Lever: 11,
 });
 
 const BlockCategory = Object.freeze({
@@ -633,7 +634,7 @@ class Block extends Square {
                                 dropItem.count--;
 
                                 if (dropItem.count <= 0) {
-                                    drop.destroy(); // Remove the drop entity from the world
+                                    removeEntity(drop);
                                 }
 
                                 transferredFromDrop = true;
@@ -1183,7 +1184,27 @@ class Block extends Square {
             case SpecialType.NoteBlock:
                 this.noteBlockInteraction();
                 break;
+            case SpecialType.Lever:
+                this.leverInteraction();
+                break;
         }
+    }
+
+    leverInteraction() {
+        if (this.redstoneOutput === 0) {
+            this.redstoneOutput = 15;
+            this.setState(1);
+        } else {
+            this.redstoneOutput = 0;
+            this.setState(0);
+        }
+
+        playPositionalSound(
+            getBlockWorldPosition(this),
+            "blocks/wood_click.ogg",
+            10,
+            0.4
+        );
     }
 
     redstoneDustUpdateState() {
