@@ -605,7 +605,17 @@ document.getElementById("copyBtn").addEventListener("click", () => {
 
 // ----- CLEAN FUNCTIONALITY -----
 document.getElementById("cleanBtn").addEventListener("click", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.delete("build");
+    const newUrl =
+        window.location.origin +
+        window.location.pathname +
+        "?" +
+        urlParams.toString();
+    window.history.replaceState({}, document.title, newUrl);
+
     initializeGrids(gridRows, gridCols);
+
     drawGrid();
 });
 
