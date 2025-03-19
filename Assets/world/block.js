@@ -323,8 +323,8 @@ class Block extends Square {
         this.chunkX = chunkX;
         this.blockType = blockType;
         this.lightSourceLevel = 0;
-        this.powered = false;
         this.redstoneOutput = 0;
+        this.powered = false;
 
         this.updateSprite();
     }
@@ -578,6 +578,7 @@ class Block extends Square {
     hopperLogic() {
         const props = this.metaData.props;
         if (!props.storage) return;
+        if (this.powered) return;
 
         const storage = props.storage;
 
