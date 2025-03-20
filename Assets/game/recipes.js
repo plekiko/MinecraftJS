@@ -946,7 +946,15 @@ const recipes = [
         ],
         output: new InventoryItem({ blockId: Blocks.RedstoneLamp, count: 1 }),
     }),
-
+    // Lever
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [new RecipeItem({ itemId: Items.Stick })],
+            [new RecipeItem({ blockId: Blocks.Cobblestone })],
+        ],
+        output: new InventoryItem({ blockId: Blocks.Lever, count: 1 }),
+    }),
     //#endregion
 
     //#region Food
