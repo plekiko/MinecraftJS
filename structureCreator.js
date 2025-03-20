@@ -640,9 +640,13 @@ document.getElementById("shareBtn").addEventListener("click", () => {
     };
     const url = new URL(window.location.href);
     url.searchParams.set("build", JSON.stringify(buildData));
-    navigator.clipboard.writeText(url.href).then(() => {
-        alert("Link copied to clipboard!");
-    });
+    if (navigator?.clipboard) {
+        navigator.clipboard.writeText(url.href).then(() => {
+            alert("Link copied to clipboard!");
+        });
+    } else {
+        alert("Copy this link to share your build: \n" + url.href);
+    }
 });
 
 // ----- LOAD BUILD FROM URL -----
