@@ -763,6 +763,8 @@ class Inventory {
             const slot = array[y][x];
             if (slot.onlyTake || slot.infiniteTake) {
                 // Add infiniteTake check
+                // Delete the item
+                this.holdingItem = null;
                 return; // Do not allow placing items in onlyTake or infiniteTake slots
             }
 
@@ -1003,9 +1005,7 @@ class Inventory {
             if (hoveredSlot.onlyTake) return; // Don't allow taking from onlyTake slots
             if (hoveredSlot.infiniteTake) {
                 // Infinite take: copy item without removing from slot
-                console.log(hotbarItem);
-                if (hotbarItem.count === 0)
-                    hotbarSlot.item = structuredClone(hoveredItem);
+                hotbarSlot.item = structuredClone(hoveredItem);
                 return;
             }
 

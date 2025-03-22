@@ -675,6 +675,8 @@ const blockTypes = [
         cannotBeConverted: true,
         transparent: true,
         extinguishEntity: true,
+
+        excludeFromCreativeInventory: true,
     }),
     new BlockType({
         blockId: 53,
@@ -690,6 +692,8 @@ const blockTypes = [
         cannotBeConverted: true,
         transparent: true,
         fire: true,
+
+        excludeFromCreativeInventory: true,
     }),
     //#endregion
 
@@ -1369,6 +1373,8 @@ const blockTypes = [
         dropWithoutTool: false,
         breakSound: ["blocks/fizz"],
         ambientSound: "blocks/fire",
+
+        excludeFromCreativeInventory: true,
     }),
     new BlockType({
         blockId: 86,
@@ -1595,6 +1601,8 @@ const blockTypes = [
         cropSpeed: 600,
 
         updateSpeed: 1,
+
+        excludeFromCreativeInventory: true,
     }),
 
     // Carrot
@@ -1636,6 +1644,8 @@ const blockTypes = [
         cropSpeed: 600,
 
         updateSpeed: 1,
+
+        excludeFromCreativeInventory: true,
     }),
 
     // Potato
@@ -1677,6 +1687,8 @@ const blockTypes = [
         cropSpeed: 600,
 
         updateSpeed: 1,
+
+        excludeFromCreativeInventory: true,
     }),
 
     //#endregion
