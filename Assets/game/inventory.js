@@ -3,9 +3,9 @@ class Inventory {
         this.inventoryUI = { x: 492, y: 150 };
 
         this.items = [];
-        this.craftingSlots = [];
-        this.furnaceSlots = [];
-        this.creativeSlots = [];
+        this.craftingSlots = null;
+        this.furnaceSlots = null;
+        this.creativeSlots = null;
 
         this.currentCreativePage = 0;
 

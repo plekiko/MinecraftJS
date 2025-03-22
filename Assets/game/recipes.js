@@ -1189,7 +1189,7 @@ const recipes = [
         type: RecipeType.Shapeless,
         input: [
             new RecipeItem({ blockCategory: BlockCategory.Wool }),
-            new RecipeItem({ itemId: Items.DandelionYellow }),
+            new RecipeItem({ itemId: Items.YellowDye }),
         ],
         output: new InventoryItem({ blockId: Blocks.YellowWool, count: 1 }),
     }),
@@ -1305,6 +1305,12 @@ const recipes = [
         ],
         output: new InventoryItem({ itemId: Items.OrangeDye, count: 2 }),
     }),
+    // Orange Dye (Alternate)
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [new RecipeItem({ blockId: Blocks.FlowerTulipOrange })],
+        output: new InventoryItem({ itemId: Items.OrangeDye, count: 2 }),
+    }),
     // Magenta Dye
     new Recipe({
         type: RecipeType.Shapeless,
@@ -1329,6 +1335,12 @@ const recipes = [
         ],
         output: new InventoryItem({ itemId: Items.LightBlueDye, count: 2 }),
     }),
+    // Light Blue Dye (Alternate)
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [new RecipeItem({ blockId: Blocks.FlowerBlueOrchid })],
+        output: new InventoryItem({ itemId: Items.LightBlueDye, count: 2 }),
+    }),
     // Yellow Dye
     new Recipe({
         type: RecipeType.Shapeless,
@@ -1351,6 +1363,12 @@ const recipes = [
             new RecipeItem({ itemId: Items.RedDye }),
             new RecipeItem({ itemId: Items.BoneMeal }),
         ],
+        output: new InventoryItem({ itemId: Items.PinkDye, count: 2 }),
+    }),
+    // Pink Dye (Alternate)
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [new RecipeItem({ blockId: Blocks.FlowerTulipPink })],
         output: new InventoryItem({ itemId: Items.PinkDye, count: 2 }),
     }),
     // Gray Dye
@@ -1395,6 +1413,17 @@ const recipes = [
         input: [new RecipeItem({ itemId: Items.LapisLazuli })],
         output: new InventoryItem({ itemId: Items.BlueDye, count: 2 }),
     }),
-
+    // Red Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [new RecipeItem({ blockId: Blocks.FlowerRose })],
+        output: new InventoryItem({ itemId: Items.RedDye, count: 2 }),
+    }),
+    // Red Dye (Alternate)
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [new RecipeItem({ blockId: Blocks.FlowerTulipRed })],
+        output: new InventoryItem({ itemId: Items.RedDye, count: 2 }),
+    }),
     //#endregion
 ];

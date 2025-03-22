@@ -129,7 +129,7 @@ function createSheepBody() {
                 sprite: "entities/sheep/head",
                 offset: { x: 40, y: -12 },
                 flipOrigin: { x: -56, y: 0 },
-                zIndex: 4,
+                zIndex: 0,
                 flip: true,
             }),
             torso: new BodyPart({
