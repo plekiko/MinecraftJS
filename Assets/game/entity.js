@@ -404,7 +404,7 @@ class Entity {
         if (this.body) this.body.updateBody();
     }
 
-    tickUpdate() {
+    entityTickUpdate() {
         this.fireLogic();
         this.voidLogic();
     }

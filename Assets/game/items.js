@@ -62,6 +62,8 @@ const Items = Object.freeze({
     GoldenCarrot: 1509,
     Potato: 1510,
     BakedPotato: 1511,
+    RawMutton: 1512,
+    CookedMutton: 1513,
 
     Leather: 50,
     Bone: 51,
@@ -487,7 +489,7 @@ const items = [
         name: "Raw Beef",
         sprite: "beef_raw",
         smeltOutput: { itemId: 1501 },
-        foodValue: 1,
+        foodValue: 2,
     }),
     new Item({
         itemId: 1501,
@@ -500,7 +502,7 @@ const items = [
         name: "Raw Porkchop",
         sprite: "porkchop_raw",
         smeltOutput: { itemId: 1503 },
-        foodValue: 1,
+        foodValue: 2,
     }),
     new Item({
         itemId: 1503,
@@ -558,6 +560,19 @@ const items = [
         name: "Baked Potato",
         sprite: "potato_baked",
         foodValue: 5,
+    }),
+    new Item({
+        itemId: 1512,
+        name: "Raw Mutton",
+        sprite: "mutton_raw",
+        smeltOutput: { itemId: 1513 },
+        foodValue: 2,
+    }),
+    new Item({
+        itemId: 1513,
+        name: "Cooked Mutton",
+        sprite: "mutton_cooked",
+        foodValue: 6,
     }),
     //#endregion
 

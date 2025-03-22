@@ -88,6 +88,15 @@ const Sounds = Object.freeze({
     ],
     Zombie_Hurt: ["mobs/zombie/hurt1", "mobs/zombie/hurt2"],
 
+    Sheep_Say: ["mobs/sheep/say1", "mobs/sheep/say2", "mobs/sheep/say3"],
+    Sheep_Step: [
+        "mobs/sheep/step1",
+        "mobs/sheep/step2",
+        "mobs/sheep/step3",
+        "mobs/sheep/step4",
+        "mobs/sheep/step5",
+    ],
+
     // Player
     Player_Hurt: ["player/hit1", "player/hit2", "player/hit3"],
     Player_Eat: ["player/eat1", "player/eat2", "player/eat3"],

@@ -55,6 +55,12 @@ class Pig extends Mob {
         playPositionalSound(this.position, "mobs/pig/death.ogg");
         removeEntity(this);
     }
+
+    tickUpdate() {
+        this.entityTickUpdate();
+    }
+
+    interact(player, item) {}
 }
 
 const pigBody = new Body({

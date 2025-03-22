@@ -82,6 +82,12 @@ class Zombie extends Mob {
         playPositionalSound(this.position, "mobs/zombie/death.ogg");
         removeEntity(this);
     }
+
+    tickUpdate() {
+        this.entityTickUpdate();
+    }
+
+    interact(player, item) {}
 }
 
 const zombieBody = {

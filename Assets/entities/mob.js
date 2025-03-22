@@ -172,11 +172,19 @@ class Mob extends Entity {
         const loot = this.lootTable.getRandomLoot();
 
         loot.forEach((item) => {
-            summonEntity(Drop, new Vector2(this.position.x, this.position.y), {
-                blockId: item.blockId,
-                itemId: item.itemId,
-                count: item.count,
-            });
+            summonEntity(
+                Drop,
+                new Vector2(
+                    this.position.x +
+                        RandomRange(-this.hitbox.x, this.hitbox.x),
+                    this.position.y
+                ),
+                {
+                    blockId: item.blockId,
+                    itemId: item.itemId,
+                    count: item.count,
+                }
+            );
         });
     }
 

@@ -43,6 +43,8 @@ class Drop extends Entity {
         return 64;
     }
 
+    interact(player, item) {}
+
     collisionLogic() {
         this.getOutBlockLogic();
         const other = this.entityCollision();
@@ -73,6 +75,10 @@ class Drop extends Entity {
                 if (other.count <= 0) removeEntity(other);
             }
         }
+    }
+
+    tickUpdate() {
+        this.entityTickUpdate();
     }
 
     hit() {}

@@ -339,6 +339,7 @@ class Player extends Entity {
 
     processEating() {
         if (!this.eating) return;
+        if (this.health >= this.maxHealth) return;
 
         const item = GetItem(this.holdItem.itemId);
         if (!item || item.foodValue <= 0) {
@@ -396,6 +397,10 @@ class Player extends Entity {
         this.inventory.dropAll(this.position);
     }
 
+    tickUpdate() {
+        this.entityTickUpdate();
+    }
+
     dieEvent() {
         chat.message("Player has dies");
 
@@ -436,6 +441,8 @@ class Player extends Entity {
 
         if (rightClick) this.useItemInHand();
 
+        if (rightClick) this.tryEntityInteract();
+
         if (!this.hoverBlock) return;
 
         const block = GetBlock(this.hoverBlock.blockType);
@@ -467,6 +474,20 @@ class Player extends Entity {
                 this.openHopper();
                 break;
         }
+    }
+
+    tryEntityInteract() {
+        const entity = this.checkForEntityOnMouse();
+
+        if (!entity) return;
+
+        if (typeof entity.interact !== "function") return;
+
+        entity.interact(this, this.holdItem);
+    }
+
+    interact(player, item) {
+        if (player === this) return;
     }
 
     openConverter() {

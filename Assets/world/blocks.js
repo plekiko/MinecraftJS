@@ -112,6 +112,8 @@ const Blocks = Object.freeze({
     Vines: 124,
 
     ZombieSpawner: 500,
+
+    WhiteWool: 200,
 });
 
 const blockTypes = [
@@ -1653,6 +1655,18 @@ const blockTypes = [
         collision: false,
     }),
 
+    //#endregion
+
+    //#region Wool
+    new BlockType({
+        blockId: 200,
+        name: "White Wool",
+        sprite: "wool_colored_white",
+        hardness: 1.3,
+        breakSound: Sounds.Break_Cloth,
+        breakingSound: Sounds.Breaking_Cloth,
+        toolType: ToolType.Shears,
+    }),
     //#endregion
 ];
 

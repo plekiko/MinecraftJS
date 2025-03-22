@@ -737,6 +737,86 @@ class Inventory {
         }
 
         if (this.updateStorage) this.syncStorageSlots();
+
+        this.handleHotbarAssignment();
+    }
+
+    handleHotbarAssignment() {
+        // Only proceed if an item is hovered and the inventory UI is open
+        if (!this.hoverItem || !player.windowOpen) return;
+
+        // Map number keys "Digit1" to "Digit9" to hotbar slots 0-8
+        for (let i = 1; i <= 9; i++) {
+            if (input.isKeyPressed(`Digit${i}`)) {
+                const hotbarIndex = i - 1; // Convert to 0-based index (Digit1 -> slot 0, Digit2 -> slot 1, etc.)
+                this.assignToHotbarSlot(hotbarIndex);
+                break; // Exit loop after handling the first key press
+            }
+        }
+    }
+
+    assignToHotbarSlot(slotIndex) {
+        const hotbarSlot = this.items[3][slotIndex]; // Hotbar is row 3
+        const hoveredSlot = this.hoverSlot.array
+            ? this.hoverSlot.array[this.hoverSlot.y][this.hoverSlot.x]
+            : null;
+
+        // If the hovered item is already in the hotbar slot, do nothing
+        if (
+            hoveredSlot &&
+            hoveredSlot === hotbarSlot &&
+            this.hoverSlot.array === this.items
+        ) {
+            return;
+        }
+
+        // Clone the items to avoid reference issues
+        const hoveredItem = structuredClone(this.hoverItem);
+        const hotbarItem = structuredClone(hotbarSlot.item);
+
+        // If the hovered item is from the crafting output slot
+        if (
+            !this.hoverSlot.array &&
+            this.hoverItem === this.craftingOutputSlot.item
+        ) {
+            if (hotbarSlot.isEmpty()) {
+                // Place the crafting output directly into the hotbar slot
+                hotbarSlot.item = structuredClone(hoveredItem);
+                this.clearSlot(this.craftingOutputSlot);
+                this.craftingComplete();
+            } else {
+                // Swap with the hotbar slot and return leftovers to inventory
+                const temp = structuredClone(hotbarSlot.item);
+                hotbarSlot.item = structuredClone(hoveredItem);
+                this.clearSlot(this.craftingOutputSlot);
+                this.craftingComplete();
+                this.addItem(temp); // Add the old hotbar item back to inventory
+            }
+            return;
+        }
+
+        // Handle swapping or placing from another slot (inventory, crafting, storage, etc.)
+        if (hoveredSlot) {
+            if (hoveredSlot.onlyTake) return; // Don't allow taking from onlyTake slots
+
+            if (hotbarSlot.isEmpty()) {
+                // Move hovered item to empty hotbar slot
+                hotbarSlot.item = structuredClone(hoveredItem);
+                hoveredSlot.clear();
+            } else {
+                // Swap items between hovered slot and hotbar slot
+                hotbarSlot.item = structuredClone(hoveredItem);
+                hoveredSlot.item = structuredClone(hotbarItem);
+            }
+
+            // Sync storage if modifying storageSlots
+            if (
+                this.hoverSlot.array === this.storageSlots ||
+                this.storageSlots
+            ) {
+                this.reverseSync();
+            }
+        }
     }
 
     resetLastHoveredSlot() {

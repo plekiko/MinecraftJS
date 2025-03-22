@@ -14,6 +14,10 @@ class Snowball extends Projectile {
         });
     }
 
+    tickUpdate() {
+        this.entityTickUpdate();
+    }
+
     dieEvent() {
         PlayRandomSoundFromArray({
             array: Sounds.Break_Snow,

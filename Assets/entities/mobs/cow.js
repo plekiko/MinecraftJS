@@ -64,6 +64,12 @@ class Cow extends Mob {
         });
         removeEntity(this);
     }
+
+    tickUpdate() {
+        this.entityTickUpdate();
+    }
+
+    interact(player, item) {}
 }
 
 const cowBody = new Body({
@@ -115,11 +121,5 @@ const cowBody = new Body({
             swayIntensity: 3,
             zIndex: 1,
         }),
-        // snout: new BodyPart({
-        //     sprite: "entities/pig/snout",
-        //     offset: { x: 75, y: -4 },
-        //     rotationOrigin: { x: 12, y: 32 },
-        //     zIndex: 1,
-        // }),
     },
 });

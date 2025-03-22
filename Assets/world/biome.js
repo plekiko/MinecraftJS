@@ -43,7 +43,7 @@ class Biome {
 }
 
 const BiomeMobs = Object.freeze({
-    CommonMobs: ["Pig", "Cow"],
+    CommonMobs: ["Pig", "Cow", "Sheep"],
     Googlies: ["Zombie"],
 });
 

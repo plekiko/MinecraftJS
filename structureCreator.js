@@ -645,7 +645,10 @@ document.getElementById("shareBtn").addEventListener("click", () => {
             alert("Link copied to clipboard!");
         });
     } else {
-        alert("Copy this link to share your build: \n" + url.href);
+        // Change the link to the new URL
+        const newUrl = url.toString();
+        window.history.replaceState({}, document.title, newUrl);
+        alert("Cannot copy link to clipboard, please copy from the URL bar.");
     }
 });
 
