@@ -126,6 +126,8 @@ class Entity {
             this.filterBlocksByProperty(this.collidingWithBlocks, "collision")
                 .length > 0
         ) {
+            this.shouldAddForce = { x: 0, y: 0 };
+            this.isGettingKnockback = false;
             return;
         }
         this.shouldAddForce.x += x * BLOCK_SIZE;

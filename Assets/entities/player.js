@@ -1206,14 +1206,16 @@ class Player extends Entity {
             return;
         }
 
+        this.isGettingKnockback = false;
+
         const isSprinting = input.isKeyDown("ShiftLeft");
         let speed = isSprinting
             ? this.abilities.walkSpeed * 1.3 * BLOCK_SIZE
             : this.abilities.walkSpeed * BLOCK_SIZE;
 
-        this.velocity.y = 0;
-
         this.noGravity = true;
+
+        this.velocity.y = 0;
 
         if (input.isKeyDown("KeyW") || input.isKeyDown("Space"))
             this.velocity.y = -4.7 * BLOCK_SIZE;

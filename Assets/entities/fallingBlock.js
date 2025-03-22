@@ -56,9 +56,16 @@ class FallingBlock extends Entity {
 
             setBlockType(myBlock, this.blockType);
         } else {
+            if (
+                this.filterBlocksByProperty(
+                    this.collidingWithBlocks,
+                    "collision"
+                ).length > 0
+            ) {
+                this.grounded = true;
+            }
+
             this.lastVelocityY = this.velocity.y / 2;
         }
     }
-
-    hit() {}
 }

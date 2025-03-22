@@ -121,7 +121,8 @@ function updateEntities(tick = false) {
             entity.position.x >= cameraFarX &&
             entity.position.x <= cameraNearX
         ) {
-            if (tick) entity.tickUpdate();
+            if (typeof entity.tickUpdate === "function" && tick)
+                entity.tickUpdate();
             else entity.update();
         }
     });

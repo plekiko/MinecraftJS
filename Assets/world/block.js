@@ -347,10 +347,17 @@ class Block extends Square {
                 this.playNote();
                 break;
             case SpecialType.TNT:
-                summonEntity(TNT, getBlockWorldPosition(this));
-                this.breakBlock(false);
+                this.explode();
                 break;
         }
+    }
+
+    explode(shortFuse = false) {
+        const tntEntity = summonEntity(TNT, getBlockWorldPosition(this));
+        if (shortFuse) {
+            tntEntity.fuse = 10;
+        }
+        this.breakBlock(false);
     }
 
     unpower() {

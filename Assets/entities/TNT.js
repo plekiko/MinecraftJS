@@ -16,11 +16,11 @@ class TNT extends Entity {
 
         this.velocity.y = -4 * BLOCK_SIZE;
 
-        this.fuse = 10;
+        this.fuse = 80;
 
         // Explosion properties
         this.explosionRadius = 4 * BLOCK_SIZE;
-        this.explosionDamage = 10;
+        this.explosionDamage = 15;
         this.explosionPower = 20;
 
         this.flashInterval = 10;
@@ -46,6 +46,8 @@ class TNT extends Entity {
         }
     }
 
+    hit() {}
+
     // Explosion logic: damage entities and destroy blocks in radius
     explode() {
         PlayRandomSoundFromArray({
@@ -63,7 +65,11 @@ class TNT extends Entity {
                     entity.position
                 );
                 const damage = this.calculateDamage(distance);
-                entity.hit(damage);
+                if (typeof entity.hit === "function") entity.hit(damage);
+                if (entity.type === EntityTypes.Drop) {
+                    removeEntity(entity);
+                    return;
+                }
                 // Apply knockback
                 const knockbackForce = this.calculateKnockback(distance);
                 const dx = entity.position.x - this.position.x;
@@ -148,7 +154,7 @@ class TNT extends Entity {
             if (power >= powerThreshold) {
                 if (blockDef.hardness >= 0) {
                     if (blockDef.specialType === SpecialType.TNT) {
-                        block.power();
+                        block.explode(true);
                     } else {
                         block.breakBlock(blockDef.dropWithoutTool);
                         setBlockType(block, Blocks.Air);
