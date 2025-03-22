@@ -100,6 +100,8 @@ const Sounds = Object.freeze({
     // Player
     Player_Hurt: ["player/hit1", "player/hit2", "player/hit3"],
     Player_Eat: ["player/eat1", "player/eat2", "player/eat3"],
+
+    Explosion: ["tnt/explode1", "tnt/explode2", "tnt/explode3", "tnt/explode4"],
 });
 
 function PlayRandomSoundFromArray({

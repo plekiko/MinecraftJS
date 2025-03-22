@@ -749,30 +749,57 @@ class Chunk {
                 }
 
                 if (updateBlocks) {
-                    const blockBeneath = GetBlock(
-                        this.getBlock(x, y + 1, calculate, wall)?.blockType
+                    this.updateAdjacentBlocks(
+                        x,
+                        y,
+                        blockType,
+                        wall,
+                        metaData,
+                        calculate
                     );
-
-                    if (
-                        blockBeneath &&
-                        blockBeneath.changeToBlockWithBlockAbove
-                    ) {
-                        if (GetBlock(blockType).collision) {
-                            this.setBlockType(
-                                x,
-                                y + 1,
-                                blockBeneath.changeToBlockWithBlockAbove,
-                                wall,
-                                metaData,
-                                calculate
-                            );
-                        }
-                    }
                 }
 
                 block.dark = wall;
                 block.wall = wall;
                 if (metaData !== null) block.metaData = metaData;
+            }
+        }
+    }
+
+    updateAdjacentBlocks(x, y, blockType, wall, metaData, calculate) {
+        const currentBlockDef = GetBlock(blockType);
+        const blockBeneath = GetBlock(
+            this.getBlock(x, y + 1, calculate, wall)?.blockType
+        );
+        const blockAbove = GetBlock(
+            this.getBlock(x, y - 1, calculate, wall)?.blockType
+        );
+
+        // Case 1: Update block beneath (e.g., grass below turns to dirt)
+        if (blockBeneath && blockBeneath.changeToBlockWithBlockAbove) {
+            if (currentBlockDef?.collision) {
+                this.setBlockType(
+                    x,
+                    y + 1,
+                    blockBeneath.changeToBlockWithBlockAbove,
+                    wall,
+                    metaData,
+                    calculate
+                );
+            }
+        }
+
+        // Case 2: Update the placed block itself (e.g., grass turns to dirt if block above)
+        if (currentBlockDef?.changeToBlockWithBlockAbove) {
+            if (blockAbove && blockAbove.collision) {
+                this.setBlockType(
+                    x,
+                    y,
+                    currentBlockDef.changeToBlockWithBlockAbove,
+                    wall,
+                    metaData,
+                    calculate
+                );
             }
         }
     }

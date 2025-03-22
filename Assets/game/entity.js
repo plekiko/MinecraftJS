@@ -102,6 +102,8 @@ class Entity {
         this.fireMin = fire;
         this.fireDamageTimer = 0;
 
+        this.flashingColor = false;
+
         this.fireSprite = new SimpleSprite({
             sprite: "blocks/fire_layer_0.png",
             transform: new Transform(),
@@ -372,9 +374,11 @@ class Entity {
 
     flashColor(color = "red", duration = 0.05) {
         if (!this.body) {
+            this.flashingColor = true;
             this.color = color;
             setTimeout(() => {
                 this.color = this.originalColor;
+                this.flashingColor = false;
             }, duration * 1000);
             return;
         }
@@ -950,6 +954,16 @@ class Entity {
                 this.hitbox.x + this.outline * 2,
                 this.hitbox.y + this.outline * 2
             );
+        }
+
+        if (this.flashingColor) {
+            if (this.color) {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(0, 0, this.hitbox.x, this.hitbox.y);
+
+                ctx.restore();
+                return;
+            }
         }
 
         ctx.fillStyle = this.color;

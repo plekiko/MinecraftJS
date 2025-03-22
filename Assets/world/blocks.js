@@ -75,6 +75,7 @@ const Blocks = Object.freeze({
     RedstoneOre: 84,
     Hopper: 87,
     Lever: 88,
+    TNT: 89,
 
     MossyStoneBricks: 300,
 
@@ -1162,6 +1163,18 @@ const blockTypes = [
         collision: false,
         breakWithoutBlockUnderneath: true,
         specialType: SpecialType.Lever,
+    }),
+    // TNT
+    new BlockType({
+        blockId: 89,
+        name: "TNT",
+        sprite: "tnt_side",
+        hardness: 0,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
+        specialType: SpecialType.TNT,
+        noteBlockSound: "bd",
     }),
 
     //#endregion

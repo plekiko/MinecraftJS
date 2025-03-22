@@ -173,6 +173,7 @@ const SpecialType = Object.freeze({
     PressurePlate: 9,
     Hopper: 10,
     Lever: 11,
+    TNT: 12,
 });
 
 const BlockCategory = Object.freeze({
@@ -344,6 +345,10 @@ class Block extends Square {
                 break;
             case SpecialType.NoteBlock:
                 this.playNote();
+                break;
+            case SpecialType.TNT:
+                summonEntity(TNT, getBlockWorldPosition(this));
+                this.breakBlock(false);
                 break;
         }
     }
