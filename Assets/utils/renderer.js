@@ -447,15 +447,15 @@ function drawText({
     color = "white",
     background = null,
 }) {
-    if (background) {
-        ctx.fillStyle = background;
-        ctx.fillRect(
-            x - 5,
-            y - size + 2,
-            ctx.measureText(text).width + ctx.measureText(text).width / 2.8,
-            size + 5
-        );
-    }
+    // if (background) {
+    //     ctx.fillStyle = background;
+
+    //     const metrics = ctx.measureText(text);
+    //     const textWidth =
+    //         metrics.actualBoundingBoxRight + metrics.actualBoundingBoxLeft;
+
+    //     ctx.fillRect(x - 5, y - size + 2, textWidth, size + 5);
+    // }
 
     ctx.textAlign = textAlign;
 
