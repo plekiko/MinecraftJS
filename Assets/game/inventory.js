@@ -5,7 +5,15 @@ class Inventory {
         this.items = [];
         this.craftingSlots = [];
         this.furnaceSlots = [];
+        this.creativeSlots = [];
+
+        this.currentCreativePage = 0;
+
         this.storageSlots = null;
+
+        this.creativeItems = [];
+        this.creativeMaxPages = 0;
+        this.inventoryText = null;
 
         this.craftingOutputPosition = {
             x: 508,
@@ -42,12 +50,15 @@ class Inventory {
 
         this.openUIOffset = { x: 0, y: 0 };
         this.openUIImage = "";
+        this.openUIImageOffset = { x: 0, y: 0 };
 
         this.interactedBlock = null;
 
         this.lastHoveredSlot = { x: null, y: null };
 
         this.updateStorage = false;
+
+        this.buttons = [];
 
         this.hoverItem = null;
         this.hoverSlot = { x: null, y: null, array: null };
@@ -59,6 +70,8 @@ class Inventory {
         this.wasItemInConverterOutput = false;
 
         this.createItemArray();
+
+        this.populateCreativeInventory();
     }
 
     createItemArray() {
@@ -178,11 +191,19 @@ class Inventory {
             }
         }
 
+        this.inventoryText = null;
+
         this.wasItemInConverterOutput = false;
+
+        this.openUIImageOffset = { x: 0, y: 0 };
 
         this.openUIOffset = { x: 0, y: 0 };
 
         this.createCraftingArray();
+
+        this.clearButtons();
+
+        this.creativeSlots = null;
 
         this.furnaceSlots = null;
 
@@ -428,13 +449,181 @@ class Inventory {
 
         this.updateStorage = true;
 
+        this.openUIImage = "furnace";
+
         this.createFurnaceSlots();
+    }
+
+    openCreativeInventory() {
+        this.openUIImage = "creative_inventory";
+
+        this.openUIImageOffset.y = -80;
+        this.openUIOffset.y = 196;
+
+        this.createCreativeSlots();
+
+        this.createCreativeButtons();
+
+        this.inventoryText = new TextElement({
+            position: { x: 300, y: -152 },
+            text: `Creative - Page ${this.currentCreativePage + 1}/${
+                this.creativeMaxPages
+            }`,
+            size: 27,
+        });
+    }
+
+    createCreativeButtons() {
+        this.addButton({
+            position: { x: -50, y: 16 },
+            spriteScale: 5,
+            size: { x: 50, y: 65 },
+            image: "arrow_left",
+            hoverImage: "arrow_left_hovered",
+            callback: () => this.goLeftInCreativeMenu(),
+        });
+
+        this.addButton({
+            position: { x: 618, y: 16 },
+            spriteScale: 5,
+            size: { x: 50, y: 65 },
+            image: "arrow_right",
+            hoverImage: "arrow_right_hovered",
+            callback: () => this.goRightInCreativeMenu(),
+        });
+    }
+
+    goRightInCreativeMenu() {
+        this.currentCreativePage++;
+
+        if (this.currentCreativePage >= this.creativeMaxPages) {
+            this.currentCreativePage = this.creativeMaxPages - 1;
+        }
+
+        this.inventoryText.text = `Creative - Page ${
+            this.currentCreativePage + 1
+        }/${this.creativeMaxPages}`;
+
+        this.createCreativeSlots();
+    }
+
+    goLeftInCreativeMenu() {
+        this.currentCreativePage--;
+
+        if (this.currentCreativePage < 0) {
+            this.currentCreativePage = 0;
+        }
+
+        this.inventoryText.text = `Creative - Page ${
+            this.currentCreativePage + 1
+        }/${this.creativeMaxPages}`;
+
+        this.createCreativeSlots();
+    }
+
+    createCreativeSlots() {
+        const slots = [];
+        const itemsPerPage = 9 * 6; // 54 items per page
+        const startIndex = this.currentCreativePage * itemsPerPage;
+        const endIndex = Math.min(
+            startIndex + itemsPerPage,
+            this.creativeItems.length
+        );
+
+        // Create a 6x9 grid
+        for (let y = 0; y < 6; y++) {
+            slots[y] = [];
+            for (let x = 0; x < 9; x++) {
+                const index = startIndex + y * 9 + x;
+                const position = { x: 32 + x * 63, y: y * 63 - 129 };
+
+                // Only add a slot if there's an item at this index
+                if (index < endIndex && this.creativeItems[index]) {
+                    slots[y][x] = new InventorySlot({
+                        position: position,
+                        item: structuredClone(this.creativeItems[index]), // Clone to avoid reference issues
+                        infiniteTake: true,
+                    });
+                } else {
+                    // Fill empty slots with a blank slot
+                    slots[y][x] = new InventorySlot({
+                        position: position,
+                        item: new InventoryItem(),
+                        infiniteTake: true,
+                    });
+                }
+            }
+        }
+
+        this.creativeSlots = slots;
+    }
+
+    addButton({
+        position,
+        size,
+        text = "",
+        callback,
+        image = null,
+        hoverImage = null,
+        spriteScale = 1,
+    }) {
+        const button = new Button({
+            position,
+            size,
+            text,
+            callback,
+            image,
+            hoverImage,
+            spriteScale,
+        });
+        this.buttons.push(button);
+    }
+
+    clearButtons() {
+        this.buttons = [];
+    }
+
+    handleButtonInteractions() {
+        for (let button of this.buttons) {
+            if (
+                button.isHovered(this.inventoryUI, this.openUIOffset) &&
+                input.isLeftMouseButtonPressed()
+            ) {
+                button.onClick();
+            }
+        }
+    }
+
+    populateCreativeInventory() {
+        // Get all blocks
+        const blocks = Object.values(Blocks);
+
+        // Get all items
+        const items = Object.values(Items);
+
+        // First we take all blocks and add them to the creative inventory
+        for (let i = 1; i < blocks.length; i++) {
+            this.creativeItems.push(
+                new InventoryItem({ blockId: blocks[i], count: 1 })
+            );
+        }
+
+        // Then we take all items and add them to the creative inventory
+        for (let i = 0; i < items.length; i++) {
+            this.creativeItems.push(
+                new InventoryItem({ itemId: items[i], count: 1 })
+            );
+        }
+
+        this.creativeMaxPages = Math.ceil(this.creativeItems.length / (9 * 6));
     }
 
     openSingleChest(storage) {
         this.storage = storage;
 
         this.updateStorage = true;
+
+        this.openUIImage = "single_chest";
 
         this.createChestSlots();
     }
@@ -487,7 +676,7 @@ class Inventory {
     }
 
     refreshInventory() {
-        if (this.furnace || this.storageSlots) {
+        if (this.furnace || this.storageSlots || this.creativeSlots) {
             this.craftingSlots = [];
             return;
         }
@@ -536,6 +725,7 @@ class Inventory {
             if (array) if (this.handleShiftClick(array[y][x], array)) return;
         }
 
+        // Handle crafting output slot
         if (item === this.craftingOutputSlot.item) {
             const maxStackSize = this.getStackSize(item);
             const isSameType =
@@ -566,27 +756,37 @@ class Inventory {
             return;
         }
 
+        // Handle placing an item from cursor into a slot
         if (this.holdingItem && array) {
-            if (array[y][x].onlyTake) {
-                return; // Do not allow placing items in onlyTake slots
+            const slot = array[y][x];
+            if (slot.onlyTake || slot.infiniteTake) {
+                // Add infiniteTake check
+                return; // Do not allow placing items in onlyTake or infiniteTake slots
             }
 
             this.movingLogic(item);
-
             this.reverseSync();
             return;
         }
 
+        // Handle picking up an item from a slot
         if (item.count <= 0 || (!item.blockId && item.itemId === null)) return;
 
         if (array) {
-            this.holdingItem = structuredClone(item);
-            this.removeItem(y, x, item.count, array);
-
+            const slot = array[y][x];
+            if (slot.infiniteTake) {
+                // Infinite take: copy item without removing from slot
+                this.holdingItem = structuredClone(item);
+            } else {
+                // Normal take: remove item from slot
+                this.holdingItem = structuredClone(item);
+                this.removeItem(y, x, item.count, array);
+            }
             this.reverseSync();
             return;
         }
 
+        // Handle combining items when cursor already holds an item (not array-based)
         if (!this.holdingItem) {
             this.holdingItem = structuredClone(item);
         } else if (
@@ -739,6 +939,7 @@ class Inventory {
         if (this.updateStorage) this.syncStorageSlots();
 
         this.handleHotbarAssignment();
+        this.handleButtonInteractions();
     }
 
     handleHotbarAssignment() {
@@ -798,6 +999,13 @@ class Inventory {
         // Handle swapping or placing from another slot (inventory, crafting, storage, etc.)
         if (hoveredSlot) {
             if (hoveredSlot.onlyTake) return; // Don't allow taking from onlyTake slots
+            if (hoveredSlot.infiniteTake) {
+                // Infinite take: copy item without removing from slot
+                console.log(hotbarItem);
+                if (hotbarItem.count === 0)
+                    hotbarSlot.item = structuredClone(hoveredItem);
+                return;
+            }
 
             if (hotbarSlot.isEmpty()) {
                 // Move hovered item to empty hotbar slot
@@ -830,6 +1038,7 @@ class Inventory {
         this.mouseOverCheck(this.items);
         this.mouseOverCheck(this.craftingSlots);
         this.mouseOverCheck(this.furnaceSlots);
+        this.mouseOverCheck(this.creativeSlots);
         this.mouseOverCheck(this.storageSlots);
 
         if (
@@ -1054,7 +1263,11 @@ class Inventory {
 
         this.hoverSlot = { x: x, y: y, array: array };
 
-        if (!item.onlyTake) this.handleRightClickSpread(item, x, y, array);
+        const slot = array[y][x];
+        if (!slot.onlyTake && !slot.infiniteTake) {
+            // Add infiniteTake check
+            this.handleRightClickSpread(item, x, y, array);
+        }
 
         if (this.handleRightClickGetHalf(item, x, y, array)) return;
 
@@ -1062,10 +1275,20 @@ class Inventory {
     }
 
     getHalf(item, x, y, array) {
+        const slot = array[y][x];
         this.holdingItem = structuredClone(item);
-        const half = Math.round(item.count / 2);
-        this.holdingItem.count = half;
-        this.removeItem(y, x, half, array);
+        if (slot.infiniteTake) {
+            // Infinite take: set holdingItem to half count without modifying slot
+            // Get Max stack size
+            const maxStackSize = this.getStackSize(item);
+
+            this.holdingItem.count = maxStackSize;
+        } else {
+            // Normal take: reduce slot count by half
+            const half = Math.round(item.count / 2);
+            this.holdingItem.count = half;
+            this.removeItem(y, x, half, array);
+        }
     }
 
     getSlotFromInventory(item) {
@@ -1172,8 +1395,6 @@ class Inventory {
 
         let path = "inventory";
         if (this.craftingTable) path = "crafting_table";
-        if (this.furnace) path = "furnace";
-        if (this.storageSlots) path = "single_chest";
 
         if (this.openUIImage !== "") {
             path = this.openUIImage;
@@ -1181,14 +1402,24 @@ class Inventory {
 
         this.inventoryUI = drawImage({
             url: "Assets/sprites/gui/" + path + ".png",
-            x: CANVAS.width / 2,
-            y: CANVAS.height / 6,
+            x: CANVAS.width / 2 + this.openUIImageOffset.x,
+            y: CANVAS.height / 6 + this.openUIImageOffset.y,
             scale: 3.5,
         });
 
         this.drawItems();
         this.drawHoldItem();
         this.drawHoverTitle();
+        this.drawButtons(ctx);
+
+        if (this.inventoryText)
+            this.inventoryText.draw(this.inventoryUI, this.openUIOffset);
+    }
+
+    drawButtons(ctx) {
+        for (let button of this.buttons) {
+            button.draw(ctx, this.inventoryUI, this.openUIOffset);
+        }
     }
 
     drawItems() {
@@ -1197,6 +1428,7 @@ class Inventory {
 
         this.drawCraftingSlots();
         this.drawSlots(this.furnaceSlots);
+        this.drawSlots(this.creativeSlots);
         this.drawSlots(this.storageSlots);
         this.drawFurnaceExtras();
     }
@@ -1396,10 +1628,12 @@ class InventorySlot {
         position = { x: 0, y: 0 },
         item = new InventoryItem(),
         onlyTake = false,
+        infiniteTake = false,
     }) {
         this.position = position;
         this.item = item;
         this.onlyTake = onlyTake;
+        this.infiniteTake = infiniteTake;
     }
 
     isEmpty() {
@@ -1411,5 +1645,109 @@ class InventorySlot {
         this.item.itemId = null;
         this.item.count = 0;
         this.item.props = {};
+    }
+}
+
+class Button {
+    constructor({
+        position = { x: 0, y: 0 },
+        size = { x: 50, y: 20 },
+        text = "",
+        callback = () => {},
+        image = null, // Default image
+        hoverImage = null, // Hover image
+        spriteScale = 1,
+    }) {
+        this.position = position;
+        this.size = size;
+        this.text = text;
+        this.callback = callback;
+        this.image = image;
+        this.hoverImage = hoverImage;
+        this.spriteScale = spriteScale;
+    }
+
+    isHovered(inventoryUI, openUIOffset) {
+        const x = inventoryUI.x + this.position.x + openUIOffset.x;
+        const y = inventoryUI.y + this.position.y + openUIOffset.y;
+        return mouseOverPosition(x, y, this.size.x, this.size.y);
+    }
+
+    onClick() {
+        playSound("ui/click.ogg");
+
+        this.callback();
+    }
+
+    draw(ctx, inventoryUI, openUIOffset) {
+        const x = inventoryUI.x + this.position.x + openUIOffset.x;
+        const y = inventoryUI.y + this.position.y + openUIOffset.y;
+        const isHovered = this.isHovered(inventoryUI, openUIOffset);
+
+        if (this.image) {
+            // Draw image-based button
+            const imageToDraw =
+                isHovered && this.hoverImage ? this.hoverImage : this.image;
+            drawImage({
+                url: "Assets/sprites/gui/" + imageToDraw + ".png",
+                x: x,
+                y: y,
+                width: this.size.x,
+                height: this.size.y,
+                centerX: false,
+                centerY: false,
+                scale: this.spriteScale,
+            });
+
+            // Draw hitbox
+            // ctx.fillStyle = "rgba(255, 0, 0, .5)";
+            // ctx.fillRect(x, y, this.size.x, this.size.y);
+        } else {
+            // Draw text-based button with background
+            ctx.fillStyle = isHovered ? "lightgray" : "gray";
+            ctx.fillRect(x, y, this.size.width, this.size.height);
+
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, this.size.width, this.size.height);
+
+            if (this.text) {
+                drawText({
+                    text: this.text,
+                    x: x + this.size.width / 2,
+                    y: y + this.size.height / 2,
+                    size: 20,
+                    color: "black",
+                    textAlign: "center",
+                });
+            }
+        }
+    }
+}
+
+class TextElement {
+    constructor({
+        text = "",
+        position = { x: 0, y: 0 },
+        size = 20,
+        textAlign = "center",
+    }) {
+        this.text = text;
+        this.position = position;
+        this.size = size;
+        this.textAlign = textAlign;
+    }
+
+    draw(inventoryUI, openUIOffset) {
+        const x = inventoryUI.x + this.position.x + openUIOffset.x;
+        const y = inventoryUI.y + this.position.y + openUIOffset.y;
+
+        drawText({
+            text: this.text,
+            x: x,
+            y: y,
+            size: this.size,
+            textAlign: this.textAlign,
+        });
     }
 }

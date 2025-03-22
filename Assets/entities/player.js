@@ -571,6 +571,10 @@ class Player extends Entity {
         if (input.isKeyPressed("KeyE")) {
             if (this.windowOpen) this.closeInventory();
             else {
+                if (this.gamemode === 1) {
+                    this.inventory.openCreativeInventory();
+                }
+
                 this.inventory.interactedBlock = null;
                 this.openInventory();
             }

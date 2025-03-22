@@ -48,7 +48,6 @@ const Items = Object.freeze({
     GoldIngot: 24,
     RedstoneDust: 25,
     GoldNugget: 26,
-    IronNugget: 27,
 
     RawBeef: 1500,
     CookedBeef: 1501,
@@ -493,11 +492,6 @@ const items = [
         name: "Gold Nugget",
         sprite: "gold_nugget",
     }),
-    new Item({
-        itemId: 27,
-        name: "Iron Nugget",
-        sprite: "iron_nugget",
-    }),
 
     //#endregion
 
@@ -543,7 +537,7 @@ const items = [
     new Item({
         itemId: 1506,
         name: "Golden Apple",
-        sprite: "apple_gold",
+        sprite: "apple_golden",
         foodValue: 7,
     }),
     new Item({
@@ -562,7 +556,7 @@ const items = [
     new Item({
         itemId: 1509,
         name: "Golden Carrot",
-        sprite: "carrot_gold",
+        sprite: "carrot_golden",
         foodValue: 6,
     }),
     new Item({

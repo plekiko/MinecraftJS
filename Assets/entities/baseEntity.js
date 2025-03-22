@@ -3,4 +3,5 @@ class base extends Entity {
     update() {}
     dieEvent() {}
     interact(player, item) {}
+    tickUpdate() {}
 }
