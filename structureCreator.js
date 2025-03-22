@@ -258,7 +258,7 @@ if (!document.getElementById("paletteSearch")) {
 
 const paletteTitle = document.createElement("h3");
 paletteTitle.style.color = "#e8e8e8";
-paletteTitle.textContent = "Blocks";
+paletteTitle.textContent = `Blocks (${blockTypes.length})`;
 paletteContainer.appendChild(paletteTitle);
 
 const sortedBlocks = blockTypes
@@ -296,7 +296,7 @@ sortedBlocks.forEach((block) => {
 
 const lootTitle = document.createElement("h3");
 lootTitle.style.color = "#e8e8e8";
-lootTitle.textContent = "Chest Loot";
+lootTitle.textContent = `Chest Loot (${Object.keys(ChestLoot).length})`;
 paletteContainer.appendChild(lootTitle);
 
 for (const key in ChestLoot) {
