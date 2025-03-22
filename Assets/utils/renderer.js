@@ -445,7 +445,18 @@ function drawText({
     shadow = true,
     textAlign = "right",
     color = "white",
+    background = null,
 }) {
+    if (background) {
+        ctx.fillStyle = background;
+        ctx.fillRect(
+            x - 5,
+            y - size + 2,
+            ctx.measureText(text).width + ctx.measureText(text).width / 2.8,
+            size + 5
+        );
+    }
+
     ctx.textAlign = textAlign;
 
     if (shadow) {

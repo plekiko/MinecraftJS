@@ -14,6 +14,7 @@ class Item {
         playMusicInJukebox = null,
         projectile = null,
         throwPower = 0,
+        excludeFromCreativeInventory = false,
 
         placeBlock = null,
     }) {
@@ -39,6 +40,8 @@ class Item {
         this.smeltOutput = smeltOutput;
 
         this.heldInHand = heldInHand;
+
+        this.excludeFromCreativeInventory = excludeFromCreativeInventory;
 
         this.placeBlock = placeBlock;
     }

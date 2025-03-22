@@ -134,7 +134,13 @@ const Blocks = Object.freeze({
 
 const blockTypes = [
     //#region Basic Blocks
-    new BlockType({ blockId: 0, name: "Air", collision: false, air: true }),
+    new BlockType({
+        blockId: 0,
+        name: "Air",
+        collision: false,
+        air: true,
+        excludeFromCreativeInventory: true,
+    }),
     new BlockType({
         blockId: 1,
         sprite: "grass_side",
@@ -985,6 +991,7 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
+        excludeFromCreativeInventory: true,
     }),
     new BlockType({
         blockId: 47,
@@ -998,6 +1005,7 @@ const blockTypes = [
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
+        excludeFromCreativeInventory: true,
     }),
     new BlockType({
         blockId: 50,
@@ -1026,6 +1034,7 @@ const blockTypes = [
         name: "Structure Air",
         collision: false,
         air: true,
+        excludeFromCreativeInventory: true,
     }),
     new BlockType({
         blockId: 60,
@@ -1108,6 +1117,7 @@ const blockTypes = [
         chunkUpdate: true,
         cannotBeConverted: true,
         dropItem: Items.RedstoneDust,
+        excludeFromCreativeInventory: true,
     }),
     new BlockType({
         blockId: 68,

@@ -12,6 +12,8 @@ class BlockType {
         drag = 40,
         collision = true,
 
+        excludeFromCreativeInventory = false,
+
         stackSize = 64,
 
         hoeAble = false,
@@ -108,6 +110,8 @@ class BlockType {
         this.noPriority = noPriority;
 
         this.climable = climable;
+
+        this.excludeFromCreativeInventory = excludeFromCreativeInventory;
 
         this.fire = fire;
         this.extinguishEntity = extinguishEntity;

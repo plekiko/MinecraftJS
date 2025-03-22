@@ -602,7 +602,8 @@ class Inventory {
         const items = Object.values(Items);
 
         // First we take all blocks and add them to the creative inventory
-        for (let i = 1; i < blocks.length; i++) {
+        for (let i = 0; i < blocks.length; i++) {
+            if (GetBlock(blocks[i]).excludeFromCreativeInventory) continue;
             this.creativeItems.push(
                 new InventoryItem({ blockId: blocks[i], count: 1 })
             );
@@ -610,6 +611,7 @@ class Inventory {
 
         // Then we take all items and add them to the creative inventory
         for (let i = 0; i < items.length; i++) {
+            if (GetItem(items[i]).excludeFromCreativeInventory) continue;
             this.creativeItems.push(
                 new InventoryItem({ itemId: items[i], count: 1 })
             );
@@ -1409,8 +1411,8 @@ class Inventory {
 
         this.drawItems();
         this.drawHoldItem();
-        this.drawHoverTitle();
         this.drawButtons(ctx);
+        this.drawHoverTitle();
 
         if (this.inventoryText)
             this.inventoryText.draw(this.inventoryUI, this.openUIOffset);
@@ -1528,6 +1530,7 @@ class Inventory {
             size: 25,
             shadow: true,
             textAlign: "left",
+            background: "rgba(0, 0, 0, 0.5)",
         });
     }
 
