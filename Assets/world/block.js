@@ -179,6 +179,7 @@ const SpecialType = Object.freeze({
 const BlockCategory = Object.freeze({
     Logs: 1,
     Planks: 2,
+    Wool: 3,
 });
 
 class Metadata {

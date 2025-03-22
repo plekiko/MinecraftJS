@@ -86,6 +86,24 @@ const Items = Object.freeze({
     MusicDiscWait: 2267,
 
     Snowball: 300,
+
+    // Dyes
+    InkSack: 1200,
+    RedDye: 1201,
+    GreenDye: 1202,
+    MagentaDye: 1203,
+    OrangeDye: 1204,
+    LightBlueDye: 1205,
+    YellowDye: 1206,
+    LimeDye: 1207,
+    PinkDye: 1208,
+    GrayDye: 1209,
+    LightGrayDye: 1210,
+    CyanDye: 1211,
+    PurpleDye: 1212,
+    LapisLazuli: 1213,
+    CocoaBeans: 1214,
+    BoneMeal: 1215,
 });
 
 const items = [
@@ -703,6 +721,90 @@ const items = [
         projectile: "Snowball",
         throwPower: 25,
     }),
+    //#endregion
+
+    //#region Dyes
+    new Item({
+        itemId: 1200,
+        name: "Ink Sack",
+        sprite: "dye_powder_black",
+    }),
+    new Item({
+        itemId: 1201,
+        name: "Red Dye",
+        sprite: "dye_powder_red",
+    }),
+    new Item({
+        itemId: 1202,
+        name: "Green Dye",
+        sprite: "dye_powder_green",
+    }),
+    new Item({
+        itemId: 1203,
+        name: "Magenta Dye",
+        sprite: "dye_powder_magenta",
+    }),
+    new Item({
+        itemId: 1204,
+        name: "Orange Dye",
+        sprite: "dye_powder_orange",
+    }),
+    new Item({
+        itemId: 1205,
+        name: "Light Blue Dye",
+        sprite: "dye_powder_light_blue",
+    }),
+    new Item({
+        itemId: 1206,
+        name: "Yellow Dye",
+        sprite: "dye_powder_yellow",
+    }),
+    new Item({
+        itemId: 1207,
+        name: "Lime Dye",
+        sprite: "dye_powder_lime",
+    }),
+    new Item({
+        itemId: 1208,
+        name: "Pink Dye",
+        sprite: "dye_powder_pink",
+    }),
+    new Item({
+        itemId: 1209,
+        name: "Gray Dye",
+        sprite: "dye_powder_gray",
+    }),
+    new Item({
+        itemId: 1210,
+        name: "Light Gray Dye",
+        sprite: "dye_powder_silver",
+    }),
+    new Item({
+        itemId: 1211,
+        name: "Cyan Dye",
+        sprite: "dye_powder_cyan",
+    }),
+    new Item({
+        itemId: 1212,
+        name: "Purple Dye",
+        sprite: "dye_powder_purple",
+    }),
+    new Item({
+        itemId: 1213,
+        name: "Lapis Lazuli",
+        sprite: "dye_powder_blue",
+    }),
+    new Item({
+        itemId: 1214,
+        name: "Cocoa Beans",
+        sprite: "dye_powder_brown",
+    }),
+    new Item({
+        itemId: 1215,
+        name: "Bone Meal",
+        sprite: "dye_powder_white",
+    }),
+
     //#endregion
 ];
 

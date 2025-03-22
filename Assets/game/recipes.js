@@ -1119,7 +1119,7 @@ const recipes = [
     //#region Mossy Blocks
     // Mossy Cobblestone
     new Recipe({
-        type: RecipeType.Shaped,
+        type: RecipeType.Shapeless,
         input: [
             [
                 new RecipeItem({ blockId: Blocks.Cobblestone }),
@@ -1133,7 +1133,7 @@ const recipes = [
     }),
     // Mossy Stone Bricks
     new Recipe({
-        type: RecipeType.Shaped,
+        type: RecipeType.Shapeless,
         input: [
             [
                 new RecipeItem({ blockId: Blocks.StoneBricks }),
@@ -1145,5 +1145,256 @@ const recipes = [
             count: 1,
         }),
     }),
+    //#endregion
+
+    //#region Wool
+    // White Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.BoneMeal }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.WhiteWool, count: 1 }),
+    }),
+    // Orange Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.OrangeDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.OrangeWool, count: 1 }),
+    }),
+    // Magenta Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.MagentaDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.MagentaWool, count: 1 }),
+    }),
+    // Light Blue Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.LightBlueDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.LightBlueWool, count: 1 }),
+    }),
+    // Yellow Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.DandelionYellow }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.YellowWool, count: 1 }),
+    }),
+    // Lime Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.LimeDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.LimeWool, count: 1 }),
+    }),
+    // Pink Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.PinkDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.PinkWool, count: 1 }),
+    }),
+    // Gray Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.GrayDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.GrayWool, count: 1 }),
+    }),
+    // Light Gray Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.LightGrayDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.LightGrayWool, count: 1 }),
+    }),
+    // Cyan Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.CyanDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.CyanWool, count: 1 }),
+    }),
+    // Purple Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.PurpleDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.PurpleWool, count: 1 }),
+    }),
+    // Blue Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.LapisLazuli }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.BlueWool, count: 1 }),
+    }),
+    // Brown Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.CocoaBeans }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.BrownWool, count: 1 }),
+    }),
+    // Green Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.GreenDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.GreenWool, count: 1 }),
+    }),
+    // Red Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.RedDye }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.RedWool, count: 1 }),
+    }),
+    // Black Wool
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ blockCategory: BlockCategory.Wool }),
+            new RecipeItem({ itemId: Items.InkSack }),
+        ],
+        output: new InventoryItem({ blockId: Blocks.BlackWool, count: 1 }),
+    }),
+
+    //#endregion
+
+    //#region Dyes
+    // Orange Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ itemId: Items.RedDye }),
+            new RecipeItem({ itemId: Items.YellowDye }),
+        ],
+        output: new InventoryItem({ itemId: Items.OrangeDye, count: 2 }),
+    }),
+    // Magenta Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ itemId: Items.PinkDye }),
+            new RecipeItem({ itemId: Items.PurpleDye }),
+        ],
+        output: new InventoryItem({ itemId: Items.MagentaDye, count: 2 }),
+    }),
+    // Magenta Dye (Alternate)
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [new RecipeItem({ blockId: Blocks.FlowerAllium })],
+        output: new InventoryItem({ itemId: Items.MagentaDye, count: 2 }),
+    }),
+    // Light Blue Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ itemId: Items.BlueDye }),
+            new RecipeItem({ itemId: Items.WhiteDye }),
+        ],
+        output: new InventoryItem({ itemId: Items.LightBlueDye, count: 2 }),
+    }),
+    // Yellow Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [new RecipeItem({ blockId: Blocks.FlowerDandelion })],
+        output: new InventoryItem({ itemId: Items.YellowDye, count: 2 }),
+    }),
+    // Lime Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ itemId: Items.GreenDye }),
+            new RecipeItem({ itemId: Items.BoneMeal }),
+        ],
+        output: new InventoryItem({ itemId: Items.LimeDye, count: 2 }),
+    }),
+    // Pink Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ itemId: Items.RedDye }),
+            new RecipeItem({ itemId: Items.BoneMeal }),
+        ],
+        output: new InventoryItem({ itemId: Items.PinkDye, count: 2 }),
+    }),
+    // Gray Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ itemId: Items.InkSack }),
+            new RecipeItem({ itemId: Items.BoneMeal }),
+        ],
+        output: new InventoryItem({ itemId: Items.GrayDye, count: 2 }),
+    }),
+    // Light Gray Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ itemId: Items.GrayDye }),
+            new RecipeItem({ itemId: Items.BoneMeal }),
+        ],
+        output: new InventoryItem({ itemId: Items.LightGrayDye, count: 2 }),
+    }),
+    // Cyan Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ itemId: Items.BlueDye }),
+            new RecipeItem({ itemId: Items.GreenDye }),
+        ],
+        output: new InventoryItem({ itemId: Items.CyanDye, count: 2 }),
+    }),
+    // Purple Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ itemId: Items.RedDye }),
+            new RecipeItem({ itemId: Items.BlueDye }),
+        ],
+        output: new InventoryItem({ itemId: Items.PurpleDye, count: 2 }),
+    }),
+    // Blue Dye
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [new RecipeItem({ itemId: Items.LapisLazuli })],
+        output: new InventoryItem({ itemId: Items.BlueDye, count: 2 }),
+    }),
+
     //#endregion
 ];
