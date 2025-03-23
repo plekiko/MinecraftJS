@@ -1326,6 +1326,12 @@ const recipes = [
         input: [new RecipeItem({ blockId: Blocks.FlowerAllium })],
         output: new InventoryItem({ itemId: Items.MagentaDye, count: 2 }),
     }),
+    // Magenta Dye (Alternate)
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [new RecipeItem({ blockId: Blocks.FlowerSyringa })],
+        output: new InventoryItem({ itemId: Items.MagentaDye, count: 2 }),
+    }),
     // Light Blue Dye
     new Recipe({
         type: RecipeType.Shapeless,
