@@ -221,7 +221,7 @@ function playPositionalSound(
     if (cachedAudio) {
         audioElem = cachedAudio.cloneNode();
     } else {
-        console.warn(`Positional sound not preloaded: ${url}`);
+        // console.warn(`Positional sound not preloaded: ${url}`);
         audioElem = new Audio(url);
     }
 
@@ -253,12 +253,12 @@ function playPositionalSound(
         removeAudio(audioElem);
     });
     audioElem.onerror = () => {
-        console.error(`Error with positional sound: ${url}`);
+        // console.error(`Error with positional sound: ${url}`);
         removeAudio(audioElem);
     };
 
     audioElem.play().catch((err) => {
-        console.error(`Error playing positional sound ${url}: ${err}`);
+        // console.error(`Error playing positional sound ${url}: ${err}`);
     });
 
     return audioElem;
