@@ -286,10 +286,21 @@ function createPaletteItem(labelText, imgSrc, value) {
 }
 
 sortedBlocks.forEach((block) => {
+    // get block name by name in blocks array for exameple Blocks.FlowerRose -> Flower Rose
+    // We print the blockId in the palette, so we can use it directly in the exported JSON
+    const name = block.name
+        .replace("Blocks.", "")
+        .replace(/([A-Z])/g, " $1")
+        .trim();
+
     const imgSrc = block.sprite
-        ? "Assets/sprites/blocks/" + block.sprite + ".png"
+        ? "Assets/sprites/blocks/" + block.iconSprite + ".png"
         : "Assets/sprites/misc/placeholder.png";
-    const item = createPaletteItem(block.name, imgSrc, block.blockId);
+    const item = createPaletteItem(
+        name + " - " + block.blockId,
+        imgSrc,
+        block.blockId
+    );
     if (block.blockId === activeBlockId) item.classList.add("selected");
     paletteContainer.appendChild(item);
 });
