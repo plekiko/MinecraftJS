@@ -55,6 +55,8 @@ function SaveWorld(message = true, toFile = false) {
 
     currentSave.time = time;
 
+    currentSave.gameRules = JSON.stringify(GAMERULES);
+
     if (player) {
         currentSave.playerPosition = JSON.stringify(player.position);
 
@@ -236,6 +238,10 @@ function LoadWorld(save) {
     else pendingBlocks = new Map();
 
     time = currentSave.time;
+
+    if (currentSave.gameRules) {
+        GAMERULES = JSON.parse(currentSave.gameRules);
+    }
 
     if (SPAWN_PLAYER) {
         removeEntity(player);

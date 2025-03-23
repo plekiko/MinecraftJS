@@ -38,6 +38,15 @@ let updatingBlocks = []; //eg furnace
 
 let chat = null;
 
+let GAMERULES = {
+    keepInventory: false,
+    doDaylightCycle: true,
+    doMobSpawning: true,
+    doMobLoot: true,
+    doTileDrops: true,
+    doFireTick: true,
+};
+
 const ToolType = Object.freeze({
     Nothing: 0,
     Pickaxe: 1,

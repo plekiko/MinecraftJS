@@ -162,9 +162,46 @@ class Chat {
             case "hit":
                 if (!player) break;
                 this.hitPlayer(messageArray);
+                break;
+            case "gamerule":
+                this.gameRule(messageArray);
+                break;
             default:
                 this.message("Invalid Command!");
                 break;
+        }
+    }
+
+    gameRule(messageArray) {
+        // /gamerule <rule> <value>
+        if (!messageArray[1]) {
+            this.invalidCommand("/gamerule <rule> <value>");
+            return;
+        }
+
+        const rule = messageArray[1];
+        const value = messageArray[2];
+
+        if (rule === "list") {
+            for (const key in GAMERULES) {
+                this.message(`${key}: ${GAMERULES[key]}`);
+            }
+            return;
+        }
+
+        if (GAMERULES[rule] === undefined) {
+            this.message("Invalid rule.");
+            return;
+        }
+
+        if (value === "true") {
+            GAMERULES[rule] = true;
+            this.message(`${rule} set to true.`);
+        } else if (value === "false") {
+            GAMERULES[rule] = false;
+            this.message(`${rule} set to false.`);
+        } else {
+            this.message("Invalid value. Use true or false.");
         }
     }
 
@@ -365,6 +402,7 @@ class Chat {
             "/locatebiome <BiomeName>",
             "/seed",
             "/hit <damage>",
+            "/gamerule <rule/list> <value>",
         ];
 
         // Print them one by one in chat

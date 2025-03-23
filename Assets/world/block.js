@@ -1565,6 +1565,8 @@ class Block extends Square {
     }
 
     dropBlock() {
+        if (!GAMERULES.doTileDrops) return;
+
         const block = GetBlock(this.blockType);
 
         let props = {};

@@ -402,7 +402,7 @@ class Player extends Entity {
     }
 
     dieEvent() {
-        chat.message("Player has dies");
+        chat.message("Player has died.");
 
         PlayRandomSoundFromArray({
             array: Sounds.Player_Hurt,
@@ -416,7 +416,7 @@ class Player extends Entity {
         this.abilities.mayBuild = false;
         this.canMove = false;
 
-        this.dropAllItems();
+        if (!GAMERULES.keepInventory) this.dropAllItems();
 
         this.respawn();
     }

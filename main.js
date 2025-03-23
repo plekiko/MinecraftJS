@@ -95,6 +95,8 @@ function updateGame() {
 }
 
 function dayNightCycle() {
+    if (!GAMERULES.doDaylightCycle) return;
+
     time += deltaTime * dayNightSpeed;
 
     if (time > 3.5 && time < 6.5) day = false;

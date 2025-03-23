@@ -314,6 +314,8 @@ class Chunk {
     }
 
     spawnMobs(passive = true) {
+        if (!GAMERULES.doMobSpawning) return;
+
         if (
             (this.biome.mobs.length == 0 && passive) ||
             (this.biome.googlies.length == 0 && !passive)
@@ -346,7 +348,7 @@ class Chunk {
 
             setTimeout(() => {
                 entity.setOnGround();
-            }, 500);
+            }, 200);
         }
     }
 

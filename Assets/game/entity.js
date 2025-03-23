@@ -425,7 +425,7 @@ class Entity {
 
         if (this.type === EntityTypes.Drop) {
             if (this.fireDamageTimer >= 9) {
-                removeEntity(this);
+                if (GAMERULES.doFireTick) removeEntity(this);
                 return;
             }
         }
@@ -475,7 +475,7 @@ class Entity {
 
         this.fireDamageTimer++;
         if (this.fireDamageTimer >= 10) {
-            this.hit(1);
+            if (GAMERULES.doFireTick) this.hit(1);
             this.fireDamageTimer = 0;
         }
     }

@@ -168,6 +168,7 @@ class Mob extends Entity {
 
     dropLoot() {
         if (!this.lootTable) return;
+        if (!GAMERULES.doMobLoot) return;
 
         const loot = this.lootTable.getRandomLoot();
 
