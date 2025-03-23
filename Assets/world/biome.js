@@ -182,6 +182,7 @@ const Biomes = Object.freeze({
             Blocks.FlowerTulipPink,
             Blocks.FlowerTulipRed,
             Blocks.FlowerTulipWhite,
+            Blocks.FlowerSyringa,
         ],
         treeThreshold: 6.5,
         minTemp: 30,

@@ -17,6 +17,7 @@ const Blocks = Object.freeze({
     AcaciaLeaves: 15,
     BirchLog: 16,
     BirchLeaves: 17,
+
     Grass: 18,
     TallGrass: 19,
     DeadBush: 20,
@@ -30,6 +31,10 @@ const Blocks = Object.freeze({
     FlowerDandelion: 28,
     FlowerDaisy: 29,
     FlowerAllium: 30,
+
+    FlowerSyringaTop: 600,
+    FlowerSyringa: 601,
+
     Water: 31,
     JungleLog: 32,
     JungleLeaves: 33,
@@ -658,6 +663,52 @@ const blockTypes = [
         cannotBeConverted: true,
         transparent: true,
     }),
+    //#region Double Plants
+    // Syringa Top
+    new BlockType({
+        blockId: 600,
+        sprite: "double_plant_syringa_top",
+        name: "Syringa",
+        hardness: 0,
+        collision: false,
+        breakByFluid: true,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
+        dropBlock: Blocks.FlowerSyringa,
+
+        excludeFromCreativeInventory: true,
+
+        cannotBeConverted: true,
+        transparent: true,
+    }),
+
+    // Syringa Bottom
+    new BlockType({
+        blockId: 601,
+        sprite: "double_plant_syringa_bottom",
+        iconSprite: "double_plant_syringa_top",
+        name: "Syringa",
+        hardness: 0,
+        collision: false,
+        breakByFluid: true,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        breakWithoutBlockUnderneath: true,
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
+        cannotBeConverted: true,
+        transparent: true,
+
+        extendedBlock: [
+            {
+                blockId: Blocks.FlowerSyringaTop,
+                offset: { x: 0, y: 1 },
+            },
+        ],
+    }),
+    //#endregion
     //#endregion
 
     //#region Liquids

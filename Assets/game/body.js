@@ -329,7 +329,7 @@ class BodyPart {
         if (holdItem.blockId) {
             return (
                 "Assets/sprites/blocks/" +
-                GetBlock(holdItem.blockId).sprite +
+                GetBlock(holdItem.blockId).iconSprite +
                 ".png"
             );
         }

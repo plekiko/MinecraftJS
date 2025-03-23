@@ -1555,7 +1555,7 @@ class Inventory {
         const spritePath =
             "Assets/sprites/" +
             (holdingItem.blockId
-                ? "blocks/" + GetBlock(holdingItem.blockId).sprite
+                ? "blocks/" + GetBlock(holdingItem.blockId).iconSprite
                 : "items/" + GetItem(holdingItem.itemId).sprite) +
             ".png";
 

@@ -166,6 +166,9 @@ function LoadCustomSeed(seed) {
         case "tundra":
             forceToBiome = Biomes.Tundra;
             break;
+        case "seasonalforest" || "seasonal" || "seasonal forest":
+            forceToBiome = Biomes.SeasonalForest;
+            break;
         //#endregion
     }
 }

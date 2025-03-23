@@ -869,7 +869,7 @@ class Player extends Entity {
         const chunk = chunks.get(this.hoverBlock.chunkX);
 
         // Place the block
-        chunk.setBlockType(
+        const succeeded = chunk.setBlockType(
             this.hoverBlock.x,
             this.hoverBlock.y,
             blockToPlace.blockId,
@@ -878,6 +878,8 @@ class Player extends Entity {
             false,
             true
         );
+
+        if (!succeeded) return;
 
         // Play appropriate break sound
         if (!isWall) {

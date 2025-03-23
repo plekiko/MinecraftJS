@@ -2,6 +2,7 @@ class BlockType {
     constructor({
         blockId,
         sprite = null,
+        iconSprite = null,
         states = [],
         name = "New block",
         hardness = -2,
@@ -33,6 +34,8 @@ class BlockType {
         fire = false,
 
         cannotBeConverted = false,
+
+        extendedBlock = null,
 
         saplingOutcome = null,
 
@@ -85,6 +88,7 @@ class BlockType {
     } = {}) {
         this.blockId = blockId;
         this.sprite = sprite;
+        this.iconSprite = iconSprite ? iconSprite : sprite;
         this.states = states;
         this.name = name;
         this.hardness = hardness;
@@ -96,6 +100,8 @@ class BlockType {
         this.collision = collision;
         this.breakSound = breakSound;
         this.breakingSound = breakingSound;
+
+        this.extendedBlock = extendedBlock;
 
         this.stackSize = stackSize;
 
@@ -332,6 +338,7 @@ class Block extends Square {
         this.lightSourceLevel = 0;
         this.redstoneOutput = 0;
         this.powered = false;
+        this.linkedBlocks = [];
 
         this.updateSprite();
     }
@@ -1479,6 +1486,17 @@ class Block extends Square {
             else this.dropBlock();
         } else if (drop) {
             this.dropBlock();
+        }
+
+        if (this.linkedBlocks) {
+            for (let block of this.linkedBlocks) {
+                const blockAtPos = GetBlockAtWorldPosition(block.x, block.y);
+
+                if (blockAtPos && blockAtPos !== this) {
+                    if (blockAtPos.blockType === block.blockType)
+                        setBlockType(blockAtPos, Blocks.Air);
+                }
+            }
         }
 
         if (blockDef.dropTable) this.dropTable();

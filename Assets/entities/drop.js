@@ -9,7 +9,7 @@ class Drop extends Entity {
         const spritePath =
             "Assets/sprites/" +
             (blockId
-                ? "blocks/" + GetBlock(blockId).sprite
+                ? "blocks/" + GetBlock(blockId).iconSprite
                 : "items/" + GetItem(itemId).sprite) +
             ".png";
         super({

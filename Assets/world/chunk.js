@@ -733,39 +733,191 @@ class Chunk {
     ) {
         const array = wall ? this.walls : this.blocks;
 
-        if (calculate) y = this.calculateY(y);
-        if (array[y] && array[y][x]) {
-            const block = array[y][x];
-            if (block.blockType !== blockType) {
-                block.setBlockType(blockType);
+        if (calculate) y = this.calculateY(y); // y is now in chunk's internal bottom-up system
+        if (!array[y] || !array[y][x]) return false; // Out of bounds check
 
-                if (GetBlock(blockType).chunkUpdate) {
-                    if (!this.update.includes(block)) {
-                        this.update.push(block);
-                    }
-                } else {
-                    const index = this.update.indexOf(block);
-                    if (index !== -1) {
-                        this.update.splice(index, 1);
-                    }
-                }
+        const block = array[y][x];
+        if (block.blockType === blockType) return false; // No change needed
 
-                if (updateBlocks) {
-                    this.updateAdjacentBlocks(
-                        x,
-                        y,
-                        blockType,
-                        wall,
+        const blockDef = GetBlock(blockType);
+        let linkedBlocks = [];
+
+        // Handle extended blocks
+        if (blockDef.extendedBlock) {
+            // First pass: Validate all extended block positions
+            for (let i = 0; i < blockDef.extendedBlock.length; i++) {
+                const extendedBlock = blockDef.extendedBlock[i];
+                const xOff = extendedBlock.offset.x;
+                const yOff = extendedBlock.offset.y;
+
+                const xIndex = x + xOff;
+                const yIndex = y - yOff;
+
+                const worldX = this.x + xIndex * BLOCK_SIZE;
+                const worldY = yIndex * BLOCK_SIZE; // Bottom-up world Y
+
+                const targetChunk = this.getChunkForBlock(worldX);
+                if (!targetChunk) {
+                    // Buffer if chunk doesn’t exist (will handle linkedBlocks later)
+                    this.setBlockTypeAtPosition(
+                        worldX,
+                        worldY,
+                        extendedBlock.blockId,
                         metaData,
-                        calculate
+                        wall
                     );
+                    continue;
                 }
 
-                block.dark = wall;
-                block.wall = wall;
-                if (metaData !== null) block.metaData = metaData;
+                const localX = Math.floor(
+                    (worldX - targetChunk.x) / BLOCK_SIZE
+                );
+                const localY = Math.floor(worldY / BLOCK_SIZE);
+
+                if (
+                    localX < 0 ||
+                    localX >= targetChunk.width ||
+                    localY < 0 ||
+                    localY >= targetChunk.height
+                ) {
+                    // Buffer if out of bounds
+                    this.setBlockTypeAtPosition(
+                        worldX,
+                        worldY,
+                        extendedBlock.blockId,
+                        metaData,
+                        wall
+                    );
+                    continue;
+                }
+
+                const blockAtPos = targetChunk.getBlock(
+                    localX,
+                    localY,
+                    false,
+                    wall
+                );
+                const blockAtPosDef = blockAtPos
+                    ? GetBlock(blockAtPos.blockType)
+                    : null;
+
+                if (
+                    !blockAtPosDef ||
+                    (!blockAtPosDef.air && !blockAtPosDef.replaceable)
+                ) {
+                    return false; // Abort if any extended block can’t be placed
+                }
+            }
+
+            // Second pass: Place extended blocks and collect references
+            const extendedBlockRefs = [];
+            for (let i = 0; i < blockDef.extendedBlock.length; i++) {
+                const extendedBlock = blockDef.extendedBlock[i];
+                const xOff = extendedBlock.offset.x;
+                const yOff = extendedBlock.offset.y;
+
+                const xIndex = x + xOff;
+                const yIndex = y - yOff;
+
+                const worldX = this.x + xIndex * BLOCK_SIZE;
+                const worldY = yIndex * BLOCK_SIZE;
+
+                const targetChunk = this.getChunkForBlock(worldX);
+                if (!targetChunk) {
+                    this.setBlockTypeAtPosition(
+                        worldX,
+                        worldY,
+                        extendedBlock.blockId,
+                        metaData,
+                        wall
+                    );
+                    linkedBlocks.push({
+                        x: worldX,
+                        y: worldY,
+                        blockType: extendedBlock.blockId,
+                    });
+                    continue;
+                }
+
+                const localX = Math.floor(
+                    (worldX - targetChunk.x) / BLOCK_SIZE
+                );
+                const localY = Math.floor(worldY / BLOCK_SIZE);
+
+                // Place the block and get its reference
+                targetChunk.setBlockType(
+                    localX,
+                    localY,
+                    extendedBlock.blockId,
+                    wall,
+                    metaData,
+                    false
+                );
+                const extendedBlockRef = targetChunk.getBlock(
+                    localX,
+                    localY,
+                    false,
+                    wall
+                );
+                extendedBlockRefs.push(extendedBlockRef);
+                linkedBlocks.push({
+                    x: worldX,
+                    y: worldY,
+                    blockType: extendedBlock.blockId,
+                });
+            }
+
+            // Set the main block
+            block.setBlockType(blockType);
+            linkedBlocks.push({ ...this.localToWorld(x, y, false), blockType });
+
+            // Assign linkedBlocks to all affected blocks
+            const allBlocks = [block, ...extendedBlockRefs];
+            for (let linkedBlock of allBlocks) {
+                if (linkedBlock) {
+                    linkedBlock.linkedBlocks = linkedBlocks;
+                }
+            }
+        } else {
+            // No extended blocks, just set the main block
+            block.setBlockType(blockType);
+            linkedBlocks.push({ ...this.localToWorld(x, y, false), blockType });
+            block.linkedBlocks = linkedBlocks;
+        }
+
+        // Update chunk logic
+        if (blockDef.chunkUpdate) {
+            if (!this.update.includes(block)) {
+                this.update.push(block);
+            }
+        } else {
+            const index = this.update.indexOf(block);
+            if (index !== -1) {
+                this.update.splice(index, 1);
             }
         }
+
+        if (updateBlocks) {
+            this.updateAdjacentBlocks(
+                x,
+                y,
+                blockType,
+                wall,
+                metaData,
+                calculate
+            );
+        }
+
+        block.dark = wall;
+        block.wall = wall;
+        if (metaData !== null) block.metaData = metaData;
+
+        return true;
+    }
+
+    localToWorld(x, y, calculate = true) {
+        if (calculate) y = this.calculateY(y);
+        return { x: x * BLOCK_SIZE + this.x, y: y * BLOCK_SIZE };
     }
 
     updateAdjacentBlocks(x, y, blockType, wall, metaData, calculate) {

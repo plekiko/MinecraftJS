@@ -86,7 +86,7 @@ class InventorySlot {
         const spritePath =
             "Assets/sprites/" +
             (item.blockId
-                ? "blocks/" + GetBlock(item.blockId).sprite
+                ? "blocks/" + GetBlock(item.blockId).iconSprite
                 : "items/" + GetItem(item.itemId).sprite) +
             ".png";
 
