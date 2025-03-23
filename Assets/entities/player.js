@@ -1166,7 +1166,7 @@ class Player extends Entity {
                     this.position,
                     "items/break.ogg",
                     10,
-                    10,
+                    1,
                     RandomRange(0.8, 1.2)
                 );
             }

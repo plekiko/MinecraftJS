@@ -104,6 +104,42 @@ const Sounds = Object.freeze({
     Explosion: ["tnt/explode1", "tnt/explode2", "tnt/explode3", "tnt/explode4"],
 });
 
+// Base URL for audio files
+const AUDIO_BASE_URL = "Assets/audio/sfx/";
+
+// Cache for preloaded audio elements
+const soundCache = {};
+
+// Create AudioContext
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+// Global array to store currently playing positional audio objects
+let playingAudio = [];
+
+// Preload all sounds at game initialization
+function preloadSounds() {
+    const allSounds = Object.values(Sounds).flat();
+    allSounds.forEach((sound) => {
+        const url = `${AUDIO_BASE_URL}${sound}.ogg`;
+        if (!soundCache[url]) {
+            const audio = new Audio(url);
+            audio.preload = "auto";
+            audio.onerror = () => {
+                console.error(`Failed to preload sound: ${url}`);
+                delete soundCache[url]; // Remove failed entries
+            };
+            audio.oncanplaythrough = () => {
+                // Ensure audio is fully loaded before marking as ready
+                soundCache[url] = audio;
+            };
+        }
+    });
+}
+
+// Call this at game startup
+preloadSounds();
+
+// Play a random sound from an array
 function PlayRandomSoundFromArray({
     array,
     pathInSfx = "",
@@ -113,49 +149,59 @@ function PlayRandomSoundFromArray({
     range = 10,
     origin = new Vector2(),
 }) {
-    if (!positional)
-        playSound(
-            pathInSfx + array[RandomRange(0, array.length)] + end,
-            volume
-        );
-    else
-        playPositionalSound(
-            origin,
-            pathInSfx + array[RandomRange(0, array.length)] + end,
-            range,
-            volume
-        );
+    const soundPath = array[RandomRange(0, array.length)];
+    const fullPath = `${pathInSfx}${soundPath}${end}`;
+
+    if (!positional) {
+        playSound(fullPath, volume);
+    } else {
+        playPositionalSound(origin, fullPath, range, volume);
+    }
 }
 
-// Create (or reuse) an AudioContext.
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-// Global array to store currently playing audio objects.
-let playingAudio = [];
-
+// Remove an audio object from the playing list
 function removeAudio(audio) {
-    if (!audio) return;
-    if (!(audio instanceof Audio)) return;
+    if (!audio || !(audio instanceof Audio)) return;
     audio.pause();
-    playingAudio = playingAudio.filter((item) => item.audio !== audio);
+    playingAudio = playingAudio.filter((item) => item.audioElem !== audio);
 }
 
-// A fallback for non-positional sounds with pitch support.
+// Play a non-positional sound with error handling
 function playSound(sound, volume = 1, pitch = 1) {
-    const audio = new Audio("Assets/audio/sfx/" + sound);
-    audio.volume = volume;
+    const url = `${AUDIO_BASE_URL}${sound}`;
+    const cachedAudio = soundCache[url];
 
-    // Disable pitch preservation so that playbackRate changes the pitch
-    audio.preservesPitch = false; // Standard (if supported)
-    audio.webkitPreservesPitch = false; // WebKit-specific
-    audio.mozPreservesPitch = false; // Firefox-specific
+    if (cachedAudio) {
+        // Clone the cached audio to allow multiple simultaneous plays
+        const audio = cachedAudio.cloneNode();
+        audio.volume = volume;
+        audio.preservesPitch = false;
+        audio.webkitPreservesPitch = false;
+        audio.mozPreservesPitch = false;
+        audio.playbackRate = pitch;
 
-    // Set the playbackRate (this changes both pitch and duration if pitch is not preserved)
-    audio.playbackRate = pitch;
-    audio.play();
+        audio.onerror = () => {
+            console.error(`Error loading sound: ${url}`);
+        };
+        audio.play().catch((err) => {
+            console.error(`Error playing sound ${url}: ${err}`);
+        });
+    } else {
+        console.warn(`Sound not preloaded or failed to load: ${url}`);
+        // Fallback: attempt to play directly
+        const audio = new Audio(url);
+        audio.volume = volume;
+        audio.preservesPitch = false;
+        audio.webkitPreservesPitch = false;
+        audio.mozPreservesPitch = false;
+        audio.playbackRate = pitch;
+        audio.play().catch((err) => {
+            console.error(`Fallback play failed for ${url}: ${err}`);
+        });
+    }
 }
 
-// Play a positional sound using the Web Audio API with panning and pitch.
+// Play a positional sound with Web Audio API
 function playPositionalSound(
     origin,
     sound,
@@ -168,57 +214,57 @@ function playPositionalSound(
         return;
     }
 
-    // Create an Audio element.
-    const audioElem = new Audio("Assets/audio/sfx/" + sound);
-    // Set the pitch (playback rate) on the audio element.
-    audioElem.preservesPitch = false; // Standard (if supported)
-    audioElem.webkitPreservesPitch = false; // WebKit-specific
-    audioElem.mozPreservesPitch = false; // Firefox-specific
+    const url = `${AUDIO_BASE_URL}${sound}`;
+    const cachedAudio = soundCache[url];
 
+    let audioElem;
+    if (cachedAudio) {
+        audioElem = cachedAudio.cloneNode();
+    } else {
+        console.warn(`Positional sound not preloaded: ${url}`);
+        audioElem = new Audio(url);
+    }
+
+    audioElem.preservesPitch = false;
+    audioElem.webkitPreservesPitch = false;
+    audioElem.mozPreservesPitch = false;
     audioElem.playbackRate = pitch;
 
-    // Create a MediaElementAudioSourceNode from the audio element.
     const sourceNode = audioCtx.createMediaElementSource(audioElem);
-
-    // Create a StereoPannerNode.
     const panner = audioCtx.createStereoPanner();
-
-    // Connect the nodes: source -> panner -> destination.
     sourceNode.connect(panner);
     panner.connect(audioCtx.destination);
 
-    // Calculate distance and volume.
     const distance = Vector2.Distance(player.position, origin);
     const volume =
         distance <= range * BLOCK_SIZE
             ? maxVolume * (1 - distance / (range * BLOCK_SIZE))
             : 0;
-    // Set the volume on the audio element.
     audioElem.volume = volume;
 
-    // Calculate pan value.
     const panDiff = (origin.x - player.position.x) / (range * BLOCK_SIZE);
     const panValue = Math.max(-1, Math.min(1, panDiff));
     panner.pan.value = panValue;
 
-    // Store this audio object for later updates.
     const audioObj = { audioElem, origin, range, maxVolume, panner };
     playingAudio.push(audioObj);
 
     audioElem.addEventListener("ended", () => {
-        playingAudio = playingAudio.filter(
-            (item) => item.audioElem !== audioElem
-        );
+        removeAudio(audioElem);
     });
+    audioElem.onerror = () => {
+        console.error(`Error with positional sound: ${url}`);
+        removeAudio(audioElem);
+    };
 
-    // Start playing.
-    audioElem.play();
+    audioElem.play().catch((err) => {
+        console.error(`Error playing positional sound ${url}: ${err}`);
+    });
 
     return audioElem;
 }
 
-// This function can be called in your game loop to update volumes and panning
-// in case the player moves.
+// Update positional audio in the game loop
 function updatePositionalAudioVolumes() {
     if (!player) return;
     playingAudio.forEach((item) => {
@@ -233,5 +279,10 @@ function updatePositionalAudioVolumes() {
             (item.origin.x - player.position.x) / (item.range * BLOCK_SIZE);
         const panValue = Math.max(-1, Math.min(1, panDiff));
         item.panner.pan.value = panValue;
+
+        // Clean up if volume is 0 (out of range)
+        if (volume <= 0 && !item.audioElem.paused) {
+            removeAudio(item.audioElem);
+        }
     });
 }
