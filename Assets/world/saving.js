@@ -55,7 +55,7 @@ function SaveWorld(message = true, toFile = false) {
 
     currentSave.time = time;
 
-    currentSave.gameRules = JSON.stringify(GAMERULES);
+    currentSave.gameRules = GAMERULES;
 
     if (player) {
         currentSave.playerPosition = JSON.stringify(player.position);
@@ -65,7 +65,10 @@ function SaveWorld(message = true, toFile = false) {
         currentSave.gamemode = player.gamemode;
 
         currentSave.health = player.health;
+
+        currentSave.currentSlot = hotbar.currentSlot;
     }
+
     currentSave.chunks = savedChunks;
     currentSave.seed = seed;
     currentSave.pendingBlocks = pendingBlocks;
@@ -240,7 +243,7 @@ function LoadWorld(save) {
     time = currentSave.time;
 
     if (currentSave.gameRules) {
-        GAMERULES = JSON.parse(currentSave.gameRules);
+        GAMERULES = currentSave.gameRules;
     }
 
     if (SPAWN_PLAYER) {
@@ -263,6 +266,9 @@ function LoadWorld(save) {
                     });
                 }
             }
+
+            if (currentSave.currentSlot)
+                hotbar.currentSlot = currentSave.currentSlot;
 
             player.setGamemode(currentSave.gamemode);
 

@@ -15,6 +15,7 @@ class Item {
         projectile = null,
         throwPower = 0,
         excludeFromCreativeInventory = false,
+        durability = null,
 
         placeBlock = null,
     }) {
@@ -24,6 +25,7 @@ class Item {
 
         this.toolType = toolType;
         this.toolLevel = toolLevel;
+        this.durability = durability;
 
         this.foodValue = foodValue;
 

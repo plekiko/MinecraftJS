@@ -95,16 +95,16 @@ function updateGame() {
 }
 
 function dayNightCycle() {
+    if (time > 7.3) {
+        time = 1;
+    }
+
     if (!GAMERULES.doDaylightCycle) return;
 
     time += deltaTime * dayNightSpeed;
 
     if (time > 3.5 && time < 6.5) day = false;
     else day = true;
-
-    if (time > 7.3) {
-        time = 1;
-    }
 }
 
 function updateEntities(tick = false) {

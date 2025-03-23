@@ -105,6 +105,8 @@ class Sheep extends Mob {
             count: RandomRange(1, 3),
         });
 
+        player.reduceDurability();
+
         this.hasWool = false;
 
         playPositionalSound(this.position, "mobs/sheep/shear.ogg");

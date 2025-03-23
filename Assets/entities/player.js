@@ -224,6 +224,8 @@ class Player extends Entity {
             origin: this.position,
         });
 
+        this.reduceDurability();
+
         setBlockType(this.hoverBlock, Blocks.Farmland);
     }
 
@@ -770,6 +772,33 @@ class Player extends Entity {
         if (entity === this) return;
 
         entity.hit(this.calculateDamage(), this.position.x, 2);
+
+        if (entity.health) {
+            let reduceDurabilityBy = 1;
+
+            switch (GetItem(this.holdItem.itemId)?.toolType) {
+                case ToolType.Axe:
+                    reduceDurabilityBy = 2;
+                    break;
+                case ToolType.Pickaxe:
+                    reduceDurabilityBy = 2;
+                    break;
+                case ToolType.Shovel:
+                    reduceDurabilityBy = 2;
+                    break;
+                case ToolType.Hoe:
+                    reduceDurabilityBy = 2;
+                    break;
+                case ToolType.Hammer:
+                    reduceDurabilityBy = 2;
+                    break;
+                case ToolType.Shears:
+                    reduceDurabilityBy = 0;
+                    break;
+            }
+
+            this.reduceDurability();
+        }
     }
 
     calculateDamage() {
@@ -1045,6 +1074,7 @@ class Player extends Entity {
         }
 
         let currentBlockHardness = block.hardness;
+        const originalBlockHardness = block.hardness;
 
         const selectedTool = this.inventory.selectedItem?.toolType;
 
@@ -1105,8 +1135,41 @@ class Player extends Entity {
                 shouldDrop = false;
             if (isWall) shouldDrop = true;
             hover.breakBlock(shouldDrop, isWall);
+
+            let reduceDurabilityBy = 1;
+
+            if (GetItem(this.holdItem.itemId)?.toolType === ToolType.Sword)
+                reduceDurabilityBy = 2;
+
+            if (originalBlockHardness <= 0) reduceDurabilityBy = 0;
+
+            this.reduceDurability();
+
             this.resetBreaking();
             this.swing();
+        }
+    }
+
+    reduceDurability(amount = 1) {
+        if (this.gamemode === 1) return;
+
+        if (this.holdItem.hasProp("durability")) {
+            this.holdItem.setProp(
+                "durability",
+                this.holdItem.getProp("durability") - amount
+            );
+
+            if (this.holdItem.getProp("durability") <= 0) {
+                this.inventory.removeItem(3, this.inventory.currentSlot, 1);
+
+                playPositionalSound(
+                    this.position,
+                    "items/break.ogg",
+                    10,
+                    10,
+                    RandomRange(0.8, 1.2)
+                );
+            }
         }
     }
 

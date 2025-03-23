@@ -102,60 +102,16 @@ class Hotbar {
 
     drawItems() {
         for (let i = 0; i < this.inventory.items[3].length; i++) {
-            const slot = {
-                position: {
-                    x: CANVAS.width / 2 - 240 + i * 60, // Exact original X position and 60px gap
-                    y: CANVAS.height - 75 + 12, // Adjusted to align items with hotbar slots
-                },
-                item: this.inventory.items[3][i].item,
+            const position = {
+                x: CANVAS.width / 2 - 261.7 + i * 60, // Exact original X position and 60px gap
+                y: CANVAS.height - 76 + 12, // Adjusted to align items with hotbar slots
             };
-            this.drawSlot(slot);
+            this.drawSlot(this.inventory.items[3][i], position);
         }
     }
 
-    drawSlot(slot) {
-        const item = slot.item;
-
-        if (item.count <= 0) return;
-        if (!item.blockId && item.itemId === null) return;
-
-        const slotX = slot.position.x;
-        const slotY = slot.position.y;
-
-        const spritePath =
-            "Assets/sprites/" +
-            (item.blockId
-                ? "blocks/" + GetBlock(item.blockId).sprite
-                : "items/" + GetItem(item.itemId).sprite) +
-            ".png";
-
-        // If block, get the default draw cutoff
-        let cutoff = 0;
-        if (item.blockId) cutoff = GetBlock(item.blockId).defaultCutoff;
-
-        // Draw the sprite
-        drawImage({
-            url: spritePath,
-            x: slotX,
-            y: slotY,
-            scale: 2.7,
-            centerX: true,
-            dark: item.props?.wall === true,
-            sizeY: 16 - cutoff * 16,
-            fixAnimation: cutoff === 0,
-        });
-
-        if (item.count <= 1) return;
-
-        // Draw the count (unchanged, as text position is correct)
-        drawText({
-            text: item.count,
-            x: slotX + 27,
-            y: slotY + 58 - 14, // Adjusted to maintain original count position relative to new item Y
-            size: 25,
-            color: "white",
-            shadow: true,
-        });
+    drawSlot(slot, position) {
+        slot.draw(0, 0, position, 0.9);
     }
 
     handleSelecting() {
@@ -169,14 +125,10 @@ class Hotbar {
 
         this.currentSlot = (this.currentSlot + 9) % 9;
 
-        if (input.isKeyPressed("Digit1")) this.currentSlot = 0;
-        if (input.isKeyPressed("Digit2")) this.currentSlot = 1;
-        if (input.isKeyPressed("Digit3")) this.currentSlot = 2;
-        if (input.isKeyPressed("Digit4")) this.currentSlot = 3;
-        if (input.isKeyPressed("Digit5")) this.currentSlot = 4;
-        if (input.isKeyPressed("Digit6")) this.currentSlot = 5;
-        if (input.isKeyPressed("Digit7")) this.currentSlot = 6;
-        if (input.isKeyPressed("Digit8")) this.currentSlot = 7;
-        if (input.isKeyPressed("Digit9")) this.currentSlot = 8;
+        for (let i = 1; i < 10; i++) {
+            if (input.isKeyPressed(`Digit${i}`)) {
+                this.currentSlot = i - 1;
+            }
+        }
     }
 }

@@ -573,3 +573,27 @@ function drawImage({
         sizeY: drawHeight,
     };
 }
+
+function drawRect({
+    x,
+    y,
+    width,
+    height,
+    color = "black",
+    opacity = 1,
+    stroke = false,
+    lineWidth = 1,
+} = {}) {
+    ctx.globalAlpha = opacity;
+
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, width, height);
+
+    if (stroke) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = lineWidth;
+        ctx.strokeRect(x, y, width, height);
+    }
+
+    ctx.globalAlpha = 1;
+}

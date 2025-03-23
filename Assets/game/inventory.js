@@ -252,7 +252,7 @@ class Inventory {
 
                     // Place as many as possible in this slot.
                     const stackSize = this.getStackSize(newItem);
-                    slot.item = structuredClone(newItem);
+                    slot.item = this.cloneItem(newItem);
                     slot.item.count = Math.min(remaining, stackSize);
                     remaining -= slot.item.count;
                     if (remaining === 0) return 0;
@@ -260,6 +260,15 @@ class Inventory {
             }
         }
         return remaining;
+    }
+
+    cloneItem(item) {
+        return new InventoryItem({
+            blockId: item.blockId,
+            itemId: item.itemId,
+            count: item.count,
+            props: structuredClone(item.props || {}),
+        });
     }
 
     handleShiftClick(slot, array) {
@@ -289,7 +298,7 @@ class Inventory {
         }
         if (!hasValidTarget) return false; // No valid slots to transfer into
 
-        let itemToTransfer = structuredClone(slot.item);
+        let itemToTransfer = this.cloneItem(slot.item);
         let originalCount = itemToTransfer.count;
 
         // Add items to the target array (addItemToArray now respects onlyTake)
@@ -307,7 +316,7 @@ class Inventory {
             if (targetArray === this.storageSlots) {
                 for (let i = 0; i < this.storageSlots.length; i++) {
                     for (let j = 0; j < this.storageSlots[i].length; j++) {
-                        this.storage[i][j] = structuredClone(
+                        this.storage[i][j] = this.cloneItem(
                             this.storageSlots[i][j].item
                         );
                     }
@@ -318,7 +327,7 @@ class Inventory {
             if (array === this.storageSlots) {
                 for (let i = 0; i < this.storageSlots.length; i++) {
                     for (let j = 0; j < this.storageSlots[i].length; j++) {
-                        this.storage[i][j] = structuredClone(
+                        this.storage[i][j] = this.cloneItem(
                             this.storageSlots[i][j].item
                         );
                     }
@@ -334,7 +343,7 @@ class Inventory {
 
         for (let i = 0; i < this.storageSlots.length; i++) {
             for (let j = 0; j < this.storageSlots[i].length; j++) {
-                this.storageSlots[i][j].item = structuredClone(
+                this.storageSlots[i][j].item = this.cloneItem(
                     this.storage[i][j]
                 );
             }
@@ -429,7 +438,7 @@ class Inventory {
         }
 
         // Set the right slot to the converted item
-        rightSlot.item = structuredClone(leftSlot.item); // Use leftSlot.item directly since it’s already an InventoryItem
+        rightSlot.item = this.cloneItem(leftSlot.item); // Use leftSlot.item directly since it’s already an InventoryItem
 
         // Determine if the output becomes a wall (toggle based on input)
         const becomesWall = !(
@@ -541,7 +550,7 @@ class Inventory {
                 if (index < endIndex && this.creativeItems[index]) {
                     slots[y][x] = new InventorySlot({
                         position: position,
-                        item: structuredClone(this.creativeItems[index]), // Clone to avoid reference issues
+                        item: this.creativeItems[index],
                         infiniteTake: true,
                     });
                 } else {
@@ -695,7 +704,7 @@ class Inventory {
 
         for (let i = 0; i < this.storageSlots.length; i++) {
             for (let j = 0; j < this.storageSlots[i].length; j++) {
-                this.storage[i][j] = structuredClone(
+                this.storage[i][j] = this.cloneItem(
                     this.storageSlots[i][j].item
                 );
             }
@@ -751,7 +760,8 @@ class Inventory {
                 this.clearItem(item);
                 this.craftingComplete();
             } else if (!this.holdingItem) {
-                this.holdingItem = structuredClone(item);
+                this.holdingItem = this.cloneItem(item);
+                console.log(this.holdingItem);
                 this.clearItem(item);
                 this.craftingComplete();
             }
@@ -780,10 +790,10 @@ class Inventory {
             const slot = array[y][x];
             if (slot.infiniteTake) {
                 // Infinite take: copy item without removing from slot
-                this.holdingItem = structuredClone(item);
+                this.holdingItem = this.cloneItem(item);
             } else {
                 // Normal take: remove item from slot
-                this.holdingItem = structuredClone(item);
+                this.holdingItem = this.cloneItem(item);
                 this.removeItem(y, x, item.count, array);
             }
             this.reverseSync();
@@ -792,7 +802,7 @@ class Inventory {
 
         // Handle combining items when cursor already holds an item (not array-based)
         if (!this.holdingItem) {
-            this.holdingItem = structuredClone(item);
+            this.holdingItem = this.cloneItem(item);
         } else if (
             this.holdingItem.blockId === item.blockId &&
             this.holdingItem.itemId === item.itemId
@@ -863,7 +873,7 @@ class Inventory {
                 const item = this.items[y][x].item;
 
                 if (item.count > 0) {
-                    items.push(structuredClone(item));
+                    items.push(this.cloneItem(item));
                 }
             }
         }
@@ -976,8 +986,8 @@ class Inventory {
         }
 
         // Clone the items to avoid reference issues
-        const hoveredItem = structuredClone(this.hoverItem);
-        const hotbarItem = structuredClone(hotbarSlot.item);
+        const hoveredItem = this.cloneItem(this.hoverItem);
+        const hotbarItem = this.cloneItem(hotbarSlot.item);
 
         // If the hovered item is from the crafting output slot
         if (
@@ -986,13 +996,13 @@ class Inventory {
         ) {
             if (hotbarSlot.isEmpty()) {
                 // Place the crafting output directly into the hotbar slot
-                hotbarSlot.item = structuredClone(hoveredItem);
+                hotbarSlot.item = this.cloneItem(hoveredItem);
                 this.clearSlot(this.craftingOutputSlot);
                 this.craftingComplete();
             } else {
                 // Swap with the hotbar slot and return leftovers to inventory
-                const temp = structuredClone(hotbarSlot.item);
-                hotbarSlot.item = structuredClone(hoveredItem);
+                const temp = this.cloneItem(hotbarSlot.item);
+                hotbarSlot.item = this.cloneItem(hoveredItem);
                 this.clearSlot(this.craftingOutputSlot);
                 this.craftingComplete();
                 this.addItem(temp); // Add the old hotbar item back to inventory
@@ -1005,18 +1015,18 @@ class Inventory {
             if (hoveredSlot.onlyTake) return; // Don't allow taking from onlyTake slots
             if (hoveredSlot.infiniteTake) {
                 // Infinite take: copy item without removing from slot
-                hotbarSlot.item = structuredClone(hoveredItem);
+                hotbarSlot.item = this.cloneItem(hoveredItem);
                 return;
             }
 
             if (hotbarSlot.isEmpty()) {
                 // Move hovered item to empty hotbar slot
-                hotbarSlot.item = structuredClone(hoveredItem);
+                hotbarSlot.item = this.cloneItem(hoveredItem);
                 hoveredSlot.clear();
             } else {
                 // Swap items between hovered slot and hotbar slot
-                hotbarSlot.item = structuredClone(hoveredItem);
-                hoveredSlot.item = structuredClone(hotbarItem);
+                hotbarSlot.item = this.cloneItem(hoveredItem);
+                hoveredSlot.item = this.cloneItem(hotbarItem);
             }
 
             // Sync storage if modifying storageSlots
@@ -1278,7 +1288,7 @@ class Inventory {
 
     getHalf(item, x, y, array) {
         const slot = array[y][x];
-        this.holdingItem = structuredClone(item);
+        this.holdingItem = this.cloneItem(item);
         if (slot.infiniteTake) {
             // Infinite take: set holdingItem to half count without modifying slot
             // Get Max stack size
@@ -1323,7 +1333,7 @@ class Inventory {
             if (item.count === 1) {
                 item.blockId = this.holdingItem.blockId;
                 item.itemId = this.holdingItem.itemId;
-                item.props = structuredClone(this.holdingItem.props || {});
+                item.props = this.cloneItem(this.holdingItem.props || {});
             }
 
             if (this.holdingItem.count === 0) {
@@ -1350,7 +1360,7 @@ class Inventory {
             slotItem.itemId !== this.holdingItem.itemId ||
             !this.arePropsEqual(slotItem.props, this.holdingItem.props)
         ) {
-            let oldItem = structuredClone(slotItem);
+            let oldItem = this.cloneItem(slotItem);
             slotItem.blockId = this.holdingItem.blockId;
             slotItem.itemId = this.holdingItem.itemId;
             slotItem.count = this.holdingItem.count;
@@ -1586,68 +1596,10 @@ class Inventory {
     }
 
     drawSlot(slot) {
-        const item = slot.item;
-
-        if (item.count <= 0) return;
-        if (!item.blockId && item.itemId === null) return;
-
-        const slotX =
-            this.inventoryUI.x + slot.position.x + this.openUIOffset.x;
-        const slotY =
-            this.inventoryUI.y + slot.position.y + this.openUIOffset.y;
-
-        const spritePath =
-            "Assets/sprites/" +
-            (item.blockId
-                ? "blocks/" + GetBlock(item.blockId).sprite
-                : "items/" + GetItem(item.itemId).sprite) +
-            ".png";
-
-        // If block get the default draw cutoff
-        let cutoff = 0;
-        if (item.blockId) cutoff = GetBlock(item.blockId).defaultCutoff;
-
-        // Draw the sprite
-        drawImage({
-            url: spritePath,
-            x: slotX,
-            y: slotY,
-            scale: 3,
-            centerX: false,
-            dark: item.props.wall === true,
-            sizeY: 16 - cutoff * 16,
-            fixAnimation: cutoff === 0,
-        });
-
-        if (item.count <= 1) return;
-
-        // Draw the count
-        drawText({ text: item.count, x: slotX + 55, y: slotY + 50, size: 30 });
-    }
-}
-
-class InventorySlot {
-    constructor({
-        position = { x: 0, y: 0 },
-        item = new InventoryItem(),
-        onlyTake = false,
-        infiniteTake = false,
-    }) {
-        this.position = position;
-        this.item = item;
-        this.onlyTake = onlyTake;
-        this.infiniteTake = infiniteTake;
-    }
-
-    isEmpty() {
-        return this.item.itemId === null && !this.item.blockId;
-    }
-
-    clear() {
-        this.item.blockId = null;
-        this.item.itemId = null;
-        this.item.count = 0;
-        this.item.props = {};
+        slot.draw(
+            this.inventoryUI.x + this.openUIOffset.x,
+            this.inventoryUI.y + this.openUIOffset.y
+        );
     }
 }
 

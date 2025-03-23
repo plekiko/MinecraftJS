@@ -119,6 +119,8 @@ const items = [
         stackSize: 1,
         fuelTime: 10,
         baseDamage: 0.7,
+
+        durability: 59,
     }),
     new Item({
         itemId: 2,
@@ -129,6 +131,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         fuelTime: 10,
+
+        durability: 59,
     }),
     new Item({
         itemId: 3,
@@ -139,6 +143,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         fuelTime: 10,
+
+        durability: 59,
     }),
     new Item({
         itemId: 4,
@@ -149,6 +155,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         fuelTime: 10,
+
+        durability: 59,
     }),
     new Item({
         itemId: 5,
@@ -160,6 +168,8 @@ const items = [
         stackSize: 1,
         fuelTime: 10,
         baseDamage: 1,
+
+        durability: 59,
     }),
     //#endregion
 
@@ -173,6 +183,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 1.7,
+
+        durability: 131,
     }),
     new Item({
         itemId: 7,
@@ -182,6 +194,8 @@ const items = [
         toolLevel: 13.5,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 131,
     }),
     new Item({
         itemId: 8,
@@ -191,6 +205,8 @@ const items = [
         toolLevel: 1,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 131,
     }),
     new Item({
         itemId: 9,
@@ -200,6 +216,8 @@ const items = [
         toolLevel: 2,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 131,
     }),
     new Item({
         itemId: 10,
@@ -210,6 +228,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 2,
+
+        durability: 131,
     }),
     //#endregion
 
@@ -222,6 +242,8 @@ const items = [
         toolLevel: 2,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 250,
     }),
     new Item({
         itemId: 12,
@@ -232,6 +254,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 2.7,
+
+        durability: 250,
     }),
     new Item({
         itemId: 13,
@@ -241,6 +265,8 @@ const items = [
         toolLevel: 14.5,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 250,
     }),
     new Item({
         itemId: 14,
@@ -250,6 +276,8 @@ const items = [
         toolLevel: 1.25,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 250,
     }),
     new Item({
         itemId: 15,
@@ -259,6 +287,8 @@ const items = [
         toolLevel: 3,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 250,
     }),
     new Item({
         itemId: 16,
@@ -269,6 +299,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 3,
+
+        durability: 250,
     }),
     new Item({
         itemId: 17,
@@ -303,6 +335,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 3.7,
+
+        durability: 1561,
     }),
     new Item({
         itemId: 41,
@@ -312,6 +346,8 @@ const items = [
         toolLevel: 14.8,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 1561,
     }),
     new Item({
         itemId: 42,
@@ -321,6 +357,8 @@ const items = [
         toolLevel: 1.5,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 1561,
     }),
     new Item({
         itemId: 43,
@@ -330,6 +368,8 @@ const items = [
         toolLevel: 4,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 1561,
     }),
     new Item({
         itemId: 44,
@@ -340,6 +380,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 4,
+
+        durability: 1561,
     }),
 
     //#endregion
@@ -354,6 +396,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 2.7,
+
+        durability: 32,
     }),
     new Item({
         itemId: 46,
@@ -363,6 +407,8 @@ const items = [
         toolLevel: 14.5,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 32,
     }),
     new Item({
         itemId: 47,
@@ -372,6 +418,8 @@ const items = [
         toolLevel: 1.25,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 32,
     }),
     new Item({
         itemId: 48,
@@ -381,6 +429,8 @@ const items = [
         toolLevel: 3,
         heldInHand: true,
         stackSize: 1,
+
+        durability: 32,
     }),
     new Item({
         itemId: 49,
@@ -391,6 +441,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 3,
+
+        durability: 32,
     }),
     //#endregion
 
@@ -407,6 +459,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 2,
+
+        durability: 59,
     }),
     new Item({
         itemId: 1001,
@@ -417,6 +471,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 3,
+
+        durability: 131,
     }),
     new Item({
         itemId: 1002,
@@ -427,6 +483,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 4,
+
+        durability: 250,
     }),
     new Item({
         itemId: 1003,
@@ -437,6 +495,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 5,
+
+        durability: 1561,
     }),
     new Item({
         itemId: 1004,
@@ -447,6 +507,8 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         baseDamage: 6,
+
+        durability: 32,
     }),
 
     //#endregion
