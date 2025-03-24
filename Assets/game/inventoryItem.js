@@ -103,7 +103,7 @@ class InventorySlot {
         drawImage({
             url: spritePath,
             x: slotX,
-            y: slotY,
+            y: slotY /*+ cutoff * 16 * size * 3*/,
             scale: 3 * size,
             centerX: false,
             dark: item.props.wall === true,
