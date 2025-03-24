@@ -481,7 +481,12 @@ const blockTypes = [
         toolType: ToolType.Shears,
         breakWithoutBlockUnderneath: true,
 
-        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+        onlyPlacableOn: [
+            Blocks.GrassBlock,
+            Blocks.Dirt,
+            Blocks.Podzol,
+            Blocks.Sand,
+        ],
 
         cannotBeConverted: true,
         transparent: true,
@@ -1268,6 +1273,7 @@ const blockTypes = [
         sprite: "planks_oak",
         hardness: 4,
         defaultCutoff: 0.5,
+        excludeFromCreativeInventory: true,
     }),
     new BlockType({
         blockId: 72,
