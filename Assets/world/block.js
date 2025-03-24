@@ -325,7 +325,7 @@ class Block extends Square {
             new Transform(new Vector2(), new Vector2()),
             1,
             GetBlock(blockType).sprite
-                ? "blocks/" + GetBlock(blockType).sprite + ".png"
+                ? getSpriteUrl("blocks/" + GetBlock(blockType).sprite)
                 : null,
             BLOCK_SIZE / 16,
             wall
@@ -1069,7 +1069,7 @@ class Block extends Square {
 
     setState(index) {
         const sprite = GetBlock(this.blockType).states[index];
-        this.setSprite("blocks/" + sprite + ".png");
+        this.setSprite("Assets/sprites/blocks/" + sprite + ".png");
     }
 
     furnaceLogic() {
@@ -1631,7 +1631,9 @@ class Block extends Square {
         }
     }
 
-    updateSprite() {
+    async updateSprite() {
+        await waitForTexturePack();
+
         const block = GetBlock(this.blockType);
 
         if (block.air) {
@@ -1644,7 +1646,9 @@ class Block extends Square {
 
         this.frameRate = block.animationSpeed;
 
-        this.setSprite("blocks/" + block.sprite + ".png");
+        const sprite = getSpriteUrl("blocks/" + block.sprite);
+
+        this.setSprite(sprite);
     }
 }
 

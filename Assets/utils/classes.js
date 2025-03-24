@@ -85,14 +85,15 @@ class Square {
         if (!sprite) return;
 
         this.img = new Image();
-        this.img.src = "Assets/sprites/" + sprite;
+        this.img.src = sprite;
     }
 
     setSprite(sprite) {
         if (!sprite) return;
 
         this.img = new Image();
-        this.img.src = "Assets/sprites/" + sprite;
+
+        this.img.src = sprite;
 
         if (this.img)
             if (this.isAnimated()) this.frameCount = this.img.height / 16;

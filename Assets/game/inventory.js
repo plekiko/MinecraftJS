@@ -1413,7 +1413,7 @@ class Inventory {
         }
 
         this.inventoryUI = drawImage({
-            url: "Assets/sprites/gui/" + path + ".png",
+            url: getSpriteUrl("gui/" + path),
             x: CANVAS.width / 2 + this.openUIImageOffset.x,
             y: CANVAS.height / 6 + this.openUIImageOffset.y,
             scale: 3.5,
@@ -1479,7 +1479,7 @@ class Inventory {
         const flameFrame = Math.ceil(14 - (fuelProgress / fuelMax) * 14);
 
         drawImage({
-            url: "Assets/sprites/gui/furnace_flame.png",
+            url: getSpriteUrl("gui/furnace_flame.png"),
             x: this.inventoryUI.x + 196,
             y: this.inventoryUI.y + 126,
             scale: 3.5,
@@ -1493,7 +1493,7 @@ class Inventory {
         const arrowFrame = Math.ceil((arrowProgression / 10) * 25);
 
         drawImage({
-            url: "Assets/sprites/gui/furnace_arrow.png",
+            url: getSpriteUrl("gui/furnace_arrow.png"),
             x: this.inventoryUI.x + 277,
             y: this.inventoryUI.y + 120,
             scale: 3.5,
@@ -1552,12 +1552,12 @@ class Inventory {
 
         let image = null;
 
-        const spritePath =
-            "Assets/sprites/" +
-            (holdingItem.blockId
-                ? "blocks/" + GetBlock(holdingItem.blockId).iconSprite
-                : "items/" + GetItem(holdingItem.itemId).sprite) +
-            ".png";
+        const isItem = holdingItem.itemId !== null;
+        const spritePath = isItem
+            ? getSpriteUrl("items/" + GetItem(holdingItem.itemId).sprite)
+            : getSpriteUrl(
+                  "blocks/" + GetBlock(holdingItem.blockId).iconSprite
+              );
 
         let cutoff = 0;
         if (holdingItem.blockId)
@@ -1644,7 +1644,7 @@ class Button {
             const imageToDraw =
                 isHovered && this.hoverImage ? this.hoverImage : this.image;
             drawImage({
-                url: "Assets/sprites/gui/" + imageToDraw + ".png",
+                url: getSpriteUrl("gui/" + imageToDraw),
                 x: x,
                 y: y,
                 width: this.size.x,

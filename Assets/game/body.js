@@ -267,7 +267,7 @@ class BodyPart {
 
     loadSprite() {
         const img = new Image();
-        img.src = "Assets/sprites/" + this.sprite + ".png";
+        img.src = getSpriteUrl(this.sprite);
         return img;
     }
 
@@ -327,18 +327,12 @@ class BodyPart {
 
     getHeldItemSprite(holdItem) {
         if (holdItem.blockId) {
-            return (
-                "Assets/sprites/blocks/" +
-                GetBlock(holdItem.blockId).iconSprite +
-                ".png"
+            return getSpriteUrl(
+                "blocks/" + GetBlock(holdItem.blockId).iconSprite
             );
         }
         if (holdItem.itemId != null) {
-            return (
-                "Assets/sprites/items/" +
-                GetItem(holdItem.itemId).sprite +
-                ".png"
-            );
+            return getSpriteUrl("items/" + GetItem(holdItem.itemId).sprite);
         }
         return null;
     }

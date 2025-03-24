@@ -83,12 +83,17 @@ class InventorySlot {
             ? overwritePosition.y
             : this.position.y + offsetY;
 
-        const spritePath =
-            "Assets/sprites/" +
-            (item.blockId
-                ? "blocks/" + GetBlock(item.blockId).iconSprite
-                : "items/" + GetItem(item.itemId).sprite) +
-            ".png";
+        // const spritePath =
+        //     "Assets/sprites/" +
+        //     (item.blockId
+        //         ? "blocks/" + GetBlock(item.blockId).iconSprite
+        //         : "items/" + GetItem(item.itemId).sprite) +
+        //     ".png";
+
+        const isItem = item.itemId !== null;
+        const spritePath = isItem
+            ? getSpriteUrl("items/" + GetItem(item.itemId).sprite)
+            : getSpriteUrl("blocks/" + GetBlock(item.blockId).iconSprite);
 
         // If block get the default draw cutoff
         let cutoff = 0;

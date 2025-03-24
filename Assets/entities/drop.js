@@ -6,12 +6,11 @@ class Drop extends Entity {
         count = 1,
         props = {},
     }) {
-        const spritePath =
-            "Assets/sprites/" +
-            (blockId
-                ? "blocks/" + GetBlock(blockId).iconSprite
-                : "items/" + GetItem(itemId).sprite) +
-            ".png";
+        const isItem = itemId !== null;
+        const spritePath = isItem
+            ? getSpriteUrl("items/" + GetItem(itemId).sprite)
+            : getSpriteUrl("blocks/" + GetBlock(blockId).iconSprite);
+
         super({
             position: position,
             hitbox: new Vector2(BLOCK_SIZE / 1.5, BLOCK_SIZE / 1.5),
