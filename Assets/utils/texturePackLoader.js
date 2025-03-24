@@ -100,7 +100,7 @@ function waitForTexturePack() {
             if (isTexturePackLoaded) {
                 resolve();
             } else {
-                setTimeout(checkLoaded, 100); // Check every 100ms
+                setTimeout(checkLoaded, 1);
             }
         };
         checkLoaded();

@@ -272,7 +272,7 @@ function DrawCursor() {
 
     if (player.windowOpen) {
         drawImage({
-            url: "Assets/sprites/misc/cursor.png",
+            url: getSpriteUrl("misc/cursor"),
             x: input.getMousePosition().x,
             y: input.getMousePosition().y,
             centerX: false,
@@ -281,7 +281,7 @@ function DrawCursor() {
     }
 
     drawImage({
-        url: "Assets/sprites/misc/crosshair.png",
+        url: getSpriteUrl("misc/crosshair"),
         x: input.getMousePosition().x,
         y: input.getMousePosition().y,
         scale: 3,
@@ -488,51 +488,51 @@ function drawImage({
     dark = false,
     fixAnimation = false,
     frame = 0,
+    crop = { x: 0, y: 0, width: 0, height: 0 },
 } = {}) {
     const img = new Image();
     img.src = url;
 
+    const shouldCrop = crop.width > 0 && crop.height > 0;
     // Function to handle the actual drawing
     function drawFrame() {
         ctx.globalAlpha = opacity;
 
         let sourceWidth, sourceHeight, sourceX, sourceY, drawWidth, drawHeight;
 
+        // Determine if cropping should be applied (both width and height must be > 0)
+
         if (fixAnimation) {
             // Fixed 16x16 animation mode
-            sourceWidth = 16;
-            sourceHeight = 16;
-            sourceX = 0; // Assuming vertical sprite sheet
-            sourceY = frame * 16; // Frame offset for animation
+            sourceWidth = shouldCrop ? crop.width : 16; // Default to 16 if no crop
+            sourceHeight = shouldCrop ? crop.height : 16; // Default to 16 if no crop
+            sourceX = shouldCrop ? crop.x : 0; // No offset if not cropping
+            sourceY = (shouldCrop ? crop.y : 0) + frame * 16; // Frame offset always applies
             drawWidth = sourceWidth * scale;
             drawHeight = sourceHeight * scale;
         } else {
             // Original behavior
-            sourceWidth = sizeX !== null ? sizeX : img.width;
-            sourceHeight = sizeY !== null ? sizeY : img.height;
-            sourceX = 0;
-            sourceY = img.height; // Original start Y (bottom of image)
+            sourceWidth =
+                sizeX !== null ? sizeX : shouldCrop ? crop.width : img.width; // Full width if no crop
+            sourceHeight =
+                sizeY !== null ? sizeY : shouldCrop ? crop.height : img.height; // Full height if no crop
+            sourceX = shouldCrop ? crop.x : 0; // No offset if not cropping
+            sourceY = shouldCrop ? crop.y : 0; // No offset if not cropping
             drawWidth = sourceWidth * scale;
             drawHeight = sourceHeight * scale;
         }
 
         // Adjust position based on centering
         const drawX = centerX ? x - drawWidth / 2 : x;
-        const drawY = fixAnimation
-            ? centerY
-                ? y - drawHeight / 2
-                : y // Simplified for 16x16
-            : centerY
-            ? y - drawHeight / 2 + (sizeY ? (img.height - sizeY) * scale : 0)
-            : y + (sizeY ? (img.height - sizeY) * scale : 0);
+        const drawY = centerY ? y - drawHeight / 2 : y;
 
-        // Draw the image
+        // Draw the image (cropped or full based on shouldCrop)
         ctx.drawImage(
             img,
             sourceX, // Source x
             sourceY, // Source y
             sourceWidth, // Source width
-            fixAnimation ? sourceHeight : -sourceHeight, // Positive for animation, negative for original
+            sourceHeight, // Source height
             drawX, // Canvas x
             drawY, // Canvas y
             drawWidth, // Scaled width
@@ -559,15 +559,16 @@ function drawImage({
     }
 
     // Return drawn position and size
-    const drawWidth =
-        (fixAnimation ? 16 : sizeX !== null ? sizeX : img.width) * scale;
-    const drawHeight =
-        (fixAnimation ? 16 : sizeY !== null ? sizeY : img.height) * scale;
+    const drawWidthFinal =
+        (sizeX !== null ? sizeX : shouldCrop ? crop.width : img.width) * scale;
+    const drawHeightFinal =
+        (sizeY !== null ? sizeY : shouldCrop ? crop.height : img.height) *
+        scale;
     return {
-        x: centerX ? x - drawWidth / 2 : x,
-        y: centerY ? y - drawHeight / 2 : y, // Simplified return for consistency
-        sizeX: drawWidth,
-        sizeY: drawHeight,
+        x: centerX ? x - drawWidthFinal / 2 : x,
+        y: centerY ? y - drawHeightFinal / 2 : y,
+        sizeX: drawWidthFinal,
+        sizeY: drawHeightFinal,
     };
 }
 

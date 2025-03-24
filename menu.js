@@ -4,7 +4,6 @@ const worldsContainer = document.querySelector(".world-select");
 const worldContainer = document.querySelector(".world-container");
 const worldSelectContainer = document.querySelector("#world-select-container");
 const removeTexturePackButton = document.getElementById("remove-texture-btn");
-removeTexturePackButton.disabled = true; // Initially disabled
 const texturePackSelectContainer = document.querySelector(
     "#texture-pack-select-container"
 );
@@ -17,7 +16,7 @@ const footer = document.querySelector(".footer");
 const panorama = document.querySelector(".panorama");
 
 let selectedWorld = null;
-let selectedTexturePack = null;
+let selectedTexturePack = "default";
 let randomTexts = [];
 
 fetch("menu_text.json")
@@ -56,6 +55,10 @@ function showTexturePacks() {
     footer.style.display = "none";
     texturePackSelectContainer.style.display = "flex";
     populateTexturePacks();
+
+    if (selectedTexturePack === "default") {
+        removeTexturePackButton.disabled = true;
+    }
 }
 
 function PlayGame() {
@@ -140,6 +143,8 @@ function initializeDefaultTexturePack() {
     // Set default as current if no texture pack is selected
     if (!localStorage.getItem("currentTexturePack")) {
         localStorage.setItem("currentTexturePack", defaultPackId);
+
+        selectTexturePack(defaultPackId, null);
     }
 }
 
@@ -215,8 +220,9 @@ async function getTexturePackIcon(packId) {
     try {
         const zip = await JSZip.loadAsync(base64Data, { base64: true });
         // Search for any file ending with "icon.png"
-        const iconFilePath = Object.keys(zip.files).find((fileName) =>
-            fileName.endsWith("icon.png")
+        const iconFilePath = Object.keys(zip.files).find(
+            (fileName) =>
+                fileName.endsWith("icon.png") || fileName.endsWith("pack.png")
         );
         if (iconFilePath) {
             const iconFile = zip.file(iconFilePath);
@@ -263,6 +269,8 @@ function uploadTexturePack() {
                 populateTexturePacks();
             };
             reader.readAsDataURL(file);
+        } else {
+            alert("No file selected.");
         }
     };
 
@@ -287,10 +295,10 @@ function removeTexturePack() {
 
     localStorage.setItem("currentTexturePack", "default");
 
-    removeTexturePackButton.disabled = true;
-
     selectedTexturePack = null;
     populateTexturePacks();
+
+    removeTexturePackButton.disabled = true;
 }
 
 function getTexturePackData(id) {
@@ -384,3 +392,5 @@ setTimeout(() => {
 
 populateWorlds();
 initializeDefaultTexturePack();
+
+removeTexturePackButton.disabled = selectTexturePack === "default";

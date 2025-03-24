@@ -25,9 +25,9 @@ class Hotbar {
         // Empty Hearts
         for (let i = 0; i < maxHealth / 2; i++) {
             drawImage({
-                url: `Assets/sprites/gui/${
-                    this.flashingHearts ? "heart_white.png" : "empty_heart.png"
-                }`,
+                url: getSpriteUrl(
+                    `gui/${this.flashingHearts ? "heart_white" : "empty_heart"}`
+                ),
                 x: hotbar.x + i * 9 * 2.9 + 12,
                 y: hotbar.y - 35,
                 scale: 3,
@@ -37,7 +37,7 @@ class Hotbar {
         // Draw Full and Half Hearts
         for (let i = 0; i < Math.floor(health / 2); i++) {
             drawImage({
-                url: "Assets/sprites/gui/heart.png",
+                url: getSpriteUrl("gui/heart"),
                 x: hotbar.x + i * 9 * 2.9 + 12,
                 y: hotbar.y - 35,
                 scale: 3,
@@ -47,7 +47,7 @@ class Hotbar {
         // Check for Half Heart
         if (health % 2 !== 0) {
             drawImage({
-                url: "Assets/sprites/gui/half_heart.png",
+                url: getSpriteUrl("gui/half_heart"),
                 x: hotbar.x + Math.floor(health / 2) * 9 * 2.9 + 12,
                 y: hotbar.y - 35,
                 scale: 3,
@@ -58,7 +58,7 @@ class Hotbar {
     draw(ctx) {
         // Draw hotbar
         const hotbar = drawImage({
-            url: "Assets/sprites/gui/hotbar.png",
+            url: getSpriteUrl("gui/hotbar"),
             x: CANVAS.width / 2,
             y: CANVAS.height - 75,
             scale: 3,
@@ -66,7 +66,7 @@ class Hotbar {
 
         // Draw current slot selector
         drawImage({
-            url: "Assets/sprites/gui/selected-slot.png",
+            url: getSpriteUrl("gui/selected-slot"),
             x: CANVAS.width / 2 - 240 + this.currentSlot * 60,
             y: CANVAS.height - 78,
             scale: 3,
