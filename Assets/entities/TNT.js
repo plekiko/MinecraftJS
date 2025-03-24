@@ -5,7 +5,7 @@ class TNT extends Entity {
                 position.x + BLOCK_SIZE / 20,
                 position.y + BLOCK_SIZE / 20
             ),
-            sprite: "Assets/sprites/blocks/tnt_side.png",
+            sprite: getSpriteUrl("blocks/tnt_side"),
             hitbox: new Vector2(
                 BLOCK_SIZE - BLOCK_SIZE / 16,
                 BLOCK_SIZE - BLOCK_SIZE / 16

@@ -1479,7 +1479,7 @@ class Inventory {
         const flameFrame = Math.ceil(14 - (fuelProgress / fuelMax) * 14);
 
         drawImage({
-            url: getSpriteUrl("gui/furnace_flame.png"),
+            url: getSpriteUrl("gui/furnace_flame"),
             x: this.inventoryUI.x + 196,
             y: this.inventoryUI.y + 126,
             scale: 3.5,
@@ -1493,7 +1493,7 @@ class Inventory {
         const arrowFrame = Math.ceil((arrowProgression / 10) * 25);
 
         drawImage({
-            url: getSpriteUrl("gui/furnace_arrow.png"),
+            url: getSpriteUrl("gui/furnace_arrow"),
             x: this.inventoryUI.x + 277,
             y: this.inventoryUI.y + 120,
             scale: 3.5,

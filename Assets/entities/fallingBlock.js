@@ -5,8 +5,7 @@ class FallingBlock extends Entity {
                 position.x + BLOCK_SIZE / 20,
                 position.y + BLOCK_SIZE / 20
             ),
-            sprite:
-                "Assets/sprites/blocks/" + GetBlock(blockType).sprite + ".png",
+            sprite: getSpriteUrl("blocks/" + GetBlock(blockType).sprite),
             hitbox: new Vector2(
                 BLOCK_SIZE - BLOCK_SIZE / 10,
                 BLOCK_SIZE - BLOCK_SIZE / 10

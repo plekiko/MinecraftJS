@@ -141,7 +141,7 @@ function DrawBreakAndPlaceCursor(inRange = false) {
 
     if (selectedBlock) {
         drawImage({
-            url: "Assets/sprites/blocks/" + selectedBlock.sprite + ".png",
+            url: getSpriteUrl("blocks/" + selectedBlock.sprite),
             x: mouseX - Math.floor(camera.x),
             y: mouseY - Math.floor(camera.y),
             scale: BLOCK_SIZE / 16,
@@ -243,10 +243,7 @@ function DrawDestroyStage() {
     const mouseY = input.getMousePositionOnBlockGrid().y;
 
     drawImage({
-        url:
-            "Assets/sprites/blocks/destroy_stage_" +
-            (player.breakingStage - 1) +
-            ".png",
+        url: getSpriteUrl("blocks/destroy_stage_" + (player.breakingStage - 1)),
         x: mouseX - Math.floor(camera.x),
         y: mouseY - Math.floor(camera.y),
         scale: BLOCK_SIZE / 16,
