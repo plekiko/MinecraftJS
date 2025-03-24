@@ -281,11 +281,12 @@ function DrawCursor() {
     }
 
     drawImage({
-        url: getSpriteUrl("misc/crosshair"),
+        url: getSpriteUrl("gui/icons"),
         x: input.getMousePosition().x,
         y: input.getMousePosition().y,
         scale: 3,
         centerY: true,
+        crop: { x: 3, y: 3, width: 9, height: 9 },
     });
 }
 

@@ -910,7 +910,8 @@ class Chunk {
 
         block.dark = wall;
         block.wall = wall;
-        if (metaData !== null) block.metaData = metaData;
+
+        if (metaData !== null) block.setBlockMetaData(metaData);
 
         return true;
     }

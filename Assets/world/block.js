@@ -489,6 +489,19 @@ class Block extends Square {
         this.metaData = new Metadata({ props: props });
     }
 
+    setBlockMetaData(metaData) {
+        this.metaData = metaData;
+
+        if (this.metaData.props.storage) {
+            // Create a deep copy of the storage array and create new InventoryItem instances with the copied data
+            const storage = this.metaData.props.storage.map((row) =>
+                row.map((item) => new InventoryItem(item))
+            );
+
+            this.metaData.props.storage = storage;
+        }
+    }
+
     setBlockType(blockType, override = false) {
         if (this.blockType === blockType && !override) return;
 
@@ -1069,7 +1082,7 @@ class Block extends Square {
 
     setState(index) {
         const sprite = GetBlock(this.blockType).states[index];
-        this.setSprite("Assets/sprites/blocks/" + sprite + ".png");
+        this.setSprite(getSpriteUrl("blocks/" + sprite));
     }
 
     furnaceLogic() {

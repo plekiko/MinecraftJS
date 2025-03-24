@@ -49,7 +49,10 @@ class Inventory {
         this.furnaceSlots = null;
 
         this.openUIOffset = { x: 0, y: 0 };
-        this.openUIImage = "";
+        this.openUIImage = {
+            url: "",
+            crop: { x: 0, y: 0, width: 0, height: 0 },
+        };
         this.openUIImageOffset = { x: 0, y: 0 };
 
         this.interactedBlock = null;
@@ -213,8 +216,6 @@ class Inventory {
 
         this.updateStorage = false;
 
-        this.openUIImage = "";
-
         return leftOver.length > 0 ? leftOver : null;
     }
 
@@ -355,7 +356,10 @@ class Inventory {
 
         let slots = [];
 
-        this.openUIImage = "converter";
+        this.openUIImage = {
+            url: "converter",
+            crop: { x: 0, y: 0, width: 176, height: 166 },
+        };
 
         slots = [
             [
@@ -380,7 +384,10 @@ class Inventory {
 
         this.updateStorage = true;
 
-        this.openUIImage = "hopper";
+        this.openUIImage = {
+            url: "hopper",
+            crop: { x: 0, y: 0, width: 176, height: 133 },
+        };
 
         for (let x = 0; x < this.storage[0].length; x++) {
             slots[0].push(
@@ -398,7 +405,7 @@ class Inventory {
 
     updateConverter() {
         // Ensure we're in converter mode
-        if (!this.storageSlots || this.openUIImage !== "converter") return;
+        if (!this.storageSlots) return;
 
         const leftSlot = this.storageSlots[0][0];
         const rightSlot = this.storageSlots[0][1];
@@ -458,13 +465,19 @@ class Inventory {
 
         this.updateStorage = true;
 
-        this.openUIImage = "furnace";
+        this.openUIImage = {
+            url: "furnace",
+            crop: { x: 0, y: 0, width: 176, height: 166 },
+        };
 
         this.createFurnaceSlots();
     }
 
     openCreativeInventory() {
-        this.openUIImage = "creative_inventory";
+        this.openUIImage = {
+            url: "generic_54",
+            crop: { x: 0, y: 0, width: 176, height: 222 },
+        };
 
         this.openUIImageOffset.y = -80;
         this.openUIOffset.y = 196;
@@ -634,7 +647,10 @@ class Inventory {
 
         this.updateStorage = true;
 
-        this.openUIImage = "single_chest";
+        this.openUIImage = {
+            url: "single_chest",
+            crop: { x: 0, y: 0, width: 176, height: 166 },
+        };
 
         this.createChestSlots();
     }
@@ -693,8 +709,14 @@ class Inventory {
         }
 
         this.craftingOutputSlot.position = this.craftingOutputPosition;
-        if (this.craftingTable)
+        if (this.craftingTable) {
             this.craftingOutputSlot.position = this.craftingTableOutputPosition;
+
+            this.openUIImage = {
+                url: "crafting_table",
+                crop: { x: 0, y: 0, width: 176, height: 166 },
+            };
+        }
 
         this.createCraftingArray(this.craftingTable ? 3 : 2);
     }
@@ -946,7 +968,7 @@ class Inventory {
 
         this.craftingLogic();
 
-        if (this.openUIImage === "converter") {
+        if (this.openUIImage.url === "converter") {
             this.updateConverter();
         }
 
@@ -1333,7 +1355,7 @@ class Inventory {
             if (item.count === 1) {
                 item.blockId = this.holdingItem.blockId;
                 item.itemId = this.holdingItem.itemId;
-                item.props = this.cloneItem(this.holdingItem.props || {});
+                item.props = structuredClone(this.holdingItem.props || {});
             }
 
             if (this.holdingItem.count === 0) {
@@ -1406,17 +1428,19 @@ class Inventory {
         ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 
         let path = "inventory";
-        if (this.craftingTable) path = "crafting_table";
+        let crop = { x: 0, y: 0, width: 176, height: 166 };
 
-        if (this.openUIImage !== "") {
-            path = this.openUIImage;
+        if (this.openUIImage.url !== "") {
+            path = this.openUIImage.url;
+            crop = this.openUIImage.crop;
         }
 
         this.inventoryUI = drawImage({
-            url: getSpriteUrl("gui/" + path),
+            url: getSpriteUrl("gui/container/" + path),
             x: CANVAS.width / 2 + this.openUIImageOffset.x,
             y: CANVAS.height / 6 + this.openUIImageOffset.y,
             scale: 3.5,
+            crop: crop,
         });
 
         this.drawItems();
@@ -1479,12 +1503,13 @@ class Inventory {
         const flameFrame = Math.ceil(14 - (fuelProgress / fuelMax) * 14);
 
         drawImage({
-            url: getSpriteUrl("gui/furnace_flame"),
+            url: getSpriteUrl("gui/container/furnace"),
             x: this.inventoryUI.x + 196,
             y: this.inventoryUI.y + 126,
             scale: 3.5,
             centerX: false,
             sizeY: flameFrame,
+            crop: { x: 176, y: 0, width: 14, height: 14 },
         });
 
         const arrowProgression = furnaceData.progression;
@@ -1493,12 +1518,13 @@ class Inventory {
         const arrowFrame = Math.ceil((arrowProgression / 10) * 25);
 
         drawImage({
-            url: getSpriteUrl("gui/furnace_arrow"),
+            url: getSpriteUrl("gui/container/furnace"),
             x: this.inventoryUI.x + 277,
             y: this.inventoryUI.y + 120,
             scale: 3.5,
             centerX: false,
             sizeX: arrowFrame,
+            crop: { x: 176, y: 14, width: 24, height: 17 },
         });
     }
 

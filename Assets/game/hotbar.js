@@ -25,32 +25,38 @@ class Hotbar {
         // Empty Hearts
         for (let i = 0; i < maxHealth / 2; i++) {
             drawImage({
-                url: getSpriteUrl(
-                    `gui/${this.flashingHearts ? "heart_white" : "empty_heart"}`
-                ),
+                url: getSpriteUrl(`gui/icons`),
                 x: hotbar.x + i * 9 * 2.9 + 12,
                 y: hotbar.y - 35,
                 scale: 3,
+                crop: {
+                    x: this.flashingHearts ? 25 : 16,
+                    y: 0,
+                    width: 9,
+                    height: 9,
+                },
             });
         }
 
         // Draw Full and Half Hearts
         for (let i = 0; i < Math.floor(health / 2); i++) {
             drawImage({
-                url: getSpriteUrl("gui/heart"),
+                url: getSpriteUrl(`gui/icons`),
                 x: hotbar.x + i * 9 * 2.9 + 12,
                 y: hotbar.y - 35,
                 scale: 3,
+                crop: { x: 52, y: 0, width: 9, height: 9 },
             });
         }
 
         // Check for Half Heart
         if (health % 2 !== 0) {
             drawImage({
-                url: getSpriteUrl("gui/half_heart"),
+                url: getSpriteUrl(`gui/icons`),
                 x: hotbar.x + Math.floor(health / 2) * 9 * 2.9 + 12,
                 y: hotbar.y - 35,
                 scale: 3,
+                crop: { x: 61, y: 0, width: 9, height: 9 },
             });
         }
     }
@@ -58,18 +64,20 @@ class Hotbar {
     draw(ctx) {
         // Draw hotbar
         const hotbar = drawImage({
-            url: getSpriteUrl("gui/hotbar"),
+            url: getSpriteUrl("gui/widgets"),
             x: CANVAS.width / 2,
             y: CANVAS.height - 75,
             scale: 3,
+            crop: { x: 0, y: 0, width: 182, height: 22 },
         });
 
         // Draw current slot selector
         drawImage({
-            url: getSpriteUrl("gui/selected-slot"),
+            url: getSpriteUrl("gui/widgets"),
             x: CANVAS.width / 2 - 240 + this.currentSlot * 60,
             y: CANVAS.height - 78,
             scale: 3,
+            crop: { x: 0, y: 22, width: 24, height: 24 },
         });
 
         this.drawItems();
