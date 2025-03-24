@@ -3,6 +3,8 @@ const menuContainer = document.querySelector(".menu-container");
 const worldsContainer = document.querySelector(".world-select");
 const worldContainer = document.querySelector(".world-container");
 const worldSelectContainer = document.querySelector("#world-select-container");
+const removeTexturePackButton = document.getElementById("remove-texture-btn");
+removeTexturePackButton.disabled = true; // Initially disabled
 const texturePackSelectContainer = document.querySelector(
     "#texture-pack-select-container"
 );
@@ -186,6 +188,8 @@ function selectTexturePack(id, selectedElement) {
     selectedElement.classList.add("selected");
     selectedTexturePack = id;
 
+    removeTexturePackButton.disabled = id === "default";
+
     localStorage.setItem("currentTexturePack", id);
 }
 
@@ -281,9 +285,9 @@ function removeTexturePack() {
         )
     );
 
-    if (localStorage.getItem("currentTexturePack") === selectedTexturePack) {
-        localStorage.setItem("currentTexturePack", "default");
-    }
+    localStorage.setItem("currentTexturePack", "default");
+
+    removeTexturePackButton.disabled = true;
 
     selectedTexturePack = null;
     populateTexturePacks();
