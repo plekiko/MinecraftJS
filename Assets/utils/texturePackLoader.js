@@ -12,7 +12,7 @@ async function loadTexturePack() {
     if (currentPackKey === "default") {
         texturePackZip = null;
         texturePackFiles = null;
-        console.log("Using default textures.");
+        // console.log("Using default textures.");
         isTexturePackLoaded = true; // Default textures are "loaded" immediately
         return;
     }
@@ -53,7 +53,7 @@ async function loadTexturePack() {
                 })
             )
         );
-        console.log(`Texture pack ${currentPackKey} loaded and cached.`);
+        // console.log(`Texture pack ${currentPackKey} loaded and cached.`);
         isTexturePackLoaded = true; // Set to true when loading completes
     } catch (err) {
         console.error(`Failed to load texture pack ${currentPackKey}:`, err);

@@ -26,11 +26,15 @@ class Player extends Entity {
         inventory = new Inventory(),
         entities,
     }) {
+        const skinData = localStorage.getItem("playerSkin");
         super({
             position: position,
             hitbox: new Vector2(0.4 * BLOCK_SIZE, 1.8 * BLOCK_SIZE),
             type: EntityTypes.Player,
-            body: new Body({ parts: playerBody, sprite: "steve" }),
+            body: new Body({
+                parts: playerBody, // Assuming playerBody is defined elsewhere
+                sprite: skinData || "steve", // Use base64 data if available, else "steve"
+            }),
             fallDamage: true,
             despawn: false,
         });

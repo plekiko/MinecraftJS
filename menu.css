@@ -29,11 +29,10 @@ body {
 .world-buttons-container {
     bottom: 0;
 
-    margin-bottom: 15px;
     gap: 10px;
 
     width: 50%;
-    height: 15%;
+    height: 20%;
     position: absolute;
     flex-direction: column;
 
@@ -129,6 +128,13 @@ body {
     aspect-ratio: 1/1;
     user-select: none;
     pointer-events: none;
+}
+
+.button-flex {
+    display: flex;
+    gap: 5px;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .world-data-container {

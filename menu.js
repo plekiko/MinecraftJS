@@ -139,10 +139,7 @@ function initializeDefaultTexturePack() {
     const currentPack =
         localStorage.getItem("currentTexturePack") || defaultPackId;
     selectedTexturePack = currentPack;
-
     localStorage.setItem("currentTexturePack", currentPack);
-
-    // Do not call selectTexturePack here; wait until UI is populated
 }
 
 async function populateTexturePacks() {
@@ -177,11 +174,6 @@ async function populateTexturePacks() {
             selectTexturePack(pack.id, packElement);
         }
     }
-
-    // Ensure the current pack is selected after UI is populated
-    const selectedElement = texturePacksContainer.querySelector(
-        `.world-container[data-id="${currentTexturePack}"]`
-    );
 }
 
 function selectTexturePack(id, selectedElement) {
@@ -285,6 +277,36 @@ function uploadTexturePack() {
     };
 
     input.click();
+}
+
+function uploadSkin() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".png";
+
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const skinData = event.target.result; // Base64 string (e.g., "data:image/png;base64,...")
+                localStorage.setItem("playerSkin", skinData);
+                alert("Skin uploaded successfully!");
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert("No file selected.");
+        }
+    };
+
+    input.click();
+}
+
+function clearSkin() {
+    if (confirm("Are you sure you want to remove your skin?")) {
+        localStorage.removeItem("playerSkin");
+        alert("Skin removed successfully!");
+    }
 }
 
 function removeTexturePack() {
