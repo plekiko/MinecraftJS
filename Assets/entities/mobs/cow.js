@@ -8,6 +8,7 @@ class Cow extends Mob {
         body = new Body({
             parts: cowBody.parts,
             flipCorrection: cowBody.flipCorrection,
+            sprite: "cow/cow",
         }),
     } = {}) {
         super({
@@ -76,21 +77,22 @@ const cowBody = new Body({
     flipCorrection: 0,
     parts: {
         head: new BodyPart({
-            sprite: "entities/cow/head",
-            offset: { x: 46, y: -18 },
-            flipOrigin: { x: -62, y: 0 },
+            spriteCrop: { x: 0, y: 6, width: 6, height: 8 },
+            offset: { x: 52, y: -18 },
+            flipOrigin: { x: -76, y: 0 },
             zIndex: 0,
             flip: true,
         }),
         torso: new BodyPart({
-            sprite: "entities/cow/torso",
-            offset: { x: -13, y: -3 },
+            spriteCrop: { x: 40, y: 14, width: 9, height: 18 },
+            spriteRotation: -90,
+            offset: { x: -13, y: 18 },
             flipOrigin: { x: 55, y: 0 },
             zIndex: 2,
             flip: true,
         }),
         back_back_leg: new BodyPart({
-            sprite: "entities/cow/far_leg",
+            spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
             offset: { x: -18, y: 22 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
@@ -98,7 +100,7 @@ const cowBody = new Body({
             zIndex: -1,
         }),
         back_leg: new BodyPart({
-            sprite: "entities/cow/leg",
+            spriteCrop: { x: 0, y: 20, width: 4, height: 12 },
             offset: { x: -18, y: 22 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
@@ -106,7 +108,7 @@ const cowBody = new Body({
             zIndex: 1,
         }),
         front_back_leg: new BodyPart({
-            sprite: "entities/cow/far_leg",
+            spriteCrop: { x: 8, y: 20, width: 4, height: 12 },
             offset: { x: 35, y: 22 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
@@ -114,7 +116,7 @@ const cowBody = new Body({
             zIndex: -1,
         }),
         front_leg: new BodyPart({
-            sprite: "entities/cow/leg",
+            spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
             offset: { x: 35, y: 22 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,

@@ -5,9 +5,7 @@ class Zombie extends Mob {
         position = new Vector2(),
         invulnerable = false,
         myChunkX = 0,
-        body = new Body({
-            parts: zombieBody,
-        }),
+        body = createZombieBody(),
     } = {}) {
         super({
             health: health,
@@ -17,7 +15,7 @@ class Zombie extends Mob {
             body: body,
             noAi: noAi,
             ai: AI.Zombie,
-            speed: 1.4,
+            speed: 1,
             stepSize: 0.4,
             myChunkX: myChunkX,
             ambientSounds: Sounds.Zombie_Say,
@@ -50,6 +48,14 @@ class Zombie extends Mob {
 
         if (this.getSunLight() && day) {
             this.fire = 100;
+        }
+
+        if (this.direction === 1) {
+            this.body.parts.leftArm.rotation = -90;
+            this.body.parts.rightArm.rotation = -90;
+        } else {
+            this.body.parts.leftArm.rotation = 90;
+            this.body.parts.rightArm.rotation = 90;
         }
     }
 
@@ -90,55 +96,58 @@ class Zombie extends Mob {
     interact(player, item) {}
 }
 
-const zombieBody = {
-    head: new BodyPart({
-        sprite: "entities/zombie/head",
-        offset: { x: -6, y: 0 },
-        rotationOrigin: { x: 12, y: 32 },
-        flipOrigin: { x: 12, y: 32 },
-        zIndex: 1,
-        flip: true,
-    }),
-    torso: new BodyPart({
-        sprite: "entities/zombie/torso",
-        offset: { x: 0, y: 34 },
-    }),
-    leftArm: new BodyPart({
-        sprite: "entities/zombie/right_arm",
-        offset: { x: 4, y: 30 },
-        zIndex: 2,
-        rotationOrigin: { x: 4, y: 4 },
+function createZombieBody() {
+    return new Body({
+        flipCorrection: 0,
+        sprite: "zombie/zombie",
+        parts: {
+            head: new BodyPart({
+                spriteCrop: { x: 0, y: 8, width: 8, height: 8 },
+                offset: { x: -6, y: 0 },
+                rotationOrigin: { x: 12, y: 32 },
+                zIndex: 1,
+                eyes: true,
+            }),
+            torso: new BodyPart({
+                spriteCrop: { x: 16, y: 20, width: 4, height: 12 },
+                offset: { x: 0, y: 34 },
+            }),
+            leftArm: new BodyPart({
+                offset: { x: 0, y: 30 },
+                spriteCrop: { x: 44, y: 20, width: 4, height: 12 },
+                zIndex: 2,
+                rotationOrigin: { x: 5, y: 4 },
+                flipOrigin: { x: 1, y: 4 },
+                mainArm: true,
+                holdOrigin: { x: 6, y: 35 },
 
-        flip: true,
-        flipOrigin: { x: 1, y: 4 },
+                rotation: 90,
+            }),
+            rightArm: new BodyPart({
+                spriteCrop: { x: 48, y: 20, width: 4, height: 12 },
+                offset: { x: 0, y: 30 },
+                rotationOrigin: { x: 5, y: 4 },
+                flipOrigin: { x: 1, y: 4 },
+                zIndex: -2,
 
-        mainArm: true,
-        holdOrigin: { x: 6, y: 35 },
-    }),
-    rightArm: new BodyPart({
-        sprite: "entities/zombie/left_arm",
-        offset: { x: 4, y: 30 },
-        rotationOrigin: { x: 4, y: 4 },
-
-        flip: true,
-        flipOrigin: { x: 1, y: 4 },
-
-        zIndex: -2,
-    }),
-    leftLeg: new BodyPart({
-        sprite: "entities/zombie/right_leg",
-        offset: { x: 0, y: 74 },
-        rotationOrigin: { x: 4, y: 0 },
-        zIndex: 1,
-        sways: true,
-        swayIntensity: 4,
-    }),
-    rightLeg: new BodyPart({
-        sprite: "entities/zombie/left_leg",
-        offset: { x: 0, y: 74 },
-        rotationOrigin: { x: 4, y: 0 },
-        zIndex: -1,
-        sways: true,
-        swayIntensity: 4,
-    }),
-};
+                rotation: 90,
+            }),
+            leftLeg: new BodyPart({
+                spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
+                offset: { x: 0, y: 74 },
+                rotationOrigin: { x: 5, y: 0 },
+                zIndex: 1,
+                sways: true,
+                swayIntensity: 4,
+            }),
+            rightLeg: new BodyPart({
+                spriteCrop: { x: 8, y: 20, width: 4, height: 12 },
+                offset: { x: 0, y: 74 },
+                rotationOrigin: { x: 5, y: 0 },
+                zIndex: -1,
+                sways: true,
+                swayIntensity: 4,
+            }),
+        },
+    });
+}

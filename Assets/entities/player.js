@@ -30,7 +30,7 @@ class Player extends Entity {
             position: position,
             hitbox: new Vector2(0.4 * BLOCK_SIZE, 1.8 * BLOCK_SIZE),
             type: EntityTypes.Player,
-            body: new Body({ parts: playerBody }),
+            body: new Body({ parts: playerBody, sprite: "steve" }),
             fallDamage: true,
             despawn: false,
         });
@@ -1305,7 +1305,6 @@ class Player extends Entity {
 
 const playerBody = {
     head: new BodyPart({
-        sprite: "steve",
         spriteCrop: { x: 0, y: 8, width: 8, height: 8 },
         offset: { x: -6, y: 0 },
         rotationOrigin: { x: 12, y: 32 },
@@ -1313,41 +1312,36 @@ const playerBody = {
         eyes: true,
     }),
     torso: new BodyPart({
-        sprite: "steve",
         spriteCrop: { x: 16, y: 20, width: 4, height: 12 },
         offset: { x: 0, y: 34 },
     }),
     leftArm: new BodyPart({
-        sprite: "steve",
         offset: { x: 0, y: 34 },
         spriteCrop: { x: 44, y: 20, width: 4, height: 12 },
         zIndex: 2,
-        rotationOrigin: { x: 4, y: 4 },
+        rotationOrigin: { x: 5, y: 4 },
         sways: true,
         mainArm: true,
         holdOrigin: { x: 6, y: 35 },
     }),
     rightArm: new BodyPart({
-        sprite: "steve",
         spriteCrop: { x: 48, y: 20, width: 4, height: 12 },
         offset: { x: 0, y: 34 },
-        rotationOrigin: { x: 4, y: 4 },
+        rotationOrigin: { x: 5, y: 4 },
         zIndex: -2,
         sways: true,
     }),
     leftLeg: new BodyPart({
-        sprite: "steve",
         spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
         offset: { x: 0, y: 74 },
-        rotationOrigin: { x: 4, y: 0 },
+        rotationOrigin: { x: 5, y: 0 },
         zIndex: 1,
         sways: true,
     }),
     rightLeg: new BodyPart({
-        sprite: "steve",
         spriteCrop: { x: 8, y: 20, width: 4, height: 12 },
         offset: { x: 0, y: 74 },
-        rotationOrigin: { x: 4, y: 0 },
+        rotationOrigin: { x: 5, y: 0 },
         zIndex: -1,
         sways: true,
     }),

@@ -1,5 +1,10 @@
 class Body {
-    constructor({ position = { x: 0, y: 0 }, parts = [], flipCorrection = 0 }) {
+    constructor({
+        position = { x: 0, y: 0 },
+        parts = [],
+        flipCorrection = 0,
+        sprite = "",
+    }) {
         this.position = position;
         this.flipCorrection = flipCorrection;
         this.parts = parts;
@@ -8,6 +13,9 @@ class Body {
         this.flashingColor = null;
 
         this.brightness = 1;
+
+        this.image = new Image();
+        this.image.src = getSpriteUrl("entity/" + sprite);
     }
 
     updatePosition(newPosition) {
@@ -63,7 +71,8 @@ class Body {
                 lookDirection,
                 holdItem,
                 this.flashingColor,
-                this.brightness
+                this.brightness,
+                this.image
             );
         }
 
@@ -85,8 +94,10 @@ class Body {
 
 class BodyPart {
     constructor({
-        sprite = "",
         spriteCrop = { x: 0, y: 0, width: 16, height: 16 },
+        spriteRotation = 0,
+        ownSpriteMap = "",
+
         position,
         offset = { x: 0, y: 0 },
         zIndex = 0,
@@ -102,10 +113,9 @@ class BodyPart {
         holdOrigin = { x: 0, y: 0 },
         flip = false,
     }) {
-        this.sprite = sprite;
         this.spriteCrop = spriteCrop;
-        this.image = new Image(); // Preload image
-        this.image.src = getSpriteUrl("entity/" + this.sprite);
+        this.spriteRotation = spriteRotation;
+        this.ownSpriteMap = ownSpriteMap;
 
         this.position = position;
         this.offset = offset;
@@ -160,21 +170,23 @@ class BodyPart {
         lookDirection,
         holdItem,
         flashingColor,
-        brightness = 1
+        brightness = 1,
+        image
     ) {
-        const img = this.loadSprite();
+        const img = this.loadSprite(image);
 
         ctx.save();
         ctx.filter = `brightness(${brightness})`;
 
+        // Step 1: Translate to the initial position
         this.applyTranslation(ctx);
 
+        // Step 2: Apply flip and dynamic rotation
         const finalRotation = this.calculateFinalRotation(
             speed,
             grounded,
             lookDirection
         );
-
         let shouldFlip = lookDirection < -90 || lookDirection > 90;
         if (this.flip && direction < 0) {
             shouldFlip = true;
@@ -183,14 +195,19 @@ class BodyPart {
         this.direction = shouldFlip ? -1 : 1;
 
         this.applyRotationAndFlip(ctx, finalRotation, shouldFlip);
+
+        // Step 3: Apply spriteRotation around the rotation origin
+        ctx.translate(this.rotationOrigin.x, this.rotationOrigin.y);
+        ctx.rotate((this.spriteRotation * Math.PI) / 180);
+        ctx.translate(-this.rotationOrigin.x, -this.rotationOrigin.y);
+
+        // Render held item and sprite
         this.renderHeldItem(ctx, holdItem, this.direction);
 
         // Calculate scaled size based on spriteCrop
         const scaleFactor = BLOCK_SIZE / 16;
         const destWidth = this.spriteCrop.width * scaleFactor;
         const destHeight = this.spriteCrop.height * scaleFactor;
-
-        console.log(scaleFactor);
 
         // Draw the cropped image
         ctx.drawImage(
@@ -210,10 +227,10 @@ class BodyPart {
             ctx.globalAlpha = 0.2;
             ctx.fillStyle = "black";
             ctx.fillRect(
-                -destWidth / (scaleFactor * 2), // Match dx
-                -destHeight / (scaleFactor * 2), // Match dy
-                destWidth, // Match dWidth
-                destHeight // Match dHeight
+                -destWidth / (scaleFactor * 2),
+                -destHeight / (scaleFactor * 2),
+                destWidth,
+                destHeight
             );
         }
 
@@ -222,10 +239,10 @@ class BodyPart {
             ctx.globalAlpha = 0.4;
             ctx.fillStyle = flashingColor;
             ctx.fillRect(
-                -destWidth / (scaleFactor * 2), // Match dx
-                -destHeight / (scaleFactor * 2), // Match dy
-                destWidth, // Match dWidth
-                destHeight // Match dHeight
+                -destWidth / (scaleFactor * 2),
+                -destHeight / (scaleFactor * 2),
+                destWidth,
+                destHeight
             );
             ctx.globalAlpha = 1;
         }
@@ -287,10 +304,13 @@ class BodyPart {
         ctx.translate(-origin.x, -origin.y); // Use precomputed origin
     }
 
-    loadSprite() {
-        const img = new Image();
+    loadSprite(image) {
+        let img = image;
 
-        img.src = getSpriteUrl("entity/" + this.sprite);
+        if (this.ownSpriteMap) {
+            img = new Image();
+            img.src = getSpriteUrl("entity/" + this.ownSpriteMap);
+        }
 
         return img;
     }

@@ -99,12 +99,12 @@ function dayNightCycle() {
         time = 1;
     }
 
+    if (time > 3.5 && time < 6.5) day = false;
+    else day = true;
+
     if (!GAMERULES.doDaylightCycle) return;
 
     time += deltaTime * dayNightSpeed;
-
-    if (time > 3.5 && time < 6.5) day = false;
-    else day = true;
 }
 
 function updateEntities(tick = false) {

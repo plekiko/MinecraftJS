@@ -8,6 +8,7 @@ class Pig extends Mob {
         body = new Body({
             parts: pigBody.parts,
             flipCorrection: pigBody.flipCorrection,
+            sprite: "pig/pig",
         }),
     } = {}) {
         super({
@@ -67,21 +68,22 @@ const pigBody = new Body({
     flipCorrection: 3,
     parts: {
         head: new BodyPart({
-            sprite: "entities/pig/head",
-            offset: { x: 40, y: -8 },
-            flipOrigin: { x: -52, y: 0 },
+            spriteCrop: { x: 0, y: 8, width: 8, height: 8 },
+            offset: { x: 45, y: -8 },
+            flipOrigin: { x: -65, y: 0 },
             zIndex: 0,
             flip: true,
         }),
         torso: new BodyPart({
-            sprite: "entities/pig/torso",
-            offset: { x: -10, y: 4 },
-            flipOrigin: { x: 48, y: 0 },
+            spriteCrop: { x: 47, y: 16, width: 9, height: 16 },
+            spriteRotation: -90,
+            offset: { x: -9, y: 24 },
+            flipOrigin: { x: 44, y: 0 },
             zIndex: 2,
             flip: true,
         }),
         back_back_leg: new BodyPart({
-            sprite: "entities/pig/far_leg",
+            spriteCrop: { x: 0, y: 20, width: 4, height: 6 },
             offset: { x: -15, y: 31 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
@@ -89,7 +91,7 @@ const pigBody = new Body({
             zIndex: -1,
         }),
         back_leg: new BodyPart({
-            sprite: "entities/pig/leg",
+            spriteCrop: { x: 8, y: 20, width: 4, height: 6 },
             offset: { x: -15, y: 31 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
@@ -97,7 +99,7 @@ const pigBody = new Body({
             zIndex: 1,
         }),
         front_back_leg: new BodyPart({
-            sprite: "entities/pig/far_leg",
+            spriteCrop: { x: 0, y: 20, width: 4, height: 6 },
             offset: { x: 30, y: 31 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
@@ -105,18 +107,12 @@ const pigBody = new Body({
             zIndex: -1,
         }),
         front_leg: new BodyPart({
-            sprite: "entities/pig/leg",
+            spriteCrop: { x: 8, y: 20, width: 4, height: 6 },
             offset: { x: 30, y: 31 },
             rotationOrigin: { x: 4, y: 0 },
             sways: true,
             swayIntensity: 4,
             zIndex: 1,
         }),
-        // snout: new BodyPart({
-        //     sprite: "entities/pig/snout",
-        //     offset: { x: 75, y: -4 },
-        //     rotationOrigin: { x: 12, y: 32 },
-        //     zIndex: 1,
-        // }),
     },
 });

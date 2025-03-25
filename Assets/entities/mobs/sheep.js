@@ -46,7 +46,9 @@ class Sheep extends Mob {
 
     woolLogic() {
         if (!this.hasWool) {
-            this.body.parts.torso.sprite = "entities/sheep/torso_sheared";
+            // With wool
+            this.body.parts.torso.ownSpriteMap = "";
+            this.body.parts.torso.spriteCrop.width = 6;
 
             // Dont drop wool if sheared
             this.lootTable = new LootTable([
@@ -57,7 +59,8 @@ class Sheep extends Mob {
                 }),
             ]);
         } else {
-            this.body.parts.torso.sprite = "entities/sheep/torso";
+            this.body.parts.torso.ownSpriteMap = "sheep/sheep_fur";
+            this.body.parts.torso.spriteCrop.width = 9;
 
             // Drop wool if not sheared
             this.lootTable = new LootTable([
@@ -126,23 +129,26 @@ class Sheep extends Mob {
 function createSheepBody() {
     return new Body({
         flipCorrection: 0,
+        sprite: "sheep/sheep",
         parts: {
             head: new BodyPart({
-                sprite: "entities/sheep/head",
-                offset: { x: 40, y: -12 },
-                flipOrigin: { x: -56, y: 0 },
+                spriteCrop: { x: 0, y: 8, width: 7, height: 6 },
+                offset: { x: 48, y: -18 },
+                flipOrigin: { x: -66, y: 0 },
                 zIndex: 0,
                 flip: true,
             }),
             torso: new BodyPart({
-                sprite: "entities/sheep/torso",
-                offset: { x: -12, y: -3 },
-                flipOrigin: { x: 48, y: 0 },
+                ownSpriteMap: "sheep/sheep_fur",
+                spriteCrop: { x: 28, y: 14, width: 6, height: 16 },
+                spriteRotation: -90,
+                offset: { x: -7, y: 18 },
+                flipOrigin: { x: 43, y: 0 },
                 zIndex: 2,
                 flip: true,
             }),
             back_back_leg: new BodyPart({
-                sprite: "entities/sheep/far_leg",
+                spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
                 offset: { x: -18, y: 22 },
                 rotationOrigin: { x: 4, y: 0 },
                 sways: true,
@@ -150,7 +156,7 @@ function createSheepBody() {
                 zIndex: -1,
             }),
             back_leg: new BodyPart({
-                sprite: "entities/sheep/leg",
+                spriteCrop: { x: 0, y: 20, width: 4, height: 12 },
                 offset: { x: -18, y: 22 },
                 rotationOrigin: { x: 4, y: 0 },
                 sways: true,
@@ -158,16 +164,16 @@ function createSheepBody() {
                 zIndex: 1,
             }),
             front_back_leg: new BodyPart({
-                sprite: "entities/sheep/far_leg",
-                offset: { x: 30, y: 22 },
+                spriteCrop: { x: 8, y: 20, width: 4, height: 12 },
+                offset: { x: 35, y: 22 },
                 rotationOrigin: { x: 4, y: 0 },
                 sways: true,
                 swayIntensity: 3,
                 zIndex: -1,
             }),
             front_leg: new BodyPart({
-                sprite: "entities/sheep/leg",
-                offset: { x: 30, y: 22 },
+                spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
+                offset: { x: 35, y: 22 },
                 rotationOrigin: { x: 4, y: 0 },
                 sways: true,
                 swayIntensity: 3,
