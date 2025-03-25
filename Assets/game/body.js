@@ -205,6 +205,18 @@ class BodyPart {
             destHeight // dHeight: Destination height
         );
 
+        // Draw dark overlay
+        if (this.zIndex < 0) {
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = "black";
+            ctx.fillRect(
+                -destWidth / (scaleFactor * 2), // Match dx
+                -destHeight / (scaleFactor * 2), // Match dy
+                destWidth, // Match dWidth
+                destHeight // Match dHeight
+            );
+        }
+
         // Draw flashing color aligned with the cropped image
         if (flashingColor) {
             ctx.globalAlpha = 0.4;
