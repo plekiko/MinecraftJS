@@ -325,15 +325,16 @@ function clearSkin() {
     }
 }
 
-function removeTexturePack() {
+async function removeTexturePack() {
     if (!selectedTexturePack || selectedTexturePack === "default") return;
+
+    const oldSelectedPack = selectedTexturePack;
 
     const texturePackList = JSON.parse(localStorage.getItem("texturePackList"));
     if (!texturePackList) return;
 
     if (!confirm("Are you sure you want to delete this texture pack?")) return;
 
-    ldb.set(`texturePack_${selectedTexturePack}`, undefined);
     localStorage.setItem(
         "texturePackList",
         JSON.stringify(
@@ -347,6 +348,8 @@ function removeTexturePack() {
     populateTexturePacks();
 
     removeTexturePackButton.disabled = true;
+    // ldb.set(`texturePack_${selectedTexturePack}`, undefined);
+    await deleteFromLdb(`texturePack_${oldSelectedPack}`);
 }
 
 async function getTexturePackData(id) {

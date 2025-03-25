@@ -39,6 +39,19 @@
                     (o.v = t),
                     n.transaction("s", "readwrite").objectStore("s").put(o);
             },
+            remove: function (key, callback) {
+                // Use a transaction to delete the key and provide a callback for completion
+                const transaction = n.transaction("s", "readwrite");
+                const store = transaction.objectStore("s");
+                const request = store.delete(key);
+
+                request.onsuccess = function () {
+                    if (callback) callback(null); // Success, no error
+                };
+                request.onerror = function (e) {
+                    if (callback) callback(e.target.error); // Pass error to callback
+                };
+            },
         });
 })();
 
@@ -49,6 +62,20 @@ function getFromLdb(key) {
                 resolve(data); // Success case
             } else {
                 reject(new Error(`No data found for key: ${key}`)); // Error case
+            }
+        });
+    });
+}
+
+function deleteFromLdb(key) {
+    return new Promise((resolve, reject) => {
+        ldb.remove(key, (err) => {
+            if (err) {
+                reject(
+                    new Error(`Failed to delete key ${key}: ${err.message}`)
+                );
+            } else {
+                resolve(); // Successfully deleted
             }
         });
     });
