@@ -380,7 +380,7 @@ function selectWorld(id, selectedElement) {
 
     selectedElement.classList.add("selected");
     worldPlayButton.disabled = false;
-    removeWorldButton.disabled = true;
+    removeWorldButton.disabled = false;
     selectedWorld = id;
 }
 
