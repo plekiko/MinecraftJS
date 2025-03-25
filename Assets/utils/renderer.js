@@ -495,13 +495,13 @@ function drawImage({
     img.src = url;
 
     const shouldCrop = crop.width > 0 && crop.height > 0;
+    const fullHeight = shouldCrop ? crop.height : img.height; // Full height of the base region
+
     // Function to handle the actual drawing
     function drawFrame() {
         ctx.globalAlpha = opacity;
 
         let sourceWidth, sourceHeight, sourceX, sourceY, drawWidth, drawHeight;
-
-        // Determine if cropping should be applied (both width and height must be > 0)
 
         if (fixAnimation) {
             // Fixed 16x16 animation mode
@@ -512,22 +512,24 @@ function drawImage({
             drawWidth = sourceWidth * scale;
             drawHeight = sourceHeight * scale;
         } else {
-            // Original behavior
+            // Behavior with sizeY cropping from top
             sourceWidth =
-                sizeX !== null ? sizeX : shouldCrop ? crop.width : img.width; // Full width if no crop
+                sizeX !== null ? sizeX : shouldCrop ? crop.width : img.width;
             sourceHeight =
-                sizeY !== null ? sizeY : shouldCrop ? crop.height : img.height; // Full height if no crop
-            sourceX = shouldCrop ? crop.x : 0; // No offset if not cropping
-            sourceY = shouldCrop ? crop.y : 0; // No offset if not cropping
+                sizeY !== null ? Math.min(sizeY, fullHeight) : fullHeight; // Use sizeY, capped at full height
+            sourceX = shouldCrop ? crop.x : 0; // Crop X or 0
+            sourceY = shouldCrop ? crop.y : 0; // Start from top (crop.y or 0)
             drawWidth = sourceWidth * scale;
             drawHeight = sourceHeight * scale;
         }
 
         // Adjust position based on centering
         const drawX = centerX ? x - drawWidth / 2 : x;
-        const drawY = centerY ? y - drawHeight / 2 : y;
+        const drawY = centerY
+            ? y - drawHeight / 2
+            : y + (sizeY !== null ? (fullHeight - sourceHeight) * scale : 0); // Offset to align bottom
 
-        // Draw the image (cropped or full based on shouldCrop)
+        // Draw the image
         ctx.drawImage(
             img,
             sourceX, // Source x
@@ -563,8 +565,11 @@ function drawImage({
     const drawWidthFinal =
         (sizeX !== null ? sizeX : shouldCrop ? crop.width : img.width) * scale;
     const drawHeightFinal =
-        (sizeY !== null ? sizeY : shouldCrop ? crop.height : img.height) *
-        scale;
+        (sizeY !== null
+            ? Math.min(sizeY, fullHeight)
+            : shouldCrop
+            ? crop.height
+            : img.height) * scale;
     return {
         x: centerX ? x - drawWidthFinal / 2 : x,
         y: centerY ? y - drawHeightFinal / 2 : y,

@@ -202,6 +202,11 @@ class Inventory {
 
         this.openUIOffset = { x: 0, y: 0 };
 
+        this.openUIImage = {
+            url: "inventory",
+            crop: { x: 0, y: 0, width: 176, height: 166 },
+        };
+
         this.createCraftingArray();
 
         this.clearButtons();
@@ -1502,14 +1507,14 @@ class Inventory {
         // Calculate the frame for the flame
         const flameFrame = Math.ceil(14 - (fuelProgress / fuelMax) * 14);
 
+        // Flame
         drawImage({
             url: getSpriteUrl("gui/container/furnace"),
             x: this.inventoryUI.x + 196,
-            y: this.inventoryUI.y + 126,
+            y: this.inventoryUI.y + 126 + (14 - flameFrame) * 3.5, // Offset y downward
             scale: 3.5,
             centerX: false,
-            sizeY: flameFrame,
-            crop: { x: 176, y: 0, width: 14, height: 14 },
+            crop: { x: 176, y: 14 - flameFrame, width: 14, height: flameFrame },
         });
 
         const arrowProgression = furnaceData.progression;
@@ -1517,6 +1522,7 @@ class Inventory {
 
         const arrowFrame = Math.ceil((arrowProgression / 10) * 25);
 
+        // Arrow
         drawImage({
             url: getSpriteUrl("gui/container/furnace"),
             x: this.inventoryUI.x + 277,
