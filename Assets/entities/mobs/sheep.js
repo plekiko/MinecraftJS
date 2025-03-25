@@ -139,8 +139,7 @@ function createSheepBody() {
                 flip: true,
             }),
             torso: new BodyPart({
-                ownSpriteMap: "sheep/sheep_fur",
-                spriteCrop: { x: 28, y: 14, width: 6, height: 16 },
+                spriteCrop: { x: 42, y: 14, width: 6, height: 16 },
                 spriteRotation: -90,
                 offset: { x: -7, y: 18 },
                 flipOrigin: { x: 43, y: 0 },
