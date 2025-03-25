@@ -85,7 +85,8 @@ class Body {
 
 class BodyPart {
     constructor({
-        sprite,
+        sprite = "",
+        spriteCrop = { x: 0, y: 0, width: 16, height: 16 },
         position,
         offset = { x: 0, y: 0 },
         zIndex = 0,
@@ -102,6 +103,10 @@ class BodyPart {
         flip = false,
     }) {
         this.sprite = sprite;
+        this.spriteCrop = spriteCrop;
+        this.image = new Image(); // Preload image
+        this.image.src = getSpriteUrl("entity/" + this.sprite);
+
         this.position = position;
         this.offset = offset;
         this.zIndex = zIndex;
@@ -112,7 +117,6 @@ class BodyPart {
             y: flipOrigin.y * (BLOCK_SIZE / 64),
         };
 
-        // Precompute and store the scaled rotation origin
         this.rotationOrigin = {
             x: rotationOrigin.x * (BLOCK_SIZE / 64),
             y: rotationOrigin.y * (BLOCK_SIZE / 64),
@@ -122,7 +126,6 @@ class BodyPart {
         this.sways = sways;
         this.rotation = rotation;
 
-        // Sway properties
         this.swaySpeed = swaySpeed;
         this.swayIntensity = swayIntensity;
         this.maxSwayAngle = maxSwayAngle;
@@ -132,13 +135,11 @@ class BodyPart {
         this.mainArm = mainArm;
         this.holdOrigin = holdOrigin;
 
-        // Swing properties
         this.isSwinging = false;
         this.swingProgress = 0;
-        this.swingSpeed = 10; // Speed of the swing (adjust as needed)
-        this.swingAmplitude = 50; // Maximum swing rotation in degrees
+        this.swingSpeed = 10;
+        this.swingAmplitude = 50;
     }
-
     getSwayRotation(speed, grounded) {
         const oscillation = Math.sin(
             Date.now() / (grounded ? this.swaySpeed : this.swaySpeed * 5)
@@ -164,7 +165,6 @@ class BodyPart {
         const img = this.loadSprite();
 
         ctx.save();
-
         ctx.filter = `brightness(${brightness})`;
 
         this.applyTranslation(ctx);
@@ -185,26 +185,36 @@ class BodyPart {
         this.applyRotationAndFlip(ctx, finalRotation, shouldFlip);
         this.renderHeldItem(ctx, holdItem, this.direction);
 
+        // Calculate scaled size based on spriteCrop
+        const scaleFactor = BLOCK_SIZE / 16;
+        const destWidth = this.spriteCrop.width * scaleFactor;
+        const destHeight = this.spriteCrop.height * scaleFactor;
+
+        console.log(scaleFactor);
+
+        // Draw the cropped image
         ctx.drawImage(
             img,
-            -img.width / 2,
-            -img.height / 2,
-            img.width * (BLOCK_SIZE / 16),
-            img.height * (BLOCK_SIZE / 16)
+            this.spriteCrop.x, // sx: Source X
+            this.spriteCrop.y, // sy: Source Y
+            this.spriteCrop.width, // sWidth: Source width
+            this.spriteCrop.height, // sHeight: Source height
+            -destWidth / (scaleFactor * 2), // dx: Destination X (centered)
+            -destHeight / (scaleFactor * 2), // dy: Destination Y (centered)
+            destWidth, // dWidth: Destination width
+            destHeight // dHeight: Destination height
         );
 
-        // Draw flashing color
+        // Draw flashing color aligned with the cropped image
         if (flashingColor) {
             ctx.globalAlpha = 0.4;
             ctx.fillStyle = flashingColor;
-
             ctx.fillRect(
-                -img.width / 2,
-                -img.height / 2,
-                img.width * (BLOCK_SIZE / 16),
-                img.height * (BLOCK_SIZE / 16)
+                -destWidth / (scaleFactor * 2), // Match dx
+                -destHeight / (scaleFactor * 2), // Match dy
+                destWidth, // Match dWidth
+                destHeight // Match dHeight
             );
-
             ctx.globalAlpha = 1;
         }
 
@@ -267,7 +277,9 @@ class BodyPart {
 
     loadSprite() {
         const img = new Image();
-        img.src = getSpriteUrl(this.sprite);
+
+        img.src = getSpriteUrl("entity/" + this.sprite);
+
         return img;
     }
 
@@ -337,47 +349,3 @@ class BodyPart {
         return null;
     }
 }
-
-const playerBody = {
-    head: new BodyPart({
-        sprite: "entities/player/head",
-        offset: { x: -6, y: 0 },
-        rotationOrigin: { x: 12, y: 32 },
-        zIndex: 1,
-        eyes: true,
-    }),
-    torso: new BodyPart({
-        sprite: "entities/player/torso",
-        offset: { x: 0, y: 34 },
-    }),
-    leftArm: new BodyPart({
-        sprite: "entities/player/left-arm",
-        offset: { x: 0, y: 34 },
-        zIndex: 2,
-        rotationOrigin: { x: 4, y: 4 },
-        sways: true,
-        mainArm: true,
-        holdOrigin: { x: 6, y: 35 },
-    }),
-    rightArm: new BodyPart({
-        sprite: "entities/player/right-arm",
-        offset: { x: 0, y: 34 },
-        rotationOrigin: { x: 4, y: 4 },
-        zIndex: -2,
-        sways: true,
-    }),
-    leftLeg: new BodyPart({
-        sprite: "entities/player/left-leg",
-        offset: { x: 0, y: 74 },
-        rotationOrigin: { x: 4, y: 0 },
-        zIndex: 1,
-        sways: true,
-    }),
-    rightLeg: new BodyPart({
-        sprite: "entities/player/right-leg",
-        offset: { x: 0, y: 74 },
-        rotationOrigin: { x: 4, y: 0 },
-        zIndex: -1,
-        sways: true,
-    }),
-};
