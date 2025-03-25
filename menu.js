@@ -128,7 +128,7 @@ function initializeDefaultTexturePack() {
             name: "Default",
             dateAdded: new Date().toLocaleString(),
             icon: "Assets/sprites/menu/worldPreview.png", // Default icon
-            description: "Default Minecraft texture pack", // Default description
+            description: "Default Minecraft JS texture pack", // Default description
         };
         texturePackList.push(defaultPack);
         localStorage.setItem(
