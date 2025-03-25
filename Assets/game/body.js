@@ -224,7 +224,7 @@ class BodyPart {
 
         // Draw dark overlay
         if (this.zIndex < 0) {
-            ctx.globalAlpha = 0.2;
+            ctx.globalAlpha = 0.3;
             ctx.fillStyle = "black";
             ctx.fillRect(
                 -destWidth / (scaleFactor * 2),
