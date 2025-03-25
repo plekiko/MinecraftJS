@@ -317,7 +317,7 @@ function removeTexturePack() {
 
     if (!confirm("Are you sure you want to delete this texture pack?")) return;
 
-    ldb.delete(`texturePack_${selectedTexturePack}`);
+    ldb.set(`texturePack_${selectedTexturePack}`, undefined);
     localStorage.setItem(
         "texturePackList",
         JSON.stringify(
