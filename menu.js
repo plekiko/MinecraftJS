@@ -117,35 +117,32 @@ function populateWorlds() {
     }
 }
 
-// Texture Pack Functions
 function initializeDefaultTexturePack() {
     const texturePackList =
         JSON.parse(localStorage.getItem("texturePackList")) || [];
     const defaultPackId = "default";
 
-    // Check if default pack exists, if not, create it
     if (!texturePackList.some((pack) => pack.id === defaultPackId)) {
         const defaultPack = {
             id: defaultPackId,
             name: "Default",
             dateAdded: new Date().toLocaleString(),
+            icon: "Assets/sprites/menu/worldPreview.png", // Default icon
         };
         texturePackList.push(defaultPack);
         localStorage.setItem(
             "texturePackList",
             JSON.stringify(texturePackList)
         );
-
-        // Since this is the default pack, we won't store actual data
-        // Game should fall back to built-in assets when using "default"
     }
 
-    // Set default as current if no texture pack is selected
-    if (!localStorage.getItem("currentTexturePack")) {
-        localStorage.setItem("currentTexturePack", defaultPackId);
+    const currentPack =
+        localStorage.getItem("currentTexturePack") || defaultPackId;
+    selectedTexturePack = currentPack;
 
-        selectTexturePack(defaultPackId, null);
-    }
+    localStorage.setItem("currentTexturePack", currentPack);
+
+    // Do not call selectTexturePack here; wait until UI is populated
 }
 
 async function populateTexturePacks() {
@@ -166,21 +163,25 @@ async function populateTexturePacks() {
         packDateElement.textContent = pack.dateAdded;
         packElement.style.display = "flex";
 
-        // Set the preview image from icon.png
-        const iconSrc = await getTexturePackIcon(pack.id);
-        packImageElement.src = iconSrc;
+        packImageElement.src =
+            pack.icon || "Assets/sprites/menu/worldPreview.png";
 
-        // Visually select the current texture pack
-        if (pack.id == currentTexturePack) {
-            packElement.classList.add("selected");
-            selectedTexturePack = pack.id;
-        }
+        console.log("Pack ID:", pack.id, "Current:", currentTexturePack);
 
         packElement.addEventListener("click", () => {
             selectTexturePack(pack.id, packElement);
         });
         texturePacksContainer.appendChild(packElement);
+
+        if (pack.id == currentTexturePack) {
+            selectTexturePack(pack.id, packElement);
+        }
     }
+
+    // Ensure the current pack is selected after UI is populated
+    const selectedElement = texturePacksContainer.querySelector(
+        `.world-container[data-id="${currentTexturePack}"]`
+    );
 }
 
 function selectTexturePack(id, selectedElement) {
@@ -190,51 +191,28 @@ function selectTexturePack(id, selectedElement) {
         container.classList.remove("selected");
     });
 
-    selectedElement.classList.add("selected");
+    if (selectedElement) {
+        selectedElement.classList.add("selected");
+    }
     selectedTexturePack = id;
 
     removeTexturePackButton.disabled = id === "default";
 
     localStorage.setItem("currentTexturePack", id);
+    loadTexturePack(); // Reload the texture pack when selected
 }
 
-// Helper function to get the icon.png from a texture pack ZIP as base64
-// Helper function to get the icon.png from a texture pack ZIP as base64
 async function getTexturePackIcon(packId) {
     if (packId === "default") {
-        return "Assets/sprites/menu/worldPreview.png"; // Default fallback icon
+        return "Assets/sprites/menu/worldPreview.png";
     }
 
-    const texturePackData = localStorage.getItem(`texturePack_${packId}`);
-    if (!texturePackData) return "Assets/sprites/menu/worldPreview.png";
-
-    const base64Data = texturePackData.startsWith(
-        "data:application/x-zip-compressed;base64,"
-    )
-        ? texturePackData.replace(
-              "data:application/x-zip-compressed;base64,",
-              ""
-          )
-        : texturePackData;
-
-    try {
-        const zip = await JSZip.loadAsync(base64Data, { base64: true });
-        // Search for any file ending with "icon.png"
-        const iconFilePath = Object.keys(zip.files).find(
-            (fileName) =>
-                fileName.endsWith("icon.png") || fileName.endsWith("pack.png")
-        );
-        if (iconFilePath) {
-            const iconFile = zip.file(iconFilePath);
-            if (iconFile) {
-                const base64 = await iconFile.async("base64");
-                return `data:image/png;base64,${base64}`;
-            }
-        }
-    } catch (err) {
-        console.error(`Failed to load icon for texture pack ${packId}:`, err);
-    }
-    return "Assets/sprites/menu/worldPreview.png"; // Fallback if no icon or error
+    const texturePackList =
+        JSON.parse(localStorage.getItem("texturePackList")) || [];
+    const pack = texturePackList.find((p) => p.id === packId);
+    return pack
+        ? pack.icon || "Assets/sprites/menu/worldPreview.png"
+        : "Assets/sprites/menu/worldPreview.png";
 }
 
 function uploadTexturePack() {
@@ -246,7 +224,7 @@ function uploadTexturePack() {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = async (event) => {
                 const texturePackList =
                     JSON.parse(localStorage.getItem("texturePackList")) || [];
                 const packId = Date.now();
@@ -254,12 +232,44 @@ function uploadTexturePack() {
                     id: packId,
                     name: file.name.replace(".zip", ""),
                     dateAdded: new Date().toLocaleString(),
+                    icon: null, // Will be set below
                 };
 
-                localStorage.setItem(
-                    `texturePack_${packId}`,
-                    event.target.result
-                );
+                const texturePackData = event.target.result;
+                ldb.set(`texturePack_${packId}`, texturePackData);
+
+                try {
+                    const base64Data = texturePackData.startsWith(
+                        "data:application/x-zip-compressed;base64,"
+                    )
+                        ? texturePackData.replace(
+                              "data:application/x-zip-compressed;base64,",
+                              ""
+                          )
+                        : texturePackData;
+                    const zip = await JSZip.loadAsync(base64Data, {
+                        base64: true,
+                    });
+                    const iconFilePath = Object.keys(zip.files).find(
+                        (fileName) =>
+                            fileName.endsWith("icon.png") ||
+                            fileName.endsWith("pack.png")
+                    );
+                    if (iconFilePath) {
+                        const iconFile = zip.file(iconFilePath);
+                        if (iconFile) {
+                            const base64 = await iconFile.async("base64");
+                            packInfo.icon = `data:image/png;base64,${base64}`;
+                        }
+                    }
+                } catch (err) {
+                    console.error(
+                        `Failed to extract icon for texture pack ${packId}:`,
+                        err
+                    );
+                    packInfo.icon = "Assets/sprites/menu/worldPreview.png"; // Fallback
+                }
+
                 texturePackList.push(packInfo);
                 localStorage.setItem(
                     "texturePackList",
@@ -285,7 +295,7 @@ function removeTexturePack() {
 
     if (!confirm("Are you sure you want to delete this texture pack?")) return;
 
-    localStorage.removeItem(`texturePack_${selectedTexturePack}`);
+    ldb.delete(`texturePack_${selectedTexturePack}`);
     localStorage.setItem(
         "texturePackList",
         JSON.stringify(
@@ -301,9 +311,16 @@ function removeTexturePack() {
     removeTexturePackButton.disabled = true;
 }
 
-function getTexturePackData(id) {
-    if (id === "default") return null; // Game should use built-in assets
-    return localStorage.getItem(`texturePack_${id}`);
+async function getTexturePackData(id) {
+    if (id === "default") return null;
+
+    try {
+        const data = await getFromLdb(`texturePack_${id}`);
+        return data;
+    } catch (err) {
+        console.error(`Failed to get texture pack data for ${id}:`, err);
+        return null;
+    }
 }
 
 function createNewWorld() {
@@ -386,11 +403,20 @@ function selectWorld(id, selectedElement) {
 
 worldPlayButton.disabled = true;
 
+// Initialize everything after texture pack loading
+async function initialize() {
+    await loadTexturePack(); // Wait for texture pack to load
+    await waitForTexturePack(); // Ensure it's fully loaded
+    populateWorlds();
+    initializeDefaultTexturePack(); // Sets up default pack and current selection
+    await populateTexturePacks(); // Populate UI with current selection
+    removeTexturePackButton.disabled = selectedTexturePack === "default";
+}
+
+initialize();
+
 setTimeout(() => {
     PlayRandomMusic();
 }, 1000);
 
-populateWorlds();
-initializeDefaultTexturePack();
-
-removeTexturePackButton.disabled = selectTexturePack === "default";
+removeTexturePackButton.addEventListener("click", removeTexturePack);

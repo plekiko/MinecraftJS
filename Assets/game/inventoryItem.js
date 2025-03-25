@@ -99,16 +99,25 @@ class InventorySlot {
         let cutoff = 0;
         if (item.blockId) cutoff = GetBlock(item.blockId).defaultCutoff;
 
+        const image = new Image();
+        image.src = spritePath;
+
         // Draw the sprite
         drawImage({
             url: spritePath,
             x: slotX,
-            y: slotY /*+ cutoff * 16 * size * 3*/,
+            y: slotY,
             scale: 3 * size,
             centerX: false,
             dark: item.props.wall === true,
             sizeY: 16 - cutoff * 16,
             fixAnimation: cutoff === 0,
+            crop: {
+                x: 0,
+                y: 0,
+                width: 16,
+                height: 16,
+            },
         });
 
         // Draw durability bar

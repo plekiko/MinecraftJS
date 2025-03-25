@@ -478,6 +478,7 @@ function drawHitboxes() {
 
 function drawImage({
     url,
+    image,
     x = 0,
     y = 0,
     scale = 1,
@@ -491,8 +492,15 @@ function drawImage({
     frame = 0,
     crop = { x: 0, y: 0, width: 0, height: 0 },
 } = {}) {
-    const img = new Image();
-    img.src = url;
+    if (!image && !url) return;
+
+    let img = null;
+    if (!image) {
+        img = new Image();
+        img.src = url;
+    } else {
+        img = image;
+    }
 
     const shouldCrop = crop.width > 0 && crop.height > 0;
     const fullHeight = shouldCrop ? crop.height : img.height; // Full height of the base region

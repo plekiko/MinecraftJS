@@ -8,7 +8,7 @@ class BlockType {
         hardness = -2,
         grassOffset = false,
         blockOffset = { x: 0, y: 0 },
-        animationSpeed = null,
+        animationSpeed = 0.2,
         fluid = false,
         drag = 40,
         collision = true,

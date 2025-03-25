@@ -357,6 +357,12 @@ class BodyPart {
             scale: (BLOCK_SIZE / 16) * scale,
             centerX: false,
             sizeY: 16 - cutoff * 16,
+            crop: {
+                x: 0,
+                y: 0,
+                width: 16,
+                height: 16,
+            },
         });
 
         ctx.restore();
