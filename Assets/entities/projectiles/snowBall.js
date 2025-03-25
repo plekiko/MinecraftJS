@@ -5,7 +5,7 @@ class Snowball extends Projectile {
     }) {
         super({
             position: position,
-            sprite: "Assets/sprites/items/snowball.png",
+            sprite: getSpriteUrl("items/snowball"),
             damage: 0,
             velocity: velocity,
             hitbox: new Vector2(BLOCK_SIZE / 2, BLOCK_SIZE / 2),

@@ -128,6 +128,7 @@ function initializeDefaultTexturePack() {
             name: "Default",
             dateAdded: new Date().toLocaleString(),
             icon: "Assets/sprites/menu/worldPreview.png", // Default icon
+            description: "Default Minecraft texture pack", // Default description
         };
         texturePackList.push(defaultPack);
         localStorage.setItem(
@@ -157,13 +158,14 @@ async function populateTexturePacks() {
         const packImageElement = packElement.querySelector(".world-image");
 
         packNameElement.textContent = pack.name;
-        packDateElement.textContent = pack.dateAdded;
+        packDateElement.textContent =
+            pack.description || "Default look of Minecraft JS"; // Use description instead of date
         packElement.style.display = "flex";
 
         packImageElement.src =
             pack.icon || "Assets/sprites/menu/worldPreview.png";
 
-        console.log("Pack ID:", pack.id, "Current:", currentTexturePack);
+        // console.log("Pack ID:", pack.id, "Current:", currentTexturePack);
 
         packElement.addEventListener("click", () => {
             selectTexturePack(pack.id, packElement);
@@ -224,7 +226,8 @@ function uploadTexturePack() {
                     id: packId,
                     name: file.name.replace(".zip", ""),
                     dateAdded: new Date().toLocaleString(),
-                    icon: null, // Will be set below
+                    icon: null,
+                    description: null, // Will be set below
                 };
 
                 const texturePackData = event.target.result;
@@ -242,6 +245,8 @@ function uploadTexturePack() {
                     const zip = await JSZip.loadAsync(base64Data, {
                         base64: true,
                     });
+
+                    // Extract icon
                     const iconFilePath = Object.keys(zip.files).find(
                         (fileName) =>
                             fileName.endsWith("icon.png") ||
@@ -254,12 +259,23 @@ function uploadTexturePack() {
                             packInfo.icon = `data:image/png;base64,${base64}`;
                         }
                     }
+
+                    // Extract pack.mcmeta description
+                    const mcmetaFile = zip.file("pack.mcmeta");
+                    if (mcmetaFile) {
+                        const mcmetaText = await mcmetaFile.async("text");
+                        const mcmeta = JSON.parse(mcmetaText);
+                        if (mcmeta.pack && mcmeta.pack.description) {
+                            packInfo.description = mcmeta.pack.description;
+                        }
+                    }
                 } catch (err) {
                     console.error(
-                        `Failed to extract icon for texture pack ${packId}:`,
+                        `Failed to process texture pack ${packId}:`,
                         err
                     );
-                    packInfo.icon = "Assets/sprites/menu/worldPreview.png"; // Fallback
+                    packInfo.icon = "Assets/sprites/menu/worldPreview.png"; // Fallback icon
+                    packInfo.description = "No description available"; // Fallback description
                 }
 
                 texturePackList.push(packInfo);

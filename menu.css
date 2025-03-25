@@ -29,8 +29,6 @@ body {
 .world-buttons-container {
     bottom: 0;
 
-    gap: 10px;
-
     width: 50%;
     height: 20%;
     position: absolute;
