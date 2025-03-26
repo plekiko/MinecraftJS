@@ -1436,7 +1436,7 @@ const blockTypes = [
     new BlockType({
         blockId: 86,
         name: "Farmland",
-        sprite: "farm_land",
+        sprite: "dirt",
         hardness: 0.6,
         breakSound: Sounds.Break_Gravel,
         breakingSound: Sounds.Breaking_Gravel,
