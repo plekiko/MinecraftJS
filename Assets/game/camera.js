@@ -41,9 +41,6 @@ class Camera {
         // The bottom edge is at: this.y + CANVAS.height/2.
         // Therefore, ensure: this.y <= CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height/2.
         this.y = Math.min(this.y, CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height);
-
-        // Trigger world generation when the camera moves
-        GenerateWorld();
     }
 
     followPlayer() {

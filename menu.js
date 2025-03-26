@@ -159,7 +159,7 @@ async function populateTexturePacks() {
 
         packNameElement.textContent = pack.name;
         packDateElement.textContent =
-            pack.description || "Default look of Minecraft JS"; // Use description instead of date
+            pack.description || "No description found for this pack"; // Use description instead of date
         packElement.style.display = "flex";
 
         packImageElement.src =

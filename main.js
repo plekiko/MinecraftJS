@@ -10,13 +10,6 @@ chat = new Chat();
 //     return dialogText;
 // };
 
-// if (SPAWN_PLAYER) {
-//     setTimeout(() => {
-//         SpawnPlayer();
-//         // summonEntity(Zombie, structuredClone(player.position));
-//     }, 100);
-// }
-
 function SpawnPlayer(
     position = new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
     setOnGround = true
@@ -57,6 +50,8 @@ function summonEntity(entity, position, props) {
     return newEntity;
 }
 
+LoadWorldFromLocalStorage();
+
 function gameLoop() {
     // Pause the game if the window is not focused
     // if (!document.hasFocus()) {
@@ -67,6 +62,8 @@ function gameLoop() {
     const currentFrameTime = performance.now();
     deltaTime = (currentFrameTime - lastFrameTime) / 1000;
     passedTime += deltaTime;
+
+    GenerateWorld();
 
     if (deltaTime <= 1) {
         updateGame();

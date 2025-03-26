@@ -81,7 +81,7 @@ function SaveWorld(message = true, toFile = false) {
         return;
     }
 
-    let worldName = "world";
+    let worldName = "New World";
     let id = Date.now();
 
     let worlds = localStorage.getItem("worlds");
@@ -118,7 +118,9 @@ function SaveWorld(message = true, toFile = false) {
     localStorage.setItem(id, saveData);
 }
 
-function LoadWorldFromLocalStorage() {
+async function LoadWorldFromLocalStorage() {
+    await waitForTexturePack();
+
     let selectedWorld = localStorage.getItem("selectedWorld");
 
     if (selectedWorld) {
@@ -147,8 +149,6 @@ function LoadWorldFromLocalStorage() {
 
     LoadWorld(selectedWorldData);
 }
-
-LoadWorldFromLocalStorage();
 
 const saveJSONToFile = (obj, filename) => {
     const blob = new Blob([JSON.stringify(obj, null, 2)], {

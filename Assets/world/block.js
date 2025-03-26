@@ -1644,9 +1644,7 @@ class Block extends Square {
         }
     }
 
-    async updateSprite() {
-        await waitForTexturePack();
-
+    updateSprite() {
         const block = GetBlock(this.blockType);
 
         if (block.air) {

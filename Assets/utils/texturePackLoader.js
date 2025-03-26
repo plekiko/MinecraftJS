@@ -87,13 +87,13 @@ function getSpriteUrl(path) {
     return `Assets/sprites/${path}.png`;
 }
 
-function waitForTexturePack() {
+async function waitForTexturePack() {
     return new Promise((resolve) => {
         const checkLoaded = () => {
             if (isTexturePackLoaded) {
                 resolve();
             } else {
-                setTimeout(checkLoaded, 1);
+                setTimeout(checkLoaded, 10);
             }
         };
         checkLoaded();
