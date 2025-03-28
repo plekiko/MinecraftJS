@@ -8,6 +8,7 @@ const EntityTypes = Object.freeze({
 
 class Entity {
     constructor({
+        UUID = uuidv4(),
         position = new Vector2(),
         rotation = new Vector2(),
         hitbox = new Vector2(1, 1),
@@ -45,6 +46,7 @@ class Entity {
 
         fire = -20,
     } = {}) {
+        this.UUID = UUID;
         this.position = position;
         this.rotation = rotation;
         this.hitbox = hitbox;

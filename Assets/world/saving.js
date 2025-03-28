@@ -76,6 +76,8 @@ function SaveWorld(message = true, toFile = false) {
     const saveData = JSON.stringify(currentSave);
     // saveJSONToFile(saveData, "world");
 
+    console.log("World saved successfully!", saveData);
+
     if (toFile) {
         saveJSONToFile(saveData, "world");
         return;

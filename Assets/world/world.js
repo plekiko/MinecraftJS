@@ -245,3 +245,7 @@ function updateBlocks() {
         }
     }
 }
+
+function getEntityByUUID(uuid) {
+    return entities.find((entity) => entity.UUID == uuid);
+}

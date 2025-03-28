@@ -944,7 +944,7 @@ class Block extends Square {
 
         // Clean up despawned or dead mobs from the tracking array
         props.spawnedMobs = props.spawnedMobs.filter(
-            (mob) => mob && mob.health > 0
+            (mob) => mob && getEntityByUUID(mob)?.health > 0
         );
 
         // Check if we can spawn more entities
@@ -982,7 +982,7 @@ class Block extends Square {
 
         if (!entity) return;
 
-        this.metaData.props.spawnedMobs.push(entity);
+        this.metaData.props.spawnedMobs.push(entity.UUID);
     }
 
     handleCropGrowth(blockDef) {

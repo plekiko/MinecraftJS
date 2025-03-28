@@ -93,7 +93,7 @@ async function waitForTexturePack() {
             if (isTexturePackLoaded) {
                 resolve();
             } else {
-                setTimeout(checkLoaded, 10);
+                setTimeout(checkLoaded, 100);
             }
         };
         checkLoaded();
