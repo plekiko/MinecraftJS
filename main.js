@@ -65,9 +65,7 @@ function gameLoop() {
 
     GenerateWorld();
 
-    if (deltaTime <= 1) {
-        updateGame();
-    }
+    updateGame();
 
     Draw(chunks, calculateFPS(currentFrameTime), deltaTime);
 

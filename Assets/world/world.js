@@ -213,7 +213,7 @@ function globalRecalculateLight() {
 }
 
 function globalUpdateSkyLight() {
-    for (let chunk of chunks.values()) {
+    for (let chunk of chunks_in_render_distance.values()) {
         chunk.updateSkyLight();
     }
 }
