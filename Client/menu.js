@@ -1,4 +1,4 @@
-window.location.href = "game.html";
+// window.location.href = "game.html";
 
 const randomTextElement = document.querySelector(".splash");
 const menuContainer = document.querySelector(".menu-container");
@@ -77,8 +77,12 @@ function getMultiplayerPort() {
     }
 }
 
-// getMultiplayerIP();
-// getMultiplayerPort();
+function multiplayerButton() {
+    buttonSound();
+    getMultiplayerIP();
+    getMultiplayerPort();
+    window.location.href = "game.html";
+}
 
 function showTexturePacks() {
     buttonSound();
