@@ -14,32 +14,14 @@ function SaveWorld(message = true, toFile = false) {
     let savedChunks = [];
 
     chunks.forEach((chunk) => {
-        let blocks = [];
-        let walls = [];
-
-        for (let y = 0; y < CHUNK_HEIGHT; y++) {
-            blocks[y] = [];
-            walls[y] = [];
-            for (let x = 0; x < CHUNK_WIDTH; x++) {
-                blocks[y][x] = chunk.blocks[y][x].blockType; // Assuming blockType is a property
-                walls[y][x] = chunk.walls[y][x].blockType; // Assuming blockType is a property
-
-                if (chunk.blocks[y][x].metaData) {
-                    // Create object from block like: {0, metaData: {props: {}}}
-                    blocks[y][x] = {
-                        t: chunk.blocks[y][x].blockType,
-                        m: JSON.stringify(chunk.blocks[y][x].metaData),
-                    };
-                }
-            }
-        }
+        const newSaveChunk = SaveChunk(chunk);
 
         savedChunks.push({
             x: chunk.x,
             biome: chunk.biome.name,
             previousChunk: chunk.previousChunk ? chunk.previousChunk.x : null,
-            blocks: blocks,
-            walls: walls,
+            blocks: newSaveChunk.blocks,
+            walls: newSaveChunk.walls,
         });
     });
     // savedChunks.splice(1, savedChunks.length - 1);
@@ -118,9 +100,37 @@ function SaveWorld(message = true, toFile = false) {
     localStorage.setItem(id, saveData);
 }
 
-async function LoadWorldFromLocalStorage() {
-    await waitForTexturePack();
+function SaveChunk(chunk) {
+    let blocks = [];
+    let walls = [];
 
+    for (let y = 0; y < CHUNK_HEIGHT; y++) {
+        blocks[y] = [];
+        walls[y] = [];
+        for (let x = 0; x < CHUNK_WIDTH; x++) {
+            blocks[y][x] = chunk.blocks[y][x].blockType; // Assuming blockType is a property
+            walls[y][x] = chunk.walls[y][x].blockType; // Assuming blockType is a property
+
+            if (chunk.blocks[y][x].metaData) {
+                // Create object from block like: {0, metaData: {props: {}}}
+                blocks[y][x] = {
+                    t: chunk.blocks[y][x].blockType,
+                    m: JSON.stringify(chunk.blocks[y][x].metaData),
+                };
+            }
+        }
+    }
+
+    return {
+        x: chunk.x,
+        biome: chunk.biome.name,
+        previousChunk: chunk.previousChunk ? chunk.previousChunk.x : null,
+        blocks,
+        walls,
+    };
+}
+
+async function LoadWorldFromLocalStorage() {
     let selectedWorld = localStorage.getItem("selectedWorld");
 
     if (selectedWorld) {
@@ -181,59 +191,7 @@ function LoadWorld(save) {
     entities = [];
 
     currentSave.chunks.forEach((chunk) => {
-        const previousChunk = chunk.previousChunk
-            ? chunks.get(chunk.previousChunk)
-            : null;
-        const constructedChunk = new Chunk(
-            chunk.x,
-            CHUNK_WIDTH,
-            Biomes[chunk.biome] ? Biomes[chunk.biome] : Biomes.Plains,
-            previousChunk,
-            pendingBlocks,
-            worldGrassNoiseMap,
-            true
-        );
-
-        constructedChunk.generateArray();
-
-        for (let y = 0; y < CHUNK_HEIGHT; y++) {
-            for (let x = 0; x < CHUNK_WIDTH; x++) {
-                // Blocks
-                constructedChunk.setBlockType(
-                    x,
-                    y,
-                    chunk.blocks[y][x].t
-                        ? chunk.blocks[y][x].t
-                        : chunk.blocks[y][x],
-                    false,
-                    chunk.blocks[y][x].m
-                        ? JSON.parse(chunk.blocks[y][x].m)
-                        : null,
-                    false
-                );
-
-                if (
-                    GetBlock(constructedChunk.blocks[y][x].blockType)
-                        .lightLevel > 0
-                ) {
-                }
-                // Walls
-                constructedChunk.setBlockType(
-                    x,
-                    y,
-                    chunk.walls[y][x].t
-                        ? chunk.walls[y][x].t
-                        : chunk.walls[y][x],
-                    true,
-                    chunk.walls[y][x].m
-                        ? JSON.parse(chunk.walls[y][x].m)
-                        : null,
-                    false
-                );
-            }
-        }
-
-        chunks.set(chunk.x, constructedChunk);
+        LoadChunk(chunk.x, chunk);
     });
 
     if (currentSave.pendingBlocks.length > 0)
@@ -281,4 +239,53 @@ function LoadWorld(save) {
     setTimeout(() => {
         loadingWorld = false;
     }, 500);
+}
+
+function LoadChunk(x, chunk) {
+    const previousChunk = chunk.previousChunk
+        ? chunks.get(chunk.previousChunk)
+        : null;
+    const constructedChunk = new Chunk(
+        x,
+        CHUNK_WIDTH,
+        Biomes[chunk.biome] ? Biomes[chunk.biome] : Biomes.Plains,
+        previousChunk,
+        pendingBlocks,
+        worldGrassNoiseMap,
+        true
+    );
+
+    constructedChunk.generateArray();
+
+    for (let y = 0; y < CHUNK_HEIGHT; y++) {
+        for (let x = 0; x < CHUNK_WIDTH; x++) {
+            // Blocks
+            constructedChunk.setBlockType(
+                x,
+                y,
+                chunk.blocks[y][x].t
+                    ? chunk.blocks[y][x].t
+                    : chunk.blocks[y][x],
+                false,
+                chunk.blocks[y][x].m ? JSON.parse(chunk.blocks[y][x].m) : null,
+                false
+            );
+
+            if (
+                GetBlock(constructedChunk.blocks[y][x].blockType).lightLevel > 0
+            ) {
+            }
+            // Walls
+            constructedChunk.setBlockType(
+                x,
+                y,
+                chunk.walls[y][x].t ? chunk.walls[y][x].t : chunk.walls[y][x],
+                true,
+                chunk.walls[y][x].m ? JSON.parse(chunk.walls[y][x].m) : null,
+                false
+            );
+        }
+    }
+
+    chunks.set(x, constructedChunk);
 }

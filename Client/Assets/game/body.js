@@ -78,7 +78,7 @@ class Body {
                 );
 
                 // Smoothly interpolate between current rotation and the adjusted look direction
-                const rotationSpeed = 15; // You can adjust this speed to make it smoother or faster
+                const rotationSpeed = 1000 * deltaTime; // You can adjust this speed to make it smoother or faster
 
                 // Update the rotation towards the target rotation
                 part.rotation +=

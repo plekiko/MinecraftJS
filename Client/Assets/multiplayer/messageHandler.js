@@ -1,33 +1,83 @@
+// This object will store callbacks keyed by requestId
+const callbacks = {};
+
 function processMessage(data) {
-    switch (data.type) {
+    const message = data.message;
+    const type = data.type;
+
+    switch (type) {
         case "youJoined":
-            iJoined(data.player, data.existingPlayers);
+            console.log(data);
+            iJoined(message.player, message.existingPlayers);
             break;
         case "playerJoined":
+            console.log(data);
             SpawnPlayer(
                 new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
                 false,
-                data.player.UUID,
-                data.player.name,
+                message.player.UUID,
+                message.player.name,
                 false
             );
             break;
         case "playerLeft":
-            removeEntity(getEntityByUUID(data.UUID));
+            removeEntity(getEntityByUUID(message));
             break;
 
         case "chat":
-            chat.message(data.message, data.sender);
+            chat.message(message.message, message.sender);
             break;
         case "playerUpdate":
             updatePlayerState(data);
             break;
         case "entityRPC":
-            handleEntityRPC(data);
+            handleEntityRPC(message);
             break;
+
+        case "response":
+            if (callbacks[data.message.requestId]) {
+                callbacks[data.message.requestId](message); // Call the stored callback
+                delete callbacks[data.message.requestId]; // Remove callback once executed
+            }
+            break;
+
+        case "placeBlock":
+            if (!chunks.has(message.chunkX))
+                console.log("Chunk not loaded:", message.chunkX);
+
+            console.log("Placing block:", message);
+
+            chunks
+                .get(message.chunkX)
+                .setBlockType(
+                    message.x,
+                    message.y,
+                    message.blockType,
+                    message.isWall,
+                    null,
+                    false,
+                    true
+                );
+            break;
+
         default:
-            console.log("Unknown message type:", data.type);
+            console.log("Unknown message type:", type);
             break;
+    }
+}
+
+// Store callback for async get request
+async function getChunk(x) {
+    try {
+        const chunk = await server.get({
+            type: "getChunk",
+            message: { x: x },
+            sender: player.UUID,
+        });
+
+        console.log("Received chunk:", chunk);
+    } catch (error) {
+        console.error("Error getting chunk:", error);
     }
 }
 

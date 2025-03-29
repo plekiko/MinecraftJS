@@ -1,6 +1,9 @@
 import { uuidv4, Vector2 } from "./Classes/helper.js";
 import { Player } from "./Classes/player.js";
 import { WebSocketServer } from "ws";
+import { World } from "./Classes/world.js";
+
+const world = new World();
 
 // Create a WebSocket server
 const wss = new WebSocketServer({ port: 25565 });
@@ -12,8 +15,8 @@ wss.on("connection", (ws) => {
 
     ws.on("message", (message) => {
         // Log the incoming message size in KB
-        const incomingSizeKB = (Buffer.byteLength(message) / 1024).toFixed(2); // Convert bytes to KB
-        console.log(`Received message size: ${incomingSizeKB} KB`);
+        // const incomingSizeKB = (Buffer.byteLength(message) / 1024).toFixed(2); // Convert bytes to KB
+        // console.log(`Received message size: ${incomingSizeKB} KB`);
 
         processMessage(message, ws); // Process the incoming message
     });
@@ -29,9 +32,9 @@ function broadcast(data, exclude = []) {
         if (!exclude.includes(player.UUID)) {
             const message = JSON.stringify(data);
             // Log the outgoing message size in KB
-            const outgoingSizeKB = (Buffer.byteLength(message) / 1024).toFixed(
-                2
-            ); // Convert bytes to KB
+            // const outgoingSizeKB = (Buffer.byteLength(message) / 1024).toFixed(
+            //     2
+            // ); // Convert bytes to KB
             // console.log(
             //     `Sent message size to ${player.name}: ${outgoingSizeKB} KB`
             // );
@@ -46,11 +49,6 @@ function sendToPlayer(UUID, data) {
 
     if (player) {
         const message = JSON.stringify(data);
-        // Log the outgoing message size in KB
-        const outgoingSizeKB = (Buffer.byteLength(message) / 1024).toFixed(2); // Convert bytes to KB
-        // console.log(
-        //     `Sent message size to ${player.name}: ${outgoingSizeKB} KB`
-        // );
 
         player.ws.send(message);
     }
@@ -72,15 +70,17 @@ function playerJoined(ws) {
     // Send the new player their UUID and the list of existing players
     sendToPlayer(newPlayer.UUID, {
         type: "youJoined",
-        player: newPlayer,
-        existingPlayers: players.filter((p) => p.UUID !== newPlayer.UUID), // Send other players
+        message: {
+            player: newPlayer,
+            existingPlayers: players.filter((p) => p.UUID !== newPlayer.UUID),
+        },
     });
 
     // Broadcast to all players that a new player has joined
     broadcast(
         {
             type: "playerJoined",
-            player: newPlayer,
+            message: { player: newPlayer },
         },
         [newPlayer.UUID]
     );
@@ -91,7 +91,7 @@ function playerLeft(player) {
 
     broadcast({
         type: "playerLeft",
-        UUID: player.UUID,
+        message: player.UUID,
     });
 }
 
@@ -116,6 +116,29 @@ function processMessage(message, ws) {
         case "entityRPC":
             broadcast(data, [data.sender]);
             break;
+
+        case "getChunk":
+            const chunk = world.getChunk(data.message.data.x);
+            ws.send(
+                JSON.stringify({
+                    type: "response",
+                    message: {
+                        chunk: chunk,
+                        requestId: data.message.requestId,
+                    },
+                })
+            );
+
+            break;
+
+        case "uploadChunk":
+            world.uploadChunk(data.message.chunk);
+            break;
+
+        case "placeBlock":
+            broadcast(data, [data.sender]);
+            break;
+
         default:
             console.log("Unknown message type:", data.type);
             break;

@@ -26,7 +26,9 @@ function SpawnPlayer(
 
     if (local) player = newPlayer;
 
-    if (setOnGround) newPlayer.setOnGround();
+    setTimeout(() => {
+        if (setOnGround) newPlayer.setOnGround();
+    }, 1000);
 
     entities.push(newPlayer);
 
@@ -59,11 +61,15 @@ function summonEntity(entity, position, props) {
 
 if (!multiplayer) LoadWorldFromLocalStorage();
 
-function gameLoop() {
+async function gameLoop() {
     // Pause the game if the window is not focused
     // if (!document.hasFocus()) {
     //     requestAnimationFrame(gameLoop);
     //     return;
+    // }
+
+    // if (!isTexturePackLoaded) {
+    //     await waitForTexturePack();
     // }
 
     const currentFrameTime = performance.now();
@@ -75,7 +81,6 @@ function gameLoop() {
     if (deltaTime <= 1) {
         updateGame();
     }
-
     Draw(chunks, calculateFPS(currentFrameTime), deltaTime);
 
     lastFrameTime = currentFrameTime;

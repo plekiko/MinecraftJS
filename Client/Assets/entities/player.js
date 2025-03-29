@@ -955,6 +955,18 @@ class Player extends Entity {
 
         if (!succeeded) return;
 
+        if (multiplayer) {
+            UploadChunkToServer(chunk.x);
+
+            ServerPlaceBlock(
+                chunk.x,
+                this.hoverBlock.x,
+                this.hoverBlock.y,
+                blockToPlace.blockId,
+                isWall
+            );
+        }
+
         // Play appropriate break sound
         if (!isWall) {
             this.hoverBlock.playBreakSound();
@@ -1144,6 +1156,16 @@ class Player extends Entity {
         if (this.abilities.instaBuild) {
             hover.breakBlock(false, wall);
             this.playerSwing();
+
+            if (multiplayer) {
+                ServerPlaceBlock(
+                    hover.chunkX,
+                    hover.x,
+                    hover.y,
+                    Blocks.Air,
+                    wall
+                );
+            }
             return;
         }
 
@@ -1209,6 +1231,16 @@ class Player extends Entity {
                 shouldDrop = false;
             if (isWall) shouldDrop = true;
             hover.breakBlock(shouldDrop, isWall);
+
+            if (multiplayer) {
+                ServerPlaceBlock(
+                    hover.chunkX,
+                    hover.x,
+                    hover.y,
+                    Blocks.Air,
+                    isWall
+                );
+            }
 
             let reduceDurabilityBy = 1;
 

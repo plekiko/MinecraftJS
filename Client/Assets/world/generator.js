@@ -207,7 +207,21 @@ function RegenerateWorld() {
     }, 1);
 }
 
-function GenerateWorld() {
+async function GetChunkFromServer(x) {
+    try {
+        const chunkData = await server.get({
+            type: "getChunk",
+            message: { x: x },
+        });
+
+        return chunkData.chunk;
+    } catch (error) {
+        // console.error("Failed to get chunk from server: ", error);
+        return null;
+    }
+}
+
+async function GenerateWorld() {
     if (loadingWorld) return;
 
     const currentChunkIndex = camera.getCurrentChunkIndex();
@@ -218,14 +232,24 @@ function GenerateWorld() {
         i <= currentChunkIndex + RENDER_DISTANCE;
         i++
     ) {
+        const chunkX = i * CHUNK_WIDTH * BLOCK_SIZE;
+
+        let willUploadChunk = false;
+
         // Multiplayer get chunk
         if (multiplayer) {
-            // Get chunk from server
+            LoadCustomSeed("redstone");
 
-            continue;
+            if (!chunks.has(chunkX)) {
+                const chunkFromServer = await GetChunkFromServer(chunkX);
+
+                if (chunkFromServer) {
+                    LoadChunk(chunkX, chunkFromServer);
+                } else {
+                    willUploadChunk = true;
+                }
+            }
         }
-
-        const chunkX = i * CHUNK_WIDTH * BLOCK_SIZE;
 
         if (!chunks.has(chunkX)) {
             const oldChunkData = getNeighborBiomeData(i, currentChunkIndex);
@@ -239,9 +263,39 @@ function GenerateWorld() {
                 chunk.spawnTime = 0;
             }
         }
+
+        if (willUploadChunk) {
+            UploadChunkToServer(chunkX);
+        }
     }
 
     postProcessChunks();
+}
+
+function ServerPlaceBlock(chunkX, x, y, blockType, isWall = false) {
+    server.send({
+        type: "placeBlock",
+        message: {
+            x: x,
+            y: y,
+            blockType: blockType,
+            isWall: isWall,
+            chunkX: chunkX,
+        },
+    });
+}
+
+function ServerBreakBlock() {}
+
+function UploadChunkToServer(chunkX) {
+    const chunk = GetChunkForX(chunkX);
+    server.send({
+        type: "uploadChunk",
+        message: {
+            x: chunkX,
+            chunk: SaveChunk(chunk),
+        },
+    });
 }
 
 function GenerateStructure(structure, x, y) {

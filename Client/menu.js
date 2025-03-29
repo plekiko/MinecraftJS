@@ -1,3 +1,5 @@
+window.location.href = "game.html";
+
 const randomTextElement = document.querySelector(".splash");
 const menuContainer = document.querySelector(".menu-container");
 const worldsContainer = document.querySelector(".world-select");
