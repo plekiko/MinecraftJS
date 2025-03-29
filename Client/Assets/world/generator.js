@@ -218,6 +218,13 @@ function GenerateWorld() {
         i <= currentChunkIndex + RENDER_DISTANCE;
         i++
     ) {
+        // Multiplayer get chunk
+        if (multiplayer) {
+            // Get chunk from server
+
+            continue;
+        }
+
         const chunkX = i * CHUNK_WIDTH * BLOCK_SIZE;
 
         if (!chunks.has(chunkX)) {

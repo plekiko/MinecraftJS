@@ -409,7 +409,11 @@ class Entity {
         this.bounceSprite();
         this.playFootstepSounds();
         this.hurtCooldownLogic();
-        if (this.body) this.body.updateBody();
+        this.body?.updateBody(
+            this.velocity.x,
+            this.grounded,
+            this.lookDirection
+        );
     }
 
     entityTickUpdate() {
@@ -931,9 +935,7 @@ class Entity {
             this.body.opacity = this.opacity;
             this.body.draw(
                 ctx,
-                this.velocity.x,
                 this.direction,
-                this.grounded,
                 this.lookDirection,
                 this.holdItem
             );

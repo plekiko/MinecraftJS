@@ -12,18 +12,25 @@ chat = new Chat();
 
 function SpawnPlayer(
     position = new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
-    setOnGround = true
+    setOnGround = true,
+    UUID = null,
+    name = null,
+    local = true
 ) {
-    player = new Player({
+    const newPlayer = new Player({
         position: position,
         entities: entities,
+        UUID: UUID ? UUID : uuidv4(),
+        name: name ? name : "Player",
     });
 
-    if (setOnGround) player.setOnGround();
+    if (local) player = newPlayer;
 
-    entities.push(player);
+    if (setOnGround) newPlayer.setOnGround();
 
-    hotbar = new Hotbar(player.inventory);
+    entities.push(newPlayer);
+
+    if (local) hotbar = new Hotbar(newPlayer.inventory);
 }
 
 function ReverseY(y) {
@@ -50,7 +57,7 @@ function summonEntity(entity, position, props) {
     return newEntity;
 }
 
-LoadWorldFromLocalStorage();
+if (!multiplayer) LoadWorldFromLocalStorage();
 
 function gameLoop() {
     // Pause the game if the window is not focused

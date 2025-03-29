@@ -16,6 +16,15 @@ class Body {
 
         this.image = new Image();
         this.image.src = getSpriteUrl("entity/" + sprite);
+
+        this.initParts();
+    }
+
+    initParts() {
+        // Set the id's of the parts
+        for (const partName in this.parts) {
+            this.parts[partName].id = partName;
+        }
     }
 
     updatePosition(newPosition) {
@@ -33,10 +42,53 @@ class Body {
         }
     }
 
-    updateBody() {
+    updateBody(speed, grounded, lookDirection) {
         for (const partName in this.parts) {
             const part = this.parts[partName];
-            if (part.mainArm) part.updateSwing();
+
+            if (part.sways) {
+                part.rotation = part.getSwayRotation(speed, grounded);
+            }
+
+            if (part.mainArm) {
+                part.updateDirection(lookDirection);
+                part.updateSwing();
+            }
+
+            if (part.eyes) {
+                // Adjust the look direction based on the body and direction
+                let adjustedLookDirection = lookDirection;
+
+                // Adjust for flipping logic based on body direction or eyes flip
+                if (part.flip || lookDirection < -90 || lookDirection > 90) {
+                    adjustedLookDirection = 180 + lookDirection;
+                }
+
+                // Normalize adjustedLookDirection to range [-180, 180]
+                if (adjustedLookDirection > 180) {
+                    adjustedLookDirection -= 360; // Adjust to wrap around
+                } else if (adjustedLookDirection < -180) {
+                    adjustedLookDirection += 360; // Adjust to wrap around
+                }
+
+                // Clamp the adjustedLookDirection to be between -90 and 90 degrees
+                let targetRotation = Math.max(
+                    -90,
+                    Math.min(90, adjustedLookDirection)
+                );
+
+                // Smoothly interpolate between current rotation and the adjusted look direction
+                const rotationSpeed = 15; // You can adjust this speed to make it smoother or faster
+
+                // Update the rotation towards the target rotation
+                part.rotation +=
+                    Math.sign(targetRotation - part.rotation) * rotationSpeed;
+
+                // When it's close enough to the target rotation, lock it in
+                if (Math.abs(targetRotation - part.rotation) < rotationSpeed) {
+                    part.rotation = targetRotation;
+                }
+            }
         }
     }
 
@@ -47,7 +99,7 @@ class Body {
         }, duration * 1000);
     }
 
-    draw(ctx, speed, direction, grounded, lookDirection, holdItem) {
+    draw(ctx, direction, lookDirection, holdItem) {
         const sortedParts = Object.values(this.parts).sort(
             (a, b) => a.zIndex - b.zIndex
         );
@@ -65,9 +117,6 @@ class Body {
             };
             part.draw(
                 ctx,
-                speed,
-                direction,
-                grounded,
                 lookDirection,
                 holdItem,
                 this.flashingColor,
@@ -97,6 +146,7 @@ class BodyPart {
         spriteCrop = { x: 0, y: 0, width: 16, height: 16 },
         spriteRotation = 0,
         ownSpriteMap = "",
+        id = 0,
 
         position,
         offset = { x: 0, y: 0 },
@@ -113,6 +163,7 @@ class BodyPart {
         holdOrigin = { x: 0, y: 0 },
         flip = false,
     }) {
+        this.id = id;
         this.spriteCrop = spriteCrop;
         this.spriteRotation = spriteRotation;
         this.ownSpriteMap = ownSpriteMap;
@@ -162,17 +213,7 @@ class BodyPart {
         return output * this.swayIntensity;
     }
 
-    draw(
-        ctx,
-        speed,
-        direction,
-        grounded,
-        lookDirection,
-        holdItem,
-        flashingColor,
-        brightness = 1,
-        image
-    ) {
+    draw(ctx, lookDirection, holdItem, flashingColor, brightness = 1, image) {
         const img = this.loadSprite(image);
 
         ctx.save();
@@ -181,18 +222,10 @@ class BodyPart {
         // Step 1: Translate to the initial position
         this.applyTranslation(ctx);
 
-        // Step 2: Apply flip and dynamic rotation
-        const finalRotation = this.calculateFinalRotation(
-            speed,
-            grounded,
-            lookDirection
-        );
-        let shouldFlip = lookDirection < -90 || lookDirection > 90;
-        if (this.flip && direction < 0) {
-            shouldFlip = true;
-        }
+        // Step 2: Apply flip
+        const shouldFlip = lookDirection < -90 || lookDirection > 90;
 
-        this.direction = shouldFlip ? -1 : 1;
+        const finalRotation = this.rotation;
 
         this.applyRotationAndFlip(ctx, finalRotation, shouldFlip);
 
@@ -204,25 +237,22 @@ class BodyPart {
         // Render held item and sprite
         this.renderHeldItem(ctx, holdItem, this.direction);
 
-        // Calculate scaled size based on spriteCrop
         const scaleFactor = BLOCK_SIZE / 16;
         const destWidth = this.spriteCrop.width * scaleFactor;
         const destHeight = this.spriteCrop.height * scaleFactor;
 
-        // Draw the cropped image
         ctx.drawImage(
             img,
-            this.spriteCrop.x, // sx: Source X
-            this.spriteCrop.y, // sy: Source Y
-            this.spriteCrop.width, // sWidth: Source width
-            this.spriteCrop.height, // sHeight: Source height
-            -destWidth / (scaleFactor * 2), // dx: Destination X (centered)
-            -destHeight / (scaleFactor * 2), // dy: Destination Y (centered)
-            destWidth, // dWidth: Destination width
-            destHeight // dHeight: Destination height
+            this.spriteCrop.x,
+            this.spriteCrop.y,
+            this.spriteCrop.width,
+            this.spriteCrop.height,
+            -destWidth / (scaleFactor * 2),
+            -destHeight / (scaleFactor * 2),
+            destWidth,
+            destHeight
         );
 
-        // Draw dark overlay
         if (this.zIndex < 0) {
             ctx.globalAlpha = 0.3;
             ctx.fillStyle = "black";
@@ -234,7 +264,6 @@ class BodyPart {
             );
         }
 
-        // Draw flashing color aligned with the cropped image
         if (flashingColor) {
             ctx.globalAlpha = 0.4;
             ctx.fillStyle = flashingColor;
@@ -258,6 +287,7 @@ class BodyPart {
     updateSwing() {
         if (!this.isSwinging) return;
 
+        // Continue with swing logic
         this.swingProgress += this.swingSpeed * deltaTime;
 
         let angle =
@@ -273,35 +303,27 @@ class BodyPart {
         }
     }
 
-    calculateFinalRotation(speed, grounded, lookDirection) {
-        let finalRotation = this.rotation;
-        if (this.sways) {
-            const swayRotation =
-                this.getSwayRotation(speed, grounded) *
-                (this.zIndex < 0 ? -1 : 1);
-            finalRotation += swayRotation;
+    updateDirection(lookDirection) {
+        if (lookDirection < 90 && lookDirection > -90) {
+            this.direction = 1; // Left
+        } else {
+            this.direction = -1; // Right
         }
-        if (this.eyes) {
-            finalRotation += lookDirection;
-        }
-
-        return finalRotation;
     }
 
     applyRotationAndFlip(ctx, finalRotation, shouldFlip) {
         const willFlip = shouldFlip && (this.eyes || this.flip);
 
-        if (willFlip) {
+        if (willFlip || this.zIndex < 0) {
             ctx.scale(this.eyes ? -1 : 1, this.flip ? -1 : 1);
-            finalRotation = 180 - finalRotation;
+            finalRotation = -finalRotation;
         }
 
         ctx.rotate((finalRotation * Math.PI) / 180);
 
         const origin =
             this.flip && shouldFlip ? this.flipOrigin : this.rotationOrigin;
-
-        ctx.translate(-origin.x, -origin.y); // Use precomputed origin
+        ctx.translate(-origin.x, -origin.y);
     }
 
     loadSprite(image) {

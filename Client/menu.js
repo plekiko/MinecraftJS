@@ -48,6 +48,36 @@ function buttonSound() {
     audio.play();
 }
 
+function getMultiplayerIP() {
+    const ip = localStorage.getItem("multiplayerIP");
+    if (ip) {
+        if (!confirm(`Do you want to use ${ip} as the multiplayer server?`)) {
+            const newIP = prompt("Enter the new IP address:");
+            if (newIP) localStorage.setItem("multiplayerIP", newIP);
+        }
+    } else {
+        const newIP = prompt("Enter the IP address of the multiplayer server:");
+        if (newIP) localStorage.setItem("multiplayerIP", newIP);
+    }
+}
+function getMultiplayerPort() {
+    const port = localStorage.getItem("multiplayerPort");
+    if (port) {
+        if (!confirm(`Do you want to use ${port} as the multiplayer port?`)) {
+            const newPort = prompt("Enter the new port number:");
+            if (newPort) localStorage.setItem("multiplayerPort", newPort);
+        }
+    } else {
+        const newPort = prompt(
+            "Enter the port number of the multiplayer server:"
+        );
+        if (newPort) localStorage.setItem("multiplayerPort", newPort);
+    }
+}
+
+// getMultiplayerIP();
+// getMultiplayerPort();
+
 function showTexturePacks() {
     buttonSound();
     menuContainer.style.display = "none";

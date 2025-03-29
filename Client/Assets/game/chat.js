@@ -51,6 +51,17 @@ class Chat {
             message = "";
         }
 
+        if (multiplayer) {
+            server.send({
+                type: "chat",
+                message: message,
+                sender: player.UUID,
+            });
+
+            this.closeChat();
+            return;
+        }
+
         this.message(message, "Player");
 
         this.closeChat();

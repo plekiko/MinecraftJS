@@ -1,9 +1,11 @@
 class Player extends Entity {
     constructor({
+        name = "Player",
+        UUID = uuidv4(),
         position = new Vector2(),
         health = 20,
         abilities = {
-            flying: false,
+            flying: true,
             instaBuild: false,
             mayBuild: true,
             mayFly: false,
@@ -26,18 +28,17 @@ class Player extends Entity {
         inventory = new Inventory(),
         entities,
     }) {
-        const skinData = localStorage.getItem("playerSkin");
         super({
+            UUID: UUID,
             position: position,
             hitbox: new Vector2(0.4 * BLOCK_SIZE, 1.8 * BLOCK_SIZE),
             type: EntityTypes.Player,
-            body: new Body({
-                parts: playerBody, // Assuming playerBody is defined elsewhere
-                sprite: skinData || "steve", // Use base64 data if available, else "steve"
-            }),
+            body: createPlayerBody(),
             fallDamage: true,
             despawn: false,
         });
+
+        this.name = name;
 
         this.health = health;
         this.maxHealth = health;
@@ -76,10 +77,19 @@ class Player extends Entity {
 
         this.entities = entities;
 
-        // this.setGamemode(1);
+        this.setGamemode(1);
     }
 
     update() {
+        if (!this.isLocal()) {
+            // this.body?.updateBody(
+            //     this.velocity.x,
+            //     this.grounded,
+            //     this.lookDirection
+            // );
+            return;
+        }
+
         this.interactLogic();
         this.climbingCollisingLogic();
         this.movementLogic();
@@ -94,7 +104,61 @@ class Player extends Entity {
         this.hurtCooldownLogic();
         this.processEating();
 
+        this.mutliplayerSyncPlayerState();
+
         if (this.windowOpen) this.inventory.update();
+    }
+
+    multiplayerReceivePlayerState(data) {
+        this.position = data.position;
+
+        this.holdItem = new InventoryItem(data.holdItem);
+
+        if (this.body) {
+            Object.values(this.body.parts).forEach((part) => {
+                const syncPart = data.bodyParts.find((p) => p.id === part.id);
+
+                if (!syncPart) return;
+
+                part.rotation = syncPart.rotation;
+                part.direction = syncPart.direction;
+            });
+
+            this.lookDirection = data.lookDirection;
+        }
+    }
+
+    mutliplayerSyncPlayerState() {
+        if (!multiplayer) return;
+        if (!this.isLocal()) return;
+
+        let data = {
+            position: this.position,
+            holdItem: this.holdItem,
+
+            bodyParts: [],
+        };
+
+        if (this.body) {
+            Object.values(this.body.parts).forEach((part) => {
+                data.bodyParts.push({
+                    id: part.id,
+                    rotation: part.rotation,
+                    direction: part.direction,
+                });
+            });
+            data.lookDirection = this.lookDirection;
+        }
+
+        server.send({
+            type: "playerUpdate",
+            sender: this.UUID,
+            message: data,
+        });
+    }
+
+    isLocal() {
+        return player === this;
     }
 
     setGamemode(mode = this.gamemode) {
@@ -206,6 +270,12 @@ class Player extends Entity {
         }
     }
 
+    playerSwing() {
+        this.swing();
+
+        if (this.isLocal()) server.entityRPC(this.UUID, "playerSwing");
+    }
+
     useHoe() {
         if (!this.hoverBlock) return;
 
@@ -220,7 +290,7 @@ class Player extends Entity {
 
         if (blockAbove && !GetBlock(blockAbove.blockType).air) return;
 
-        this.swing();
+        this.playerSwing();
 
         PlayRandomSoundFromArray({
             array: Sounds.Break_Gravel,
@@ -238,7 +308,7 @@ class Player extends Entity {
 
         if (!projectile) return;
 
-        this.swing();
+        this.playerSwing();
 
         const mousePos = input.getMouseWorldPosition();
 
@@ -461,7 +531,7 @@ class Player extends Entity {
 
         this.hoverBlock.interact(this);
 
-        if (block.specialType !== null) this.swing();
+        if (block.specialType !== null) this.playerSwing();
 
         switch (block.specialType) {
             case SpecialType.CraftingTable:
@@ -713,7 +783,7 @@ class Player extends Entity {
         if (this.windowOpen) return;
 
         if (input.isLeftMouseButtonPressed()) {
-            this.swing();
+            this.playerSwing();
             this.tryHit();
         }
 
@@ -892,7 +962,7 @@ class Player extends Entity {
             this.hoverWall.playBreakSound();
         }
 
-        this.swing();
+        this.playerSwing();
 
         // Early return for walls
         if (isWall) {
@@ -928,8 +998,6 @@ class Player extends Entity {
 
     removeFromCurrentSlot(count = 1) {
         this.inventory.removeItem(3, this.inventory.currentSlot, count);
-
-        this.setHoldItem();
     }
 
     getSelectedSlotItem() {
@@ -1075,7 +1143,7 @@ class Player extends Entity {
 
         if (this.abilities.instaBuild) {
             hover.breakBlock(false, wall);
-            this.swing();
+            this.playerSwing();
             return;
         }
 
@@ -1120,7 +1188,7 @@ class Player extends Entity {
                 origin: getBlockWorldPosition(this.hoverBlock),
             });
 
-            this.swing();
+            this.playerSwing();
         }
 
         this.breakingStage = Math.floor(
@@ -1152,7 +1220,7 @@ class Player extends Entity {
             this.reduceDurability();
 
             this.resetBreaking();
-            this.swing();
+            this.playerSwing();
         }
     }
 
@@ -1307,46 +1375,52 @@ class Player extends Entity {
     }
 }
 
-const playerBody = {
-    head: new BodyPart({
-        spriteCrop: { x: 0, y: 8, width: 8, height: 8 },
-        offset: { x: -6, y: 0 },
-        rotationOrigin: { x: 12, y: 32 },
-        zIndex: 1,
-        eyes: true,
-    }),
-    torso: new BodyPart({
-        spriteCrop: { x: 16, y: 20, width: 4, height: 12 },
-        offset: { x: 0, y: 34 },
-    }),
-    leftArm: new BodyPart({
-        offset: { x: 0, y: 34 },
-        spriteCrop: { x: 44, y: 20, width: 4, height: 12 },
-        zIndex: 2,
-        rotationOrigin: { x: 5, y: 4 },
-        sways: true,
-        mainArm: true,
-        holdOrigin: { x: 6, y: 35 },
-    }),
-    rightArm: new BodyPart({
-        spriteCrop: { x: 48, y: 20, width: 4, height: 12 },
-        offset: { x: 0, y: 34 },
-        rotationOrigin: { x: 5, y: 4 },
-        zIndex: -2,
-        sways: true,
-    }),
-    leftLeg: new BodyPart({
-        spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
-        offset: { x: 0, y: 74 },
-        rotationOrigin: { x: 5, y: 0 },
-        zIndex: 1,
-        sways: true,
-    }),
-    rightLeg: new BodyPart({
-        spriteCrop: { x: 8, y: 20, width: 4, height: 12 },
-        offset: { x: 0, y: 74 },
-        rotationOrigin: { x: 5, y: 0 },
-        zIndex: -1,
-        sways: true,
-    }),
-};
+const skinData = localStorage.getItem("playerSkin");
+function createPlayerBody() {
+    return new Body({
+        sprite: skinData || "steve",
+        parts: {
+            head: new BodyPart({
+                spriteCrop: { x: 0, y: 8, width: 8, height: 8 },
+                offset: { x: -6, y: 0 },
+                rotationOrigin: { x: 12, y: 32 },
+                zIndex: 1,
+                eyes: true,
+            }),
+            torso: new BodyPart({
+                spriteCrop: { x: 16, y: 20, width: 4, height: 12 },
+                offset: { x: 0, y: 34 },
+            }),
+            leftArm: new BodyPart({
+                offset: { x: 0, y: 34 },
+                spriteCrop: { x: 44, y: 20, width: 4, height: 12 },
+                zIndex: 2,
+                rotationOrigin: { x: 5, y: 4 },
+                sways: true,
+                mainArm: true,
+                holdOrigin: { x: 6, y: 35 },
+            }),
+            rightArm: new BodyPart({
+                spriteCrop: { x: 48, y: 20, width: 4, height: 12 },
+                offset: { x: 0, y: 34 },
+                rotationOrigin: { x: 5, y: 4 },
+                zIndex: -2,
+                sways: true,
+            }),
+            leftLeg: new BodyPart({
+                spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
+                offset: { x: 0, y: 74 },
+                rotationOrigin: { x: 5, y: 0 },
+                zIndex: 1,
+                sways: true,
+            }),
+            rightLeg: new BodyPart({
+                spriteCrop: { x: 8, y: 20, width: 4, height: 12 },
+                offset: { x: 0, y: 74 },
+                rotationOrigin: { x: 5, y: 0 },
+                zIndex: -1,
+                sways: true,
+            }),
+        },
+    });
+}

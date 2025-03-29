@@ -11,6 +11,8 @@ const GRAVITY = 30 * BLOCK_SIZE;
 const INTERACT_DISTANCE = 4;
 const TICK_SPEED = 20;
 
+let multiplayer = true;
+
 let deltaTime;
 
 const mobSpawnDelay = { min: 10, max: 120 };
@@ -57,3 +59,5 @@ const ToolType = Object.freeze({
     Sword: 6,
     Hammer: 7,
 });
+
+let server = null;
