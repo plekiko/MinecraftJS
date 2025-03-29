@@ -11,7 +11,7 @@ const GRAVITY = 30 * BLOCK_SIZE;
 const INTERACT_DISTANCE = 4;
 const TICK_SPEED = 20;
 
-let multiplayer = true;
+const multiplayer = true;
 
 let deltaTime;
 

@@ -5,11 +5,7 @@ class Pig extends Mob {
         position = new Vector2(),
         invulnerable = false,
         myChunkX = 0,
-        body = new Body({
-            parts: pigBody.parts,
-            flipCorrection: pigBody.flipCorrection,
-            sprite: "pig/pig",
-        }),
+        body = createPigBody(),
     } = {}) {
         super({
             health: health,
@@ -64,55 +60,58 @@ class Pig extends Mob {
     interact(player, item) {}
 }
 
-const pigBody = new Body({
-    flipCorrection: 3,
-    parts: {
-        head: new BodyPart({
-            spriteCrop: { x: 0, y: 8, width: 8, height: 8 },
-            offset: { x: 45, y: -8 },
-            flipOrigin: { x: -65, y: 0 },
-            zIndex: 0,
-            flip: true,
-        }),
-        torso: new BodyPart({
-            spriteCrop: { x: 47, y: 16, width: 9, height: 16 },
-            spriteRotation: -90,
-            offset: { x: -9, y: 24 },
-            flipOrigin: { x: 44, y: 0 },
-            zIndex: 2,
-            flip: true,
-        }),
-        back_back_leg: new BodyPart({
-            spriteCrop: { x: 0, y: 20, width: 4, height: 6 },
-            offset: { x: -15, y: 31 },
-            rotationOrigin: { x: 4, y: 0 },
-            sways: true,
-            swayIntensity: 4,
-            zIndex: -1,
-        }),
-        back_leg: new BodyPart({
-            spriteCrop: { x: 8, y: 20, width: 4, height: 6 },
-            offset: { x: -15, y: 31 },
-            rotationOrigin: { x: 4, y: 0 },
-            sways: true,
-            swayIntensity: 4,
-            zIndex: 1,
-        }),
-        front_back_leg: new BodyPart({
-            spriteCrop: { x: 0, y: 20, width: 4, height: 6 },
-            offset: { x: 30, y: 31 },
-            rotationOrigin: { x: 4, y: 0 },
-            sways: true,
-            swayIntensity: 4,
-            zIndex: -1,
-        }),
-        front_leg: new BodyPart({
-            spriteCrop: { x: 8, y: 20, width: 4, height: 6 },
-            offset: { x: 30, y: 31 },
-            rotationOrigin: { x: 4, y: 0 },
-            sways: true,
-            swayIntensity: 4,
-            zIndex: 1,
-        }),
-    },
-});
+function createPigBody() {
+    return new Body({
+        sprite: "pig/pig",
+        flipCorrection: 3,
+        parts: {
+            head: new BodyPart({
+                spriteCrop: { x: 0, y: 8, width: 8, height: 8 },
+                offset: { x: 45, y: -8 },
+                flipOrigin: { x: -65, y: 0 },
+                zIndex: 0,
+                flip: true,
+            }),
+            torso: new BodyPart({
+                spriteCrop: { x: 47, y: 16, width: 9, height: 16 },
+                spriteRotation: -90,
+                offset: { x: -9, y: 24 },
+                flipOrigin: { x: 44, y: 0 },
+                zIndex: 2,
+                flip: true,
+            }),
+            back_back_leg: new BodyPart({
+                spriteCrop: { x: 0, y: 20, width: 4, height: 6 },
+                offset: { x: -15, y: 31 },
+                rotationOrigin: { x: 4, y: 0 },
+                sways: true,
+                swayIntensity: 4,
+                zIndex: -1,
+            }),
+            back_leg: new BodyPart({
+                spriteCrop: { x: 8, y: 20, width: 4, height: 6 },
+                offset: { x: -15, y: 31 },
+                rotationOrigin: { x: 4, y: 0 },
+                sways: true,
+                swayIntensity: 4,
+                zIndex: 1,
+            }),
+            front_back_leg: new BodyPart({
+                spriteCrop: { x: 0, y: 20, width: 4, height: 6 },
+                offset: { x: 30, y: 31 },
+                rotationOrigin: { x: 4, y: 0 },
+                sways: true,
+                swayIntensity: 4,
+                zIndex: -1,
+            }),
+            front_leg: new BodyPart({
+                spriteCrop: { x: 8, y: 20, width: 4, height: 6 },
+                offset: { x: 30, y: 31 },
+                rotationOrigin: { x: 4, y: 0 },
+                sways: true,
+                swayIntensity: 4,
+                zIndex: 1,
+            }),
+        },
+    });
+}

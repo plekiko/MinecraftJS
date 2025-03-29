@@ -25,7 +25,7 @@ function processMessage(data) {
             break;
 
         case "chat":
-            chat.message(message.message, message.sender);
+            chat.message(message, data.sender);
             break;
         case "playerUpdate":
             updatePlayerState(data);

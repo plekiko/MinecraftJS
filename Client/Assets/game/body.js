@@ -121,7 +121,8 @@ class Body {
                 holdItem,
                 this.flashingColor,
                 this.brightness,
-                this.image
+                this.image,
+                direction
             );
         }
 
@@ -213,7 +214,15 @@ class BodyPart {
         return output * this.swayIntensity;
     }
 
-    draw(ctx, lookDirection, holdItem, flashingColor, brightness = 1, image) {
+    draw(
+        ctx,
+        lookDirection,
+        holdItem,
+        flashingColor,
+        brightness = 1,
+        image,
+        direction
+    ) {
         const img = this.loadSprite(image);
 
         ctx.save();
@@ -223,10 +232,17 @@ class BodyPart {
         this.applyTranslation(ctx);
 
         // Step 2: Apply flip
-        const shouldFlip = lookDirection < -90 || lookDirection > 90;
+        let shouldFlip = false;
+        // Use exact same flipping logic as before
+        if (this.eyes) {
+            shouldFlip = lookDirection < -90 || lookDirection > 90;
+        } else {
+            shouldFlip = direction < 0;
+        }
 
         const finalRotation = this.rotation;
 
+        // Apply the rotation and flipping
         this.applyRotationAndFlip(ctx, finalRotation, shouldFlip);
 
         // Step 3: Apply spriteRotation around the rotation origin
@@ -312,15 +328,19 @@ class BodyPart {
     }
 
     applyRotationAndFlip(ctx, finalRotation, shouldFlip) {
+        // Determine if we need to flip the sprite based on 'shouldFlip' and the 'eyes' flag
         const willFlip = shouldFlip && (this.eyes || this.flip);
 
         if (willFlip || this.zIndex < 0) {
-            ctx.scale(this.eyes ? -1 : 1, this.flip ? -1 : 1);
+            ctx.scale(willFlip ? -1 : 1, 1);
+            // Invert the final rotation if we are flipping
             finalRotation = -finalRotation;
         }
 
+        // Apply rotation
         ctx.rotate((finalRotation * Math.PI) / 180);
 
+        // Set the origin of rotation to either flipOrigin or rotationOrigin
         const origin =
             this.flip && shouldFlip ? this.flipOrigin : this.rotationOrigin;
         ctx.translate(-origin.x, -origin.y);

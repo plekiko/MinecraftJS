@@ -46,16 +46,16 @@ class Zombie extends Mob {
 
         this.hitPlayerLogic();
 
-        if (this.getSunLight() && day) {
+        if (this.getSunLight() && this.getLightLevel() >= 14) {
             this.fire = 100;
         }
 
         if (this.direction === 1) {
             this.body.parts.leftArm.rotation = -90;
-            this.body.parts.rightArm.rotation = -90;
+            this.body.parts.rightArm.rotation = 90;
         } else {
             this.body.parts.leftArm.rotation = 90;
-            this.body.parts.rightArm.rotation = 90;
+            this.body.parts.rightArm.rotation = -90;
         }
     }
 
@@ -118,7 +118,7 @@ function createZombieBody() {
                 zIndex: 2,
                 rotationOrigin: { x: 5, y: 4 },
                 flipOrigin: { x: 1, y: 4 },
-                mainArm: true,
+                // mainArm: true,
                 holdOrigin: { x: 6, y: 35 },
 
                 rotation: 90,
