@@ -1,5 +1,8 @@
+import { RandomRange } from "./helper.js";
+
 export class World {
     constructor() {
+        this.seed = Math.floor(RandomRange(-1000000, 1000000));
         this.chunks = new Map();
     }
 

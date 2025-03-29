@@ -1,9 +1,15 @@
-import { uuidv4, Vector2 } from "./Classes/helper.js";
+import { uuidv4, Vector2, RandomRange } from "./Classes/helper.js";
 import { Player } from "./Classes/player.js";
 import { WebSocketServer } from "ws";
 import { World } from "./Classes/world.js";
+import { createInterface } from "readline";
 
 const world = new World();
+
+const rl = createInterface({
+    input: process.stdin,
+    output: process.stdout,
+});
 
 // Create a WebSocket server
 const wss = new WebSocketServer({ port: 25565 });
@@ -131,6 +137,18 @@ function processMessage(message, ws) {
 
             break;
 
+        case "getSeed":
+            ws.send(
+                JSON.stringify({
+                    type: "response",
+                    message: {
+                        seed: world.seed,
+                        requestId: data.message.requestId,
+                    },
+                })
+            );
+            break;
+
         case "uploadChunk":
             world.uploadChunk(data.message.chunk);
             break;
@@ -150,3 +168,13 @@ function getPlayerByUUID(UUID) {
 }
 
 console.log("WebSocket server is running on ws://localhost:25565");
+
+rl.question("Enter seed: ", (seed) => {
+    if (seed) {
+        world.seed = seed;
+    } else {
+        world.seed = Math.floor(RandomRange(-1000000, 1000000));
+    }
+
+    rl.close(); // Close the readline interface when done
+});

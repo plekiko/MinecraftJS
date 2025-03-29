@@ -5,7 +5,7 @@ class Player extends Entity {
         position = new Vector2(),
         health = 20,
         abilities = {
-            flying: true,
+            flying: false,
             instaBuild: false,
             mayBuild: true,
             mayFly: false,

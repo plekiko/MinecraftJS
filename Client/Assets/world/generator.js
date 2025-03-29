@@ -4,6 +4,8 @@ let pendingBlocks = new Map();
 let seed = 0;
 // let seed = 0;
 
+let hasGottenSeed = false;
+
 tooloud.Perlin.setSeed(seed);
 
 let specialWorldProps = {};
@@ -226,6 +228,13 @@ async function GenerateWorld() {
 
     const currentChunkIndex = camera.getCurrentChunkIndex();
 
+    // Get seed from server
+    if (!hasGottenSeed) {
+        const serverSeed = await server.get({ type: "getSeed" });
+        LoadCustomSeed(serverSeed.seed);
+        hasGottenSeed = true;
+    }
+
     // Generate chunks within the visible range of the camera
     for (
         let i = currentChunkIndex - RENDER_DISTANCE;
@@ -238,13 +247,16 @@ async function GenerateWorld() {
 
         // Multiplayer get chunk
         if (multiplayer) {
-            LoadCustomSeed("redstone");
-
             if (!chunks.has(chunkX)) {
                 const chunkFromServer = await GetChunkFromServer(chunkX);
 
                 if (chunkFromServer) {
                     LoadChunk(chunkX, chunkFromServer);
+                    console.log(
+                        "Loaded chunk from server",
+                        chunkX,
+                        chunkFromServer
+                    );
                 } else {
                     willUploadChunk = true;
                 }
@@ -264,12 +276,16 @@ async function GenerateWorld() {
             }
         }
 
+        postProcessChunk(GetChunkForX(chunkX));
+
         if (willUploadChunk) {
             UploadChunkToServer(chunkX);
         }
     }
 
-    postProcessChunks();
+    if (specialWorldProps.noStructures) return;
+
+    generateStructures();
 }
 
 function ServerPlaceBlock(chunkX, x, y, blockType, isWall = false) {
@@ -283,6 +299,8 @@ function ServerPlaceBlock(chunkX, x, y, blockType, isWall = false) {
             chunkX: chunkX,
         },
     });
+
+    UploadChunkToServer(chunkX);
 }
 
 function ServerBreakBlock() {}
@@ -460,39 +478,35 @@ function GetChunk(worldX) {
     return chunks.has(worldX) ? chunks.get(worldX) : null;
 }
 
-function postProcessChunks() {
+function postProcessChunk(chunk) {
     if (specialWorldProps.void) {
-        chunks.forEach((chunk) => {
-            chunk.applyBufferedBlocks();
-        });
+        chunk.applyBufferedBlocks();
         return;
     }
 
-    chunks.forEach((chunk) => {
-        if (!chunk.generated) {
-            chunk.generateOres();
+    if (!chunk.generated) {
+        console.log("Generating chunk", chunk.x);
 
-            if (!specialWorldProps.flat) {
-                chunk.generateCaves();
-            }
+        chunk.generateOres();
 
-            chunk.applyBufferedBlocks();
-            chunk.generateWater();
-
-            if (!specialWorldProps.noMobs) chunk.spawnMobs(day);
-
-            if (!specialWorldProps.flat) {
-                chunk.generateTrees();
-                chunk.generateGrass();
-            }
-
-            chunk.generateBedrock();
+        if (!specialWorldProps.flat) {
+            chunk.generateCaves();
         }
-    });
 
-    if (specialWorldProps.noStructures) return;
+        chunk.applyBufferedBlocks();
+        chunk.generateWater();
 
-    generateStructures();
+        if (!specialWorldProps.noMobs) chunk.spawnMobs(day);
+
+        if (!specialWorldProps.flat) {
+            chunk.generateTrees();
+            chunk.generateGrass();
+        }
+
+        chunk.generateBedrock();
+
+        chunk.generated = true;
+    }
 }
 
 function generateStructures() {
