@@ -12,13 +12,14 @@ function processMessage(data) {
             break;
         case "playerJoined":
             console.log(data);
-            SpawnPlayer(
+            const newPlayer = SpawnPlayer(
                 new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
                 false,
                 message.player.UUID,
                 message.player.name,
                 false
             );
+            newPlayer.setSkin(message.player.skin);
             break;
         case "playerLeft":
             removeEntity(getEntityByUUID(message));
@@ -33,12 +34,25 @@ function processMessage(data) {
         case "entityRPC":
             handleEntityRPC(message);
             break;
+        case "uploadChunk":
+            console.log("Received chunk:", message);
+            LoadChunk(message.x, message.chunk);
+            break;
+        case "seed":
+            console.log("Received seed:", message);
+            LoadCustomSeed(message);
+            break;
 
         case "response":
             if (callbacks[data.message.requestId]) {
                 callbacks[data.message.requestId](message); // Call the stored callback
                 delete callbacks[data.message.requestId]; // Remove callback once executed
             }
+            break;
+        case "playerSkin":
+            console.log("Received player skin:", message);
+            const player = getEntityByUUID(message.UUID);
+            if (player) player.setSkin(message.skin);
             break;
 
         case "placeBlock":
@@ -89,23 +103,37 @@ function updatePlayerState(data) {
 }
 
 function iJoined(player, existingPlayers) {
-    SpawnPlayer(
+    const myPlayer = SpawnPlayer(
         new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
         true,
         player.UUID,
         player.name
     );
 
+    // Upload skin to server
+    server.send({
+        type: "playerSkin",
+        sender: player.UUID,
+        message: {
+            UUID: player.UUID,
+            skin: myPlayer.body.sprite,
+        },
+    });
+
+    console.log("Uploaded skin to server", myPlayer.body.sprite);
+
     // Spawn all existing players for the new player
     if (existingPlayers && existingPlayers.length > 0) {
         existingPlayers.forEach((p) => {
-            SpawnPlayer(
+            const newPlayer = SpawnPlayer(
                 new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
                 false,
                 p.UUID,
                 p.name,
                 false
             );
+
+            newPlayer.setSkin(p.skin);
         });
     }
 }

@@ -5,7 +5,6 @@ export class Player {
         this.UUID = UUID;
         this.name = name;
         this.ws = ws;
-
         this.skin = skin;
     }
 }

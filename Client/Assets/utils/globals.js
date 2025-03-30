@@ -10,8 +10,9 @@ const CHUNK_FILE_SIZE = 7.5; // kB
 const GRAVITY = 30 * BLOCK_SIZE;
 const INTERACT_DISTANCE = 4;
 const TICK_SPEED = 20;
-
-const multiplayer = true;
+// Get multiplayer bool from url
+const url = new URL(window.location.href);
+const multiplayer = url.searchParams.get("multiplayer") === "true";
 
 let deltaTime;
 

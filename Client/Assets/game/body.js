@@ -17,7 +17,14 @@ class Body {
         this.image = new Image();
         this.image.src = getSpriteUrl("entity/" + sprite);
 
+        this.sprite = sprite;
+
         this.initParts();
+    }
+
+    setSprite(sprite) {
+        this.sprite = sprite;
+        this.image.src = getSpriteUrl("entity/" + sprite);
     }
 
     initParts() {

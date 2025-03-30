@@ -3,12 +3,28 @@ let fpsDisplay = 0;
 
 chat = new Chat();
 
-// window.onbeforeunload = (e) => {
-//     alert("You are about to close the game!");
-//     var dialogText = "Whoops, you probably didn't mean to close the game!";
-//     e.returnValue = dialogText;
-//     return dialogText;
-// };
+function waitForTexturePack() {
+    return new Promise((resolve) => {
+        const checkLoaded = () => {
+            if (isTexturePackLoaded) {
+                resolve();
+            } else {
+                setTimeout(checkLoaded, 1);
+            }
+        };
+        checkLoaded();
+    });
+}
+
+function ReverseY(y) {
+    return CHUNK_HEIGHT - y;
+}
+
+function summonEntity(entity, position, props) {
+    const newEntity = new entity({ position: position, ...props });
+    entities.push(newEntity);
+    return newEntity;
+}
 
 function SpawnPlayer(
     position = new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
@@ -33,10 +49,8 @@ function SpawnPlayer(
     entities.push(newPlayer);
 
     if (local) hotbar = new Hotbar(newPlayer.inventory);
-}
 
-function ReverseY(y) {
-    return CHUNK_HEIGHT - y;
+    return newPlayer;
 }
 
 function calculateFPS(currentFrameTime) {
@@ -53,34 +67,20 @@ function calculateFPS(currentFrameTime) {
     return fpsDisplay;
 }
 
-function summonEntity(entity, position, props) {
-    const newEntity = new entity({ position: position, ...props });
-    entities.push(newEntity);
-    return newEntity;
-}
-
-if (!multiplayer) LoadWorldFromLocalStorage();
-
 async function gameLoop() {
-    // Pause the game if the window is not focused
-    // if (!document.hasFocus()) {
-    //     requestAnimationFrame(gameLoop);
-    //     return;
-    // }
-
-    // if (!isTexturePackLoaded) {
-    //     await waitForTexturePack();
-    // }
-
     const currentFrameTime = performance.now();
     deltaTime = (currentFrameTime - lastFrameTime) / 1000;
     passedTime += deltaTime;
 
-    GenerateWorld();
-
-    if (deltaTime <= 1) {
-        updateGame();
+    if (!document.hasFocus()) {
+        lastFrameTime = currentFrameTime;
+        requestAnimationFrame(gameLoop);
+        return;
     }
+
+    await GenerateWorld(); // Ensure GenerateWorld is awaited since it's async
+
+    updateGame();
     Draw(chunks, calculateFPS(currentFrameTime), deltaTime);
 
     lastFrameTime = currentFrameTime;
@@ -89,19 +89,39 @@ async function gameLoop() {
 
 function updateGame() {
     updateEntities();
-
     if (player) cursorBlockLogic();
-
     if (hotbar) hotbar.update();
-
     if (chat) chat.update();
-
     animateFrame();
-
     camera.update(player);
-
     dayNightCycle();
 }
+
+async function initGame() {
+    console.log("Initializing game...");
+
+    // Wait for texture pack
+    console.log("Waiting for texture pack...");
+    await waitForTexturePack();
+    console.log("Texture pack loaded!");
+
+    // Load world from local storage if not multiplayer
+    if (!multiplayer) {
+        LoadWorldFromLocalStorage();
+    }
+
+    console.log("Generating initial world...");
+    await GenerateWorld();
+
+    console.log("Game initialized, starting loop...");
+    requestAnimationFrame(gameLoop); // Start the game loop
+}
+
+window.onload = function () {
+    initGame().catch((error) => {
+        console.error("Failed to initialize game:", error);
+    });
+};
 
 function dayNightCycle() {
     if (time > 7.3) {

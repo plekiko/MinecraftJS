@@ -53,8 +53,8 @@ async function loadTexturePack() {
                 })
             )
         );
+        isTexturePackLoaded = true;
         // console.log(`Texture pack ${currentPackKey} loaded and cached.`);
-        isTexturePackLoaded = true; // Set to true when loading completes
     } catch (err) {
         console.error(`Failed to load texture pack ${currentPackKey}:`, err);
         texturePackZip = null;
@@ -64,8 +64,7 @@ async function loadTexturePack() {
     }
 }
 
-// Call this when the page loads or when a new texture pack is selected
-loadTexturePack();
+loadTexturePack(); // Load texture pack immediately on script load
 
 // Global function to resolve sprite URLs (unchanged except for comments)
 function getSpriteUrl(path) {
@@ -87,13 +86,13 @@ function getSpriteUrl(path) {
     return `Assets/sprites/${path}.png`;
 }
 
-async function waitForTexturePack() {
+function waitForTexturePack() {
     return new Promise((resolve) => {
         const checkLoaded = () => {
             if (isTexturePackLoaded) {
                 resolve();
             } else {
-                setTimeout(checkLoaded, 100);
+                setTimeout(checkLoaded, 1);
             }
         };
         checkLoaded();

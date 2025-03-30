@@ -88,7 +88,7 @@ class Square {
         this.img.src = sprite;
     }
 
-    setSprite(sprite) {
+    async setSprite(sprite) {
         if (!sprite) return;
 
         this.img = new Image();

@@ -4,8 +4,6 @@ let pendingBlocks = new Map();
 let seed = 0;
 // let seed = 0;
 
-let hasGottenSeed = false;
-
 tooloud.Perlin.setSeed(seed);
 
 let specialWorldProps = {};
@@ -210,6 +208,8 @@ function RegenerateWorld() {
 }
 
 async function GetChunkFromServer(x) {
+    await waitForTexturePack();
+
     try {
         const chunkData = await server.get({
             type: "getChunk",
@@ -228,13 +228,6 @@ async function GenerateWorld() {
 
     const currentChunkIndex = camera.getCurrentChunkIndex();
 
-    // Get seed from server
-    if (!hasGottenSeed) {
-        const serverSeed = await server.get({ type: "getSeed" });
-        LoadCustomSeed(serverSeed.seed);
-        hasGottenSeed = true;
-    }
-
     // Generate chunks within the visible range of the camera
     for (
         let i = currentChunkIndex - RENDER_DISTANCE;
@@ -249,23 +242,29 @@ async function GenerateWorld() {
         if (multiplayer) {
             if (!chunks.has(chunkX)) {
                 const chunkFromServer = await GetChunkFromServer(chunkX);
-
                 if (chunkFromServer) {
-                    LoadChunk(chunkX, chunkFromServer);
                     console.log(
                         "Loaded chunk from server",
                         chunkX,
                         chunkFromServer
                     );
+                    LoadChunk(chunkX, chunkFromServer);
+                    // console.log(
+                    //     "Loaded chunk from server",
+                    //     chunkX,
+                    //     chunkFromServer
+                    // );
                 } else {
                     willUploadChunk = true;
+                    const oldChunkData = getNeighborBiomeData(
+                        i,
+                        currentChunkIndex
+                    );
+                    generateChunk(i, chunkX, oldChunkData);
                 }
             }
-        }
-
-        if (!chunks.has(chunkX)) {
+        } else if (!chunks.has(chunkX)) {
             const oldChunkData = getNeighborBiomeData(i, currentChunkIndex);
-
             generateChunk(i, chunkX, oldChunkData);
         } else {
             const chunk = chunks.get(chunkX);
@@ -289,31 +288,33 @@ async function GenerateWorld() {
 }
 
 function ServerPlaceBlock(chunkX, x, y, blockType, isWall = false) {
-    server.send({
-        type: "placeBlock",
-        message: {
-            x: x,
-            y: y,
-            blockType: blockType,
-            isWall: isWall,
-            chunkX: chunkX,
-        },
-    });
+    // server.send({
+    //     type: "placeBlock",
+    //     message: {
+    //         x: x,
+    //         y: y,
+    //         blockType: blockType,
+    //         isWall: isWall,
+    //         chunkX: chunkX,
+    //     },
+    // });
 
     UploadChunkToServer(chunkX);
 }
 
 function ServerBreakBlock() {}
 
-function UploadChunkToServer(chunkX) {
+async function UploadChunkToServer(chunkX) {
     const chunk = GetChunkForX(chunkX);
-    server.send({
+    await server.send({
         type: "uploadChunk",
         message: {
             x: chunkX,
             chunk: SaveChunk(chunk),
         },
+        sender: player.UUID,
     });
+    console.log(`Uploaded chunk ${chunkX} to server`);
 }
 
 function GenerateStructure(structure, x, y) {
@@ -460,6 +461,8 @@ function getNeighborBiomeData(currentIndex, cameraIndex) {
 }
 
 function generateChunk(chunkIndex, chunkX, oldChunkData) {
+    console.log("Generating chunk", seed);
+
     const biome = calculateChunkBiome(chunkIndex);
 
     const newChunk = new Chunk(

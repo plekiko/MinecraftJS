@@ -81,7 +81,6 @@ class Chunk {
                 Blocks.GrassBlock
             );
         }
-
         // Dirt layers 2 thick
         for (
             let y = (CHUNK_HEIGHT / 2) * BLOCK_SIZE - BLOCK_SIZE;

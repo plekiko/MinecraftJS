@@ -82,6 +82,11 @@ function playerJoined(ws) {
         },
     });
 
+    sendToPlayer(newPlayer.UUID, {
+        type: "seed",
+        message: world.seed,
+    });
+
     // Broadcast to all players that a new player has joined
     broadcast(
         {
@@ -108,6 +113,10 @@ function processMessage(message, ws) {
 
     switch (data.type) {
         case "playerUpdate":
+            broadcast(data, [data.sender]);
+            break;
+        case "playerSkin":
+            getPlayerByUUID(data.message.UUID).skin = data.message.skin;
             broadcast(data, [data.sender]);
             break;
 
@@ -151,6 +160,8 @@ function processMessage(message, ws) {
 
         case "uploadChunk":
             world.uploadChunk(data.message.chunk);
+
+            broadcast(data, [data.sender]);
             break;
 
         case "placeBlock":

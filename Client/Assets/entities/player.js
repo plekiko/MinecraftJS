@@ -109,6 +109,10 @@ class Player extends Entity {
         if (this.windowOpen) this.inventory.update();
     }
 
+    setSkin(skin) {
+        this.body.setSprite(skin);
+    }
+
     multiplayerReceivePlayerState(data) {
         this.position = data.position;
 
@@ -273,7 +277,8 @@ class Player extends Entity {
     playerSwing() {
         this.swing();
 
-        if (this.isLocal()) server.entityRPC(this.UUID, "playerSwing");
+        if (this.isLocal() && multiplayer)
+            server.entityRPC(this.UUID, "playerSwing");
     }
 
     useHoe() {

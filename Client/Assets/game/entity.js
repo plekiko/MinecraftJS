@@ -507,7 +507,7 @@ class Entity {
 
     calculateGravity() {
         if (this.noGravity) return;
-        this.velocity.y += GRAVITY * deltaTime;
+        this.velocity.y += GRAVITY * Math.min(deltaTime, 1 / 30);
     }
 
     calculateForce() {
@@ -539,16 +539,20 @@ class Entity {
 
         this.handleTargetVelocity();
 
-        const nextPositionX = this.position.x + this.velocity.x * deltaTime;
-        const nextPositionY = this.position.y + this.velocity.y * deltaTime;
+        // Cap deltaTime to avoid huge jumps
+        const cappedDeltaTime = Math.min(deltaTime, 1 / 30);
+        const nextPositionX =
+            this.position.x + this.velocity.x * cappedDeltaTime;
+        const nextPositionY =
+            this.position.y + this.velocity.y * cappedDeltaTime;
 
         this.applyDrag();
         this.clampHorizontalVelocity();
 
         if (this.noCollision) {
             this.calculateForce();
-            this.position.x += this.velocity.x * deltaTime;
-            this.position.y += this.velocity.y * deltaTime;
+            this.position.x += this.velocity.x * cappedDeltaTime;
+            this.position.y += this.velocity.y * cappedDeltaTime;
             return;
         }
 
@@ -560,7 +564,6 @@ class Entity {
         let steppedUp = false;
 
         if (nextPositionX > this.position.x) {
-            // Moving right
             if (rightCollision && this.grounded) {
                 const effectiveHeight =
                     BLOCK_SIZE * (1 - rightCollision.cutoff);
@@ -568,15 +571,14 @@ class Entity {
                     rightCollision.transform.position.y +
                     (BLOCK_SIZE - effectiveHeight);
                 const entityBottomY = this.position.y + this.hitbox.y;
-                const heightDifference = entityBottomY - blockTopY; // Positive means block is above (lower Y)
+                const heightDifference = entityBottomY - blockTopY;
 
                 if (
-                    heightDifference > 0 && // Block is above entity
-                    heightDifference <= this.maxStepHeight // Within step height
+                    heightDifference > 0 &&
+                    heightDifference <= this.maxStepHeight
                 ) {
-                    const newY = blockTopY - this.hitbox.y; // New top position after stepping
-                    const checkAbove = this.checkUpCollision(newY); // Check ceiling clearance
-
+                    const newY = blockTopY - this.hitbox.y;
+                    const checkAbove = this.checkUpCollision(newY);
                     const blockAboveSlab = GetBlockAtWorldPosition(
                         rightCollision.transform.position.x,
                         blockTopY - BLOCK_SIZE
@@ -587,7 +589,6 @@ class Entity {
                         (!blockAboveSlab ||
                             !GetBlock(blockAboveSlab.blockType).collision)
                     ) {
-                        // No ceiling or block above slab
                         this.position.y = newY;
                         this.velocity.y = 0;
                         this.position.x += 3;
@@ -601,7 +602,6 @@ class Entity {
             }
         }
         if (nextPositionX < this.position.x) {
-            // Moving left
             if (leftCollision && this.grounded) {
                 const effectiveHeight = BLOCK_SIZE * (1 - leftCollision.cutoff);
                 const blockTopY =
@@ -666,7 +666,6 @@ class Entity {
 
         if (!upCollision) {
             if (downCollision && !steppedUp) {
-                // Skip if stepped up
                 this.standingOnBlockType = downCollision.blockType;
                 this.wasColliding = true;
                 const effectiveHeight = BLOCK_SIZE * (1 - downCollision.cutoff);
@@ -683,19 +682,19 @@ class Entity {
             this.velocity.y = 0;
         }
 
-        this.fluidLogic(collidingBlocks, deltaTime);
-
+        this.fluidLogic(collidingBlocks, cappedDeltaTime);
         this.calculateForce();
 
         if (!this.grounded && !this.swimming)
-            this.fallDistance += (this.velocity.y / BLOCK_SIZE) * deltaTime;
+            this.fallDistance +=
+                (this.velocity.y / BLOCK_SIZE) * cappedDeltaTime;
         else this.fallDistance = 0;
 
         if (!leftCollision && !rightCollision) {
-            this.position.x += this.velocity.x * deltaTime;
+            this.position.x += this.velocity.x * cappedDeltaTime;
         }
         if (!downCollision && !upCollision && !steppedUp) {
-            this.position.y += this.velocity.y * deltaTime;
+            this.position.y += this.velocity.y * cappedDeltaTime;
         }
     }
 

@@ -172,7 +172,11 @@ const saveJSONToFile = (obj, filename) => {
     URL.revokeObjectURL(url);
 };
 
-function LoadWorld(save) {
+async function LoadWorld(save) {
+    if (!isTexturePackLoaded) {
+        await waitForTexturePack();
+    }
+
     try {
         currentSave = JSON.parse(save);
     } catch (error) {
@@ -241,7 +245,7 @@ function LoadWorld(save) {
     }, 500);
 }
 
-function LoadChunk(x, chunk) {
+async function LoadChunk(x, chunk) {
     const previousChunk = chunk.previousChunk
         ? chunks.get(chunk.previousChunk)
         : null;

@@ -81,7 +81,7 @@ function multiplayerButton() {
     buttonSound();
     getMultiplayerIP();
     getMultiplayerPort();
-    window.location.href = "game.html";
+    window.location.href = "game.html?multiplayer=true";
 }
 
 function showTexturePacks() {
