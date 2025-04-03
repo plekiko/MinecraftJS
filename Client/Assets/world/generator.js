@@ -15,7 +15,7 @@ function setSeed(newSeed) {
     tooloud.Perlin.setSeed(seed);
 }
 
-let loadingWorld = false;
+let loadingWorld = true;
 
 const worldGrassNoiseMap = new Noise(550, 0.2, 1);
 
@@ -282,6 +282,8 @@ async function GenerateWorld() {
         }
     }
 
+    console.log("Generating chunks...");
+
     if (specialWorldProps.noStructures) return;
 
     generateStructures();
@@ -461,7 +463,9 @@ function getNeighborBiomeData(currentIndex, cameraIndex) {
 }
 
 function generateChunk(chunkIndex, chunkX, oldChunkData) {
-    console.log("Generating chunk", seed);
+    // console.log("Generating chunk", seed);
+
+    console.log("Seed: ", seed);
 
     const biome = calculateChunkBiome(chunkIndex);
 

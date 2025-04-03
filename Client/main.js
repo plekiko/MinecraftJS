@@ -78,12 +78,13 @@ async function gameLoop() {
         return;
     }
 
-    await GenerateWorld(); // Ensure GenerateWorld is awaited since it's async
-
+    await GenerateWorld();
     updateGame();
+
     Draw(chunks, calculateFPS(currentFrameTime), deltaTime);
 
     lastFrameTime = currentFrameTime;
+
     requestAnimationFrame(gameLoop);
 }
 
@@ -98,6 +99,8 @@ function updateGame() {
 }
 
 async function initGame() {
+    loadingWorld = true;
+
     console.log("Initializing game...");
 
     // Wait for texture pack
@@ -110,12 +113,10 @@ async function initGame() {
         LoadWorldFromLocalStorage();
     }
 
-    console.log("Generating initial world...");
-    await GenerateWorld();
-
-    console.log("Game initialized, starting loop...");
-    requestAnimationFrame(gameLoop); // Start the game loop
+    loadingWorld = false;
 }
+
+requestAnimationFrame(gameLoop);
 
 window.onload = function () {
     initGame().catch((error) => {
@@ -198,5 +199,3 @@ function cursorBlockLogic() {
 function animateFrame() {
     globalFrame++;
 }
-
-requestAnimationFrame(gameLoop);

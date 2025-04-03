@@ -130,10 +130,11 @@ function SaveChunk(chunk) {
     };
 }
 
-async function LoadWorldFromLocalStorage() {
+function LoadWorldFromLocalStorage() {
     let selectedWorld = localStorage.getItem("selectedWorld");
 
     if (selectedWorld) {
+        console.log("Loading world from local storage");
         selectedWorld = JSON.parse(selectedWorld);
     } else {
         if (SPAWN_PLAYER) {
@@ -147,6 +148,7 @@ async function LoadWorldFromLocalStorage() {
     const selectedWorldData = localStorage.getItem(selectedWorld.id);
 
     if (!selectedWorldData) {
+        console.log("World not found in local storage", selectedWorld);
         if (selectedWorld.seed) LoadCustomSeed(selectedWorld.seed);
         if (SPAWN_PLAYER) {
             setTimeout(() => {
