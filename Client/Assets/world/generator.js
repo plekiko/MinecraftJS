@@ -290,21 +290,35 @@ async function GenerateWorld() {
 }
 
 function ServerPlaceBlock(chunkX, x, y, blockType, isWall = false) {
-    // server.send({
-    //     type: "placeBlock",
-    //     message: {
-    //         x: x,
-    //         y: y,
-    //         blockType: blockType,
-    //         isWall: isWall,
-    //         chunkX: chunkX,
-    //     },
-    // });
+    server.send({
+        type: "placeBlock",
+        message: {
+            x: x,
+            y: y,
+            blockType: blockType,
+            isWall: isWall,
+            chunkX: chunkX,
+        },
+    });
 
     UploadChunkToServer(chunkX);
 }
 
-function ServerBreakBlock() {}
+function ServerBreakBlock(chunkX, x, y, blockType, isWall = false, shouldDrop) {
+    server.send({
+        type: "breakBlock",
+        message: {
+            x: x,
+            y: y,
+            blockType: blockType,
+            isWall: isWall,
+            chunkX: chunkX,
+            shouldDrop: shouldDrop,
+        },
+    });
+
+    UploadChunkToServer(chunkX);
+}
 
 async function UploadChunkToServer(chunkX) {
     const chunk = GetChunkForX(chunkX);

@@ -4,15 +4,22 @@ let chunks_in_render_distance = new Map();
 
 let player;
 
-function removeEntity(entity) {
+function removeEntity(entity, sync = false) {
     if (!entity) return;
     if (entity.myChunkX !== null) {
         chunks.get(entity.myChunkX).removeEntityFromChunk(entity);
     }
 
-    const index = entities.indexOf(entity);
+    // use the UUID to find the entity in the array
+    const index = entities.findIndex((e) => e.UUID === entity.UUID);
 
-    entities.splice(index, 1);
+    if (index !== -1) {
+        entities.splice(index, 1);
+    }
+
+    if (sync) {
+        server.send({ type: "removeEntity", message: { UUID: entity.UUID } });
+    }
 }
 
 setInterval(() => {

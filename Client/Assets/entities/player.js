@@ -732,7 +732,7 @@ class Player extends Entity {
             return;
         }
 
-        removeEntity(drop);
+        removeEntity(drop, multiplayer);
     }
 
     climbingCollisingLogic() {
@@ -961,8 +961,6 @@ class Player extends Entity {
         if (!succeeded) return;
 
         if (multiplayer) {
-            UploadChunkToServer(chunk.x);
-
             ServerPlaceBlock(
                 chunk.x,
                 this.hoverBlock.x,
@@ -1163,12 +1161,13 @@ class Player extends Entity {
             this.playerSwing();
 
             if (multiplayer) {
-                ServerPlaceBlock(
+                ServerBreakBlock(
                     hover.chunkX,
                     hover.x,
                     hover.y,
                     Blocks.Air,
-                    wall
+                    wall,
+                    false
                 );
             }
             return;
@@ -1238,12 +1237,13 @@ class Player extends Entity {
             hover.breakBlock(shouldDrop, isWall);
 
             if (multiplayer) {
-                ServerPlaceBlock(
+                ServerBreakBlock(
                     hover.chunkX,
                     hover.x,
                     hover.y,
                     Blocks.Air,
-                    isWall
+                    isWall,
+                    shouldDrop
                 );
             }
 

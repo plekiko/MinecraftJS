@@ -161,15 +161,18 @@ function processMessage(message, ws) {
         case "uploadChunk":
             world.uploadChunk(data.message.chunk);
 
-            broadcast(data, [data.sender]);
+            // broadcast(data, [data.sender]);
             break;
 
         case "placeBlock":
             broadcast(data, [data.sender]);
             break;
+        case "breakBlock":
+            broadcast(data, [data.sender]);
+            break;
 
         default:
-            console.log("Unknown message type:", data.type);
+            broadcast(data, [data.sender]);
             break;
     }
 }

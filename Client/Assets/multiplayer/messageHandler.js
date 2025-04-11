@@ -42,6 +42,23 @@ function processMessage(data) {
             console.log("Received seed:", message);
             LoadCustomSeed(message);
             break;
+        case "removeEntity":
+            console.log("Removing entity:", message);
+            const entity = getEntityByUUID(message.UUID);
+            if (entity) {
+                removeEntity(entity);
+            }
+            break;
+        case "summonEntity":
+            console.log("Summoning entity:", message);
+            const newEntity = summonEntity(
+                message.entity,
+                message.position,
+                message.props,
+                false,
+                message.UUID
+            );
+            return;
 
         case "response":
             if (callbacks[data.message.requestId]) {
@@ -73,6 +90,20 @@ function processMessage(data) {
                     true
                 );
             break;
+        case "breakBlock":
+            if (!chunks.has(message.chunkX))
+                console.log("Chunk not loaded:", message.chunkX);
+
+            console.log("Breaking block:", message);
+
+            // get the block at the given coordinates
+            const block = chunks
+                .get(message.chunkX)
+                .getBlock(message.x, message.y, false, message.isWall);
+
+            if (!block) console.log("Block not found:", message.x, message.y);
+
+            block.breakBlock(message.shouldDrop);
 
         default:
             console.log("Unknown message type:", type);

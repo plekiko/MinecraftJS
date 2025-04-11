@@ -20,9 +20,25 @@ function ReverseY(y) {
     return CHUNK_HEIGHT - y;
 }
 
-function summonEntity(entity, position, props) {
-    const newEntity = new entity({ position: position, ...props });
+function summonEntity(entity, position, props, sync = false, uuid = null) {
+    console.log("Summoning entity:", entity, position, props, uuid);
+    const UUID = uuid ? uuid : uuidv4();
+
+    const newEntity = new entity({ UUID: UUID, position: position, ...props });
     entities.push(newEntity);
+
+    if (sync) {
+        server.send({
+            type: "summonEntity",
+            message: {
+                entity: newEntity.name,
+                props: props,
+                position: position,
+                UUID: UUID,
+            },
+        });
+    }
+
     return newEntity;
 }
 
@@ -72,11 +88,11 @@ async function gameLoop() {
     deltaTime = (currentFrameTime - lastFrameTime) / 1000;
     passedTime += deltaTime;
 
-    if (!document.hasFocus()) {
-        lastFrameTime = currentFrameTime;
-        requestAnimationFrame(gameLoop);
-        return;
-    }
+    // if (!document.hasFocus()) {
+    //     lastFrameTime = currentFrameTime;
+    //     requestAnimationFrame(gameLoop);
+    //     return;
+    // }
 
     await GenerateWorld();
     updateGame();
