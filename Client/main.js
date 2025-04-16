@@ -109,7 +109,6 @@ function updateGame() {
     if (player) cursorBlockLogic();
     if (hotbar) hotbar.update();
     if (chat) chat.update();
-    animateFrame();
     camera.update(player);
     dayNightCycle();
 }

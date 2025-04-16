@@ -1600,7 +1600,7 @@ class Inventory {
         const spritePath = getSpriteUrl(path);
         const spriteSize = getSpriteSize(path);
         const actualWidth = spriteSize.width || 16;
-        const actualHeight = spriteSize.height || 16;
+        const actualHeight = spriteSize.width || 16;
 
         let cutoff = 0;
         if (holdingItem.blockId) {

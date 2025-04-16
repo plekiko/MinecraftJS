@@ -14,9 +14,8 @@ class Drop extends Entity {
 
         const spriteSize = getSpriteSize(spritePath);
         const spriteWidth = spriteSize.width;
-        const spriteHeight = spriteSize.height;
 
-        const spriteScale = 16 / Math.max(spriteWidth, spriteHeight);
+        const spriteScale = 16 / Math.max(spriteWidth, spriteWidth);
 
         // Set up the entity with dynamic scaling
         super({

@@ -29,6 +29,8 @@ setInterval(() => {
 function tick() {
     updateBlocks();
 
+    animateFrame();
+
     updatePositionalAudioVolumes();
 
     updateEntities(true);

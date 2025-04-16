@@ -107,6 +107,27 @@ class InventorySlot {
         const scaleX = (baseDrawSize / actualWidth) * size;
         const scaleY = (baseDrawSize / actualHeight) * drawHeight * size;
 
+        // Frame animation logic based on time (globalFrame could be set elsewhere)
+        const frameCount = Math.floor(actualHeight / actualWidth); // Total number of frames in the sprite sheet
+
+        const animationSpeed = 2;
+        const frame = Math.floor(globalFrame / animationSpeed) % frameCount;
+
+        // Calculate the crop Y offset for the current frame
+        const cropY = frame * actualWidth; // Adjust the Y position for the current frame
+
+        // Ensure we don't go out of bounds
+        const cropHeight = Math.min(actualWidth, actualHeight - cropY); // Max height for each frame
+
+        // Set crop to match the current animation frame
+        const crop = {
+            x: 0,
+            y: moveDown + cropY, // Apply the moveDown offset for cutoff
+            width: actualWidth,
+            height: cropHeight,
+        };
+
+        // Draw the sprite with animation applied through the crop
         drawImage({
             url: spritePath,
             x: slotX,
@@ -114,13 +135,8 @@ class InventorySlot {
             scale: Math.min(scaleX, scaleY),
             centerX: false,
             dark: item.props.wall === true,
-            fixAnimation: cutoff === 0,
-            crop: {
-                x: 0,
-                y: moveDown,
-                width: actualWidth,
-                height: drawHeight,
-            },
+            fixAnimation: false, // No longer need to fix to 16x16
+            crop: crop,
         });
 
         // Draw durability bar

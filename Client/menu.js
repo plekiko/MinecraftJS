@@ -260,7 +260,8 @@ async function getTexturePackIcon(packId) {
 function uploadTexturePack() {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".zip";
+    // Accept zip 7z rar
+    input.accept = ".zip, .7z, .rar";
 
     input.onchange = (e) => {
         const file = e.target.files[0];
