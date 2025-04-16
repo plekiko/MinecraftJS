@@ -293,12 +293,15 @@ class Square {
 class SimpleSprite {
     constructor({ sprite, transform, alpha = 1, frameRate = 0 }) {
         this.sprite = sprite;
+
         this.img = new Image();
-        this.img.src = "Assets/sprites/" + sprite;
+        this.img.src = getSpriteUrl(sprite);
+        this.spriteSize = getSpriteSize(sprite);
+
         this.transform = transform;
         this.alpha = alpha;
         this.frameRate = frameRate;
-        this.frameCount = this.img.height / this.spriteSize;
+        this.frameCount = this.spriteSize.height / this.spriteSize.width;
     }
 
     draw(ctx, camera) {
@@ -331,7 +334,10 @@ class SimpleSprite {
     }
 
     drawAnimation(ctx, camera) {
-        const frameHeight = this.spriteSize;
+        console.log(this.spriteSize);
+
+        const frameHeight = this.spriteSize.width;
+
         const effectiveFrame =
             Math.floor(globalFrame / this.frameRate) % this.frameCount;
         const frameY = effectiveFrame * frameHeight;
@@ -340,7 +346,7 @@ class SimpleSprite {
             this.img,
             0,
             frameY,
-            this.spriteSize,
+            this.spriteSize.width,
             frameHeight,
             -this.transform.size.x / 2 - camera.x,
             -this.transform.size.y / 2 - camera.y,

@@ -107,9 +107,9 @@ class Entity {
         this.flashingColor = false;
 
         this.fireSprite = new SimpleSprite({
-            sprite: "blocks/fire_layer_0.png",
+            sprite: "blocks/fire_layer_0",
             transform: new Transform(),
-            frameRate: 4,
+            frameRate: 1,
         });
     }
 
