@@ -106,6 +106,28 @@ function Draw(chunks, frames) {
 
     DrawEntities();
     AfterDraw();
+
+    if (!isTexturePackLoaded || loadingWorld) {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
+
+        ctx.fillStyle = "white";
+        ctx.font = "30px Pixel";
+        ctx.textAlign = "center";
+
+        if (!isTexturePackLoaded)
+            ctx.fillText(
+                "Loading texture pack...",
+                CANVAS.width / 2,
+                CANVAS.height / 2
+            );
+        else if (loadingWorld)
+            ctx.fillText(
+                "Loading world...",
+                CANVAS.width / 2,
+                CANVAS.height / 2
+            );
+    }
 }
 
 function DrawEntities() {

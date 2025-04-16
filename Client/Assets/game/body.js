@@ -396,6 +396,9 @@ class BodyPart {
         if (!this.mainArm || !holdItem) return;
 
         const spritePath = this.getHeldItemSpritePath(holdItem);
+
+        if (!spritePath) return;
+
         const spriteSize = getSpriteSize(spritePath).width;
 
         const sprite = getSpriteUrl(spritePath);
