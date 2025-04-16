@@ -1607,12 +1607,11 @@ class Inventory {
             cutoff = GetBlock(holdingItem.blockId).defaultCutoff || 0;
         }
 
-        const drawHeight = actualHeight - cutoff * actualHeight;
+        const drawHeight = actualHeight - cutoff * actualHeight; // Height after cutoff
+        const targetHeight = 40; // Desired height in pixels
+        const scale = targetHeight / actualHeight; // Scale based on full height, not cropped
 
-        const targetHeight = 40;
-        const scale = targetHeight / drawHeight;
-
-        const cropY = cutoff * actualHeight; // Crop from the top 1by the cutoff amount
+        const cropY = cutoff * actualHeight; // Crop from the top by the cutoff amount
 
         const image = drawImage({
             url: spritePath,
@@ -1626,7 +1625,7 @@ class Inventory {
                 x: 0,
                 y: cropY, // Start cropping from the top by the cutoff value
                 width: actualWidth,
-                height: drawHeight,
+                height: drawHeight, // Draw only the remaining height
             },
         });
 
