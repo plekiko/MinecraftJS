@@ -334,8 +334,6 @@ class SimpleSprite {
     }
 
     drawAnimation(ctx, camera) {
-        console.log(this.spriteSize);
-
         const frameHeight = this.spriteSize.width;
 
         const effectiveFrame =

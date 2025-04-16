@@ -1384,6 +1384,12 @@ class Block extends Square {
     }
 
     simulateWaterFlow() {
+        if (getDimension(activeDimension).fastLava) {
+            blockMap.get(Blocks.Lava).updateSpeed = 0.15;
+        } else {
+            blockMap.get(Blocks.Lava).updateSpeed = 0.05;
+        }
+
         // Only process if this block is water.
         if (!GetBlock(this.blockType).fluid) return;
 

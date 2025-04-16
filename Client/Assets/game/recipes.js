@@ -1432,4 +1432,36 @@ const recipes = [
         output: new InventoryItem({ itemId: Items.RedDye, count: 2 }),
     }),
     //#endregion
+
+    //#region Nether
+    // Glowstone
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.GlowstoneDust }),
+                new RecipeItem({ itemId: Items.GlowstoneDust }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.GlowstoneDust }),
+                new RecipeItem({ itemId: Items.GlowstoneDust }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.Glowstone, count: 1 }),
+    }),
+    // Quartz Block
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ itemId: Items.NetherQuartz }),
+                new RecipeItem({ itemId: Items.NetherQuartz }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.NetherQuartz }),
+                new RecipeItem({ itemId: Items.NetherQuartz }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.QuartzBlock, count: 1 }),
+    }),
 ];

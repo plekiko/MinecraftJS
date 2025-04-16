@@ -32,6 +32,8 @@ const ORE_THRESHOLDS = {
     redstone: 1.5,
     diamond: 0.8,
     gold: 1.4,
+    quartz: 1.5,
+    glowstone: 1.5,
 };
 
 const SPAWN_PLAYER = true;

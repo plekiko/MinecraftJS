@@ -1,12 +1,85 @@
 let texturePackZip = null;
 let texturePackFiles = null;
-let isTexturePackLoaded = false; // New boolean flag
+let vanillaTextureCache = null;
+let isTexturePackLoaded = false;
+
+// Load vanilla textures by iterating over Blocks and Items
+async function loadVanillaTextures() {
+    vanillaTextureCache = {};
+
+    // Collect sprite paths from Blocks and Items
+    const spritePaths = [];
+
+    // Loop through Blocks
+    for (const blockKey in Blocks) {
+        const block = GetBlock(Blocks[blockKey]);
+        if (block.iconSprite) {
+            spritePaths.push(`blocks/${block.iconSprite}`);
+        }
+    }
+
+    // Loop through Items
+    for (const itemKey in Items) {
+        const item = GetItem(Items[itemKey]);
+        if (item.sprite) {
+            spritePaths.push(`items/${item.sprite}`);
+        }
+    }
+
+    // Remove duplicates (if any)
+    const uniquePaths = [...new Set(spritePaths)];
+
+    await Promise.all(
+        uniquePaths.map(async (path) => {
+            try {
+                const imgUrl = `Assets/sprites/${path}.png`;
+                const img = new Image();
+                img.src = imgUrl;
+
+                await new Promise((resolve, reject) => {
+                    img.onload = () => {
+                        vanillaTextureCache[path] = {
+                            url: imgUrl,
+                            width: img.width,
+                            height: img.height,
+                            originalWidth: img.width,
+                            originalHeight: img.height,
+                        };
+                        resolve();
+                    };
+                    img.onerror = () => {
+                        vanillaTextureCache[path] = {
+                            url: imgUrl,
+                            width: 16,
+                            height: 16,
+                            originalWidth: 16,
+                            originalHeight: 16,
+                        };
+                        resolve();
+                    };
+                });
+            } catch (err) {
+                console.warn(`Failed to load vanilla texture ${path}:`, err);
+                vanillaTextureCache[path] = {
+                    url: `Assets/sprites/${path}.png`,
+                    width: 16,
+                    height: 16,
+                    originalWidth: 16,
+                    originalHeight: 16,
+                };
+            }
+        })
+    );
+}
 
 // Load the active texture pack from localStorage
 async function loadTexturePack() {
     const currentPackKey =
         localStorage.getItem("currentTexturePack") || "default";
     isTexturePackLoaded = false;
+
+    // Load vanilla textures first
+    await loadVanillaTextures();
 
     if (currentPackKey === "default") {
         texturePackZip = null;
@@ -51,18 +124,13 @@ async function loadTexturePack() {
 
                 await new Promise((resolve) => {
                     img.onload = async () => {
-                        // Normalize path to use for lookups (remove prefix + .png)
                         const relativePath = fileName
                             .replace(/^.*assets\/minecraft\/textures\//, "")
                             .replace(/\.png$/, "");
 
-                        const originalSize = await getDefaultSpriteSize(
+                        const originalSize = vanillaTextureCache[
                             relativePath
-                        );
-
-                        // console.log(
-                        //     `Loaded texture: ${relativePath} (${img.width}x${img.height}) original (${originalSize.width}x${originalSize.height})`
-                        // );
+                        ] || { width: 16, height: 16 };
 
                         texturePackFiles[relativePath] = {
                             url: imgUrl,
@@ -87,25 +155,12 @@ async function loadTexturePack() {
     }
 }
 
-loadTexturePack(); // Load texture pack immediately on script load
-
-async function getDefaultSpriteSize(fileName) {
-    if (!fileName) return { width: 16, height: 16 };
-
-    return new Promise((resolve) => {
-        const path = `Assets/sprites/${fileName.replace(/^\/?/, "")}.png`;
-        const img = new Image();
-        img.src = path;
-
-        img.onload = () => {
-            resolve({ width: img.width, height: img.height });
-        };
-
-        img.onerror = () => {
-            resolve({ width: 16, height: 16 });
-        };
-    });
+// Initialize both vanilla and texture pack loading
+async function initializeTextures() {
+    await loadTexturePack();
 }
+
+initializeTextures();
 
 function getSpriteUrl(path, useTexturePack = true) {
     if (isBase64(path)) {
@@ -113,8 +168,12 @@ function getSpriteUrl(path, useTexturePack = true) {
         return path.substring(base64Index);
     }
 
-    if (texturePackFiles && texturePackFiles[path] && useTexturePack) {
+    if (useTexturePack && texturePackFiles && texturePackFiles[path]) {
         return texturePackFiles[path].url;
+    }
+
+    if (vanillaTextureCache && vanillaTextureCache[path]) {
+        return vanillaTextureCache[path].url;
     }
 
     return `Assets/sprites/${path}.png`;
@@ -130,9 +189,15 @@ function getSpriteSize(path) {
         };
     }
 
-    if (texturePackZip && texturePackFiles && texturePackFiles[path]) {
+    if (texturePackFiles && texturePackFiles[path]) {
         const { width, height, originalWidth, originalHeight } =
             texturePackFiles[path];
+        return { width, height, originalWidth, originalHeight };
+    }
+
+    if (vanillaTextureCache && vanillaTextureCache[path]) {
+        const { width, height, originalWidth, originalHeight } =
+            vanillaTextureCache[path];
         return { width, height, originalWidth, originalHeight };
     }
 
@@ -147,15 +212,18 @@ function getSpriteSize(path) {
 function isEqualToOriginal(path) {
     const spriteSize = getSpriteSize(path);
 
-    let useTexturePack = true;
-
     if (
-        spriteSize.width !== spriteSize.originalWidth ||
-        spriteSize.height !== spriteSize.originalHeight
-    )
-        useTexturePack = false;
+        !spriteSize ||
+        !spriteSize.originalWidth ||
+        !spriteSize.originalHeight
+    ) {
+        return false;
+    }
 
-    return useTexturePack;
+    return (
+        spriteSize.width === spriteSize.originalWidth &&
+        spriteSize.height === spriteSize.originalHeight
+    );
 }
 
 function waitForTexturePack() {

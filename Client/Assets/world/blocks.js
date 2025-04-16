@@ -137,6 +137,10 @@ const Blocks = Object.freeze({
     BlackWool: 215,
 
     Netherrack: 400,
+    SoulSand: 401,
+    QuartzOre: 402,
+    Glowstone: 403,
+    QuartzBlock: 404,
 });
 
 const blockTypes = [
@@ -1938,10 +1942,56 @@ const blockTypes = [
         blockId: 400,
         name: "Netherrack",
         sprite: "netherrack",
-        hardness: 2.3,
+        hardness: 7.8,
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 401,
+        name: "Soul Sand",
+        sprite: "soul_sand",
+        hardness: 2.3,
+        breakSound: Sounds.Break_Sand,
+        breakingSound: Sounds.Breaking_Sand,
+        toolType: ToolType.Shovel,
+    }),
+    new BlockType({
+        blockId: 402,
+        name: "Nether Quartz Ore",
+        sprite: "quartz_ore",
+        hardness: 9,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+        dropItem: Items.NetherQuartz,
+    }),
+    new BlockType({
+        blockId: 403,
+        name: "Glowstone",
+        sprite: "glowstone",
+        hardness: 0.8,
+        breakSound: Sounds.Break_Glass,
+        breakingSound: Sounds.Breaking_Glass,
+        dropTable: new LootTable([
+            new LootItem({
+                itemId: Items.GlowstoneDust,
+                maxCount: 3,
+                subtract: 3,
+            }),
+        ]),
+        dropItem: Items.GlowstoneDust,
+        lightLevel: 12,
+    }),
+    new BlockType({
+        blockId: 404,
+        name: "Quartz Block",
+        sprite: "quartz_block_side",
+        hardness: 5,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
         dropWithoutTool: false,
     }),
     //#endregion

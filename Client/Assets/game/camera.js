@@ -41,6 +41,9 @@ class Camera {
         // The bottom edge is at: this.y + CANVAS.height/2.
         // Therefore, ensure: this.y <= CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height/2.
         this.y = Math.min(this.y, CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height);
+
+        // Same for top edge
+        this.y = Math.max(this.y, 0);
     }
 
     followPlayer() {
@@ -74,5 +77,8 @@ class Camera {
             this.y,
             CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height / 2
         );
+
+        // Same for top edge
+        this.y = Math.max(this.y, 0);
     }
 }

@@ -431,8 +431,7 @@ function generateChunk(
         CHUNK_WIDTH,
         biome,
         oldChunkData,
-        pendingBlocks,
-        dimension.noiseMaps.grass
+        pendingBlocks
     );
 
     newChunk.dimension = dimensionIndex;

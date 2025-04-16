@@ -20,7 +20,14 @@ class Biome {
         googlies = BiomeMobs.Googlies,
         maxMobs = 4,
 
+        fluidType = Blocks.Water,
+
         baseBlock = Blocks.Stone,
+
+        waterSandType = Blocks.Sand,
+
+        // Nether specific
+        fullChunk = false,
     } = {}) {
         this.name = name;
         this.heightNoise = heightNoise;
@@ -43,6 +50,11 @@ class Biome {
         this.maxMobs = maxMobs;
 
         this.baseBlock = baseBlock;
+
+        this.fluidType = fluidType;
+        this.fullChunk = fullChunk;
+
+        this.waterSandType = waterSandType;
     }
 }
 
@@ -247,7 +259,6 @@ const OverworldBiomes = Object.freeze({
 const NetherBiomes = Object.freeze({
     NetherWastes: new Biome({
         name: "Nether Wastes",
-        heightNoise: NoisePresets.LowHills,
         topLayer: Blocks.Netherrack,
         secondLayer: Blocks.Netherrack,
         firstLayerWidth: 3,
@@ -261,12 +272,17 @@ const NetherBiomes = Object.freeze({
         maxWet: -50,
         minMount: 0,
         maxMount: 60,
-        waterLevel: 0,
+        waterLevel: 5,
         mobs: [],
         googlies: [],
         maxMobs: 4,
 
         baseBlock: Blocks.Netherrack,
+        fullChunk: true,
+
+        fluidType: Blocks.Lava,
+
+        waterSandType: Blocks.SoulSand,
     }),
 });
 

@@ -5,7 +5,6 @@ class Chunk {
         biome = OverworldBiomes.Plains,
         previousChunk = null,
         pendingBlocks = new Map(),
-        worldGrassNoiseMap = new Noise(),
         generated = false
     ) {
         this.biome = biome;
@@ -233,7 +232,16 @@ class Chunk {
 
     generateHeight() {
         for (let x = 0; x < this.width; x++) {
-            let height = this.getHeight(x);
+            let height = 0;
+
+            if (!this.biome.fullChunk) height = this.getHeight(x);
+            else {
+                // Fill the entire chunk with the base block
+                for (let y = 0; y < this.height; y++) {
+                    this.setBlockType(x, y, this.biome.baseBlock);
+                }
+                continue;
+            }
 
             if (specialWorldProps.flat) {
                 height = CHUNK_HEIGHT / 2;
@@ -291,24 +299,24 @@ class Chunk {
 
                 // Place water only if the block is air (empty)
                 if (GetBlock(blockType).air) {
-                    this.setBlockType(x, y, Blocks.Water);
+                    this.setBlockType(x, y, this.biome.fluidType);
                 }
 
                 if (
                     this.getDown(x, y) &&
                     this.getDown(x, y).blockType == this.biome.topLayer
                 )
-                    this.setBlockType(x, y - 1, Blocks.Sand);
+                    this.setBlockType(x, y - 1, this.biome.waterSandType);
                 if (
                     this.getLeft(x, y) &&
                     this.getLeft(x, y).blockType == this.biome.topLayer
                 )
-                    this.setBlockType(x - 1, y, Blocks.Sand);
+                    this.setBlockType(x - 1, y, this.biome.waterSandType);
                 if (
                     this.getRight(x, y) &&
                     this.getRight(x, y).blockType == this.biome.topLayer
                 )
-                    this.setBlockType(x + 1, y, Blocks.Sand);
+                    this.setBlockType(x + 1, y, this.biome.waterSandType);
             }
         }
     }
@@ -438,6 +446,12 @@ class Chunk {
         for (let i = 0; i < this.width; i++) {
             this.setBlockType(i, 0, Blocks.Bedrock); // Set bedrock at the bottom
         }
+
+        if (getDimension(this.dimension).bedrockRoof) {
+            for (let i = 0; i < this.width; i++) {
+                this.setBlockType(i, CHUNK_HEIGHT - 1, Blocks.Bedrock); // Set bedrock at the top
+            }
+        }
     }
 
     generateTrees() {
@@ -532,39 +546,70 @@ class Chunk {
     }
 
     generateOres() {
-        this.generateOre(
-            getDimension(this.dimension).noiseMaps.coal,
-            ORE_THRESHOLDS.coal,
-            Blocks.CoalOre,
-            0
-        );
-        this.generateOre(
-            getDimension(this.dimension).noiseMaps.iron,
-            ORE_THRESHOLDS.iron,
-            Blocks.IronOre,
-            100000
-        );
-        this.generateOre(
-            getDimension(this.dimension).noiseMaps.diamond,
-            ORE_THRESHOLDS.diamond,
-            Blocks.DiamondOre,
-            200000,
-            25
-        );
-        this.generateOre(
-            getDimension(this.dimension).noiseMaps.redstone,
-            ORE_THRESHOLDS.redstone,
-            Blocks.RedstoneOre,
-            300000,
-            30
-        );
-        this.generateOre(
-            getDimension(this.dimension).noiseMaps.gold,
-            ORE_THRESHOLDS.gold,
-            Blocks.GoldOre,
-            400000,
-            25
-        );
+        const noiseMaps = getDimension(this.dimension).noiseMaps;
+
+        if (noiseMaps.coal)
+            this.generateOre(
+                noiseMaps.coal,
+                ORE_THRESHOLDS.coal,
+                Blocks.CoalOre,
+                0
+            );
+        if (noiseMaps.iron)
+            this.generateOre(
+                noiseMaps.iron,
+                ORE_THRESHOLDS.iron,
+                Blocks.IronOre,
+                100000
+            );
+        if (noiseMaps.diamond)
+            this.generateOre(
+                noiseMaps.diamond,
+                ORE_THRESHOLDS.diamond,
+                Blocks.DiamondOre,
+                200000,
+                25
+            );
+        if (noiseMaps.redstone)
+            this.generateOre(
+                noiseMaps.redstone,
+                ORE_THRESHOLDS.redstone,
+                Blocks.RedstoneOre,
+                300000,
+                30
+            );
+        if (noiseMaps.gold)
+            this.generateOre(
+                noiseMaps.gold,
+                ORE_THRESHOLDS.gold,
+                Blocks.GoldOre,
+                400000,
+                25
+            );
+        if (noiseMaps.quartz)
+            this.generateOre(
+                noiseMaps.quartz,
+                ORE_THRESHOLDS.quartz,
+                Blocks.QuartzOre,
+                500000,
+                CHUNK_HEIGHT
+            );
+        if (noiseMaps.glowstone)
+            this.generateOre(
+                noiseMaps.glowstone,
+                ORE_THRESHOLDS.glowstone,
+                Blocks.Glowstone,
+                600000,
+                CHUNK_HEIGHT
+            );
+        if (noiseMaps.lavaPockets)
+            this.generateOre(
+                noiseMaps.lavaPockets,
+                1.5,
+                Blocks.Lava,
+                700000,
+                CHUNK_HEIGHT
+            );
     }
 
     generateOre(noise, threshold, block, offset, height = CHUNK_HEIGHT) {
@@ -575,7 +620,7 @@ class Chunk {
                     y + offset
                 );
 
-                if (this.getBlockType(x, y) != Blocks.Stone) continue;
+                if (this.getBlockType(x, y) != this.biome.baseBlock) continue;
 
                 if (noiseValue > threshold) continue;
 
@@ -1006,6 +1051,20 @@ class Chunk {
         const maxSkyLight = !getDimension(this.dimension).alwaysDay
             ? Math.floor(1 + 14 * dayNightFactor)
             : 15;
+
+        if (getDimension(this.dimension).baseLightLevel) {
+            // Set every block to the base light level
+            for (let y = 0; y < this.height; y++) {
+                for (let x = 0; x < this.width; x++) {
+                    const block = this.blocks[y][x];
+                    block.lightLevel = getDimension(
+                        this.dimension
+                    ).baseLightLevel;
+                }
+            }
+
+            return;
+        }
 
         // Loop over every column in the chunk
         for (let x = 0; x < this.width; x++) {

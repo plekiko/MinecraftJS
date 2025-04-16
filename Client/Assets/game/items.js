@@ -103,6 +103,9 @@ const Items = Object.freeze({
     LapisLazuli: 1213,
     CocoaBeans: 1214,
     BoneMeal: 1215,
+
+    GlowstoneDust: 150,
+    NetherQuartz: 151,
 });
 
 const items = [
@@ -861,6 +864,19 @@ const items = [
         sprite: "dye_powder_white",
     }),
 
+    //#endregion
+
+    //#region Nether
+    new Item({
+        itemId: 150,
+        name: "Glowstone Dust",
+        sprite: "glowstone_dust",
+    }),
+    new Item({
+        itemId: 151,
+        name: "Nether Quartz",
+        sprite: "quartz",
+    }),
     //#endregion
 ];
 

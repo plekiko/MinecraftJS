@@ -31,7 +31,12 @@ class Dimension {
             gold: new Noise(100, 6.5, 5),
         },
 
+        baseLightLevel = null,
         alwaysDay = false,
+
+        bedrockRoof = false,
+        fastLava = false,
+        noWater = false,
     }) {
         this.name = name;
         this.chunks = new Map();
@@ -42,6 +47,12 @@ class Dimension {
         this.noiseMaps = noiseMaps;
 
         this.alwaysDay = alwaysDay;
+
+        this.baseLightLevel = baseLightLevel;
+        this.bedrockRoof = bedrockRoof;
+
+        this.fastLava = fastLava;
+        this.noWater = noWater;
     }
 }
 
@@ -56,7 +67,27 @@ let dimensions = [
             sunsetColor: "#FF4500", // Sunset bottom color (red)
             midnightColor: "#000000", // Midnight bottom color (black)
         },
+
         alwaysDay: true,
+
+        noiseMaps: {
+            grass: new Noise(550, 0.2, 1),
+            structure: new Noise(500, 1, 10),
+            temperature: new Noise(30, 70, 32),
+            wetness: new Noise(30, 40, 21),
+            tree: new Noise(100, 10, 5),
+            mountains: new Noise(30, 60, 30),
+            cave: new Noise(20, 80, 5),
+            quartz: new Noise(100, 7, 5),
+            glowstone: new Noise(100, 7, 5),
+            lavaPockets: new Noise(100, 7, 5),
+        },
+
+        baseLightLevel: 3,
+        bedrockRoof: true,
+
+        fastLava: true,
+        noWater: true,
     }),
 ];
 
