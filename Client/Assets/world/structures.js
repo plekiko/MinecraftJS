@@ -157,7 +157,7 @@ const Structures = Object.freeze({
         underground: true,
     }),
     WitchHut: new Structure({
-        biome: Biomes.Swamp,
+        biome: OverworldBiomes.Swamp,
         blocks: [
             [
                 Blocks.Air,
@@ -324,7 +324,7 @@ const Structures = Object.freeze({
         ],
     }),
     Iglo: new Structure({
-        biome: Biomes.Tundra,
+        biome: OverworldBiomes.Tundra,
         blocks: [
             [
                 Blocks.Air,
@@ -441,7 +441,7 @@ const Structures = Object.freeze({
         ],
     }),
     // DesertTemple: new Structure({
-    //     biome: Biomes.Desert,
+    //     biome: OverworldBiomes.Desert,
     //     shift: { x: 0, y: 10 },
     //     blocks: [
     //         [
@@ -961,7 +961,7 @@ const Structures = Object.freeze({
     //     ],
     // }),
     DesertTemple: new Structure({
-        biome: Biomes.Desert,
+        biome: OverworldBiomes.Desert,
         shift: { x: 0, y: 14 },
         blocks: [
             [

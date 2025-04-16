@@ -19,6 +19,8 @@ class Biome {
         mobs = BiomeMobs.CommonMobs,
         googlies = BiomeMobs.Googlies,
         maxMobs = 4,
+
+        baseBlock = Blocks.Stone,
     } = {}) {
         this.name = name;
         this.heightNoise = heightNoise;
@@ -39,6 +41,8 @@ class Biome {
         this.mobs = mobs;
         this.googlies = googlies;
         this.maxMobs = maxMobs;
+
+        this.baseBlock = baseBlock;
     }
 }
 
@@ -47,7 +51,7 @@ const BiomeMobs = Object.freeze({
     Googlies: ["Zombie"],
 });
 
-const Biomes = Object.freeze({
+const OverworldBiomes = Object.freeze({
     Plains: new Biome({
         name: "Plains",
         heightNoise: NoisePresets.Flat,
@@ -238,4 +242,35 @@ const Biomes = Object.freeze({
         minMount: 50,
         maxMount: Infinity,
     }),
+});
+
+const NetherBiomes = Object.freeze({
+    NetherWastes: new Biome({
+        name: "Nether Wastes",
+        heightNoise: NoisePresets.LowHills,
+        topLayer: Blocks.Netherrack,
+        secondLayer: Blocks.Netherrack,
+        firstLayerWidth: 3,
+        secondLayerWidth: 5,
+        treeType: [],
+        grassType: [],
+        treeThreshold: Infinity,
+        minTemp: 80,
+        maxTemp: Infinity,
+        minWet: -Infinity,
+        maxWet: -50,
+        minMount: 0,
+        maxMount: 60,
+        waterLevel: 0,
+        mobs: [],
+        googlies: [],
+        maxMobs: 4,
+
+        baseBlock: Blocks.Netherrack,
+    }),
+});
+
+const AllBiomes = Object.freeze({
+    ...OverworldBiomes,
+    ...NetherBiomes,
 });

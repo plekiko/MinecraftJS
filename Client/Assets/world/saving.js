@@ -4,30 +4,38 @@ let currentSave = {
     time: 0,
     inventoryItems: [[]],
     seed: 0,
-    chunks: new Map(),
     pendingBlocks: new Map(),
+    dimensions: [], // Array of { index, chunks: [{ x, biome, previousChunk, blocks, walls }] }
 };
 
-// Assuming chunks, seed, pendingBlocks, etc. are defined elsewhere in the global scope
-
 function SaveWorld(message = true, toFile = false) {
-    let savedChunks = [];
+    let savedDimensions = [];
 
-    chunks.forEach((chunk) => {
-        const newSaveChunk = SaveChunk(chunk);
-
-        savedChunks.push({
-            x: chunk.x,
-            biome: chunk.biome.name,
-            previousChunk: chunk.previousChunk ? chunk.previousChunk.x : null,
-            blocks: newSaveChunk.blocks,
-            walls: newSaveChunk.walls,
+    // Save chunks for each dimension
+    dimensions.forEach((dimension, index) => {
+        let savedChunks = [];
+        dimension.chunks.forEach((chunk) => {
+            const newSaveChunk = SaveChunk(chunk);
+            savedChunks.push({
+                x: chunk.x,
+                biome: {
+                    name: chunk.biome.name,
+                    dimension: index, // Explicitly save dimension to avoid ambiguity
+                },
+                previousChunk: chunk.previousChunk
+                    ? chunk.previousChunk.x
+                    : null,
+                blocks: newSaveChunk.blocks,
+                walls: newSaveChunk.walls,
+            });
+        });
+        savedDimensions.push({
+            index: index,
+            chunks: savedChunks,
         });
     });
-    // savedChunks.splice(1, savedChunks.length - 1);
 
     let playerInventory = [[]];
-
     for (let i = 0; i < player.inventory.items.length; i++) {
         playerInventory[i] = [];
         for (let j = 0; j < player.inventory.items[i].length; j++) {
@@ -36,27 +44,28 @@ function SaveWorld(message = true, toFile = false) {
     }
 
     currentSave.time = time;
-
     currentSave.gameRules = GAMERULES;
 
     if (player) {
         currentSave.playerPosition = JSON.stringify(player.position);
-
         currentSave.inventoryItems = JSON.stringify(playerInventory);
-
         currentSave.gamemode = player.gamemode;
-
         currentSave.health = player.health;
-
         currentSave.currentSlot = hotbar.currentSlot;
+        currentSave.activeDimension = activeDimension;
     }
 
-    currentSave.chunks = savedChunks;
     currentSave.seed = seed;
-    currentSave.pendingBlocks = pendingBlocks;
+    currentSave.pendingBlocks = Array.from(pendingBlocks.entries()).map(
+        ([chunkX, entry]) => ({
+            chunkX,
+            dimensionIndex: entry.dimensionIndex,
+            blocks: entry.blocks,
+        })
+    );
+    currentSave.dimensions = savedDimensions;
 
     const saveData = JSON.stringify(currentSave);
-    // saveJSONToFile(saveData, "world");
 
     if (toFile) {
         saveJSONToFile(saveData, "world");
@@ -96,7 +105,6 @@ function SaveWorld(message = true, toFile = false) {
     if (message) chat.message("World saved successfully!");
 
     localStorage.setItem("worlds", JSON.stringify(worlds));
-
     localStorage.setItem(id, saveData);
 }
 
@@ -108,11 +116,10 @@ function SaveChunk(chunk) {
         blocks[y] = [];
         walls[y] = [];
         for (let x = 0; x < CHUNK_WIDTH; x++) {
-            blocks[y][x] = chunk.blocks[y][x].blockType; // Assuming blockType is a property
-            walls[y][x] = chunk.walls[y][x].blockType; // Assuming blockType is a property
+            blocks[y][x] = chunk.blocks[y][x].blockType;
+            walls[y][x] = chunk.walls[y][x].blockType;
 
             if (chunk.blocks[y][x].metaData) {
-                // Create object from block like: {0, metaData: {props: {}}}
                 blocks[y][x] = {
                     t: chunk.blocks[y][x].blockType,
                     m: JSON.stringify(chunk.blocks[y][x].metaData),
@@ -122,9 +129,6 @@ function SaveChunk(chunk) {
     }
 
     return {
-        x: chunk.x,
-        biome: chunk.biome.name,
-        previousChunk: chunk.previousChunk ? chunk.previousChunk.x : null,
         blocks,
         walls,
     };
@@ -185,26 +189,47 @@ async function LoadWorld(save) {
         currentSave = JSON.parse(save);
     } catch (error) {
         console.error("Failed to load world: ", error);
-        return; // Exit if loading fails
+        return;
     }
 
     loadingWorld = true;
 
-    // Reinitialize global variables
     LoadCustomSeed(currentSave.seed);
 
-    chunks = new Map();
-    // pendingBlocks = new Map();
+    // Clear chunks for all dimensions
+    dimensions.forEach((dimension) => {
+        dimension.chunks = new Map();
+    });
 
     entities = [];
 
-    currentSave.chunks.forEach((chunk) => {
-        LoadChunk(chunk.x, chunk);
-    });
+    // Load chunks for each dimension
+    if (currentSave.dimensions) {
+        currentSave.dimensions.forEach((dimData) => {
+            const dimension = getDimension(dimData.index);
+            console.log("Loading dimension:", dimData);
+            dimData.chunks.forEach((chunk) => {
+                LoadChunk(chunk.x, chunk, dimData.index);
+            });
+        });
+    } else {
+        // Fallback for older saves (single Overworld chunks)
+        currentSave.chunks.forEach((chunk) => {
+            LoadChunk(chunk.x, chunk, Dimensions.Overworld);
+        });
+    }
 
-    if (currentSave.pendingBlocks.length > 0)
-        pendingBlocks = currentSave.pendingBlocks;
-    else pendingBlocks = new Map();
+    pendingBlocks = new Map();
+    if (currentSave.pendingBlocks && currentSave.pendingBlocks.length > 0) {
+        currentSave.pendingBlocks.forEach(
+            ({ chunkX, dimensionIndex, blocks }) => {
+                pendingBlocks.set(chunkX, {
+                    dimensionIndex,
+                    blocks,
+                });
+            }
+        );
+    }
 
     time = currentSave.time;
 
@@ -214,7 +239,6 @@ async function LoadWorld(save) {
 
     if (SPAWN_PLAYER) {
         removeEntity(player);
-
         player = null;
 
         setTimeout(() => {
@@ -240,6 +264,9 @@ async function LoadWorld(save) {
 
             if (currentSave.health) player.health = currentSave.health;
 
+            if (currentSave.activeDimension !== undefined)
+                gotoDimension(currentSave.activeDimension);
+
             SaveWorld(false);
         }, 100);
     }
@@ -249,18 +276,30 @@ async function LoadWorld(save) {
     }, 500);
 }
 
-async function LoadChunk(x, chunk) {
+async function LoadChunk(x, chunk, dimensionIndex = Dimensions.Overworld) {
+    console.log("Loading chunk:", x, chunk, dimensionIndex);
+
+    const dimension = getDimension(dimensionIndex);
     const previousChunk = chunk.previousChunk
-        ? chunks.get(chunk.previousChunk)
+        ? dimension.chunks.get(chunk.previousChunk)
         : null;
+
+    // Use biome.name for newer saves, fallback to biome for older saves
+    const biomeName =
+        chunk.biome && chunk.biome.name ? chunk.biome.name : chunk.biome;
+
+    // Map the biome name to the dimension's biome set
+    const biome = AllBiomes[biomeName];
+
     const constructedChunk = new Chunk(
         x,
         CHUNK_WIDTH,
-        Biomes[chunk.biome] ? Biomes[chunk.biome] : Biomes.Plains,
+        biome,
         previousChunk,
         pendingBlocks,
-        worldGrassNoiseMap,
-        true
+        dimension.noiseMaps.grass,
+        true,
+        dimensionIndex
     );
 
     constructedChunk.generateArray();
@@ -282,7 +321,9 @@ async function LoadChunk(x, chunk) {
             if (
                 GetBlock(constructedChunk.blocks[y][x].blockType).lightLevel > 0
             ) {
+                // Handle light-emitting blocks if needed
             }
+
             // Walls
             constructedChunk.setBlockType(
                 x,
@@ -295,5 +336,5 @@ async function LoadChunk(x, chunk) {
         }
     }
 
-    chunks.set(x, constructedChunk);
+    dimension.chunks.set(x, constructedChunk);
 }

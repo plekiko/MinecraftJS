@@ -73,12 +73,12 @@ function processMessage(data) {
             break;
 
         case "placeBlock":
-            if (!chunks.has(message.chunkX))
+            if (!getDimensionChunks(activeDimension).has(message.chunkX))
                 console.log("Chunk not loaded:", message.chunkX);
 
             console.log("Placing block:", message);
 
-            chunks
+            getDimensionChunks(activeDimension)
                 .get(message.chunkX)
                 .setBlockType(
                     message.x,
@@ -91,13 +91,13 @@ function processMessage(data) {
                 );
             break;
         case "breakBlock":
-            if (!chunks.has(message.chunkX))
+            if (!getDimensionChunks(activeDimension).has(message.chunkX))
                 console.log("Chunk not loaded:", message.chunkX);
 
             console.log("Breaking block:", message);
 
             // get the block at the given coordinates
-            const block = chunks
+            const block = getDimensionChunks(activeDimension)
                 .get(message.chunkX)
                 .getBlock(message.x, message.y, false, message.isWall);
 

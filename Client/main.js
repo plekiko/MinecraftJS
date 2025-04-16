@@ -94,14 +94,33 @@ async function gameLoop() {
     //     return;
     // }
 
-    await GenerateWorld();
+    await generateWorld();
     updateGame();
 
-    Draw(chunks, calculateFPS(currentFrameTime), deltaTime);
+    Draw(
+        getDimensionChunks(activeDimension),
+        calculateFPS(currentFrameTime),
+        deltaTime
+    );
 
     lastFrameTime = currentFrameTime;
 
     requestAnimationFrame(gameLoop);
+}
+
+function gotoDimension(dimension) {
+    if (dimension === activeDimension) return;
+
+    chunks_in_render_distance = new Map();
+
+    entities = entities.filter((entity) => {
+        if (entity instanceof Player) {
+            return entity.UUID === player.UUID;
+        }
+        return false;
+    });
+
+    activeDimension = dimension;
 }
 
 function updateGame() {

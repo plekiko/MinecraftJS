@@ -135,6 +135,8 @@ const Blocks = Object.freeze({
     GreenWool: 213,
     RedWool: 214,
     BlackWool: 215,
+
+    Netherrack: 400,
 });
 
 const blockTypes = [
@@ -995,6 +997,7 @@ const blockTypes = [
         sprite: "obsidian",
         name: "Obsidian",
         hardness: 14.8,
+        collision: false,
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
         toolType: ToolType.Pickaxe,
@@ -1928,6 +1931,19 @@ const blockTypes = [
         category: BlockCategory.Wool,
     }),
 
+    //#endregion
+
+    //#region Nether
+    new BlockType({
+        blockId: 400,
+        name: "Netherrack",
+        sprite: "netherrack",
+        hardness: 2.3,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
+    }),
     //#endregion
 ];
 

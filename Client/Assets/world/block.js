@@ -252,7 +252,7 @@ function flowDownward(block, worldPos) {
 }
 
 function setBlockType(block, type) {
-    const chunk = chunks.get(block.chunkX);
+    const chunk = getDimensionChunks(activeDimension).get(block.chunkX);
     if (!chunk) return;
     chunk.setBlockType(block.x, block.y, type, block.wall, null, false, true);
 }
@@ -505,8 +505,8 @@ class Block extends Square {
     setBlockType(blockType, override = false) {
         if (this.blockType === blockType && !override) return;
 
-        const myChunk = chunks.has(this.chunkX)
-            ? chunks.get(this.chunkX)
+        const myChunk = getDimensionChunks(activeDimension).has(this.chunkX)
+            ? getDimensionChunks(activeDimension).get(this.chunkX)
             : null;
 
         this.dark = false;
@@ -1484,7 +1484,7 @@ class Block extends Square {
     breakBlock(drop = false, wall = false) {
         if (GetBlock(this.blockType).air) return;
 
-        const chunk = chunks.get(this.chunkX);
+        const chunk = getDimensionChunks(activeDimension).get(this.chunkX);
 
         if (!chunk) return;
 

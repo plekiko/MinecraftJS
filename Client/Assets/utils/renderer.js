@@ -30,10 +30,13 @@ r.style.setProperty("--drawMouse", "none");
 
 function DrawBackground() {
     // Calculate the color stops based on time
-    const dayColor = "#74B3FF"; // Daytime top color (light blue)
-    const nightColor = "#000000"; // Nighttime top color (dark blue)
-    const sunsetColor = "#D47147"; // Sunset bottom color
-    const midnightColor = "#001848"; // Midnight bottom color
+    const dayColor = getDimension(activeDimension).backgroundGradient.dayColor;
+    const nightColor =
+        getDimension(activeDimension).backgroundGradient.nightColor;
+    const sunsetColor =
+        getDimension(activeDimension).backgroundGradient.sunsetColor;
+    const midnightColor =
+        getDimension(activeDimension).backgroundGradient.midnightColor;
 
     const topColor = interpolateColor(
         nightColor,
@@ -47,8 +50,14 @@ function DrawBackground() {
     );
 
     const gradient = ctx.createLinearGradient(0, CANVAS.height, 0, 0);
-    gradient.addColorStop(0, bottomColor); // Bottom color
-    gradient.addColorStop(1, topColor); // Top color
+
+    if (!getDimension(activeDimension).alwaysDay) {
+        gradient.addColorStop(0, bottomColor); // Bottom color
+        gradient.addColorStop(1, topColor); // Top color
+    } else {
+        gradient.addColorStop(0, sunsetColor);
+        gradient.addColorStop(1, dayColor);
+    }
 
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
@@ -144,7 +153,9 @@ function DrawEntities() {
             entity.draw(ctx, camera);
         } else {
             if (entity.despawn) {
-                const chunk = chunks.get(entity.myChunkX);
+                const chunk = getDimensionChunks(activeDimension).get(
+                    entity.myChunkX
+                );
                 if (chunk) chunk.removeEntityFromChunk(entity);
 
                 removeEntity(entity);
@@ -345,11 +356,14 @@ function DrawChunkStats(chunk, chunkX) {
 
     // Base text with biome details
     let txt = `${index} - ${chunk.biome.name}\nTemp: ${Math.floor(
-        worldTemperatureNoiseMap.getNoise(index, 20000)
+        getDimension(activeDimension).noiseMaps.temperature.getNoise(
+            index,
+            20000
+        )
     )}\nWetness: ${Math.floor(
-        worldWetnessNoiseMap.getNoise(index, 10000)
+        getDimension(activeDimension).noiseMaps.wetness.getNoise(index, 10000)
     )}\nMountains: ${Math.floor(
-        worldMountainsNoiseMap.getNoise(index, 30000)
+        getDimension(activeDimension).noiseMaps.mountains.getNoise(index, 30000)
     )}\nHeight: ${chunk.biome.heightNoise.scale * 1000} - ${
         chunk.biome.heightNoise.intensity
     }`;
@@ -361,6 +375,10 @@ function DrawChunkStats(chunk, chunkX) {
     ) {
         txt += `\nNext to: ${chunk.previousChunk.biome.name}`;
     }
+
+    // Dimension information
+
+    txt += `\nDimension: ${getDimension(chunk.dimension).name}`;
 
     // Split text by lines for rendering
     const lines = txt.split("\n");
@@ -377,7 +395,9 @@ function DrawExpectedFileSize() {
     ctx.textAlign = "left";
 
     ctx.fillText(
-        "File size: " + (chunks.size * CHUNK_FILE_SIZE + 5) + "kB",
+        "File size: " +
+            (getDimensionChunks(activeDimension).size * CHUNK_FILE_SIZE + 5) +
+            "kB",
         10,
         CANVAS.height - 10
     );
@@ -399,7 +419,7 @@ function DrawHeight() {
         const worldX = cameraWorldX + x * BLOCK_SIZE;
 
         // Get the chunk corresponding to this block position
-        const chunk = chunks.get(
+        const chunk = getDimensionChunks(activeDimension).get(
             Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
                 CHUNK_WIDTH *
                 BLOCK_SIZE

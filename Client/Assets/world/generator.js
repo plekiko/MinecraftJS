@@ -1,4 +1,3 @@
-let chunks = new Map();
 let pendingBlocks = new Map();
 
 let seed = 0;
@@ -16,66 +15,6 @@ function setSeed(newSeed) {
 }
 
 let loadingWorld = true;
-
-const worldGrassNoiseMap = new Noise(550, 0.2, 1);
-
-const worldStructureNoiseMap = new Noise(500, 1, 10);
-
-const worldTemperatureNoiseMap = new Noise(
-    30, // Scale (size)
-    70, // Intensity
-    32
-);
-
-const worldWetnessNoiseMap = new Noise(
-    30, // Scale (size)
-    40, // Intensity
-    21
-);
-
-const worldTreeNoiseMap = new Noise(
-    100, // Scale (size)
-    10, // Intensity
-    5
-);
-
-const worldCaveNoiseMap = new Noise(
-    55, // Scale (size)
-    10, // Intensity
-    5
-);
-
-const worldMountainsNoiseMap = new Noise(
-    30, // Scale (size)
-    60, // Intensity
-    30
-);
-
-const worldCoalNoiseMap = new Noise(
-    100, // Scale (size)
-    5.3, // Intensity
-    5
-);
-const worldIronNoiseMap = new Noise(
-    100, // Scale (size)
-    5, // Intensity
-    5
-);
-const worldDiamondNoiseMap = new Noise(
-    100, // Scale (size)
-    6.8, // Intensity
-    5
-);
-const worldRedstoneNoiseMap = new Noise(
-    100, // Scale (size)
-    6.5, // Intensity
-    5
-);
-const worldGoldNoiseMap = new Noise(
-    100, // Scale (size)
-    6.5, // Intensity
-    5
-);
 
 function PrintNoiseOutput(noise, count = 100) {
     // Initialize variables to track min and max
@@ -140,34 +79,34 @@ function LoadCustomSeed(seed) {
 
         //#region Biome Forces
         case "desert":
-            forceToBiome = Biomes.Desert;
+            forceToBiome = OverworldBiomes.Desert;
             break;
         case "mountain":
-            forceToBiome = Biomes.Mountain;
+            forceToBiome = OverworldBiomes.Mountain;
             break;
         case "forest":
-            forceToBiome = Biomes.Forest;
+            forceToBiome = OverworldBiomes.Forest;
             break;
         case "plains":
-            forceToBiome = Biomes.Plains;
+            forceToBiome = OverworldBiomes.Plains;
             break;
         case "swamp":
-            forceToBiome = Biomes.Swamp;
+            forceToBiome = OverworldBiomes.Swamp;
             break;
         case "jungle" || "rainforest":
-            forceToBiome = Biomes.RainForest;
+            forceToBiome = OverworldBiomes.RainForest;
             break;
         case "savanna":
-            forceToBiome = Biomes.Savanna;
+            forceToBiome = OverworldBiomes.Savanna;
             break;
         case "taiga":
-            forceToBiome = Biomes.Taiga;
+            forceToBiome = OverworldBiomes.Taiga;
             break;
         case "tundra":
-            forceToBiome = Biomes.Tundra;
+            forceToBiome = OverworldBiomes.Tundra;
             break;
         case "seasonalforest" || "seasonal" || "seasonal forest":
-            forceToBiome = Biomes.SeasonalForest;
+            forceToBiome = OverworldBiomes.SeasonalForest;
             break;
         //#endregion
     }
@@ -223,12 +162,12 @@ async function GetChunkFromServer(x) {
     }
 }
 
-async function GenerateWorld() {
+async function generateWorld(dimensionIndex = activeDimension) {
     if (loadingWorld) return;
 
+    const dimension = dimensions[dimensionIndex];
     const currentChunkIndex = camera.getCurrentChunkIndex();
 
-    // Generate chunks within the visible range of the camera
     for (
         let i = currentChunkIndex - RENDER_DISTANCE;
         i <= currentChunkIndex + RENDER_DISTANCE;
@@ -238,53 +177,51 @@ async function GenerateWorld() {
 
         let willUploadChunk = false;
 
-        // Multiplayer get chunk
         if (multiplayer) {
-            if (!chunks.has(chunkX)) {
-                const chunkFromServer = await GetChunkFromServer(chunkX);
+            if (!dimension.chunks.has(chunkX)) {
+                const chunkFromServer = await GetChunkFromServer(chunkX); // Ensure async handling
                 if (chunkFromServer) {
                     console.log(
                         "Loaded chunk from server",
                         chunkX,
                         chunkFromServer
                     );
-                    LoadChunk(chunkX, chunkFromServer);
-                    // console.log(
-                    //     "Loaded chunk from server",
-                    //     chunkX,
-                    //     chunkFromServer
-                    // );
+                    LoadChunk(chunkX, chunkFromServer, dimensionIndex);
                 } else {
                     willUploadChunk = true;
                     const oldChunkData = getNeighborBiomeData(
                         i,
-                        currentChunkIndex
+                        currentChunkIndex,
+                        dimensionIndex
                     );
-                    generateChunk(i, chunkX, oldChunkData);
+                    generateChunk(i, chunkX, oldChunkData, dimensionIndex);
                 }
             }
-        } else if (!chunks.has(chunkX)) {
-            const oldChunkData = getNeighborBiomeData(i, currentChunkIndex);
-            generateChunk(i, chunkX, oldChunkData);
+        } else if (!dimension.chunks.has(chunkX)) {
+            const oldChunkData = getNeighborBiomeData(
+                i,
+                currentChunkIndex,
+                dimensionIndex
+            );
+            generateChunk(i, chunkX, oldChunkData, dimensionIndex);
         } else {
-            const chunk = chunks.get(chunkX);
+            const chunk = dimension.chunks.get(chunkX);
             if (chunk.spawnTime && chunk.spawnTime <= passedTime) {
                 chunk.spawnMobs(day);
-
                 chunk.spawnTime = 0;
             }
         }
 
-        postProcessChunk(GetChunkForX(chunkX));
+        postProcessChunk(GetChunkForX(chunkX, dimensionIndex));
 
         if (willUploadChunk) {
-            UploadChunkToServer(chunkX);
+            UploadChunkToServer(chunkX, dimensionIndex);
         }
     }
 
-    if (specialWorldProps.noStructures) return;
-
-    generateStructures();
+    if (!specialWorldProps.noStructures) {
+        generateStructures(dimensionIndex);
+    }
 }
 
 function ServerPlaceBlock(chunkX, x, y, blockType, isWall = false) {
@@ -447,39 +384,47 @@ function PopulateStorageWithLoot(loot, storage) {
     return storage;
 }
 
-function calculateChunkBiome(chunkIndex) {
-    const temp = worldTemperatureNoiseMap.getNoise(chunkIndex, 20000);
-    const wetness = worldWetnessNoiseMap.getNoise(chunkIndex, 10000);
-    const mountains = worldMountainsNoiseMap.getNoise(chunkIndex, 30000);
+function calculateChunkBiome(chunkIndex, dimensionIndex = activeDimension) {
+    const dimension = dimensions[dimensionIndex];
+    const { temperature, wetness, mountains } = dimension.noiseMaps;
+    const temp = temperature.getNoise(chunkIndex, 20000);
+    const wet = wetness.getNoise(chunkIndex, 10000);
+    const mount = mountains.getNoise(chunkIndex, 30000);
 
-    let toBeReturned = Biomes.Plains;
+    let biome = getBiomeForNoise(temp, wet, mount, dimension.biomeSet);
 
-    toBeReturned = GetBiomeForNoise(temp, wetness, mountains);
+    if (specialWorldProps.flat) biome = dimension.biomeSet.Plains || biome;
+    if (dimension.forceToBiome != null) biome = dimension.forceToBiome;
+    if (!biome)
+        biome =
+            dimension.biomeSet.Plains || Object.values(dimension.biomeSet)[0];
 
-    if (specialWorldProps.flat) toBeReturned = Biomes.Plains;
-
-    if (forceToBiome != null) toBeReturned = forceToBiome;
-
-    if (!toBeReturned) toBeReturned = Biomes.Plains;
-
-    return toBeReturned;
+    return biome;
 }
 
-function getNeighborBiomeData(currentIndex, cameraIndex) {
+function getNeighborBiomeData(
+    currentIndex,
+    cameraIndex,
+    dimensionIndex = activeDimension
+) {
     const neighborIndex =
         currentIndex < cameraIndex ? currentIndex + 1 : currentIndex - 1;
     const neighborChunkX = neighborIndex * CHUNK_WIDTH * BLOCK_SIZE;
-    const neighborBiome = calculateChunkBiome(neighborIndex);
+    const neighborBiome = calculateChunkBiome(neighborIndex, dimensionIndex);
 
     return { x: neighborChunkX, biome: neighborBiome };
 }
 
-function generateChunk(chunkIndex, chunkX, oldChunkData) {
-    // console.log("Generating chunk", seed);
+function generateChunk(
+    chunkIndex,
+    chunkX,
+    oldChunkData,
+    dimensionIndex = activeDimension
+) {
+    // console.log("Seed:", seed);
 
-    console.log("Seed: ", seed);
-
-    const biome = calculateChunkBiome(chunkIndex);
+    const dimension = dimensions[dimensionIndex];
+    const biome = calculateChunkBiome(chunkIndex, dimensionIndex);
 
     const newChunk = new Chunk(
         chunkX,
@@ -487,14 +432,18 @@ function generateChunk(chunkIndex, chunkX, oldChunkData) {
         biome,
         oldChunkData,
         pendingBlocks,
-        worldGrassNoiseMap
+        dimension.noiseMaps.grass
     );
 
-    chunks.set(chunkX, newChunk);
+    newChunk.dimension = dimensionIndex;
+
+    dimension.chunks.set(chunkX, newChunk);
 }
 
-function GetChunk(worldX) {
-    return chunks.has(worldX) ? chunks.get(worldX) : null;
+function GetChunk(worldX, dimension = activeDimension) {
+    return getDimensionChunks(dimension).has(worldX)
+        ? getDimensionChunks(dimension).get(worldX)
+        : null;
 }
 
 function postProcessChunk(chunk) {
@@ -528,24 +477,21 @@ function postProcessChunk(chunk) {
     }
 }
 
-function generateStructures() {
-    // Loop over each chunk in the global chunks Map.
-    chunks.forEach((chunk, chunkX) => {
+function generateStructures(dimensionIndex = activeDimension) {
+    const dimension = dimensions[dimensionIndex];
+    dimension.chunks.forEach((chunk, chunkX) => {
         if (chunk.generated) {
             return;
-        } else {
-            chunk.generated = true;
         }
-        // Use the chunk index (or its x coordinate) to get a structure noise value.
+        chunk.generated = true;
+
         const chunkIndex = chunkX / (CHUNK_WIDTH * BLOCK_SIZE);
-        const structureNoiseValue = worldStructureNoiseMap.getNoise(
+        const structureNoiseValue = dimension.noiseMaps.structure.getNoise(
             chunkIndex,
             0
         );
 
-        // Define a threshold for structure spawning.
         if (structureNoiseValue > 10.2) {
-            // Build an array of candidate structure names that "fit" this chunk.
             const allStructureNames = Object.keys(Structures);
             const candidates = allStructureNames.filter((name) => {
                 const structure = Structures[name];
@@ -554,24 +500,18 @@ function generateStructures() {
                 );
             });
 
-            // 50/50 change to make it underground
             const underground = Math.random() < 0.5;
-
-            // Filter out structures that are not underground if the chunk is underground
-            candidates.filter((name) => {
+            const filteredCandidates = candidates.filter((name) => {
                 const structure = Structures[name];
-                return (
-                    structure.underground === underground &&
-                    underground === true
-                );
+                return structure.underground === underground;
             });
 
-            if (candidates.length === 0) return;
+            if (filteredCandidates.length === 0) return;
 
-            const randomName = candidates[RandomRange(0, candidates.length)];
+            const randomName =
+                filteredCandidates[RandomRange(0, filteredCandidates.length)];
             const structure = Structures[randomName];
 
-            // Determine placement X coordinate (roughly the center of the chunk)
             const structureX =
                 chunk.x +
                 RandomRange(0, CHUNK_WIDTH) * BLOCK_SIZE +
@@ -579,31 +519,23 @@ function generateStructures() {
 
             let structureY;
             if (structure.underground) {
-                // Get the surface level at the center of the chunk (0 is top)
                 const localX = chunk.getLocalX(structureX);
                 const surfaceBlockY = chunk.findGroundLevel(localX, true);
                 if (surfaceBlockY === 0) return;
-                // Multiply by BLOCK_SIZE to get the world coordinate
                 const surfaceY = surfaceBlockY * BLOCK_SIZE;
-                // Choose a fixed offset (in blocks) to place the structure underground.
-                // For example, place it between 16 and 32 blocks below the surface.
                 const undergroundOffset =
                     RandomRange(8, CHUNK_HEIGHT / 2.5) * BLOCK_SIZE;
-                // structureY = surfaceY + undergroundOffset * BLOCK_SIZE;
                 structureY = surfaceY + undergroundOffset;
             } else {
-                // For surface structures, use the surface level.
                 const localX = chunk.getLocalX(structureX);
                 const surfaceBlockY = chunk.findGroundLevel(localX, true);
                 const surfaceY = surfaceBlockY * BLOCK_SIZE;
-
                 structureY =
                     surfaceY -
                     structure.blocks.length * BLOCK_SIZE +
                     structure.shift.y * BLOCK_SIZE;
             }
 
-            // Generate the structure at these world coordinates.
             GenerateStructure(randomName, structureX, structureY);
         }
     });
@@ -617,37 +549,21 @@ function GetChunkByIndex(index) {
     return chunks.get(chunkX);
 }
 
-function GetBiomeForNoise(temp, wetness, mountains) {
-    // console.log(`Checking biome for temp: ${temp}, wetness: ${wetness}`); // Debugging log
-
-    // return Biomes.Desert;
-
-    // Iterate through the available biomes and find one that matches both the temperature and wetness range
-    for (let biomeName in Biomes) {
-        const biome = Biomes[biomeName];
-
-        // Log each biome range for comparison
-        // console.log(
-        //     `Biome: ${biome.name}, Temp range: [${biome.minTemp}, ${biome.maxTemp}], Wetness range: [${biome.minWet}, ${biome.maxWet}]`
-        // );
-
-        // Check if both temperature and wetness fall within the biome's range
+function getBiomeForNoise(temp, wetness, mountains, biomeSet) {
+    for (let biomeName in biomeSet) {
+        const biome = biomeSet[biomeName];
         if (
             temp >= biome.minTemp &&
-            temp <= biome.maxTemp && // Temperature check
+            temp <= biome.maxTemp &&
             wetness >= biome.minWet &&
-            wetness <= biome.maxWet && // Wetness check
+            wetness <= biome.maxWet &&
             mountains >= biome.minMount &&
             mountains <= biome.maxMount
         ) {
-            // console.log(`Matched biome: ${biome.name}`);
             return biome;
         }
     }
-
-    // console.log("No match found, returning Planes.");
-    // Default case: if no biome matches, return the default "Planes" biome
-    return Biomes.Planes;
+    return biomeSet.Plains || Object.values(biomeSet)[0]; // Default to first available biome
 }
 
 function getBlockWorldPosition(block) {
@@ -703,9 +619,10 @@ function SetBufferedBlock(worldX, worldY, blockType) {
     GetChunkForX(worldX).setBlockTypeAtPosition(worldX, worldY, blockType);
 }
 
-function GetChunkForX(worldX) {
+function GetChunkForX(worldX, dimensionIndex = activeDimension) {
+    const dimension = dimensions[dimensionIndex];
     const chunkX =
         Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
         (CHUNK_WIDTH * BLOCK_SIZE);
-    return chunks.get(chunkX);
+    return dimension.chunks.get(chunkX);
 }

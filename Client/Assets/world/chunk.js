@@ -2,7 +2,7 @@ class Chunk {
     constructor(
         x = 0,
         width = 8,
-        biome = Biomes.Planes,
+        biome = OverworldBiomes.Plains,
         previousChunk = null,
         pendingBlocks = new Map(),
         worldGrassNoiseMap = new Noise(),
@@ -17,7 +17,8 @@ class Chunk {
         this.height = CHUNK_HEIGHT;
         this.generated = generated;
         this.pendingBlocks = pendingBlocks;
-        this.grassNoiseMap = worldGrassNoiseMap;
+
+        this.dimension = Dimensions.Overworld;
 
         this.entities = [];
         this.update = [];
@@ -132,7 +133,7 @@ class Chunk {
 
         // Look up the right neighbor chunk.
         const rightChunkX = this.x + CHUNK_WIDTH * BLOCK_SIZE;
-        let rightChunk = chunks.get(rightChunkX);
+        let rightChunk = getDimensionChunks(activeDimension).get(rightChunkX);
         if (
             rightChunk &&
             rightChunk.x > this.x &&
@@ -209,23 +210,24 @@ class Chunk {
     }
 
     applyBufferedBlocks() {
-        const chunkX = this.x; // The x position of this chunk in world space
+        const chunkX = this.x;
         if (pendingBlocks.has(chunkX)) {
-            const blocksToPlace = pendingBlocks.get(chunkX);
-            blocksToPlace.forEach((block) => {
-                // console.log("Placed buffered " + block.blockType.name + " at " + block.x + " - " + block.y);
-
-                if (block.blockType !== Blocks.Air)
-                    this.setBlockTypeAtPosition(
-                        block.x,
-                        block.y,
-                        block.blockType,
-                        block.metaData,
-                        block.wall
-                    );
-            });
-            // Once the blocks are placed, remove them from the buffer
-            pendingBlocks.delete(chunkX);
+            const entry = pendingBlocks.get(chunkX);
+            // Only apply blocks matching this chunk's dimension
+            if (entry.dimensionIndex === this.dimension) {
+                entry.blocks.forEach((block) => {
+                    if (block.blockType !== Blocks.Air) {
+                        this.setBlockTypeAtPosition(
+                            block.x,
+                            block.y,
+                            block.blockType,
+                            block.metaData,
+                            block.wall
+                        );
+                    }
+                });
+                pendingBlocks.delete(chunkX);
+            }
         }
     }
 
@@ -271,9 +273,8 @@ class Chunk {
                 y > 0;
                 y--
             ) {
-                this.setBlockType(x, y, Blocks.Stone);
-                // Optionally set additional properties (e.g., variant) if needed.
-                this.setBlockType(x, y, Blocks.Stone, true);
+                this.setBlockType(x, y, this.biome.baseBlock);
+                this.setBlockType(x, y, this.biome.baseBlock, true);
             }
         }
     }
@@ -447,7 +448,9 @@ class Chunk {
             i < this.x + CHUNK_WIDTH * BLOCK_SIZE;
             i += BLOCK_SIZE
         ) {
-            const noiseOutput = worldTreeNoiseMap.getNoise(i);
+            const noiseOutput = getDimension(
+                this.dimension
+            ).noiseMaps.tree.getNoise(i);
             if (noiseOutput >= this.biome.treeThreshold) {
                 this.spawnTree(this.getLocalX(i, this));
             }
@@ -458,7 +461,11 @@ class Chunk {
         if (!this.biome.grassType) return;
         if (this.biome.grassType.length == 0) return;
         for (let x = 0; x < CHUNK_WIDTH; x++) {
-            if (this.grassNoiseMap.getNoise(this.getWorldX(x)) >= 1) {
+            if (
+                getDimension(this.dimension).noiseMaps.grass.getNoise(
+                    this.getWorldX(x)
+                ) >= 1
+            ) {
                 const y = this.findGroundLevel(x, false, true);
                 if (!GetBlock(this.getBlockType(x, y)).air) continue;
                 const randomGrass =
@@ -471,7 +478,7 @@ class Chunk {
     }
 
     spawnTree(x) {
-        const y = this.findGroundLevel(x, false, true); // Find valid ground level
+        const y = this.findGroundLevel(x, false, true); // Find valid ground level`
         if (!GetBlock(this.getBlockType(x, y)).air) return;
         const randomTree = this.getRandomTreeFromBiome(); // Pick a random tree
         if (!randomTree) return;
@@ -501,10 +508,9 @@ class Chunk {
 
         for (let y = 0; y < CHUNK_HEIGHT; y++) {
             for (let x = 0; x < CHUNK_WIDTH; x++) {
-                const noiseValue = worldCaveNoiseMap.getNoise(
-                    x + this.x / BLOCK_SIZE,
-                    y
-                );
+                const noiseValue = getDimension(
+                    this.dimension
+                ).noiseMaps.cave.getNoise(x + this.x / BLOCK_SIZE, y);
 
                 let dynamicThreshold = CAVES_THRESHOLD;
 
@@ -527,33 +533,33 @@ class Chunk {
 
     generateOres() {
         this.generateOre(
-            worldCoalNoiseMap,
+            getDimension(this.dimension).noiseMaps.coal,
             ORE_THRESHOLDS.coal,
             Blocks.CoalOre,
             0
         );
         this.generateOre(
-            worldIronNoiseMap,
+            getDimension(this.dimension).noiseMaps.iron,
             ORE_THRESHOLDS.iron,
             Blocks.IronOre,
             100000
         );
         this.generateOre(
-            worldDiamondNoiseMap,
+            getDimension(this.dimension).noiseMaps.diamond,
             ORE_THRESHOLDS.diamond,
             Blocks.DiamondOre,
             200000,
             25
         );
         this.generateOre(
-            worldRedstoneNoiseMap,
+            getDimension(this.dimension).noiseMaps.redstone,
             ORE_THRESHOLDS.redstone,
             Blocks.RedstoneOre,
             300000,
             30
         );
         this.generateOre(
-            worldGoldNoiseMap,
+            getDimension(this.dimension).noiseMaps.gold,
             ORE_THRESHOLDS.gold,
             Blocks.GoldOre,
             400000,
@@ -649,27 +655,32 @@ class Chunk {
         metaData = null,
         wall = false
     ) {
-        // Compute the target chunk's x-coordinate in world space.
         const chunkWidthPixels = CHUNK_WIDTH * BLOCK_SIZE;
         const targetChunkX =
             Math.floor(worldX / chunkWidthPixels) * chunkWidthPixels;
-        const targetChunk = chunks.get(targetChunkX);
+        const targetChunk = getDimension(this.dimension).chunks.get(
+            targetChunkX
+        );
 
         if (targetChunk && worldY < targetChunk.height * BLOCK_SIZE) {
-            // Calculate local X relative to the target chunk.
             const localX = Math.floor((worldX - targetChunk.x) / BLOCK_SIZE);
             const localY = Math.floor(worldY / BLOCK_SIZE);
-
             targetChunk.setBlockType(localX, localY, blockType, wall, metaData);
         } else {
-            // Buffer the block to place it once the chunk is generated.
+            // Buffer the block with dimension index
             if (!pendingBlocks.has(targetChunkX)) {
-                pendingBlocks.set(targetChunkX, []);
+                pendingBlocks.set(targetChunkX, {
+                    dimensionIndex: this.dimension,
+                    blocks: [],
+                });
             }
-            pendingBlocks
-                .get(targetChunkX)
-                .push({ x: worldX, y: worldY, blockType, metaData, wall });
-            // Optionally log: console.log(`Buffered block at worldX: ${worldX}, worldY: ${worldY}`);
+            pendingBlocks.get(targetChunkX).blocks.push({
+                x: worldX,
+                y: worldY,
+                blockType,
+                metaData,
+                wall,
+            });
         }
     }
 
@@ -678,7 +689,7 @@ class Chunk {
             Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
             CHUNK_WIDTH *
             BLOCK_SIZE;
-        return chunks.get(chunkX); // Use the Map to get the chunk by its x-coordinate
+        return getDimensionChunks(this.dimension).get(chunkX); // Use the Map to get the chunk by its x-coordinate
     }
 
     getLocalX(worldX, targetChunk = this) {
@@ -992,7 +1003,9 @@ class Chunk {
         }
 
         // Maximum skylight: 15 during day, 1 at night
-        const maxSkyLight = Math.floor(1 + 14 * dayNightFactor);
+        const maxSkyLight = !getDimension(this.dimension).alwaysDay
+            ? Math.floor(1 + 14 * dayNightFactor)
+            : 15;
 
         // Loop over every column in the chunk
         for (let x = 0; x < this.width; x++) {

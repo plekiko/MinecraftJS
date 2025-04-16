@@ -177,9 +177,30 @@ class Chat {
             case "gamerule":
                 this.gameRule(messageArray);
                 break;
+            case "dim" || "dimension":
+                this.dimension(messageArray);
+                break;
+
             default:
                 this.message("Invalid Command!");
                 break;
+        }
+    }
+
+    dimension(messageArray) {
+        if (!messageArray[1]) {
+            this.invalidCommand("/dim <dimension>");
+            return;
+        }
+
+        const dimension = messageArray[1].toLowerCase();
+
+        if (dimension === "overworld" || dimension === "0") {
+            gotoDimension(0);
+        } else if (dimension === "nether" || dimension === "1") {
+            gotoDimension(1);
+        } else {
+            this.message("Invalid dimension.");
         }
     }
 
@@ -414,6 +435,7 @@ class Chat {
             "/seed",
             "/hit <damage>",
             "/gamerule <rule/list> <value>",
+            "/dim <dimension>",
         ];
 
         // Print them one by one in chat

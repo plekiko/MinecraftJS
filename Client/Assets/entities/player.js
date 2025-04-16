@@ -377,7 +377,9 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.LavaBucket, count: 1 })
                 );
 
-                const chunk = chunks.get(this.hoverBlock.chunkX);
+                const chunk = getDimensionChunks(activeDimension).get(
+                    this.hoverBlock.chunkX
+                );
 
                 if (!chunk) return;
 
@@ -401,7 +403,9 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.WaterBucket, count: 1 })
                 );
 
-                const chunk = chunks.get(this.hoverBlock.chunkX);
+                const chunk = getDimensionChunks(activeDimension).get(
+                    this.hoverBlock.chunkX
+                );
 
                 if (!chunk) return;
 
@@ -891,7 +895,9 @@ class Player extends Entity {
     }
 
     checkWallForPlacing() {
-        const chunk = chunks.get(this.hoverBlock.chunkX);
+        const chunk = getDimensionChunks(activeDimension).get(
+            this.hoverBlock.chunkX
+        );
 
         if (!chunk) return;
 
@@ -945,7 +951,9 @@ class Player extends Entity {
         }
 
         // Get the target chunk
-        const chunk = chunks.get(this.hoverBlock.chunkX);
+        const chunk = getDimensionChunks(activeDimension).get(
+            this.hoverBlock.chunkX
+        );
 
         // Place the block
         const succeeded = chunk.setBlockType(
@@ -988,7 +996,7 @@ class Player extends Entity {
         }
 
         // Check block beneath for non-wall blocks
-        const blockBeneath = chunks
+        const blockBeneath = getDimensionChunks(activeDimension)
             .get(this.hoverBlock.chunkX)
             .getBlockTypeData(this.hoverBlock.x, this.hoverBlock.y + 1, false);
 
@@ -1352,8 +1360,8 @@ class Player extends Entity {
 
     handleSwimming() {
         if (this.wasSwimming && !this.swimming) {
-            // Exited Water
-            if (this.velocity.y < 0) this.addForce(0, -3);
+            // Exited Fluid
+            if (this.velocity.y < 0) this.addForce(0, -5);
             this.wasSwimming = false;
         }
 

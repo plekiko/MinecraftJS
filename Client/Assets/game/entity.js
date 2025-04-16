@@ -44,6 +44,8 @@ class Entity {
         direction = 1,
         holdItem = new InventoryItem(),
 
+        dimension = Dimensions.Overworld,
+
         fire = -20,
     } = {}) {
         this.UUID = UUID;
@@ -105,6 +107,8 @@ class Entity {
         this.fireDamageTimer = 0;
 
         this.flashingColor = false;
+
+        this.dimension = dimension;
 
         this.fireSprite = new SimpleSprite({
             sprite: "blocks/fire_layer_0",
@@ -395,8 +399,8 @@ class Entity {
             Math.floor(this.position.x / (CHUNK_WIDTH * BLOCK_SIZE)) *
             CHUNK_WIDTH *
             BLOCK_SIZE;
-        if (!chunks.has(chunkPosition)) return null;
-        return chunks.get(chunkPosition);
+        if (!getDimensionChunks(this.dimension).has(chunkPosition)) return null;
+        return getDimensionChunks(this.dimension).get(chunkPosition);
     }
 
     isSolid(blockType) {
