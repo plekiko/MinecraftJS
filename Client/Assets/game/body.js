@@ -15,7 +15,7 @@ class Body {
         this.brightness = 1;
 
         this.image = new Image();
-        this.image.src = getSpriteUrl("entity/" + sprite);
+        this.setSprite(sprite);
 
         this.sprite = sprite;
 
@@ -24,6 +24,24 @@ class Body {
 
     setSprite(sprite) {
         this.sprite = sprite;
+
+        const spriteSize = getSpriteSize("entity/" + sprite);
+
+        console.log("Sprite size:", spriteSize);
+
+        if (!spriteSize.width) {
+            this.image.src = getSpriteUrl("entity/" + sprite);
+            return;
+        }
+
+        if (
+            spriteSize.width > spriteSize.originalWidth ||
+            spriteSize.height > spriteSize.originalHeight
+        ) {
+            this.image.src = getSpriteUrl("entity/" + sprite, false);
+            return;
+        }
+
         this.image.src = getSpriteUrl("entity/" + sprite);
     }
 
@@ -260,7 +278,9 @@ class BodyPart {
         // Render held item and sprite
         this.renderHeldItem(ctx, holdItem, this.direction);
 
-        const scaleFactor = BLOCK_SIZE / 16;
+        const spriteSize = getSpriteSize(this.ownSpriteMap || this.sprite);
+        const baseSize = spriteSize.width || 16;
+        const scaleFactor = BLOCK_SIZE / baseSize;
         const destWidth = this.spriteCrop.width * scaleFactor;
         const destHeight = this.spriteCrop.height * scaleFactor;
 
@@ -375,7 +395,11 @@ class BodyPart {
     renderHeldItem(ctx, holdItem, direction) {
         if (!this.mainArm || !holdItem) return;
 
-        const sprite = this.getHeldItemSprite(holdItem);
+        const spritePath = this.getHeldItemSpritePath(holdItem);
+        const spriteSize = getSpriteSize(spritePath).width;
+
+        const sprite = getSpriteUrl(spritePath);
+
         const isTool = this.isTool(holdItem);
 
         if (!sprite) return;
@@ -401,16 +425,16 @@ class BodyPart {
 
         drawImage({
             url: sprite,
-            x: (-16 * scale * (BLOCK_SIZE / 16)) / 2,
-            y: (-16 * scale * (BLOCK_SIZE / 16)) / 2,
-            scale: (BLOCK_SIZE / 16) * scale,
+            x: (-spriteSize * scale * (BLOCK_SIZE / spriteSize)) / 2,
+            y: (-spriteSize * scale * (BLOCK_SIZE / spriteSize)) / 2,
+            scale: (BLOCK_SIZE / spriteSize) * scale,
             centerX: false,
-            sizeY: 16 - cutoff * 16,
+            sizeY: spriteSize - cutoff * spriteSize,
             crop: {
                 x: 0,
                 y: 0,
-                width: 16,
-                height: 16,
+                width: spriteSize,
+                height: spriteSize,
             },
         });
 
@@ -424,14 +448,12 @@ class BodyPart {
         return false;
     }
 
-    getHeldItemSprite(holdItem) {
+    getHeldItemSpritePath(holdItem) {
         if (holdItem.blockId) {
-            return getSpriteUrl(
-                "blocks/" + GetBlock(holdItem.blockId).iconSprite
-            );
+            return "blocks/" + GetBlock(holdItem.blockId).iconSprite;
         }
         if (holdItem.itemId != null) {
-            return getSpriteUrl("items/" + GetItem(holdItem.itemId).sprite);
+            return "items/" + GetItem(holdItem.itemId).sprite;
         }
         return null;
     }

@@ -1659,6 +1659,10 @@ class Block extends Square {
 
         const sprite = getSpriteUrl("blocks/" + block.sprite);
 
+        this.spriteSize = getSpriteSize("blocks/" + block.sprite).width;
+
+        this.spriteScale = BLOCK_SIZE / this.spriteSize;
+
         this.setSprite(sprite);
     }
 }

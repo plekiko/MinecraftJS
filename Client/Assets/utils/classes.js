@@ -73,6 +73,8 @@ class Square {
         this.brightness = 1;
         this.filterBrightness = 100;
 
+        this.spriteSize = 16;
+
         this.lightLevel = 15; // 0-15
 
         this.cutoff = 0;
@@ -96,7 +98,8 @@ class Square {
         this.img.src = sprite;
 
         if (this.img)
-            if (this.isAnimated()) this.frameCount = this.img.height / 16;
+            if (this.isAnimated())
+                this.frameCount = this.img.height / this.spriteSize;
     }
 
     drawBrightness(ctx, camera) {
@@ -172,8 +175,8 @@ class Square {
         const drawY = Math.round(
             -this.transform.size.y / 2 - camera.y + offset.y * BLOCK_SIZE
         );
-        const drawWidth = 16 * this.spriteScale;
-        const drawHeight = 16 * this.spriteScale;
+        const drawWidth = this.spriteSize * this.spriteScale;
+        const drawHeight = this.spriteSize * this.spriteScale;
 
         // Non-animated drawing branch with cutoff support
         if (this.img && (!this.frameCount || this.frameCount === 0)) {
@@ -222,7 +225,7 @@ class Square {
     }
 
     drawAnimation(ctx, camera) {
-        const frameHeight = 16;
+        const frameHeight = this.spriteSize;
         const effectiveFrame =
             Math.floor(globalFrame * this.frameRate) % this.frameCount;
         const frameY = effectiveFrame * frameHeight;
@@ -231,8 +234,8 @@ class Square {
             -this.transform.size.x / 2 + this.drawOffset - camera.x
         );
         const drawY = Math.round(-this.transform.size.y / 2 - camera.y);
-        const drawWidth = 16 * this.spriteScale;
-        const drawHeight = 16 * this.spriteScale;
+        const drawWidth = this.spriteSize * this.spriteScale;
+        const drawHeight = this.spriteSize * this.spriteScale;
 
         // Calculate how much of the sprite should be visible:
         // When cutoff is 0, visibleFraction is 1 (full sprite).
@@ -258,7 +261,7 @@ class Square {
             this.img,
             0, // source x
             frameY, // source y (the frame offset in the sprite sheet)
-            16, // source width (one frame)
+            this.spriteSize, // source width (one frame)
             frameHeight, // source height
             drawX, // destination x
             drawY, // destination y
@@ -283,7 +286,7 @@ class Square {
     }
 
     isAnimated() {
-        return this.img.height > 16;
+        return this.img.height > this.spriteSize;
     }
 }
 
@@ -295,7 +298,7 @@ class SimpleSprite {
         this.transform = transform;
         this.alpha = alpha;
         this.frameRate = frameRate;
-        this.frameCount = this.img.height / 16;
+        this.frameCount = this.img.height / this.spriteSize;
     }
 
     draw(ctx, camera) {
@@ -328,7 +331,7 @@ class SimpleSprite {
     }
 
     drawAnimation(ctx, camera) {
-        const frameHeight = 16;
+        const frameHeight = this.spriteSize;
         const effectiveFrame =
             Math.floor(globalFrame / this.frameRate) % this.frameCount;
         const frameY = effectiveFrame * frameHeight;
@@ -337,7 +340,7 @@ class SimpleSprite {
             this.img,
             0,
             frameY,
-            16,
+            this.spriteSize,
             frameHeight,
             -this.transform.size.x / 2 - camera.x,
             -this.transform.size.y / 2 - camera.y,
@@ -421,6 +424,6 @@ function uuidv4() {
         (
             c ^
             (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-        ).toString(16)
+        ).toString(this.spriteSize)
     );
 }

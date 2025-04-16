@@ -64,7 +64,7 @@ class Hotbar {
     draw(ctx) {
         // Draw hotbar
         const hotbar = drawImage({
-            url: getSpriteUrl("gui/widgets"),
+            url: getSpriteUrl("gui/widgets", isEqualToOriginal("gui/widgets")),
             x: CANVAS.width / 2,
             y: CANVAS.height - 75,
             scale: 3,
@@ -73,7 +73,7 @@ class Hotbar {
 
         // Draw current slot selector
         drawImage({
-            url: getSpriteUrl("gui/widgets"),
+            url: getSpriteUrl("gui/widgets", isEqualToOriginal("gui/widgets")),
             x: CANVAS.width / 2 - 240 + this.currentSlot * 60,
             y: CANVAS.height - 78,
             scale: 3,

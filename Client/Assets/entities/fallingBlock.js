@@ -1,21 +1,29 @@
 class FallingBlock extends Entity {
     constructor({ position, blockType = Blocks.Sand } = {}) {
+        const spritePath = "blocks/" + GetBlock(blockType).sprite;
+        const sprite = getSpriteUrl(spritePath);
+
+        const spriteSize = getSpriteSize(spritePath);
+        const spriteWidth = spriteSize.width;
+        const spriteHeight = spriteSize.height;
+
+        const spriteScale = BLOCK_SIZE / Math.max(spriteWidth, spriteHeight);
+
         super({
             position: new Vector2(
                 position.x + BLOCK_SIZE / 20,
                 position.y + BLOCK_SIZE / 20
             ),
-            sprite: getSpriteUrl("blocks/" + GetBlock(blockType).sprite),
+            sprite: sprite,
             hitbox: new Vector2(
                 BLOCK_SIZE - BLOCK_SIZE / 10,
                 BLOCK_SIZE - BLOCK_SIZE / 10
             ),
-            spriteScale: BLOCK_SIZE / 16,
+            spriteScale: spriteScale, // Dynamically calculated sprite scale
             canSwim: false,
         });
 
         this.blockType = blockType;
-
         this.lastVelocityY = 0;
     }
 

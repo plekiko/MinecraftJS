@@ -83,56 +83,54 @@ class InventorySlot {
             ? overwritePosition.y
             : this.position.y + offsetY;
 
-        // const spritePath =
-        //     "Assets/sprites/" +
-        //     (item.blockId
-        //         ? "blocks/" + GetBlock(item.blockId).iconSprite
-        //         : "items/" + GetItem(item.itemId).sprite) +
-        //     ".png";
-
         const isItem = item.itemId !== null;
-        const spritePath = isItem
-            ? getSpriteUrl("items/" + GetItem(item.itemId).sprite)
-            : getSpriteUrl("blocks/" + GetBlock(item.blockId).iconSprite);
+        const path = isItem
+            ? "items/" + GetItem(item.itemId).sprite
+            : "blocks/" + GetBlock(item.blockId).iconSprite;
 
-        // If block get the default draw cutoff
+        const spritePath = getSpriteUrl(path);
+        const spriteSize = getSpriteSize(path);
+        const actualWidth = spriteSize.width || 16;
+        const actualHeight = spriteSize.height || 16;
+
+        // Get the default cutoff for block
         let cutoff = 0;
-        if (item.blockId) cutoff = GetBlock(item.blockId).defaultCutoff;
+        if (item.blockId) cutoff = GetBlock(item.blockId).defaultCutoff || 0;
 
-        const image = new Image();
-        image.src = spritePath;
+        // Calculate the height to draw based on cutoff
+        const drawHeight = actualHeight - cutoff * actualHeight;
 
-        // Draw the sprite
+        // The amount to move the sprite down due to the cutoff
+        const moveDown = cutoff * actualHeight;
+
+        const baseDrawSize = 48;
+        const scaleX = (baseDrawSize / actualWidth) * size;
+        const scaleY = (baseDrawSize / actualHeight) * drawHeight * size;
+
         drawImage({
             url: spritePath,
             x: slotX,
-            y: slotY,
-            scale: 3 * size,
+            y: slotY + moveDown * Math.min(scaleX, scaleY),
+            scale: Math.min(scaleX, scaleY),
             centerX: false,
             dark: item.props.wall === true,
-            sizeY: 16 - cutoff * 16,
             fixAnimation: cutoff === 0,
             crop: {
                 x: 0,
-                y: 0,
-                width: 16,
-                height: 16,
+                y: moveDown,
+                width: actualWidth,
+                height: drawHeight,
             },
         });
 
         // Draw durability bar
         if (item.hasProp("durability")) {
             const durability = item.getProp("durability");
-
             const itemDef = GetItem(item.itemId);
 
             if (durability < itemDef.durability) {
-                const maxWidth = 45;
-                const width = maxWidth * size;
+                const maxWidth = 45 * size;
                 const height = 3.5 * size;
-
-                const offsetX = 2 * size;
-                const offsetY = 40;
 
                 const durabilityColor =
                     durability > itemDef.durability / 2
@@ -141,34 +139,31 @@ class InventorySlot {
                         ? "rgba(255, 255, 0)"
                         : "rgba(255, 0, 0)";
 
-                // Draw the background
                 drawRect({
-                    x: slotX + offsetX,
-                    y: slotY + offsetY * size,
-                    width: width,
+                    x: slotX + 2 * size,
+                    y: slotY + 40 * size,
+                    width: maxWidth,
                     height: height * 2,
                     color: "rgba(0, 0, 0)",
                 });
 
-                // Draw the durability
                 drawRect({
-                    x: slotX + offsetX,
-                    y: slotY + offsetY * size,
-                    width: width * (durability / itemDef.durability),
+                    x: slotX + 2 * size,
+                    y: slotY + 40 * size,
+                    width: maxWidth * (durability / itemDef.durability),
                     height: height,
                     color: durabilityColor,
                 });
             }
         }
 
-        if (item.count <= 1) return;
-
-        // Draw the count
-        drawText({
-            text: item.count,
-            x: slotX + 55 * size,
-            y: slotY + 50 * size,
-            size: 30 * size,
-        });
+        if (item.count > 1) {
+            drawText({
+                text: item.count,
+                x: slotX + 55 * size,
+                y: slotY + 50 * size,
+                size: 30 * size,
+            });
+        }
     }
 }

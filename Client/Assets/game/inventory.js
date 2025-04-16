@@ -4,7 +4,6 @@ class Inventory {
 
         this.items = [];
         this.craftingSlots = null;
-        this.furnaceSlots = null;
         this.creativeSlots = null;
 
         this.currentCreativePage = 0;
@@ -46,7 +45,6 @@ class Inventory {
         };
 
         this.furnace = false;
-        this.furnaceSlots = null;
 
         this.openUIOffset = { x: 0, y: 0 };
         this.openUIImage = {
@@ -212,8 +210,6 @@ class Inventory {
         this.clearButtons();
 
         this.creativeSlots = null;
-
-        this.furnaceSlots = null;
 
         this.storageSlots = null;
 
@@ -465,7 +461,6 @@ class Inventory {
 
     openFurnace(storage) {
         this.furnace = true;
-
         this.storage = storage;
 
         this.updateStorage = true;
@@ -684,7 +679,7 @@ class Inventory {
 
         for (let y = 0; y < this.storage.length; y++) {
             slots[y] = [];
-            for (let x = 0; x < this.storage.length; x++) {
+            for (let x = 0; x < this.storage[y].length; x++) {
                 let position = { x: 0, y: 0 };
 
                 // Input
@@ -696,15 +691,16 @@ class Inventory {
 
                 let slot = new InventorySlot({
                     position: position,
-                    item: this.storage[y][x],
+                    item: this.cloneItem(this.storage[y][x]), // Ensure proper cloning
                 });
                 slots[y][x] = slot;
             }
         }
 
+        // Set output slot to onlyTake
         slots[1][0].onlyTake = true;
 
-        this.furnaceSlots = slots;
+        this.storageSlots = slots;
     }
 
     refreshInventory() {
@@ -1076,7 +1072,6 @@ class Inventory {
 
         this.mouseOverCheck(this.items);
         this.mouseOverCheck(this.craftingSlots);
-        this.mouseOverCheck(this.furnaceSlots);
         this.mouseOverCheck(this.creativeSlots);
         this.mouseOverCheck(this.storageSlots);
 
@@ -1429,32 +1424,47 @@ class Inventory {
 
     draw(ctx) {
         // Black Background
-        ctx.fillStyle = "rgb(0, 0, 0, .6)";
+        ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
         ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 
         let path = "inventory";
-        let crop = { x: 0, y: 0, width: 176, height: 166 };
+        let crop = null;
 
         if (this.openUIImage.url !== "") {
             path = this.openUIImage.url;
-            crop = this.openUIImage.crop;
+            if (this.openUIImage.crop) {
+                crop = this.openUIImage.crop;
+            }
         }
 
-        this.inventoryUI = drawImage({
-            url: getSpriteUrl("gui/container/" + path),
+        const spritePath = "gui/container/" + path;
+
+        const spriteUrl = getSpriteUrl(
+            spritePath,
+            isEqualToOriginal(spritePath)
+        );
+
+        const drawParams = {
+            url: spriteUrl,
             x: CANVAS.width / 2 + this.openUIImageOffset.x,
             y: CANVAS.height / 6 + this.openUIImageOffset.y,
             scale: 3.5,
-            crop: crop,
-        });
+        };
+
+        if (crop) {
+            drawParams.crop = crop;
+        }
+
+        this.inventoryUI = drawImage(drawParams);
 
         this.drawItems();
         this.drawHoldItem();
         this.drawButtons(ctx);
         this.drawHoverTitle();
 
-        if (this.inventoryText)
+        if (this.inventoryText) {
             this.inventoryText.draw(this.inventoryUI, this.openUIOffset);
+        }
     }
 
     drawButtons(ctx) {
@@ -1468,7 +1478,6 @@ class Inventory {
         this.drawSlots(this.items);
 
         this.drawCraftingSlots();
-        this.drawSlots(this.furnaceSlots);
         this.drawSlots(this.creativeSlots);
         this.drawSlots(this.storageSlots);
         this.drawFurnaceExtras();
@@ -1582,28 +1591,43 @@ class Inventory {
         if (!holdingItem) return;
         const mousePos = input.getMousePosition();
 
-        let image = null;
-
         const isItem = holdingItem.itemId !== null;
-        const spritePath = isItem
-            ? getSpriteUrl("items/" + GetItem(holdingItem.itemId).sprite)
-            : getSpriteUrl(
-                  "blocks/" + GetBlock(holdingItem.blockId).iconSprite
-              );
+
+        const path = isItem
+            ? "items/" + GetItem(holdingItem.itemId).sprite
+            : "blocks/" + GetBlock(holdingItem.blockId).iconSprite;
+
+        const spritePath = getSpriteUrl(path);
+        const spriteSize = getSpriteSize(path);
+        const actualWidth = spriteSize.width || 16;
+        const actualHeight = spriteSize.height || 16;
 
         let cutoff = 0;
-        if (holdingItem.blockId)
-            cutoff = GetBlock(holdingItem.blockId).defaultCutoff;
+        if (holdingItem.blockId) {
+            cutoff = GetBlock(holdingItem.blockId).defaultCutoff || 0;
+        }
 
-        image = drawImage({
+        const drawHeight = actualHeight - cutoff * actualHeight;
+
+        const targetHeight = 40;
+        const scale = targetHeight / drawHeight;
+
+        const cropY = cutoff * actualHeight; // Crop from the top 1by the cutoff amount
+
+        const image = drawImage({
             url: spritePath,
             x: mousePos.x,
             y: mousePos.y,
-            scale: 2.5,
+            scale: scale,
             centerX: false,
             dark: holdingItem.props.wall === true,
-            sizeY: 16 - cutoff * 16,
             fixAnimation: cutoff === 0,
+            crop: {
+                x: 0,
+                y: cropY, // Start cropping from the top by the cutoff value
+                width: actualWidth,
+                height: drawHeight,
+            },
         });
 
         if (holdingItem.count <= 1) return;
@@ -1675,6 +1699,7 @@ class Button {
             // Draw image-based button
             const imageToDraw =
                 isHovered && this.hoverImage ? this.hoverImage : this.image;
+
             drawImage({
                 url: getSpriteUrl("gui/" + imageToDraw),
                 x: x,

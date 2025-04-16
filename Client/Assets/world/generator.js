@@ -282,8 +282,6 @@ async function GenerateWorld() {
         }
     }
 
-    console.log("Generating chunks...");
-
     if (specialWorldProps.noStructures) return;
 
     generateStructures();

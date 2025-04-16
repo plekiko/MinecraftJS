@@ -153,7 +153,9 @@ function LoadWorldFromLocalStorage() {
         if (SPAWN_PLAYER) {
             setTimeout(() => {
                 SpawnPlayer();
-                SaveWorld(false);
+                setTimeout(() => {
+                    SaveWorld(false);
+                }, 1500);
             }, 100);
         }
         return;

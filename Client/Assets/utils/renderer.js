@@ -140,14 +140,18 @@ function DrawBreakAndPlaceCursor(inRange = false) {
     const selectedBlock = player.inventory.selectedBlock;
 
     if (selectedBlock) {
+        const spritePath = "blocks/" + selectedBlock.sprite;
+
+        const spriteSize = getSpriteSize(spritePath).width;
+
         drawImage({
-            url: getSpriteUrl("blocks/" + selectedBlock.sprite),
+            url: getSpriteUrl(spritePath),
             x: mouseX - Math.floor(camera.x),
             y: mouseY - Math.floor(camera.y),
-            scale: BLOCK_SIZE / 16,
+            scale: BLOCK_SIZE / spriteSize,
             centerX: false,
             opacity: 0.5,
-            sizeY: 16 - selectedBlock.defaultCutoff * 16,
+            sizeY: spriteSize - selectedBlock.defaultCutoff * spriteSize,
         });
     }
 

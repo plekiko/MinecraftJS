@@ -8,13 +8,22 @@ class Drop extends Entity {
     }) {
         const isItem = itemId !== null;
         const spritePath = isItem
-            ? getSpriteUrl("items/" + GetItem(itemId).sprite)
-            : getSpriteUrl("blocks/" + GetBlock(blockId).iconSprite);
+            ? "items/" + GetItem(itemId).sprite
+            : "blocks/" + GetBlock(blockId).iconSprite;
+        const sprite = getSpriteUrl(spritePath);
 
+        const spriteSize = getSpriteSize(spritePath);
+        const spriteWidth = spriteSize.width;
+        const spriteHeight = spriteSize.height;
+
+        const spriteScale = 16 / Math.max(spriteWidth, spriteHeight);
+
+        // Set up the entity with dynamic scaling
         super({
             position: position,
             hitbox: new Vector2(BLOCK_SIZE / 1.5, BLOCK_SIZE / 1.5),
-            sprite: spritePath,
+            sprite: sprite,
+            spriteScale: spriteScale * 2, // Apply the dynamically calculated scale
             cutoff: GetBlock(blockId)?.defaultCutoff || 0,
             bouncing: true,
             type: EntityTypes.Drop,

@@ -9,7 +9,7 @@ function waitForTexturePack() {
             if (isTexturePackLoaded) {
                 resolve();
             } else {
-                setTimeout(checkLoaded, 1);
+                setTimeout(checkLoaded, 100);
             }
         };
         checkLoaded();
