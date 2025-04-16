@@ -84,6 +84,18 @@ function multiplayerButton() {
     window.location.href = "game.html?multiplayer=true";
 }
 
+function downloadServer() {
+    // Download local Server.zip
+    const link = document.createElement("a");
+    link.href = "Server.zip";
+    link.download = "Server.zip";
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+}
+
 function showTexturePacks() {
     buttonSound();
     menuContainer.style.display = "none";

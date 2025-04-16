@@ -26,6 +26,12 @@ body {
     z-index: -2;
 }
 
+.footer-button {
+    text-decoration: underline;
+
+    cursor: pointer;
+}
+
 .world-buttons-container {
     bottom: 0;
 
@@ -125,6 +131,7 @@ body {
     height: 100%;
     aspect-ratio: 1/1;
     user-select: none;
+    -webkit-user-select: none;
     pointer-events: none;
 }
 
@@ -148,6 +155,7 @@ body {
 
     color: white;
     user-select: none;
+    -webkit-user-select: none;
     text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
 }
 
@@ -155,6 +163,7 @@ body {
     font-family: "Pixel";
     font-size: 2rem;
     user-select: none;
+    -webkit-user-select: none;
     color: rgb(123, 123, 123);
     text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
 }
