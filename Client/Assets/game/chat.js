@@ -199,6 +199,8 @@ class Chat {
             gotoDimension(0);
         } else if (dimension === "nether" || dimension === "1") {
             gotoDimension(1);
+        } else if (dimension === "eather" || dimension === "2") {
+            gotoDimension(2);
         } else {
             this.message("Invalid dimension.");
         }
