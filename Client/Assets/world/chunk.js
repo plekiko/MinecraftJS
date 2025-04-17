@@ -1292,18 +1292,11 @@ class Chunk {
         const worldX = this.getWorldX(x);
         const worldY = y * BLOCK_SIZE;
 
-        console.log(
-            `Checking for portal at world position (${worldX}, ${worldY}) in dimension ${this.dimension}`
-        );
-
         // Restrict portal creation to Overworld and Nether
         if (
             this.dimension !== Dimensions.Overworld &&
             this.dimension !== Dimensions.Nether
         ) {
-            console.log(
-                `Portal creation blocked: Invalid dimension (${this.dimension})`
-            );
             return;
         }
 
@@ -1324,9 +1317,6 @@ class Chunk {
                 innerHeight <= maxInnerHeight;
                 innerHeight++
             ) {
-                console.log(
-                    `Checking portal size ${innerWidth}x${innerHeight}`
-                );
                 const portalFound = this.checkPortalOrientation(
                     worldX,
                     worldY,
@@ -1334,9 +1324,6 @@ class Chunk {
                     innerHeight
                 );
                 if (portalFound) {
-                    console.log(
-                        `Valid portal found at (${worldX}, ${worldY}), size: ${innerWidth}x${innerHeight}, bounds: (${portalFound.minX}, ${portalFound.minY}) to (${portalFound.maxX}, ${portalFound.maxY})`
-                    );
                     // Valid portal found; light it by setting inner air/fire blocks to NetherPortal
                     const { minX, maxX, minY, maxY } = portalFound;
                     for (let wx = minX; wx <= maxX; wx += BLOCK_SIZE) {
@@ -1347,23 +1334,14 @@ class Chunk {
                                     block.blockType === Blocks.Air ||
                                     block.blockType === Blocks.Fire
                                 ) {
-                                    console.log(
-                                        `Lighting portal block at (${wx}, ${wy}) to NetherPortal`
-                                    );
                                     SetBlockTypeAtPosition(
                                         wx,
                                         wy,
                                         Blocks.NetherPortal
                                     );
                                 } else {
-                                    console.log(
-                                        `Skipping block at (${wx}, ${wy}): Not air or fire (${block.blockType})`
-                                    );
                                 }
                             } else {
-                                console.log(
-                                    `Failed to get block at (${wx}, ${wy}): Null block`
-                                );
                             }
                         }
                     }
@@ -1371,7 +1349,6 @@ class Chunk {
                 }
             }
         }
-        console.log(`No valid portal found around (${worldX}, ${worldY})`);
     }
 
     checkPortalOrientation(worldX, worldY, innerWidth, innerHeight) {
@@ -1399,10 +1376,6 @@ class Chunk {
                 startY <= worldY + searchRangeY;
                 startY += BLOCK_SIZE
             ) {
-                console.log(
-                    `Checking frame at start position (${startX}, ${startY}) for size ${innerWidth}x${innerHeight}`
-                );
-
                 // Validate frame (obsidian borders)
                 let isValidFrame = true;
 
@@ -1418,34 +1391,18 @@ class Chunk {
                         startY + innerHeightPx + BLOCK_SIZE
                     );
                     if (!topBlock) {
-                        console.log(
-                            `Invalid frame: Null block at top (${wx}, ${startY})`
-                        );
                         isValidFrame = false;
                         break;
                     }
                     if (!bottomBlock) {
-                        console.log(
-                            `Invalid frame: Null block at bottom (${wx}, ${
-                                startY + innerHeightPx + BLOCK_SIZE
-                            })`
-                        );
                         isValidFrame = false;
                         break;
                     }
                     if (topBlock.blockType !== Blocks.Obsidian) {
-                        console.log(
-                            `Invalid frame: Top block at (${wx}, ${startY}) is ${topBlock.blockType}, expected Obsidian`
-                        );
                         isValidFrame = false;
                         break;
                     }
                     if (bottomBlock.blockType !== Blocks.Obsidian) {
-                        console.log(
-                            `Invalid frame: Bottom block at (${wx}, ${
-                                startY + innerHeightPx + BLOCK_SIZE
-                            }) is ${bottomBlock.blockType}, expected Obsidian`
-                        );
                         isValidFrame = false;
                         break;
                     }
@@ -1464,36 +1421,18 @@ class Chunk {
                             wy
                         );
                         if (!leftBlock) {
-                            console.log(
-                                `Invalid frame: Null block at left (${startX}, ${wy})`
-                            );
                             isValidFrame = false;
                             break;
                         }
                         if (!rightBlock) {
-                            console.log(
-                                `Invalid frame: Null block at right (${
-                                    startX + innerWidthPx + BLOCK_SIZE
-                                }, ${wy})`
-                            );
                             isValidFrame = false;
                             break;
                         }
                         if (leftBlock.blockType !== Blocks.Obsidian) {
-                            console.log(
-                                `Invalid frame: Left block at (${startX}, ${wy}) is ${leftBlock.blockType}, expected Obsidian`
-                            );
                             isValidFrame = false;
                             break;
                         }
                         if (rightBlock.blockType !== Blocks.Obsidian) {
-                            console.log(
-                                `Invalid frame: Right block at (${
-                                    startX + innerWidthPx + BLOCK_SIZE
-                                }, ${wy}) is ${
-                                    rightBlock.blockType
-                                }, expected Obsidian`
-                            );
                             isValidFrame = false;
                             break;
                         }
@@ -1516,9 +1455,6 @@ class Chunk {
                     ) {
                         const block = GetBlockAtWorldPosition(wx, wy);
                         if (!block) {
-                            console.log(
-                                `Invalid inner area: Null block at (${wx}, ${wy})`
-                            );
                             isValidInner = false;
                             break;
                         }
@@ -1526,9 +1462,6 @@ class Chunk {
                             block.blockType !== Blocks.Air &&
                             block.blockType !== Blocks.Fire
                         ) {
-                            console.log(
-                                `Invalid inner area: Block at (${wx}, ${wy}) is ${block.blockType}, expected Air or Fire`
-                            );
                             isValidInner = false;
                             break;
                         }
@@ -1537,9 +1470,6 @@ class Chunk {
                 }
 
                 if (isValidInner) {
-                    console.log(
-                        `Valid inner area found for portal at (${startX}, ${startY}), size: ${innerWidth}x${innerHeight}`
-                    );
                     // Return inner area bounds for portal lighting
                     return {
                         minX: startX + BLOCK_SIZE,
@@ -1550,10 +1480,6 @@ class Chunk {
                 }
             }
         }
-
-        console.log(
-            `No valid portal frame found for size ${innerWidth}x${innerHeight}`
-        );
         return null;
     }
 
