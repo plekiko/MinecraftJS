@@ -61,6 +61,7 @@ const ToolType = Object.freeze({
     Hoe: 5,
     Sword: 6,
     Hammer: 7,
+    Flame: 8,
 });
 
 let server = null;

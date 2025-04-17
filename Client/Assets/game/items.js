@@ -106,6 +106,8 @@ const Items = Object.freeze({
 
     GlowstoneDust: 150,
     NetherQuartz: 151,
+
+    FlintAndSteel: 2000,
 });
 
 const items = [
@@ -325,6 +327,15 @@ const items = [
         heldInHand: true,
         stackSize: 1,
         fuelTime: 1000,
+    }),
+    new Item({
+        itemId: 2000,
+        name: "Flint and Steel",
+        sprite: "flint_and_steel",
+        heldInHand: true,
+        stackSize: 1,
+        durability: 64,
+        toolType: ToolType.Flame,
     }),
     //#endregion
 

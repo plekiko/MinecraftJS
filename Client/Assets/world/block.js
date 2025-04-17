@@ -184,6 +184,7 @@ const SpecialType = Object.freeze({
     Hopper: 10,
     Lever: 11,
     TNT: 12,
+    NetherPortal: 13,
 });
 
 const BlockCategory = Object.freeze({

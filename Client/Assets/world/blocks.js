@@ -141,6 +141,8 @@ const Blocks = Object.freeze({
     QuartzOre: 402,
     Glowstone: 403,
     QuartzBlock: 404,
+
+    NetherPortal: 405,
 });
 
 const blockTypes = [
@@ -151,6 +153,7 @@ const blockTypes = [
         collision: false,
         air: true,
         excludeFromCreativeInventory: true,
+        transparent: true,
     }),
     new BlockType({
         blockId: 1,
@@ -747,7 +750,7 @@ const blockTypes = [
         updateSpeed: 0.05,
         chunkUpdate: true,
         hardness: -2,
-        animationSpeed: 0.03,
+        animationSpeed: 0.15,
         fluid: true,
         dropWithoutTool: false,
         lightLevel: 6,
@@ -1101,6 +1104,7 @@ const blockTypes = [
         name: "Structure Air",
         collision: false,
         air: true,
+        transparent: true,
         excludeFromCreativeInventory: true,
     }),
     new BlockType({
@@ -1431,12 +1435,13 @@ const blockTypes = [
         lightLevel: 10,
         breakWithoutBlockUnderneath: true,
         cannotBeConverted: true,
-        animationSpeed: 0.3,
+        animationSpeed: 1.5,
         fire: true,
         breakByFluid: true,
         dropWithoutTool: false,
         breakSound: ["blocks/fizz"],
         ambientSound: "blocks/fire",
+        transparent: true,
 
         excludeFromCreativeInventory: true,
     }),
@@ -1967,6 +1972,13 @@ const blockTypes = [
         toolType: ToolType.Pickaxe,
         dropWithoutTool: false,
         dropItem: Items.NetherQuartz,
+        dropTable: new LootTable([
+            new LootItem({
+                itemId: Items.NetherQuartz,
+                maxCount: 3,
+                subtract: 3,
+            }),
+        ]),
     }),
     new BlockType({
         blockId: 403,
@@ -1993,6 +2005,24 @@ const blockTypes = [
         breakSound: Sounds.Break_Stone,
         breakingSound: Sounds.Breaking_Stone,
         dropWithoutTool: false,
+    }),
+    new BlockType({
+        blockId: 405,
+        name: "Nether Portal",
+        sprite: "portal",
+        hardness: -1,
+        collision: false,
+        breakSound: Sounds.Break_Glass,
+        breakingSound: Sounds.Breaking_Glass,
+        dropWithoutTool: false,
+        specialType: SpecialType.NetherPortal,
+        cannotBeConverted: true,
+
+        excludeFromCreativeInventory: true,
+
+        animationSpeed: 1.5,
+
+        lightLevel: 11,
     }),
     //#endregion
 ];

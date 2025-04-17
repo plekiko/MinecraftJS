@@ -48,8 +48,8 @@ class Inventory {
 
         this.openUIOffset = { x: 0, y: 0 };
         this.openUIImage = {
-            url: "",
-            crop: { x: 0, y: 0, width: 0, height: 0 },
+            url: "inventory",
+            crop: { x: 0, y: 0, width: 176, height: 166 },
         };
         this.openUIImageOffset = { x: 0, y: 0 };
 

@@ -44,6 +44,8 @@ class Entity {
         direction = 1,
         holdItem = new InventoryItem(),
 
+        maxPortalCooldown = 40,
+
         dimension = Dimensions.Overworld,
 
         fire = -20,
@@ -100,6 +102,9 @@ class Entity {
         this.holdItem = holdItem;
         this.shouldAddForce = { x: 0, y: 0 };
         this.hurtCooldown = 0.3;
+
+        this.portalCooldown = maxPortalCooldown;
+        this.maxPortalCooldown = maxPortalCooldown;
 
         this.hasVisualFire = false;
         this.fire = fire;
@@ -424,6 +429,53 @@ class Entity {
     entityTickUpdate() {
         this.fireLogic();
         this.voidLogic();
+        this.portalLogic();
+    }
+
+    portalLogic() {
+        if (this.type !== EntityTypes.Player) return;
+
+        let collidingWithPortal = false;
+
+        if (
+            this.filterBlocksByProperty(this.collidingWithBlocks, "specialType")
+                .length > 0
+        ) {
+            for (let block of this.collidingWithBlocks) {
+                const blockData = GetBlock(block.blockType);
+
+                if (blockData.specialType !== SpecialType.NetherPortal) {
+                    collidingWithPortal = false;
+                    break;
+                }
+
+                collidingWithPortal = true;
+
+                if (this.portalCooldown > 0) {
+                    this.portalCooldown--;
+                    break;
+                }
+
+                if (activeDimension !== Dimensions.Nether) {
+                    gotoDimension(Dimensions.Nether);
+
+                    this.portalCooldown = this.maxPortalCooldown;
+
+                    break;
+                } else {
+                    gotoDimension(Dimensions.Overworld);
+
+                    this.portalCooldown = this.maxPortalCooldown;
+
+                    break;
+                }
+            }
+
+            if (!collidingWithPortal)
+                this.portalCooldown = this.maxPortalCooldown;
+        } else {
+            this.portalCooldown = this.maxPortalCooldown;
+        }
     }
 
     fireLogic() {

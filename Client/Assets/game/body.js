@@ -27,8 +27,6 @@ class Body {
 
         const spriteSize = getSpriteSize("entity/" + sprite);
 
-        console.log("Sprite size:", spriteSize);
-
         if (!spriteSize.width) {
             this.image.src = getSpriteUrl("entity/" + sprite);
             return;

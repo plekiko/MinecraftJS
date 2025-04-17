@@ -241,7 +241,6 @@ function selectTexturePack(id, selectedElement) {
     removeTexturePackButton.disabled = id === "default";
 
     localStorage.setItem("currentTexturePack", id);
-    loadTexturePack(); // Reload the texture pack when selected
 }
 
 async function getTexturePackIcon(packId) {
@@ -495,8 +494,6 @@ worldPlayButton.disabled = true;
 
 // Initialize everything after texture pack loading
 async function initialize() {
-    await loadTexturePack(); // Wait for texture pack to load
-    await waitForTexturePack(); // Ensure it's fully loaded
     populateWorlds();
     initializeDefaultTexturePack(); // Sets up default pack and current selection
     await populateTexturePacks(); // Populate UI with current selection

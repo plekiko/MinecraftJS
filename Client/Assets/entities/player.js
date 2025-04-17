@@ -259,6 +259,11 @@ class Player extends Entity {
             return;
         }
 
+        if (item.toolType === ToolType.Flame) {
+            this.useFlame();
+            return;
+        }
+
         if (item.foodValue > 0) {
             this.eatFoodInHand();
             return;
@@ -272,6 +277,25 @@ class Player extends Entity {
             this.useBucket();
             return;
         }
+    }
+
+    useFlame() {
+        if (!this.hoverBlock) return;
+
+        const block = GetBlock(this.hoverBlock.blockType);
+
+        // Check if block is placeable
+        if (!this.checkBlockForPlacing(GetBlock(Blocks.Fire))) return;
+
+        // Check if block is air
+        if (!block.air) return;
+
+        // Check if block is fluid
+        if (block.fluid) return;
+
+        playPositionalSound(this.position, "items/ignite.ogg", 10);
+
+        setBlockType(this.hoverBlock, Blocks.Fire);
     }
 
     playerSwing() {
@@ -1073,7 +1097,11 @@ class Player extends Entity {
 
             const blockBeneathDef = GetBlock(blockBeneath.blockType);
 
-            if (!blockBeneathDef.collision && block.onlyPlacableOn === null)
+            if (
+                !blockBeneathDef.collision &&
+                block.onlyPlacableOn === null &&
+                blockBeneathDef.transparent
+            )
                 return false;
 
             if (

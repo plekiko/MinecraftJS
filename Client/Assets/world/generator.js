@@ -569,8 +569,13 @@ function getBlockWorldPosition(block) {
     return new Vector2(block.transform.position.x, block.transform.position.y);
 }
 
-function GetBlockAtWorldPosition(worldX, worldY, wall = false) {
-    const targetChunk = GetChunkForX(worldX);
+function GetBlockAtWorldPosition(
+    worldX,
+    worldY,
+    wall = false,
+    dimensionIndex = activeDimension
+) {
+    const targetChunk = GetChunkForX(worldX, dimensionIndex);
     if (!targetChunk || worldY >= CHUNK_HEIGHT * BLOCK_SIZE) return null;
 
     // Subtract the chunk's x offset from the worldX before dividing by BLOCK_SIZE.

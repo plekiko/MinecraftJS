@@ -111,6 +111,8 @@ async function gameLoop() {
 function gotoDimension(dimension) {
     if (dimension === activeDimension) return;
 
+    console.log("Going to dimension:", dimension);
+
     chunks_in_render_distance = new Map();
 
     entities = entities.filter((entity) => {
