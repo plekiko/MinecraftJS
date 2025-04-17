@@ -586,8 +586,99 @@ function GetBlockAtWorldPosition(
 }
 
 function placePortalInDimension(dimension, position) {
-    chat.message(
-        "Placing portal in dimension: " + dimension + " at " + position
+    // Check if there is an existing portal
+    const chunk = GetChunkForX(position.x, dimension);
+
+    if (chunk) {
+        const portals = chunk.getAllBlocks(Blocks.NetherPortal);
+
+        if (portals.length > 0) {
+            // If a portal exists, return the first one
+            return portals[portals.length - 1].transform.position;
+        }
+    }
+
+    // If no portal exists, create a new one
+
+    // Bottom
+    // Loop through world positions to create a portal
+    for (let i = 0; i < 4; i++) {
+        const blockX = position.x + i * BLOCK_SIZE;
+        const blockY = position.y;
+
+        SetBlockTypeAtPosition(
+            blockX,
+            blockY,
+            Blocks.Obsidian,
+            false,
+            dimension
+        );
+    }
+    // Top
+    for (let i = 0; i < 4; i++) {
+        const blockX = position.x + i * BLOCK_SIZE;
+        const blockY = position.y + BLOCK_SIZE * 4;
+
+        SetBlockTypeAtPosition(
+            blockX,
+            blockY,
+            Blocks.Obsidian,
+            false,
+            dimension
+        );
+    }
+    // Sides
+    for (let i = 0; i < 4; i++) {
+        const blockX = position.x;
+        const blockY = position.y + i * BLOCK_SIZE;
+
+        SetBlockTypeAtPosition(
+            blockX,
+            blockY,
+            Blocks.Obsidian,
+            false,
+            dimension
+        );
+    }
+    for (let i = 0; i < 4; i++) {
+        const blockX = position.x + BLOCK_SIZE * 3;
+        const blockY = position.y + i * BLOCK_SIZE;
+
+        SetBlockTypeAtPosition(
+            blockX,
+            blockY,
+            Blocks.Obsidian,
+            false,
+            dimension
+        );
+    }
+    // Something to stand on under the portal
+    for (let i = 0; i < 6; i++) {
+        const blockX = position.x + i * BLOCK_SIZE - BLOCK_SIZE;
+        const blockY = position.y + BLOCK_SIZE * 5;
+
+        SetBlockTypeAtPosition(
+            blockX,
+            blockY,
+            Blocks.Cobblestone,
+            false,
+            dimension
+        );
+    }
+
+    // Create the portal
+    for (let y = 1; y < 4; y++) {
+        for (let x = 1; x < 3; x++) {
+            const blockX = position.x + x * BLOCK_SIZE;
+            const blockY = position.y + y * BLOCK_SIZE;
+
+            SetBlockTypeAtPosition(blockX, blockY, Blocks.NetherPortal);
+        }
+    }
+    // Return the bottom center of the portal
+    return new Vector2(
+        position.x + BLOCK_SIZE * 1.5,
+        position.y + BLOCK_SIZE * 3
     );
 }
 
@@ -617,8 +708,14 @@ function checkAdjacentBlocks(position, wall = false) {
     return false; // No adjacent block found
 }
 
-function SetBlockTypeAtPosition(worldX, worldY, blockType, wall = false) {
-    const block = GetBlockAtWorldPosition(worldX, worldY, wall);
+function SetBlockTypeAtPosition(
+    worldX,
+    worldY,
+    blockType,
+    wall = false,
+    dimensionIndex = activeDimension
+) {
+    const block = GetBlockAtWorldPosition(worldX, worldY, wall, dimensionIndex);
 
     if (!block) return;
 

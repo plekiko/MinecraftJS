@@ -1288,23 +1288,30 @@ class Chunk {
     }
 
     checkForPortal(x, y) {
-        // Convert local chunk coordinates to world coordinates
-        const worldX = this.getWorldX(x);
+        // Convert local chunk coordinates to world coordinates (pixel-based)
+        const worldX = this.x + x * BLOCK_SIZE;
         const worldY = y * BLOCK_SIZE;
+
+        console.log(
+            `Checking for portal at fire position (${worldX}, ${worldY}) in dimension ${this.dimension}`
+        );
 
         // Restrict portal creation to Overworld and Nether
         if (
             this.dimension !== Dimensions.Overworld &&
             this.dimension !== Dimensions.Nether
         ) {
+            console.log(
+                `Portal creation skipped: Invalid dimension (${this.dimension})`
+            );
             return;
         }
 
         // Minimum and maximum inner portal dimensions (in blocks)
         const minInnerWidth = 2;
         const minInnerHeight = 3;
-        const maxInnerWidth = 7;
-        const maxInnerHeight = 7;
+        const maxInnerWidth = 8;
+        const maxInnerHeight = 8;
 
         // Check for a valid portal frame of any size within min/max bounds
         for (
@@ -1317,6 +1324,9 @@ class Chunk {
                 innerHeight <= maxInnerHeight;
                 innerHeight++
             ) {
+                console.log(
+                    `Checking portal frame for size ${innerWidth}x${innerHeight}`
+                );
                 const portalFound = this.checkPortalOrientation(
                     worldX,
                     worldY,
@@ -1324,7 +1334,10 @@ class Chunk {
                     innerHeight
                 );
                 if (portalFound) {
-                    // Valid portal found; light it by setting inner air/fire blocks to NetherPortal
+                    console.log(
+                        `Valid portal found at (${worldX}, ${worldY}), size: ${innerWidth}x${innerHeight}, bounds: (${portalFound.minX}, ${portalFound.minY}) to (${portalFound.maxX}, ${portalFound.maxY})`
+                    );
+                    // Light the portal by setting inner air/fire blocks to NetherPortal
                     const { minX, maxX, minY, maxY } = portalFound;
                     for (let wx = minX; wx <= maxX; wx += BLOCK_SIZE) {
                         for (let wy = minY; wy <= maxY; wy += BLOCK_SIZE) {
@@ -1334,14 +1347,23 @@ class Chunk {
                                     block.blockType === Blocks.Air ||
                                     block.blockType === Blocks.Fire
                                 ) {
+                                    console.log(
+                                        `Lighting portal block at (${wx}, ${wy}) to NetherPortal`
+                                    );
                                     SetBlockTypeAtPosition(
                                         wx,
                                         wy,
                                         Blocks.NetherPortal
                                     );
                                 } else {
+                                    console.log(
+                                        `Skipping block at (${wx}, ${wy}): Not Air or Fire (${block.blockType})`
+                                    );
                                 }
                             } else {
+                                console.log(
+                                    `Failed to get block at (${wx}, ${wy}): Null block`
+                                );
                             }
                         }
                     }
@@ -1349,6 +1371,9 @@ class Chunk {
                 }
             }
         }
+        console.log(
+            `No valid portal frame found around fire at (${worldX}, ${worldY})`
+        );
     }
 
     checkPortalOrientation(worldX, worldY, innerWidth, innerHeight) {
@@ -1360,10 +1385,9 @@ class Chunk {
         const frameWidthPx = innerWidthPx + 2 * BLOCK_SIZE;
         const frameHeightPx = innerHeightPx + 2 * BLOCK_SIZE;
 
-        // Calculate search range to allow fire to be in the inner area or one block outside the frame
-        // Fire could be up to (innerWidth+2) blocks left/right or (innerHeight+2) blocks up/down from the inner area’s top-left
-        const searchRangeX = innerWidthPx + 2 * BLOCK_SIZE;
-        const searchRangeY = innerHeightPx + 2 * BLOCK_SIZE;
+        // Calculate search range to allow fire to be in the inner area or one block adjacent
+        const searchRangeX = innerWidthPx + BLOCK_SIZE; // Fire can be in inner area or one block outside
+        const searchRangeY = innerHeightPx + BLOCK_SIZE;
 
         // Check possible portal frame positions around the fire block
         for (
@@ -1376,13 +1400,48 @@ class Chunk {
                 startY <= worldY + searchRangeY;
                 startY += BLOCK_SIZE
             ) {
-                // Validate frame (obsidian borders)
+                console.log(
+                    `Checking frame at start position (${startX}, ${startY}) for size ${innerWidth}x${innerHeight}`
+                );
+
+                // Check if fire is in or adjacent to the inner area
+                const innerMinX = startX + BLOCK_SIZE;
+                const innerMaxX = startX + innerWidthPx;
+                const innerMinY = startY + BLOCK_SIZE;
+                const innerMaxY = startY + innerHeightPx;
+                const isFireInInnerArea =
+                    worldX >= innerMinX &&
+                    worldX <= innerMaxX &&
+                    worldY >= innerMinY &&
+                    worldY <= innerMaxY;
+                const isFireAdjacent =
+                    (worldX === innerMinX - BLOCK_SIZE &&
+                        worldY >= innerMinY &&
+                        worldY <= innerMaxY) || // Left
+                    (worldX === innerMaxX + BLOCK_SIZE &&
+                        worldY >= innerMinY &&
+                        worldY <= innerMaxY) || // Right
+                    (worldY === innerMinY - BLOCK_SIZE &&
+                        worldX >= innerMinX &&
+                        worldX <= innerMaxX) || // Top
+                    (worldY === innerMaxY + BLOCK_SIZE &&
+                        worldX >= innerMinX &&
+                        worldX <= innerMaxX); // Bottom
+
+                if (!isFireInInnerArea && !isFireAdjacent) {
+                    console.log(
+                        `Fire at (${worldX}, ${worldY}) is not in or adjacent to inner area (${innerMinX}, ${innerMinY}) to (${innerMaxX}, ${innerMaxY})`
+                    );
+                    continue;
+                }
+
+                // Validate frame (obsidian borders, corners can be any block)
                 let isValidFrame = true;
 
-                // Top and bottom borders (horizontal)
+                // Top and bottom borders (horizontal, excluding corners)
                 for (
-                    let wx = startX;
-                    wx < startX + frameWidthPx;
+                    let wx = startX + BLOCK_SIZE;
+                    wx < startX + frameWidthPx - BLOCK_SIZE;
                     wx += BLOCK_SIZE
                 ) {
                     const topBlock = GetBlockAtWorldPosition(wx, startY);
@@ -1391,24 +1450,40 @@ class Chunk {
                         startY + innerHeightPx + BLOCK_SIZE
                     );
                     if (!topBlock) {
+                        console.log(
+                            `Invalid frame: Null block at top (${wx}, ${startY})`
+                        );
                         isValidFrame = false;
                         break;
                     }
                     if (!bottomBlock) {
+                        console.log(
+                            `Invalid frame: Null block at bottom (${wx}, ${
+                                startY + innerHeightPx + BLOCK_SIZE
+                            })`
+                        );
                         isValidFrame = false;
                         break;
                     }
                     if (topBlock.blockType !== Blocks.Obsidian) {
+                        console.log(
+                            `Invalid frame: Top block at (${wx}, ${startY}) is ${topBlock.blockType}, expected Obsidian`
+                        );
                         isValidFrame = false;
                         break;
                     }
                     if (bottomBlock.blockType !== Blocks.Obsidian) {
+                        console.log(
+                            `Invalid frame: Bottom block at (${wx}, ${
+                                startY + innerHeightPx + BLOCK_SIZE
+                            }) is ${bottomBlock.blockType}, expected Obsidian`
+                        );
                         isValidFrame = false;
                         break;
                     }
                 }
 
-                // Left and right borders (vertical, excluding corners already checked)
+                // Left and right borders (vertical, excluding corners)
                 if (isValidFrame) {
                     for (
                         let wy = startY + BLOCK_SIZE;
@@ -1421,20 +1496,63 @@ class Chunk {
                             wy
                         );
                         if (!leftBlock) {
+                            console.log(
+                                `Invalid frame: Null block at left (${startX}, ${wy})`
+                            );
                             isValidFrame = false;
                             break;
                         }
                         if (!rightBlock) {
+                            console.log(
+                                `Invalid frame: Null block at right (${
+                                    startX + innerWidthPx + BLOCK_SIZE
+                                }, ${wy})`
+                            );
                             isValidFrame = false;
                             break;
                         }
                         if (leftBlock.blockType !== Blocks.Obsidian) {
+                            console.log(
+                                `Invalid frame: Left block at (${startX}, ${wy}) is ${leftBlock.blockType}, expected Obsidian`
+                            );
                             isValidFrame = false;
                             break;
                         }
                         if (rightBlock.blockType !== Blocks.Obsidian) {
+                            console.log(
+                                `Invalid frame: Right block at (${
+                                    startX + innerWidthPx + BLOCK_SIZE
+                                }, ${wy}) is ${
+                                    rightBlock.blockType
+                                }, expected Obsidian`
+                            );
                             isValidFrame = false;
                             break;
+                        }
+                    }
+                }
+
+                // Check corners (log their types, but don't require obsidian)
+                if (isValidFrame) {
+                    const corners = [
+                        { x: startX, y: startY }, // Top-left
+                        { x: startX + frameWidthPx - BLOCK_SIZE, y: startY }, // Top-right
+                        { x: startX, y: startY + frameHeightPx - BLOCK_SIZE }, // Bottom-left
+                        {
+                            x: startX + frameWidthPx - BLOCK_SIZE,
+                            y: startY + frameHeightPx - BLOCK_SIZE,
+                        }, // Bottom-right
+                    ];
+                    for (const { x, y } of corners) {
+                        const cornerBlock = GetBlockAtWorldPosition(x, y);
+                        if (cornerBlock) {
+                            console.log(
+                                `Corner at (${x}, ${y}) is ${cornerBlock.blockType} (not required to be Obsidian)`
+                            );
+                        } else {
+                            console.log(
+                                `Corner at (${x}, ${y}) is null (not required to be Obsidian)`
+                            );
                         }
                     }
                 }
@@ -1455,6 +1573,9 @@ class Chunk {
                     ) {
                         const block = GetBlockAtWorldPosition(wx, wy);
                         if (!block) {
+                            console.log(
+                                `Invalid inner area: Null block at (${wx}, ${wy})`
+                            );
                             isValidInner = false;
                             break;
                         }
@@ -1462,6 +1583,9 @@ class Chunk {
                             block.blockType !== Blocks.Air &&
                             block.blockType !== Blocks.Fire
                         ) {
+                            console.log(
+                                `Invalid inner area: Block at (${wx}, ${wy}) is ${block.blockType}, expected Air or Fire`
+                            );
                             isValidInner = false;
                             break;
                         }
@@ -1470,6 +1594,9 @@ class Chunk {
                 }
 
                 if (isValidInner) {
+                    console.log(
+                        `Valid inner area found at (${startX}, ${startY}), size: ${innerWidth}x${innerHeight}`
+                    );
                     // Return inner area bounds for portal lighting
                     return {
                         minX: startX + BLOCK_SIZE,
@@ -1480,6 +1607,10 @@ class Chunk {
                 }
             }
         }
+
+        console.log(
+            `No valid portal frame found for size ${innerWidth}x${innerHeight}`
+        );
         return null;
     }
 

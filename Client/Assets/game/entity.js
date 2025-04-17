@@ -459,11 +459,31 @@ class Entity {
                 if (activeDimension !== Dimensions.Nether) {
                     gotoDimension(Dimensions.Nether);
 
+                    setTimeout(() => {
+                        const gotoPosition = placePortalInDimension(
+                            Dimensions.Nether,
+                            block.transform.position
+                        );
+
+                        this.position.x = gotoPosition.x;
+                        this.position.y = gotoPosition.y;
+                    }, 100);
+
                     this.portalCooldown = this.maxPortalCooldown;
 
                     break;
                 } else {
                     gotoDimension(Dimensions.Overworld);
+
+                    setTimeout(() => {
+                        const gotoPosition = placePortalInDimension(
+                            Dimensions.Overworld,
+                            block.transform.position
+                        );
+
+                        this.position.x = gotoPosition.x;
+                        this.position.y = gotoPosition.y;
+                    }, 100);
 
                     this.portalCooldown = this.maxPortalCooldown;
 

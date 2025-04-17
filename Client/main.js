@@ -108,23 +108,6 @@ async function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-function gotoDimension(dimension) {
-    if (dimension === activeDimension) return;
-
-    console.log("Going to dimension:", dimension);
-
-    chunks_in_render_distance = new Map();
-
-    entities = entities.filter((entity) => {
-        if (entity instanceof Player) {
-            return entity.UUID === player.UUID;
-        }
-        return false;
-    });
-
-    activeDimension = dimension;
-}
-
 function updateGame() {
     updateEntities();
     if (player) cursorBlockLogic();
