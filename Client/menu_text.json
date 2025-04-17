@@ -19,7 +19,6 @@
         "I'm not a fish!",
         "When will this game be finished?",
         "There is no End!",
-        "There is no Nether!",
         "There is no Ender Dragon!",
         "There is no Wither!",
         "Now with Redstone!",
@@ -108,7 +107,7 @@
         "if(!done) { workOnGame(); }",
         "Better with headphones!",
         "I don't know what to write...",
-        "I WILL NOT MAKE DIMENSIONS!",
+        "I even made dimensions!",
         "Wherever you go, there you are!",
         "Click me to see more!"
     ]
