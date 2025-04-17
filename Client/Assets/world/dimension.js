@@ -1,7 +1,7 @@
 const Dimensions = Object.freeze({
     Overworld: 0,
     Nether: 1,
-    End: 2,
+    Eather: 2,
 });
 
 let activeDimension = Dimensions.Overworld;
@@ -78,6 +78,7 @@ let dimensions = [
             tree: new Noise(100, 10, 5),
             mountains: new Noise(30, 60, 30),
             cave: new Noise(20, 80, 5),
+
             quartz: new Noise(100, 7, 5),
             glowstone: new Noise(100, 7, 5),
             lavaPockets: new Noise(100, 7, 5),
@@ -85,6 +86,37 @@ let dimensions = [
 
         baseLightLevel: 3,
         bedrockRoof: true,
+
+        fastLava: true,
+        noWater: true,
+    }),
+    new Dimension({
+        name: "Eather",
+        biomeSet: OverworldBiomes,
+        backgroundGradient: {
+            dayColor: "#b70685", // Daytime top color (black)
+            nightColor: "#000000", // Nighttime top color (black)
+            sunsetColor: "#a1d9fc", // Sunset bottom color (black)
+            midnightColor: "#000000", // Midnight bottom color (black)
+        },
+
+        alwaysDay: true,
+
+        noiseMaps: {
+            grass: new Noise(550, 0.2, 1),
+            structure: new Noise(500, 1, 10),
+            temperature: new Noise(30, 70, 32),
+            wetness: new Noise(30, 40, 21),
+            tree: new Noise(100, 10, 5),
+            mountains: new Noise(30, 60, 30),
+            cave: new Noise(20, 80, 5),
+
+            quartz: new Noise(100, 7, 5),
+            glowstone: new Noise(100, 7, 5),
+            lavaPockets: new Noise(100, 7, 5),
+        },
+
+        baseLightLevel: 15,
 
         fastLava: true,
         noWater: true,

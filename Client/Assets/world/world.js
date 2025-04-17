@@ -7,9 +7,11 @@ let player;
 function removeEntity(entity, sync = false) {
     if (!entity) return;
     if (entity.myChunkX !== null) {
-        getDimensionChunks(entity.dimension)
-            .get(entity.myChunkX)
-            .removeEntityFromChunk(entity);
+        if (getDimensionChunks(entity.dimension).has(entity.myChunkX)) {
+            getDimensionChunks(entity.dimension)
+                .get(entity.myChunkX)
+                .removeEntityFromChunk(entity);
+        }
     }
 
     // use the UUID to find the entity in the array

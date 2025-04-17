@@ -585,6 +585,12 @@ function GetBlockAtWorldPosition(
     return targetChunk.getBlock(localX, localY, false, wall);
 }
 
+function placePortalInDimension(dimension, position) {
+    chat.message(
+        "Placing portal in dimension: " + dimension + " at " + position
+    );
+}
+
 function checkAdjacentBlocks(position, wall = false) {
     const directions = [
         { x: 0, y: -BLOCK_SIZE }, // Above
