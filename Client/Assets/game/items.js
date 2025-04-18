@@ -532,7 +532,7 @@ const items = [
         itemId: 20,
         name: "Coal",
         sprite: "coal",
-        fuelTime: 1,
+        fuelTime: 80,
     }),
     new Item({
         itemId: 21,
