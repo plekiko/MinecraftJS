@@ -77,7 +77,7 @@ class Player extends Entity {
 
         this.entities = entities;
 
-        this.setGamemode(1);
+        // this.setGamemode(1);
     }
 
     update() {
