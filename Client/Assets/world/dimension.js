@@ -21,7 +21,7 @@ class Dimension {
             structure: new Noise(500, 1, 10),
             temperature: new Noise(30, 70, 32),
             wetness: new Noise(30, 40, 21),
-            tree: new Noise(100, 10, 5),
+            tree: new Noise(50, 10, 5),
             cave: new Noise(55, 10, 5),
             mountains: new Noise(30, 60, 30),
             coal: new Noise(100, 5.3, 5),

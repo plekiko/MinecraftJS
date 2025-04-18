@@ -91,7 +91,7 @@ class Chat {
 
         const biomeName = messageArray[1];
 
-        const biome = Biomes[biomeName];
+        const biome = AllBiomes[biomeName];
 
         if (biome) {
             const biomeChunkX = LocateBiome(biome);

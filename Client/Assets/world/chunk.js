@@ -710,7 +710,7 @@ class Chunk {
             const localY = Math.floor(worldY / BLOCK_SIZE);
             targetChunk.setBlockType(localX, localY, blockType, wall, metaData);
         } else {
-            // Buffer the block with dimension index
+            // Buffer the block with dimension index`
             bufferBlock(
                 worldX,
                 worldY,
