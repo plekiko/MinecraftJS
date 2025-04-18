@@ -39,7 +39,10 @@ class Dimension {
         noWater = false,
     }) {
         this.name = name;
+
         this.chunks = new Map();
+        this.pendingBlocks = new Map();
+
         this.biomeSet = biomeSet;
 
         this.backgroundGradient = backgroundGradient;
@@ -138,7 +141,7 @@ function gotoDimension(dimension) {
     activeDimension = dimension;
 }
 
-function getDimension(index) {
+function getDimension(index = activeDimension) {
     return dimensions[index];
 }
 

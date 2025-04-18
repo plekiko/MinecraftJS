@@ -11,7 +11,7 @@ let currentSave = {
 function SaveWorld(message = true, toFile = false) {
     let savedDimensions = [];
 
-    // Save chunks for each dimension
+    // Save chunks and pendingBlocks for each dimension
     dimensions.forEach((dimension, index) => {
         let savedChunks = [];
         dimension.chunks.forEach((chunk) => {
@@ -20,7 +20,7 @@ function SaveWorld(message = true, toFile = false) {
                 x: chunk.x,
                 biome: {
                     name: chunk.biome.name,
-                    dimension: index, // Explicitly save dimension to avoid ambiguity
+                    dimension: index,
                 },
                 previousChunk: chunk.previousChunk
                     ? chunk.previousChunk.x
@@ -29,9 +29,20 @@ function SaveWorld(message = true, toFile = false) {
                 walls: newSaveChunk.walls,
             });
         });
+
+        // Save dimension-specific pendingBlocks
+        const savedPendingBlocks = Array.from(
+            dimension.pendingBlocks.entries()
+        ).map(([chunkX, entry]) => ({
+            chunkX,
+            dimensionIndex: index,
+            blocks: entry.blocks,
+        }));
+
         savedDimensions.push({
             index: index,
             chunks: savedChunks,
+            pendingBlocks: savedPendingBlocks, // Store pendingBlocks per dimension
         });
     });
 
@@ -56,13 +67,6 @@ function SaveWorld(message = true, toFile = false) {
     }
 
     currentSave.seed = seed;
-    currentSave.pendingBlocks = Array.from(pendingBlocks.entries()).map(
-        ([chunkX, entry]) => ({
-            chunkX,
-            dimensionIndex: entry.dimensionIndex,
-            blocks: entry.blocks,
-        })
-    );
     currentSave.dimensions = savedDimensions;
 
     const saveData = JSON.stringify(currentSave);
@@ -196,39 +200,75 @@ async function LoadWorld(save) {
 
     LoadCustomSeed(currentSave.seed);
 
-    // Clear chunks for all dimensions
+    // Clear chunks and pendingBlocks for all dimensions
     dimensions.forEach((dimension) => {
         dimension.chunks = new Map();
+        dimension.pendingBlocks = new Map(); // Initialize per-dimension pendingBlocks
     });
 
     entities = [];
 
-    // Load chunks for each dimension
+    // Load chunks and pendingBlocks for each dimension
     if (currentSave.dimensions) {
         currentSave.dimensions.forEach((dimData) => {
             const dimension = getDimension(dimData.index);
             console.log("Loading dimension:", dimData);
+
+            // Load chunks
             dimData.chunks.forEach((chunk) => {
-                LoadChunk(chunk.x, chunk, dimData.index);
+                LoadChunk(
+                    chunk.x,
+                    chunk,
+                    dimData.index,
+                    dimension.pendingBlocks
+                );
             });
+
+            // Load dimension-specific pendingBlocks
+            if (dimData.pendingBlocks && dimData.pendingBlocks.length > 0) {
+                dimData.pendingBlocks.forEach(
+                    ({ chunkX, dimensionIndex, blocks }) => {
+                        dimension.pendingBlocks.set(chunkX, {
+                            dimensionIndex,
+                            blocks,
+                        });
+                        console.log(
+                            `Loaded pendingBlocks for chunkX: ${chunkX} in dimension ${dimensionIndex}`
+                        );
+                    }
+                );
+            }
         });
     } else {
-        // Fallback for older saves (single Overworld chunks)
+        // Fallback for older saves with global pendingBlocks
+        const dimension = getDimension(Dimensions.Overworld);
         currentSave.chunks.forEach((chunk) => {
-            LoadChunk(chunk.x, chunk, Dimensions.Overworld);
+            LoadChunk(
+                chunk.x,
+                chunk,
+                Dimensions.Overworld,
+                dimension.pendingBlocks
+            );
         });
-    }
 
-    pendingBlocks = new Map();
-    if (currentSave.pendingBlocks && currentSave.pendingBlocks.length > 0) {
-        currentSave.pendingBlocks.forEach(
-            ({ chunkX, dimensionIndex, blocks }) => {
-                pendingBlocks.set(chunkX, {
-                    dimensionIndex,
-                    blocks,
-                });
-            }
-        );
+        if (currentSave.pendingBlocks && currentSave.pendingBlocks.length > 0) {
+            currentSave.pendingBlocks.forEach(
+                ({ chunkX, dimensionIndex, blocks }) => {
+                    const targetDimension = getDimension(
+                        dimensionIndex || Dimensions.Overworld
+                    );
+                    targetDimension.pendingBlocks.set(chunkX, {
+                        dimensionIndex,
+                        blocks,
+                    });
+                    console.log(
+                        `Loaded legacy pendingBlocks for chunkX: ${chunkX} in dimension ${
+                            dimensionIndex || Dimensions.Overworld
+                        }`
+                    );
+                }
+            );
+        }
     }
 
     time = currentSave.time;
@@ -276,7 +316,12 @@ async function LoadWorld(save) {
     }, 500);
 }
 
-async function LoadChunk(x, chunk, dimensionIndex = Dimensions.Overworld) {
+async function LoadChunk(
+    x,
+    chunk,
+    dimensionIndex = Dimensions.Overworld,
+    pendingBlocks
+) {
     console.log("Loading chunk:", x, chunk, dimensionIndex);
 
     const dimension = getDimension(dimensionIndex);
@@ -296,8 +341,7 @@ async function LoadChunk(x, chunk, dimensionIndex = Dimensions.Overworld) {
         CHUNK_WIDTH,
         biome,
         previousChunk,
-        pendingBlocks,
-        dimension.noiseMaps.grass,
+        pendingBlocks, // Pass dimension-specific pendingBlocks
         true,
         dimensionIndex
     );

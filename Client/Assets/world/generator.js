@@ -1,5 +1,3 @@
-let pendingBlocks = new Map();
-
 let seed = 0;
 // let seed = 0;
 
@@ -133,9 +131,6 @@ function BiomesInChunkCount(count) {
 function RegenerateWorld() {
     let seed = Math.floor(Math.random() * 10000);
     tooloud.Perlin.setSeed(seed);
-
-    pendingBlocks = new Map();
-    chunks = new Map();
 
     entities = [];
 
@@ -426,13 +421,7 @@ function generateChunk(
     const dimension = dimensions[dimensionIndex];
     const biome = calculateChunkBiome(chunkIndex, dimensionIndex);
 
-    const newChunk = new Chunk(
-        chunkX,
-        CHUNK_WIDTH,
-        biome,
-        oldChunkData,
-        pendingBlocks
-    );
+    const newChunk = new Chunk(chunkX, CHUNK_WIDTH, biome, oldChunkData);
 
     newChunk.dimension = dimensionIndex;
 
@@ -646,7 +635,7 @@ function placePortalInDimension(dimension, position) {
             const blockX = position.x + x * BLOCK_SIZE;
             const blockY = position.y + y * BLOCK_SIZE;
 
-            bufferBlock(blockX, blockY, Blocks.NetherPortal);
+            bufferBlock(blockX, blockY, Blocks.NetherPortal, dimension);
         }
     }
     // Return the bottom center of the portal
@@ -713,13 +702,13 @@ function bufferBlock(
 
     if (calculateY) worldY = CHUNK_HEIGHT * BLOCK_SIZE - worldY;
 
-    if (!pendingBlocks.has(targetChunkX)) {
-        pendingBlocks.set(targetChunkX, {
+    if (!getDimension(dimensionIndex).pendingBlocks.has(targetChunkX)) {
+        getDimension(dimensionIndex).pendingBlocks.set(targetChunkX, {
             dimensionIndex: dimensionIndex,
             blocks: [],
         });
     }
-    pendingBlocks.get(targetChunkX).blocks.push({
+    getDimension(dimensionIndex).pendingBlocks.get(targetChunkX).blocks.push({
         x: worldX,
         y: worldY,
         blockType,
