@@ -1137,7 +1137,7 @@ class Block extends Square {
             this.metaData.props.fuelProgression = 0;
             this.metaData.props.burningFuelTime = 0;
 
-            if (fuel && input) {
+            if (fuel && input && fuel.fuelTime && input.smeltOutput) {
                 this.metaData.props.burningFuelTime = fuel.fuelTime;
                 this.removeOneFromStack(storage[0][1]);
             }
