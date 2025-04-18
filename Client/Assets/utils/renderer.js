@@ -279,11 +279,15 @@ function DrawDestroyStage() {
     const mouseX = input.getMousePositionOnBlockGrid().x;
     const mouseY = input.getMousePositionOnBlockGrid().y;
 
+    const spriteSize = getSpriteSize(
+        "blocks/destroy_stage_" + (player.breakingStage - 1)
+    ).width;
+
     drawImage({
         url: getSpriteUrl("blocks/destroy_stage_" + (player.breakingStage - 1)),
         x: mouseX - Math.floor(camera.x),
         y: mouseY - Math.floor(camera.y),
-        scale: BLOCK_SIZE / 16,
+        scale: BLOCK_SIZE / spriteSize,
         centerX: false,
     });
 }
