@@ -718,8 +718,8 @@ class Chunk {
                 worldY,
                 blockType,
                 this.dimension,
-                wall,
                 metaData,
+                wall,
                 false
             );
         }
