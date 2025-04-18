@@ -77,18 +77,11 @@ class Player extends Entity {
 
         this.entities = entities;
 
-        // this.setGamemode(1);
+        this.setGamemode(1);
     }
 
     update() {
-        if (!this.isLocal()) {
-            // this.body?.updateBody(
-            //     this.velocity.x,
-            //     this.grounded,
-            //     this.lookDirection
-            // );
-            return;
-        }
+        if (!this.isLocal()) return;
 
         this.interactLogic();
         this.climbingCollisingLogic();
