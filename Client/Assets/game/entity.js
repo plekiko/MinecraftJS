@@ -81,9 +81,12 @@ class Entity {
         this.cutoff = cutoff;
         this.body = body;
         this.dark = dark;
+
         this.img = new Image();
         this.img.src = sprite ? sprite : "";
+
         this.despawn = despawn;
+
         this.spriteScale = spriteScale;
         this.outline = outline;
         this.color = color;

@@ -100,7 +100,7 @@ class Sheep extends Mob {
     }
 
     interact(player, item) {
-        if (!item.itemId === Items.Shears) return;
+        if (item.itemId !== Items.Shears) return;
         if (!this.hasWool) return;
 
         summonEntity(Drop, new Vector2(this.position.x, this.position.y), {

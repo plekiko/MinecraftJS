@@ -115,6 +115,7 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 // Global array to store currently playing positional audio objects
 let playingAudio = [];
+let messySounds = [];
 
 // Preload all sounds at game initialization
 function preloadSounds() {
@@ -167,7 +168,7 @@ function removeAudio(audio) {
 }
 
 // Play a non-positional sound with error handling
-function playSound(sound, volume = 1, pitch = 1) {
+function playSound(sound, volume = 1, pitch = 1, loop = false) {
     const url = `${AUDIO_BASE_URL}${sound}`;
     const cachedAudio = soundCache[url];
 
@@ -180,12 +181,16 @@ function playSound(sound, volume = 1, pitch = 1) {
         audio.mozPreservesPitch = false;
         audio.playbackRate = pitch;
 
+        audio.loop = loop;
+
         audio.onerror = () => {
             console.error(`Error loading sound: ${url}`);
         };
         audio.play().catch((err) => {
             console.error(`Error playing sound ${url}: ${err}`);
         });
+
+        return audio;
     } else {
         console.warn(`Sound not preloaded or failed to load: ${url}`);
         // Fallback: attempt to play directly
@@ -195,9 +200,14 @@ function playSound(sound, volume = 1, pitch = 1) {
         audio.webkitPreservesPitch = false;
         audio.mozPreservesPitch = false;
         audio.playbackRate = pitch;
+
+        audio.loop = loop;
+
         audio.play().catch((err) => {
             console.error(`Fallback play failed for ${url}: ${err}`);
         });
+
+        return audio;
     }
 }
 
@@ -207,8 +217,11 @@ function playPositionalSound(
     sound,
     range = 10,
     maxVolume = 1,
-    pitch = 1
+    pitch = 1,
+    loop = false
 ) {
+    console.log("pitch: ", pitch);
+
     if (!player) {
         playSound(sound, maxVolume, pitch);
         return;
@@ -229,6 +242,7 @@ function playPositionalSound(
     audioElem.webkitPreservesPitch = false;
     audioElem.mozPreservesPitch = false;
     audioElem.playbackRate = pitch;
+    audioElem.loop = loop;
 
     const sourceNode = audioCtx.createMediaElementSource(audioElem);
     const panner = audioCtx.createStereoPanner();
@@ -262,6 +276,80 @@ function playPositionalSound(
     });
 
     return audioElem;
+}
+
+function playMessySound(
+    origin,
+    sound,
+    range = 10,
+    maxVolume = 1,
+    messyRange = new Vector2(1, 4)
+) {
+    // A positional sound that plays every messyRange seconds, only if the player is within range
+    // Tracks the sound instance and allows stopping via stopMessySound
+
+    // Validate input
+    if (!origin || !sound || !messyRange) {
+        return null;
+    }
+
+    // Create a unique ID for the messy sound instance
+    const soundId = uuidv4();
+
+    // Function to play the sound and schedule the next play
+    const playAndSchedule = () => {
+        // Check if player is within range
+        if (
+            player &&
+            Vector2.Distance(player.position, origin) <= range * BLOCK_SIZE
+        ) {
+            const pitch = RandomRange(0.5, 1.5); // Randomize pitch for each play
+            playPositionalSound(origin, sound, range, maxVolume, pitch, false);
+        }
+
+        // Schedule the next play with a new random interval
+        const interval = RandomRange(messyRange.x, messyRange.y) * 1000;
+        const timeoutId = setTimeout(playAndSchedule, interval);
+
+        // Update the timeout ID in the messySounds array
+        const soundInstance = messySounds.find((s) => s.soundId === soundId);
+        if (soundInstance) {
+            soundInstance.timeoutId = timeoutId;
+        }
+    };
+
+    // Initial play
+    playAndSchedule();
+
+    // Store the messy sound instance
+    const soundInstance = {
+        soundId,
+        origin: new Vector2(origin.x, origin.y), // Copy to avoid reference issues
+        sound,
+        range,
+        maxVolume,
+        messyRange: new Vector2(messyRange.x, messyRange.y),
+        timeoutId: null, // Will be set by playAndSchedule
+    };
+    messySounds.push(soundInstance);
+
+    return soundId; // Return ID for stopping specific sounds
+}
+
+function stopMessySound(soundId) {
+    // Stops a specific messy sound by soundId
+    if (!soundId) {
+        console.warn(`No soundId provided to stopMessySound`);
+        return;
+    }
+
+    const soundInstance = messySounds.find((s) => s.soundId === soundId);
+    if (soundInstance) {
+        clearTimeout(soundInstance.timeoutId);
+        messySounds = messySounds.filter((s) => s.soundId !== soundId);
+    } else {
+        console.warn(`No messy sound found with ID ${soundId}`);
+    }
 }
 
 // Update positional audio in the game loop

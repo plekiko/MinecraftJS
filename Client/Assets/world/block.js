@@ -341,6 +341,8 @@ class Block extends Square {
         this.powered = false;
         this.linkedBlocks = [];
 
+        this.ambientSound = null;
+
         this.updateSprite();
     }
 
@@ -553,6 +555,20 @@ class Block extends Square {
 
         if (block.fluid) {
             this.cutoff = this.metaData.props.waterLevel;
+        }
+
+        if (this.ambientSound) {
+            stopMessySound(this.ambientSound);
+            this.ambientSound = null;
+        }
+
+        if (block.ambientSound) {
+            this.ambientSound = playMessySound(
+                getBlockWorldPosition(this),
+                block.ambientSound + ".ogg",
+                10,
+                0.4
+            );
         }
 
         this.redstoneOutput = block.baseRedstoneOutput;

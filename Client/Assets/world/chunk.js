@@ -979,18 +979,11 @@ class Chunk {
         const worldX = this.x + x * BLOCK_SIZE;
         const worldY = y * BLOCK_SIZE;
 
-        console.log(
-            `Checking for portal break at obsidian position (${worldX}, ${worldY}) in dimension ${this.dimension}`
-        );
-
         // Restrict to Overworld and Nether
         if (
             this.dimension !== Dimensions.Overworld &&
             this.dimension !== Dimensions.Nether
         ) {
-            console.log(
-                `Portal break check skipped: Invalid dimension (${this.dimension})`
-            );
             return;
         }
 
@@ -1012,25 +1005,13 @@ class Chunk {
             const key = `${adjX},${adjY}`;
             const block = GetBlockAtWorldPosition(adjX, adjY);
             if (block && block.blockType === Blocks.NetherPortal) {
-                console.log(
-                    `Found adjacent NetherPortal block at (${adjX}, ${adjY})`
-                );
                 hasAdjacentPortal = true;
                 queue.push({ x: adjX, y: adjY });
                 visited.add(key);
-            } else if (block) {
-                console.log(
-                    `Adjacent block at (${adjX}, ${adjY}) is ${block.blockType}, not NetherPortal`
-                );
-            } else {
-                console.log(`Adjacent block at (${adjX}, ${adjY}) is null`);
             }
         }
 
         if (!hasAdjacentPortal) {
-            console.log(
-                `No adjacent NetherPortal blocks found; stopping check`
-            );
             return;
         }
 
@@ -1039,7 +1020,6 @@ class Chunk {
             const { x: currX, y: currY } = queue.shift();
 
             // Break the current portal block
-            console.log(`Breaking NetherPortal block at (${currX}, ${currY})`);
             SetBlockTypeAtPosition(currX, currY, Blocks.Air);
 
             // Check adjacent blocks for more NetherPortal blocks
@@ -1051,26 +1031,18 @@ class Chunk {
 
                 const block = GetBlockAtWorldPosition(nextX, nextY);
                 if (block && block.blockType === Blocks.NetherPortal) {
-                    console.log(
-                        `Adding NetherPortal block at (${nextX}, ${nextY}) to queue`
-                    );
                     queue.push({ x: nextX, y: nextY });
                     visited.add(key);
-                } else if (block) {
-                    console.log(
-                        `Skipping block at (${nextX}, ${nextY}): Not a NetherPortal (${block.blockType})`
-                    );
-                } else {
-                    console.log(
-                        `Skipping block at (${nextX}, ${nextY}): Null block`
-                    );
                 }
             }
         }
 
-        console.log(
-            `Finished breaking connected NetherPortal blocks around (${worldX}, ${worldY})`
-        );
+        PlayRandomSoundFromArray({
+            array: Sounds.Break_Glass,
+            positional: true,
+            origin: new Vector2(worldX, worldY),
+            volume: 0.5,
+        });
     }
 
     checkPortalFrame(worldX, worldY, innerWidth, innerHeight) {
@@ -1337,6 +1309,12 @@ class Chunk {
                             }
                         }
                     }
+                    // Play portal sound effect
+                    playPositionalSound(
+                        new Vector2(worldX, worldY),
+                        "portal/trigger.ogg"
+                    );
+
                     return; // Exit after lighting the first valid portal
                 }
             }

@@ -2018,6 +2018,8 @@ const blockTypes = [
         specialType: SpecialType.NetherPortal,
         cannotBeConverted: true,
 
+        // ambientSound: "portal/portal",
+
         excludeFromCreativeInventory: true,
 
         animationSpeed: 1.5,

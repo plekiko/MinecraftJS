@@ -77,7 +77,9 @@ class Player extends Entity {
 
         this.entities = entities;
 
-        this.setGamemode(1);
+        this.portalSound = playSound("portal/travel.ogg", 0, 1, true);
+
+        // this.setGamemode(1);
     }
 
     update() {
@@ -97,9 +99,25 @@ class Player extends Entity {
         this.hurtCooldownLogic();
         this.processEating();
 
+        this.portalSoundLogic();
+
         this.mutliplayerSyncPlayerState();
 
         if (this.windowOpen) this.inventory.update();
+    }
+
+    portalSoundLogic() {
+        if (this.portalCooldown >= this.maxPortalCooldown) {
+            this.portalSound.currentTime = 0;
+            this.portalSound.volume = 0;
+            return;
+        }
+
+        this.portalSound.volume = lerp(
+            this.portalSound.volume,
+            0.5,
+            deltaTime / 3
+        );
     }
 
     setSkin(skin) {
