@@ -116,6 +116,8 @@ body {
     padding: 5px;
     box-sizing: border-box;
 
+    z-index: -10;
+
     overflow: hidden;
 
     display: none;
@@ -175,7 +177,7 @@ body {
     padding-top: 10px;
     padding-bottom: 10px;
     width: 50%;
-    height: 73%;
+    height: 72.5%;
 
     overflow-y: auto;
 
