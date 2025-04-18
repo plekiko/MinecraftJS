@@ -545,7 +545,7 @@ function GetChunkByIndex(index) {
     const chunkX = index * CHUNK_WIDTH * BLOCK_SIZE;
 
     // Retrieve the chunk from the Map using its x-coordinate
-    return chunks.get(chunkX);
+    return getDimensionChunks().get(chunkX);
 }
 
 function getBiomeForNoise(temp, wetness, mountains, biomeSet) {
@@ -586,15 +586,19 @@ function GetBlockAtWorldPosition(
 }
 
 function placePortalInDimension(dimension, position) {
+    const range = 8;
+
     // Check if there is an existing portal
-    const chunk = GetChunkForX(position.x, dimension);
+    for (let x = -range; x <= range; x++) {
+        const chunk = GetChunkForX(position.x + x * BLOCK_SIZE, dimension);
 
-    if (chunk) {
-        const portals = chunk.getAllBlocks(Blocks.NetherPortal);
+        if (chunk) {
+            const portals = chunk.getAllBlocks(Blocks.NetherPortal);
 
-        if (portals.length > 0) {
-            // If a portal exists, return the first one
-            return portals[portals.length - 1].transform.position;
+            if (portals.length > 0) {
+                // If a portal exists, return the first one
+                return portals[portals.length - 1].transform.position;
+            }
         }
     }
 
@@ -606,64 +610,34 @@ function placePortalInDimension(dimension, position) {
         const blockX = position.x + i * BLOCK_SIZE;
         const blockY = position.y;
 
-        SetBlockTypeAtPosition(
-            blockX,
-            blockY,
-            Blocks.Obsidian,
-            false,
-            dimension
-        );
+        bufferBlock(blockX, blockY, Blocks.Obsidian, dimension);
     }
     // Top
     for (let i = 0; i < 4; i++) {
         const blockX = position.x + i * BLOCK_SIZE;
         const blockY = position.y + BLOCK_SIZE * 4;
 
-        SetBlockTypeAtPosition(
-            blockX,
-            blockY,
-            Blocks.Obsidian,
-            false,
-            dimension
-        );
+        bufferBlock(blockX, blockY, Blocks.Obsidian, dimension);
     }
     // Sides
     for (let i = 0; i < 4; i++) {
         const blockX = position.x;
         const blockY = position.y + i * BLOCK_SIZE;
 
-        SetBlockTypeAtPosition(
-            blockX,
-            blockY,
-            Blocks.Obsidian,
-            false,
-            dimension
-        );
+        bufferBlock(blockX, blockY, Blocks.Obsidian, dimension);
     }
     for (let i = 0; i < 4; i++) {
         const blockX = position.x + BLOCK_SIZE * 3;
         const blockY = position.y + i * BLOCK_SIZE;
 
-        SetBlockTypeAtPosition(
-            blockX,
-            blockY,
-            Blocks.Obsidian,
-            false,
-            dimension
-        );
+        bufferBlock(blockX, blockY, Blocks.Obsidian, dimension);
     }
     // Something to stand on under the portal
     for (let i = 0; i < 6; i++) {
         const blockX = position.x + i * BLOCK_SIZE - BLOCK_SIZE;
         const blockY = position.y + BLOCK_SIZE * 5;
 
-        SetBlockTypeAtPosition(
-            blockX,
-            blockY,
-            Blocks.Cobblestone,
-            false,
-            dimension
-        );
+        bufferBlock(blockX, blockY, Blocks.Cobblestone, dimension);
     }
 
     // Create the portal
@@ -672,7 +646,7 @@ function placePortalInDimension(dimension, position) {
             const blockX = position.x + x * BLOCK_SIZE;
             const blockY = position.y + y * BLOCK_SIZE;
 
-            SetBlockTypeAtPosition(blockX, blockY, Blocks.NetherPortal);
+            bufferBlock(blockX, blockY, Blocks.NetherPortal);
         }
     }
     // Return the bottom center of the portal
@@ -717,13 +691,41 @@ function SetBlockTypeAtPosition(
 ) {
     const block = GetBlockAtWorldPosition(worldX, worldY, wall, dimensionIndex);
 
-    if (!block) return;
+    if (!block) {
+        // Buffer the block placement
+
+        return;
+    }
 
     block.setBlockType(blockType);
 }
 
-function SetBufferedBlock(worldX, worldY, blockType) {
-    GetChunkForX(worldX).setBlockTypeAtPosition(worldX, worldY, blockType);
+function bufferBlock(
+    worldX,
+    worldY,
+    blockType,
+    dimensionIndex = activeDimension,
+    metaData = null,
+    wall = false,
+    calculateY = true
+) {
+    const targetChunkX = getChunkXForWorldX(worldX);
+
+    if (calculateY) worldY = CHUNK_HEIGHT * BLOCK_SIZE - worldY;
+
+    if (!pendingBlocks.has(targetChunkX)) {
+        pendingBlocks.set(targetChunkX, {
+            dimensionIndex: dimensionIndex,
+            blocks: [],
+        });
+    }
+    pendingBlocks.get(targetChunkX).blocks.push({
+        x: worldX,
+        y: worldY,
+        blockType,
+        metaData,
+        wall,
+    });
 }
 
 function GetChunkForX(worldX, dimensionIndex = activeDimension) {
@@ -732,4 +734,9 @@ function GetChunkForX(worldX, dimensionIndex = activeDimension) {
         Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
         (CHUNK_WIDTH * BLOCK_SIZE);
     return dimension.chunks.get(chunkX);
+}
+
+function getChunkXForWorldX(worldX) {
+    const chunkSize = CHUNK_WIDTH * BLOCK_SIZE;
+    return Math.floor(worldX / chunkSize) * chunkSize;
 }

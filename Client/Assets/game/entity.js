@@ -457,33 +457,35 @@ class Entity {
                 }
 
                 if (activeDimension !== Dimensions.Nether) {
+                    const gotoPosition = placePortalInDimension(
+                        Dimensions.Nether,
+                        new Vector2(
+                            block.transform.position.x / 8,
+                            block.transform.position.y
+                        )
+                    );
+
                     gotoDimension(Dimensions.Nether);
 
-                    setTimeout(() => {
-                        const gotoPosition = placePortalInDimension(
-                            Dimensions.Nether,
-                            block.transform.position
-                        );
-
-                        this.position.x = gotoPosition.x;
-                        this.position.y = gotoPosition.y;
-                    }, 100);
+                    this.position.x = gotoPosition.x;
+                    this.position.y = gotoPosition.y;
 
                     this.portalCooldown = this.maxPortalCooldown;
 
                     break;
                 } else {
+                    const gotoPosition = placePortalInDimension(
+                        Dimensions.Overworld,
+                        new Vector2(
+                            block.transform.position.x * 8,
+                            block.transform.position.y
+                        )
+                    );
+
                     gotoDimension(Dimensions.Overworld);
 
-                    setTimeout(() => {
-                        const gotoPosition = placePortalInDimension(
-                            Dimensions.Overworld,
-                            block.transform.position
-                        );
-
-                        this.position.x = gotoPosition.x;
-                        this.position.y = gotoPosition.y;
-                    }, 100);
+                    this.position.x = gotoPosition.x;
+                    this.position.y = gotoPosition.y;
 
                     this.portalCooldown = this.maxPortalCooldown;
 

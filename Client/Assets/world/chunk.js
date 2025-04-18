@@ -713,19 +713,15 @@ class Chunk {
             targetChunk.setBlockType(localX, localY, blockType, wall, metaData);
         } else {
             // Buffer the block with dimension index
-            if (!pendingBlocks.has(targetChunkX)) {
-                pendingBlocks.set(targetChunkX, {
-                    dimensionIndex: this.dimension,
-                    blocks: [],
-                });
-            }
-            pendingBlocks.get(targetChunkX).blocks.push({
-                x: worldX,
-                y: worldY,
+            bufferBlock(
+                worldX,
+                worldY,
                 blockType,
-                metaData,
+                this.dimension,
                 wall,
-            });
+                metaData,
+                false
+            );
         }
     }
 

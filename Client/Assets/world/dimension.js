@@ -142,6 +142,6 @@ function getDimension(index) {
     return dimensions[index];
 }
 
-function getDimensionChunks(index) {
+function getDimensionChunks(index = activeDimension) {
     return dimensions[index].chunks;
 }
