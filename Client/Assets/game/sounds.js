@@ -220,8 +220,6 @@ function playPositionalSound(
     pitch = 1,
     loop = false
 ) {
-    console.log("pitch: ", pitch);
-
     if (!player) {
         playSound(sound, maxVolume, pitch);
         return;

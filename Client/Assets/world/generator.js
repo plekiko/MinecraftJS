@@ -207,15 +207,15 @@ async function generateWorld(dimensionIndex = activeDimension) {
             }
         }
 
+        if (!specialWorldProps.noStructures) {
+            generateStructures(dimensionIndex);
+        }
+
         postProcessChunk(GetChunkForX(chunkX, dimensionIndex));
 
         if (willUploadChunk) {
             UploadChunkToServer(chunkX, dimensionIndex);
         }
-    }
-
-    if (!specialWorldProps.noStructures) {
-        generateStructures(dimensionIndex);
     }
 }
 
@@ -264,6 +264,8 @@ async function UploadChunkToServer(chunkX) {
 }
 
 function GenerateStructure(structure, x, y) {
+    console.log("Generating structure", structure, x, y);
+
     const structureData = Structures[structure];
     if (!structureData) return;
 
@@ -471,7 +473,6 @@ function generateStructures(dimensionIndex = activeDimension) {
         if (chunk.generated) {
             return;
         }
-        chunk.generated = true;
 
         const chunkIndex = chunkX / (CHUNK_WIDTH * BLOCK_SIZE);
         const structureNoiseValue = dimension.noiseMaps.structure.getNoise(
@@ -479,7 +480,14 @@ function generateStructures(dimensionIndex = activeDimension) {
             0
         );
 
-        if (structureNoiseValue > 10.2) {
+        // console.log(
+        //     "Structure noise value for chunk",
+        //     chunkIndex,
+        //     "is",
+        //     structureNoiseValue
+        // );
+
+        if (structureNoiseValue > 10) {
             const allStructureNames = Object.keys(Structures);
             const candidates = allStructureNames.filter((name) => {
                 const structure = Structures[name];
