@@ -286,6 +286,20 @@ const NetherBiomes = Object.freeze({
     }),
 });
 
+const YvanBiomes = Object.freeze({
+    Bob: new Biome({
+        name: "Bob",
+        heightNoise: NoisePresets.Mountains,
+        topLayer: Blocks.AcaciaLeaves,
+        secondLayer: Blocks.AcaciaLog,
+        baseBlock: Blocks.TNT,
+        waterLevel: 55,
+        maxMobs: 16,
+        waterSandType: Blocks.DiamondOre,
+        fluidType: Blocks.Stone,
+    }),
+});
+
 const AllBiomes = Object.freeze({
     ...OverworldBiomes,
     ...NetherBiomes,

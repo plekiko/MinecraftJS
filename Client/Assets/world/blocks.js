@@ -753,7 +753,7 @@ const blockTypes = [
         animationSpeed: 0.15,
         fluid: true,
         dropWithoutTool: false,
-        lightLevel: 6,
+        lightLevel: 10,
         cannotBeConverted: true,
         transparent: true,
         fire: true,
@@ -1440,7 +1440,7 @@ const blockTypes = [
         breakByFluid: true,
         dropWithoutTool: false,
         breakSound: ["blocks/fizz"],
-        ambientSound: "blocks/fire",
+        // ambientSound: "blocks/fire",
         transparent: true,
 
         excludeFromCreativeInventory: true,

@@ -24,6 +24,7 @@ class Dimension {
             tree: new Noise(50, 10, 5),
             cave: new Noise(55, 10, 5),
             mountains: new Noise(30, 60, 30),
+
             coal: new Noise(100, 5.3, 5),
             iron: new Noise(100, 5, 5),
             diamond: new Noise(100, 6.8, 5),
@@ -123,6 +124,32 @@ let dimensions = [
 
         fastLava: true,
         noWater: true,
+    }),
+    new Dimension({
+        name: "Yvan Dimension",
+        biomeSet: YvanBiomes,
+        backgroundGradient: {
+            dayColor: "#03fca9", // Daytime top color (black)
+            nightColor: "#1c0314", // Nighttime top color (black)
+            sunsetColor: "#053c59", // Sunset bottom color (black)
+            midnightColor: "#300121", // Midnight bottom color (black)
+        },
+
+        noiseMaps: {
+            grass: new Noise(550, 0.2, 1),
+            structure: new Noise(500, 1, 10),
+            temperature: new Noise(30, 70, 32),
+            wetness: new Noise(30, 40, 21),
+            tree: new Noise(100, 10, 5),
+            mountains: new Noise(30, 60, 30),
+            cave: new Noise(37, 80, 5),
+
+            lavaPockets: new Noise(100, 10, 5),
+            iron: new Noise(70, 20, 5),
+            coal: new Noise(70, 20, 5),
+        },
+
+        fastLava: true,
     }),
 ];
 

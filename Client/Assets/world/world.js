@@ -215,7 +215,14 @@ function globalRecalculateLight() {
             const ny = currentPosY + offset.dy * BLOCK_SIZE;
             const neighbor = GetBlockAtWorldPosition(nx, ny, false);
             if (!neighbor) continue;
-            const newLight = currentLevel - 1;
+
+            // Exponential decay: reduce light by a factor (e.g., 0.5)
+            const decayFactor = 0.8; // Adjust this value to control the steepness of the curve
+            const newLight = Math.max(
+                1,
+                Math.floor(currentLevel * decayFactor)
+            ); // Ensure it doesn't go below 1
+
             if (neighbor.lightLevel < newLight) {
                 neighbor.lightLevel = newLight;
                 neighbor.sunLight = false;
