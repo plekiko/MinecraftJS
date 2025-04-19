@@ -4,13 +4,19 @@ const randomTextElement = document.querySelector(".splash");
 const menuContainer = document.querySelector(".menu-container");
 const worldsContainer = document.querySelector(".world-select");
 const worldContainer = document.querySelector(".world-container");
+const worldCreateContainer = document.querySelector(".world-create-container");
+const worldSeedInput = document.querySelector("#world-seed-input");
+const savedInText = document.querySelector("#saved-in-text");
 const worldSelectContainer = document.querySelector("#world-select-container");
 const removeTexturePackButton = document.getElementById("remove-texture-btn");
+const gameModeButton = document.getElementById("game-mode-button");
 const texturePackSelectContainer = document.querySelector(
     "#texture-pack-select-container"
 );
 const texturePacksContainer =
     texturePackSelectContainer.querySelector(".world-select");
+
+const worldNameInput = document.querySelector("#world-name-input");
 
 const worldPlayButton = document.getElementById("play-selected-btn");
 const removeWorldButton = document.getElementById("remove-world-btn");
@@ -109,7 +115,7 @@ function showTexturePacks() {
     }
 }
 
-function PlayGame() {
+function playGame() {
     buttonSound();
     menuContainer.style.display = "none";
     panorama.style.display = "none";
@@ -412,19 +418,31 @@ async function getTexturePackData(id) {
     }
 }
 
-function createNewWorld() {
-    let worldName = "New World";
-    let seed = "";
-    worldName = prompt("Enter world name: ", worldName);
-    seed = prompt("Enter world seed (leave empty for a random seed): ", seed);
+function gotoWorldCreate() {
+    buttonSound();
 
-    if (!seed) seed = Math.floor(Math.random() * 100000000);
+    worldCreateContainer.style.display = "flex";
+    menuContainer.style.display = "none";
+    panorama.style.display = "none";
+    worldSelectContainer.style.display = "none";
+    footer.style.display = "none";
+}
+
+function createNewWorld() {
+    if (!worldSeed) worldSeed = Math.floor(Math.random() * 100000000);
     if (!worldName) worldName = "New World";
 
     localStorage.setItem(
         "selectedWorld",
-        JSON.stringify({ id: Date.now(), name: worldName, seed: seed })
+        JSON.stringify({
+            id: Date.now(),
+            name: worldName,
+            seed: worldSeed,
+            gameMode: selectedGameMode,
+        })
     );
+
+    // console.log("Selected World:", worldName, worldSeed, selectedGameMode);
 
     window.location.href = "./game.html";
 }
@@ -454,11 +472,66 @@ function removeWorld() {
 
 function backToMenu() {
     buttonSound();
+
+    enableMenu();
+}
+
+function enableMenu() {
+    worldCreateContainer.style.display = "none";
     menuContainer.style.display = "flex";
     panorama.style.display = "block";
     worldSelectContainer.style.display = "none";
     footer.style.display = "block";
     texturePackSelectContainer.style.display = "none";
+}
+
+function backToWorldSelection() {
+    buttonSound();
+
+    worldCreateContainer.style.display = "none";
+    worldSelectContainer.style.display = "flex";
+
+    worldNameInput.value = "New World";
+    worldSeedInput.value = "";
+    setGameMode(0);
+    updateWorldSeed(worldSeedInput.value);
+    updateWorldName(worldNameInput.value);
+}
+
+let selectedGameMode = 0;
+function switchGameMode() {
+    buttonSound();
+
+    selectedGameMode = (selectedGameMode + 1) % 4;
+
+    setGameMode(selectedGameMode);
+}
+
+function setGameMode(gamemode) {
+    const gameModes = ["Survival", "Creative", "Adventure", "Spectator"];
+
+    selectedGameMode = gamemode;
+
+    gameModeButton.textContent = "Game Mode: " + gameModes[gamemode];
+}
+
+let worldSeed = "";
+function updateWorldSeed(value) {
+    if (value === "") {
+        value = Math.floor(Math.random() * 100000000);
+    }
+    worldSeed = value;
+}
+
+let worldName = "New World";
+function updateWorldName(value) {
+    if (value === "") {
+        value = "World";
+    }
+
+    savedInText.textContent = "Will be saved in: " + value;
+
+    worldName = value;
 }
 
 function playSelectedWorld() {

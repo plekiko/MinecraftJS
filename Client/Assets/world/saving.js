@@ -161,6 +161,7 @@ function LoadWorldFromLocalStorage() {
         if (SPAWN_PLAYER) {
             setTimeout(() => {
                 SpawnPlayer();
+                player.setGamemode(selectedWorld.gameMode);
                 setTimeout(() => {
                     SaveWorld(false);
                 }, 1500);

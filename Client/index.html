@@ -12,7 +12,7 @@
         <script src="Assets/utils/indexDB.js"></script>
 
         <!-- Panoramic background container -->
-        <div class="panorama">
+        <div class="panorama" style="display: none">
             <div class="cube">
                 <div class="face face0"></div>
                 <div class="face face1"></div>
@@ -23,7 +23,7 @@
             </div>
         </div>
 
-        <div class="footer">
+        <div class="footer" style="display: none">
             <p>
                 Made by Plekiko - For the best experience use Firefox <br />
                 <a class="footer-button" onclick="downloadServer()"
@@ -31,7 +31,7 @@
                 >
             </p>
         </div>
-        <div class="menu-container">
+        <div class="menu-container" style="display: none">
             <div class="title">
                 <div class="logo-container">
                     <div class="logo-column">
@@ -52,7 +52,7 @@
             </div>
 
             <div class="buttons">
-                <a onclick="PlayGame()" class="btn">Singleplayer</a>
+                <a onclick="playGame()" class="btn">Singleplayer</a>
                 <a onclick="multiplayerButton()" class="btn"
                     >Multiplayer (beta)</a
                 >
@@ -88,7 +88,7 @@
 
                 <div class="world-buttons-container">
                     <button
-                        onclick="createNewWorld()"
+                        onclick="gotoWorldCreate()"
                         id="create-new-btn"
                         class="btn"
                     >
@@ -170,6 +170,66 @@
                 <div class="world-select-bar"></div>
             </div>
             <div src="Assets/sprites/blocks/dirt.png" class="background"></div>
+        </div>
+
+        <div class="center-childs">
+            <div class="world-create-container">
+                <div class="world-create-background"></div>
+                <div class="world-create-top-container">
+                    <div class="big-text">Create New World</div>
+                    <div class="input-field-container">
+                        <div class="input-field-title">World Name</div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            id="world-name-input"
+                            maxlength="20"
+                            value="New World"
+                            autocomplete="off"
+                            autofocus
+                            oninput="updateWorldName(this.value)"
+                        />
+                        <div class="input-field-footer" id="saved-in-text">
+                            Will be saved in: New World
+                        </div>
+                    </div>
+                    <div class="input-field-container">
+                        <div class="input-field-title">
+                            Seed for the world generator
+                        </div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            maxlength="20"
+                            id="world-seed-input"
+                            autocomplete="off"
+                            value=""
+                            autofocus
+                            oninput="updateWorldSeed(this.value)"
+                        />
+                        <div class="input-field-footer">
+                            Leave blank for a random seed
+                        </div>
+                    </div>
+
+                    <div
+                        class="btn"
+                        id="game-mode-button"
+                        onclick="switchGameMode()"
+                    >
+                        Game Mode: Survival
+                    </div>
+                    <!-- <div class="btn" id="world-options-button">
+                        More World Options...
+                    </div> -->
+                </div>
+                <div class="world-create-bottom-container">
+                    <a onclick="createNewWorld()" class="btn"
+                        >Create New World</a
+                    >
+                    <a onclick="backToWorldSelection()" class="btn">Cancel</a>
+                </div>
+            </div>
         </div>
     </body>
 

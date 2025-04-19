@@ -10,6 +10,8 @@ body {
     overflow: hidden;
 
     margin: 0;
+
+    font-family: "Pixel";
 }
 
 .background {
@@ -30,6 +32,114 @@ body {
     text-decoration: underline;
 
     cursor: pointer;
+}
+
+.center-childs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    height: 100%;
+}
+
+.input-field-container {
+    width: 80%;
+    height: fit-content;
+
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.input-field:focus {
+    outline: none;
+}
+
+.input-field {
+    border: none;
+    padding: 0;
+
+    width: 100%;
+    height: 50px;
+
+    background-color: black;
+
+    border: solid rgb(209, 209, 209) 2px;
+
+    color: white;
+
+    font-family: "Pixel";
+
+    font-size: 25px;
+
+    padding-left: 10px;
+}
+
+.input-field-title {
+    color: rgb(209, 209, 209);
+    font-size: x-large;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+}
+
+.input-field-footer {
+    color: rgb(209, 209, 209);
+    font-size: x-large;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+}
+
+.world-create-container {
+    width: 50%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    align-items: center;
+    position: absolute;
+}
+
+.world-create-top-container {
+    width: 70%;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 35px;
+}
+
+.world-create-bottom-container {
+    width: 100%;
+    height: fit-content;
+
+    justify-content: center;
+
+    display: flex;
+
+    gap: 20px;
+
+    padding: 10px;
+}
+
+.world-create-background {
+    position: absolute;
+
+    width: 100vw;
+    height: 100%;
+
+    background-image: url("Assets/sprites/blocks/dirt.png");
+    background-size: 100px;
+    background-repeat: repeat;
+    filter: brightness(35%);
+
+    z-index: -1;
 }
 
 .world-buttons-container {
@@ -316,6 +426,8 @@ body {
     font-family: "Pixel";
     text-decoration: none;
     font-size: 130%;
+
+    user-select: none;
 
     cursor: pointer;
 
