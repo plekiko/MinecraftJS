@@ -95,7 +95,7 @@ body {
     width: 50%;
     height: 100%;
 
-    display: flex;
+    display: none;
     flex-direction: column;
     justify-content: space-between;
 
