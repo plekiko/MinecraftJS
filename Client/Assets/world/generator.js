@@ -141,13 +141,11 @@ function RegenerateWorld() {
     }, 1);
 }
 
-async function GetChunkFromServer(x) {
-    await waitForTexturePack();
-
+async function GetChunkFromServer(x, dimensionIndex = activeDimension) {
     try {
         const chunkData = await server.get({
             type: "getChunk",
-            message: { x: x },
+            message: { x: x, dimensionIndex: dimensionIndex },
         });
 
         return chunkData.chunk;
@@ -174,7 +172,17 @@ async function generateWorld(dimensionIndex = activeDimension) {
 
         if (multiplayer) {
             if (!dimension.chunks.has(chunkX)) {
-                const chunkFromServer = await GetChunkFromServer(chunkX); // Ensure async handling
+                console.log("Chunk not loaded", chunkX, dimensionIndex);
+                const chunkFromServer = await GetChunkFromServer(
+                    chunkX,
+                    dimensionIndex
+                ); // Ensure async handling
+                console.log(
+                    "Chunk from server",
+                    chunkX,
+                    chunkFromServer,
+                    dimensionIndex
+                );
                 if (chunkFromServer) {
                     console.log(
                         "Loaded chunk from server",
@@ -239,7 +247,7 @@ function ServerPlaceBlock(
         },
     });
 
-    UploadChunkToServer(chunkX);
+    UploadChunkToServer(chunkX, dimensionIndex);
 }
 
 function ServerBreakBlock(
@@ -264,16 +272,17 @@ function ServerBreakBlock(
         },
     });
 
-    UploadChunkToServer(chunkX);
+    UploadChunkToServer(chunkX, dimensionIndex);
 }
 
-async function UploadChunkToServer(chunkX) {
-    const chunk = GetChunkForX(chunkX);
+async function UploadChunkToServer(chunkX, dimensionIndex) {
+    const chunk = GetChunkForX(chunkX, dimensionIndex);
     await server.send({
         type: "uploadChunk",
         message: {
             x: chunkX,
             chunk: SaveChunk(chunk),
+            dimensionIndex: dimensionIndex,
         },
         sender: player.UUID,
     });

@@ -133,7 +133,14 @@ function processMessage(message, ws) {
             break;
 
         case "getChunk":
-            const chunk = world.getChunk(data.message.data.x);
+            const chunk = world
+                .getDimension(data.message.data.dimensionIndex)
+                .getChunk(data.message.data.x);
+            console.log(
+                `Dimension: ${JSON.stringify(
+                    world.getDimension(data.message.data.dimensionIndex).chunks
+                )}`
+            );
             ws.send(
                 JSON.stringify({
                     type: "response",
@@ -159,7 +166,15 @@ function processMessage(message, ws) {
             break;
 
         case "uploadChunk":
-            world.uploadChunk(data.message.chunk);
+            world
+                .getDimension(data.message.dimensionIndex)
+                .uploadChunk(data.message.chunk, data.message.x);
+
+            console.log(
+                `New World: ${JSON.stringify(
+                    world.getDimension(0).chunks.size
+                )}`
+            );
 
             // broadcast(data, [data.sender]);
             break;

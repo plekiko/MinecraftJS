@@ -110,7 +110,7 @@ function processMessage(data) {
                 return;
             }
 
-            console.log("Breaking block:", message);
+            // console.log("Breaking block:", message);
 
             // get the block at the given coordinates
             const block = getDimensionChunks(message.dimensionIndex)
