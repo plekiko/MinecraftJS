@@ -248,6 +248,7 @@ class Player extends Entity {
     respawn() {
         this.velocity = new Vector2();
         this.shouldAddForce = new Vector2();
+        if (this.isLocal) gotoDimension(0);
         this.teleport(new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE));
         this.setOnGround();
         this.setGamemode();
@@ -1009,7 +1010,8 @@ class Player extends Entity {
                 this.hoverBlock.x,
                 this.hoverBlock.y,
                 blockToPlace.blockId,
-                isWall
+                isWall,
+                activeDimension
             );
         }
 
@@ -1214,7 +1216,8 @@ class Player extends Entity {
                     hover.y,
                     Blocks.Air,
                     wall,
-                    false
+                    false,
+                    activeDimension
                 );
             }
             return;
@@ -1290,7 +1293,8 @@ class Player extends Entity {
                     hover.y,
                     Blocks.Air,
                     isWall,
-                    shouldDrop
+                    shouldDrop,
+                    activeDimension
                 );
             }
 

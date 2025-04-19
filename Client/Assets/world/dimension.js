@@ -156,11 +156,23 @@ let dimensions = [
 function gotoDimension(dimension) {
     if (dimension === activeDimension) return;
 
+    player.dimension = dimension;
+
+    if (multiplayer) {
+        server.send({
+            type: "playerDimension",
+            message: {
+                player: player.UUID,
+                dimension: dimension,
+            },
+        });
+    }
+
     chunks_in_render_distance = new Map();
 
     entities = entities.filter((entity) => {
         if (entity instanceof Player) {
-            return entity.UUID === player.UUID;
+            return true;
         }
         return false;
     });

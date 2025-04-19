@@ -219,7 +219,14 @@ async function generateWorld(dimensionIndex = activeDimension) {
     }
 }
 
-function ServerPlaceBlock(chunkX, x, y, blockType, isWall = false) {
+function ServerPlaceBlock(
+    chunkX,
+    x,
+    y,
+    blockType,
+    isWall = false,
+    dimensionIndex = activeDimension
+) {
     server.send({
         type: "placeBlock",
         message: {
@@ -228,13 +235,22 @@ function ServerPlaceBlock(chunkX, x, y, blockType, isWall = false) {
             blockType: blockType,
             isWall: isWall,
             chunkX: chunkX,
+            dimensionIndex: dimensionIndex,
         },
     });
 
     UploadChunkToServer(chunkX);
 }
 
-function ServerBreakBlock(chunkX, x, y, blockType, isWall = false, shouldDrop) {
+function ServerBreakBlock(
+    chunkX,
+    x,
+    y,
+    blockType,
+    isWall = false,
+    shouldDrop = false,
+    dimensionIndex = activeDimension
+) {
     server.send({
         type: "breakBlock",
         message: {
@@ -244,6 +260,7 @@ function ServerBreakBlock(chunkX, x, y, blockType, isWall = false, shouldDrop) {
             isWall: isWall,
             chunkX: chunkX,
             shouldDrop: shouldDrop,
+            dimensionIndex: dimensionIndex,
         },
     });
 

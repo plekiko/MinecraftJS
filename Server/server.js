@@ -170,6 +170,13 @@ function processMessage(message, ws) {
         case "breakBlock":
             broadcast(data, [data.sender]);
             break;
+        case "playerDimension":
+            const player = getPlayerByUUID(data.message.player);
+            if (player) {
+                player.dimension = data.message.dimension;
+                broadcast(data, [data.sender]);
+            }
+            break;
 
         default:
             broadcast(data, [data.sender]);

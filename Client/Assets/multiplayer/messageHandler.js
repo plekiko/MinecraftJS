@@ -73,12 +73,20 @@ function processMessage(data) {
             break;
 
         case "placeBlock":
-            if (!getDimensionChunks(activeDimension).has(message.chunkX))
-                console.log("Chunk not loaded:", message.chunkX);
+            if (
+                !getDimensionChunks(message.dimensionIndex)?.has(message.chunkX)
+            ) {
+                console.log(
+                    "Chunk not loaded:",
+                    message.chunkX,
+                    message.dimensionIndex
+                );
+                return;
+            }
 
             console.log("Placing block:", message);
 
-            getDimensionChunks(activeDimension)
+            getDimensionChunks(message.dimensionIndex)
                 .get(message.chunkX)
                 .setBlockType(
                     message.x,
@@ -91,19 +99,31 @@ function processMessage(data) {
                 );
             break;
         case "breakBlock":
-            if (!getDimensionChunks(activeDimension).has(message.chunkX))
-                console.log("Chunk not loaded:", message.chunkX);
+            if (
+                !getDimensionChunks(message.dimensionIndex)?.has(message.chunkX)
+            ) {
+                console.log(
+                    "Chunk not loaded:",
+                    message.chunkX,
+                    message.dimensionIndex
+                );
+                return;
+            }
 
             console.log("Breaking block:", message);
 
             // get the block at the given coordinates
-            const block = getDimensionChunks(activeDimension)
+            const block = getDimensionChunks(message.dimensionIndex)
                 .get(message.chunkX)
                 .getBlock(message.x, message.y, false, message.isWall);
 
             if (!block) console.log("Block not found:", message.x, message.y);
 
             block.breakBlock(message.shouldDrop);
+        case "playerDimension":
+            const otherPlayer = getEntityByUUID(message.player);
+            if (otherPlayer) otherPlayer.dimension = message.dimension;
+            break;
 
         default:
             console.log("Unknown message type:", type);
@@ -163,6 +183,8 @@ function iJoined(player, existingPlayers) {
                 p.name,
                 false
             );
+
+            newPlayer.dimension = p.dimension;
 
             newPlayer.setSkin(p.skin);
         });

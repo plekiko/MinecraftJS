@@ -141,6 +141,7 @@ function Draw(chunks, frames) {
 
 function DrawEntities() {
     entities.forEach((entity) => {
+        if (entity.dimension !== activeDimension) return;
         if (
             Math.abs(
                 Vector2.XDistance(
