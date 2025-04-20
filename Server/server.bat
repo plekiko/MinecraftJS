@@ -1,2 +1,2 @@
 @echo off
-python -m http.server 25566
+node server.js
