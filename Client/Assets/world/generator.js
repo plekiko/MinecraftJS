@@ -237,6 +237,7 @@ function ServerPlaceBlock(
 ) {
     server.send({
         type: "placeBlock",
+        sender: player.UUID,
         message: {
             x: x,
             y: y,
@@ -261,6 +262,7 @@ function ServerBreakBlock(
 ) {
     server.send({
         type: "breakBlock",
+        sender: player.UUID,
         message: {
             x: x,
             y: y,

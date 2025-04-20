@@ -307,6 +307,15 @@ class Player extends Entity {
 
         playPositionalSound(this.position, "items/ignite.ogg", 10);
 
+        ServerPlaceBlock(
+            getChunkXForWorldX(this.hoverBlock.transform.position.x),
+            this.hoverBlock.x,
+            this.hoverBlock.y,
+            Blocks.Fire,
+            false,
+            activeDimension
+        );
+
         setBlockType(this.hoverBlock, Blocks.Fire);
     }
 
@@ -338,6 +347,15 @@ class Player extends Entity {
             positional: true,
             origin: this.position,
         });
+
+        ServerPlaceBlock(
+            getChunkXForWorldX(this.hoverBlock.transform.position.x),
+            this.hoverBlock.x,
+            this.hoverBlock.y,
+            Blocks.Farmland,
+            false,
+            activeDimension
+        );
 
         this.reduceDurability();
 
