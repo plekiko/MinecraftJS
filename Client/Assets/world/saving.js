@@ -64,6 +64,7 @@ function SaveWorld(message = true, toFile = false) {
         currentSave.health = player.health;
         currentSave.currentSlot = hotbar.currentSlot;
         currentSave.activeDimension = activeDimension;
+        currentSave.flying = player.abilities.flying;
     }
 
     currentSave.seed = seed;
@@ -120,14 +121,25 @@ function SaveChunk(chunk) {
         blocks[y] = [];
         walls[y] = [];
         for (let x = 0; x < CHUNK_WIDTH; x++) {
-            blocks[y][x] = chunk.blocks[y][x].blockType;
-            walls[y][x] = chunk.walls[y][x].blockType;
+            const block = chunk.blocks[y][x];
+            const wall = chunk.walls[y][x];
 
-            if (chunk.blocks[y][x].metaData) {
-                blocks[y][x] = {
-                    t: chunk.blocks[y][x].blockType,
-                    m: JSON.stringify(chunk.blocks[y][x].metaData),
-                };
+            // Save block
+            blocks[y][x] = { t: block.blockType };
+            if (block.metaData) {
+                blocks[y][x].m = JSON.stringify(block.metaData);
+            }
+            if (block.linkedBlocks && block.linkedBlocks.length > 1) {
+                blocks[y][x].l = JSON.stringify(block.linkedBlocks);
+            }
+
+            // Save wall
+            walls[y][x] = { t: wall.blockType };
+            if (wall.metaData) {
+                walls[y][x].m = JSON.stringify(wall.metaData);
+            }
+            if (wall.linkedBlocks && wall.linkedBlocks.length > 1) {
+                walls[y][x].l = JSON.stringify(wall.linkedBlocks);
             }
         }
     }
@@ -305,6 +317,8 @@ async function LoadWorld(save) {
 
             if (currentSave.health) player.health = currentSave.health;
 
+            if (currentSave.flying) player.abilities.flying = true;
+
             if (currentSave.activeDimension !== undefined)
                 gotoDimension(currentSave.activeDimension);
 
@@ -330,11 +344,8 @@ async function LoadChunk(
         ? dimension.chunks.get(chunk.previousChunk)
         : null;
 
-    // Use biome.name for newer saves, fallback to biome for older saves
     const biomeName =
         chunk.biome && chunk.biome.name ? chunk.biome.name : chunk.biome;
-
-    // Map the biome name to the dimension's biome set
     const biome = AllBiomes[biomeName];
 
     const constructedChunk = new Chunk(
@@ -342,42 +353,67 @@ async function LoadChunk(
         CHUNK_WIDTH,
         biome,
         previousChunk,
-        pendingBlocks, // Pass dimension-specific pendingBlocks
+        pendingBlocks,
         true,
         dimensionIndex
     );
 
     constructedChunk.generateArray();
 
+    // First pass: Set block types without handling extended blocks
     for (let y = 0; y < CHUNK_HEIGHT; y++) {
         for (let x = 0; x < CHUNK_WIDTH; x++) {
             // Blocks
+            const blockData = chunk.blocks[y][x];
+            const blockType = blockData.t ? blockData.t : blockData;
+            const metaData = blockData.m ? JSON.parse(blockData.m) : null;
+
             constructedChunk.setBlockType(
                 x,
                 y,
-                chunk.blocks[y][x].t
-                    ? chunk.blocks[y][x].t
-                    : chunk.blocks[y][x],
+                blockType,
                 false,
-                chunk.blocks[y][x].m ? JSON.parse(chunk.blocks[y][x].m) : null,
+                metaData,
+                false, // Skip calculateY since we're in chunk-local coordinates
+                false, // Skip updateBlocks to do it in a second pass
                 false
             );
 
-            if (
-                GetBlock(constructedChunk.blocks[y][x].blockType).lightLevel > 0
-            ) {
-                // Handle light-emitting blocks if needed
+            // Walls
+            const wallData = chunk.walls[y][x];
+            const wallType = wallData.t ? wallData.t : wallData;
+            const wallMetaData = wallData.m ? JSON.parse(wallData.m) : null;
+
+            constructedChunk.setBlockType(
+                x,
+                y,
+                wallType,
+                true,
+                wallMetaData,
+                false,
+                false,
+                false
+            );
+        }
+    }
+
+    // Second pass: Restore linkedBlocks
+    for (let y = 0; y < CHUNK_HEIGHT; y++) {
+        for (let x = 0; x < CHUNK_WIDTH; x++) {
+            // Blocks
+            const blockData = chunk.blocks[y][x];
+            const block = constructedChunk.blocks[y][x];
+            if (blockData.l) {
+                console.log("Linked blocks:", JSON.parse(blockData.l));
+                block.linkedBlocks = JSON.parse(blockData.l);
             }
 
             // Walls
-            constructedChunk.setBlockType(
-                x,
-                y,
-                chunk.walls[y][x].t ? chunk.walls[y][x].t : chunk.walls[y][x],
-                true,
-                chunk.walls[y][x].m ? JSON.parse(chunk.walls[y][x].m) : null,
-                false
-            );
+            const wallData = chunk.walls[y][x];
+            const wall = constructedChunk.walls[y][x];
+            if (wallData.l) {
+                wall.linkedBlocks = JSON.parse(wallData.l);
+            }
         }
     }
 

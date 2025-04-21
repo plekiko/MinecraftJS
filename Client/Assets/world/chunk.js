@@ -778,8 +778,12 @@ class Chunk {
         wall = false,
         metaData = null,
         calculate = true,
-        updateBlocks = false
+        updateBlocks = false,
+        makeLinks = true
     ) {
+        // Check if blockType is a valid int
+        if (typeof blockType !== "number") blockType = Blocks.Air;
+
         const array = wall ? this.walls : this.blocks;
 
         if (calculate) y = this.calculateY(y); // y is now in chunk's internal bottom-up system
@@ -792,7 +796,7 @@ class Chunk {
         let linkedBlocks = [];
 
         // Handle extended blocks
-        if (blockDef.extendedBlock) {
+        if (blockDef.extendedBlock && makeLinks) {
             // First pass: Validate all extended block positions
             for (let i = 0; i < blockDef.extendedBlock.length; i++) {
                 const extendedBlock = blockDef.extendedBlock[i];
@@ -807,7 +811,6 @@ class Chunk {
 
                 const targetChunk = this.getChunkForBlock(worldX);
                 if (!targetChunk) {
-                    // Buffer if chunk doesn’t exist (will handle linkedBlocks later)
                     this.setBlockTypeAtPosition(
                         worldX,
                         worldY,
@@ -829,7 +832,6 @@ class Chunk {
                     localY < 0 ||
                     localY >= targetChunk.height
                 ) {
-                    // Buffer if out of bounds
                     this.setBlockTypeAtPosition(
                         worldX,
                         worldY,
@@ -893,6 +895,24 @@ class Chunk {
                 );
                 const localY = Math.floor(worldY / BLOCK_SIZE);
 
+                const blockAtPos = targetChunk.getBlock(
+                    localX,
+                    localY,
+                    false,
+                    wall
+                );
+
+                // Skip placing if the block is already the correct type (avoids duplicates during loading)
+                if (blockAtPos.blockType === extendedBlock.blockId) {
+                    extendedBlockRefs.push(blockAtPos);
+                    linkedBlocks.push({
+                        x: worldX,
+                        y: worldY,
+                        blockType: extendedBlock.blockId,
+                    });
+                    continue;
+                }
+
                 // Place the block and get its reference
                 targetChunk.setBlockType(
                     localX,
@@ -928,9 +948,7 @@ class Chunk {
                 }
             }
         } else {
-            // No extended blocks, just set the main block
             if (block.blockType === Blocks.Obsidian) {
-                // Obsidian is broken check for portal
                 this.checkForPortalBreak(x, y);
             }
 
@@ -939,7 +957,6 @@ class Chunk {
             block.linkedBlocks = linkedBlocks;
         }
 
-        // Update chunk logic
         if (blockDef.chunkUpdate) {
             if (!this.update.includes(block)) {
                 this.update.push(block);
