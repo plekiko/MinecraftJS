@@ -44,6 +44,11 @@ class InventoryItem {
     removeProp(prop) {
         delete this.props[prop];
     }
+
+    isEmpty() {
+        if (this.count <= 0) return true;
+        return this.blockId === null && this.itemId === null;
+    }
 }
 
 class InventorySlot {

@@ -999,6 +999,8 @@ class Inventory {
             ? this.hoverSlot.array[this.hoverSlot.y][this.hoverSlot.x]
             : null;
 
+        if (!this.hoverItem) return; // No hovered item, exit early
+
         // If the hovered item is already in the hotbar slot, do nothing
         if (
             hoveredSlot &&
@@ -1017,18 +1019,11 @@ class Inventory {
             !this.hoverSlot.array &&
             this.hoverItem === this.craftingOutputSlot.item
         ) {
-            if (hotbarSlot.isEmpty()) {
+            if (hotbarSlot.isEmpty() && !hoveredItem.isEmpty()) {
                 // Place the crafting output directly into the hotbar slot
                 hotbarSlot.item = this.cloneItem(hoveredItem);
                 this.clearSlot(this.craftingOutputSlot);
                 this.craftingComplete();
-            } else {
-                // Swap with the hotbar slot and return leftovers to inventory
-                const temp = this.cloneItem(hotbarSlot.item);
-                hotbarSlot.item = this.cloneItem(hoveredItem);
-                this.clearSlot(this.craftingOutputSlot);
-                this.craftingComplete();
-                this.addItem(temp); // Add the old hotbar item back to inventory
             }
             return;
         }
