@@ -1298,7 +1298,8 @@ class Inventory {
             this.handleRightClickSpread(item, x, y, array);
         }
 
-        if (this.handleRightClickGetHalf(item, x, y, array)) return;
+        if (!slot.onlyTake)
+            if (this.handleRightClickGetHalf(item, x, y, array)) return;
 
         this.handleLeftClickItemInteraction(item, x, y, array);
     }
