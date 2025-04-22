@@ -570,6 +570,13 @@ function displayServers() {
         });
         serverListContainer.appendChild(serverElement);
     });
+
+    // Auto-select the first server if none is selected
+    if (!selectedServerId && servers.length > 0) {
+        const firstServerElement =
+            serverListContainer.querySelector(".world-container");
+        selectServer(servers[0].id, firstServerElement);
+    }
 }
 
 function selectServer(id, selectedElement) {
@@ -662,12 +669,19 @@ function updateQuickConnectIP(value) {
 }
 
 function connectToServer() {
-    if (!tempQuickConnectIP) {
-        alert("Please enter a server IP.");
+    if (!selectedServerId) {
+        alert("Please select a server to connect to.");
         return;
     }
 
-    const [ip, port = "25565"] = tempQuickConnectIP.split(":");
+    const servers = JSON.parse(localStorage.getItem("servers") || "[]");
+    const selectedServer = servers.find((s) => s.id === selectedServerId);
+    if (!selectedServer) {
+        alert("Selected server not found.");
+        return;
+    }
+
+    const [ip, port = "25565"] = selectedServer.ip.split(":");
     localStorage.setItem("multiplayerIP", ip);
     localStorage.setItem("multiplayerPort", port);
 
@@ -687,7 +701,6 @@ function cancelQuickConnect() {
 function backToServerSelection() {
     buttonSound();
     addServerContainer.style.display = "none";
-    quickConnectContainer.style.display = "none";
     serverSelectContainer.style.display = "flex";
     displayServers();
 }

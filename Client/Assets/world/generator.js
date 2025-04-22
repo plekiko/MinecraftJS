@@ -235,6 +235,7 @@ function ServerPlaceBlock(
     isWall = false,
     dimensionIndex = activeDimension
 ) {
+    if (!multiplayer) return;
     server.send({
         type: "placeBlock",
         sender: player.UUID,
@@ -260,6 +261,7 @@ function ServerBreakBlock(
     shouldDrop = false,
     dimensionIndex = activeDimension
 ) {
+    if (!multiplayer) return;
     server.send({
         type: "breakBlock",
         sender: player.UUID,
@@ -278,6 +280,7 @@ function ServerBreakBlock(
 }
 
 async function UploadChunkToServer(chunkX, dimensionIndex) {
+    if (!multiplayer) return;
     const chunk = GetChunkForX(chunkX, dimensionIndex);
     await server.send({
         type: "uploadChunk",

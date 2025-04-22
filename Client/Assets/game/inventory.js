@@ -1577,7 +1577,6 @@ class Inventory {
             size: 25,
             shadow: true,
             textAlign: "left",
-            background: "rgba(0, 0, 0, 0.5)",
         });
     }
 
