@@ -4,7 +4,7 @@ const randomTextElement = document.querySelector(".splash");
 const menuContainer = document.querySelector(".menu-container");
 const worldsContainer = document.querySelector(".world-select");
 const worldContainer = document.querySelector(".world-container");
-const worldCreateContainer = document.querySelector(".world-create-container");
+const worldCreateContainer = document.querySelector("#world-create-container");
 const worldSeedInput = document.querySelector("#world-seed-input");
 const savedInText = document.querySelector("#saved-in-text");
 const worldSelectContainer = document.querySelector("#world-select-container");
@@ -23,8 +23,28 @@ const removeWorldButton = document.getElementById("remove-world-btn");
 const footer = document.querySelector(".footer");
 const panorama = document.querySelector(".panorama");
 
+// Server-related elements
+const serverSelectContainer = document.querySelector(
+    "#server-select-container"
+);
+const serverListContainer = document.querySelector("#server-list");
+const addServerContainer = document.querySelector("#add-server-container");
+const quickConnectContainer = document.querySelector(
+    "#quick-connect-container"
+);
+const serverNameInput = document.querySelector("#server-name-input");
+const serverIPInput = document.querySelector("#server-ip-input");
+const quickConnectIPInput = document.querySelector("#quick-connect-ip-input");
+const removeServerButton = document.getElementById("remove-server-btn");
+const quickConnectButton = document.getElementById("quick-connect-btn");
+const connectButton = document.getElementById("connect-btn");
+
 let selectedWorld = null;
 let selectedTexturePack = "default";
+let selectedServerId = null;
+let tempServerName = "New Server";
+let tempServerIP = "";
+let tempQuickConnectIP = "";
 let randomTexts = [];
 
 fetch("menu_text.json")
@@ -33,9 +53,7 @@ fetch("menu_text.json")
         randomTexts = data.random_text;
         setRandomText();
     })
-    .catch((error) => {
-        console.error("Error loading menu_text.json:", error);
-    });
+    .catch((error) => {});
 
 function setRandomText() {
     const randomPick =
@@ -56,42 +74,12 @@ function buttonSound() {
     audio.play();
 }
 
-function getMultiplayerIP() {
-    const ip = localStorage.getItem("multiplayerIP");
-    if (ip) {
-        if (!confirm(`Do you want to use ${ip} as the multiplayer server?`)) {
-            const newIP = prompt("Enter the new IP address:");
-            if (newIP) localStorage.setItem("multiplayerIP", newIP);
-        }
-    } else {
-        const newIP = prompt("Enter the IP address of the multiplayer server:");
-        if (newIP) localStorage.setItem("multiplayerIP", newIP);
-    }
-}
-function getMultiplayerPort() {
-    const port = localStorage.getItem("multiplayerPort");
-    if (port) {
-        if (!confirm(`Do you want to use ${port} as the multiplayer port?`)) {
-            const newPort = prompt("Enter the new port number:");
-            if (newPort) localStorage.setItem("multiplayerPort", newPort);
-        }
-    } else {
-        const newPort = prompt(
-            "Enter the port number of the multiplayer server:"
-        );
-        if (newPort) localStorage.setItem("multiplayerPort", newPort);
-    }
-}
-
 function multiplayerButton() {
     buttonSound();
-    getMultiplayerIP();
-    getMultiplayerPort();
-    window.location.href = "game.html?multiplayer=true";
+    showServers();
 }
 
 function downloadServer() {
-    // Download local Server.zip
     const link = document.createElement("a");
     link.href = "Server.zip";
     link.download = "Server.zip";
@@ -121,6 +109,7 @@ function playGame() {
     panorama.style.display = "none";
     worldSelectContainer.style.display = "flex";
     footer.style.display = "none";
+    populateWorlds();
 }
 
 function PlayRandomMusic() {
@@ -181,8 +170,8 @@ function initializeDefaultTexturePack() {
             id: defaultPackId,
             name: "Default",
             dateAdded: new Date().toLocaleString(),
-            icon: "Assets/sprites/menu/worldPreview.png", // Default icon
-            description: "Default Minecraft JS texture pack", // Default description
+            icon: "Assets/sprites/menu/worldPreview.png",
+            description: "Default Minecraft JS texture pack",
         };
         texturePackList.push(defaultPack);
         localStorage.setItem(
@@ -213,13 +202,11 @@ async function populateTexturePacks() {
 
         packNameElement.textContent = pack.name;
         packDateElement.textContent =
-            pack.description || "No description found for this pack"; // Use description instead of date
+            pack.description || "No description found for this pack";
         packElement.style.display = "flex";
 
         packImageElement.src =
             pack.icon || "Assets/sprites/menu/worldPreview.png";
-
-        // console.log("Pack ID:", pack.id, "Current:", currentTexturePack);
 
         packElement.addEventListener("click", () => {
             selectTexturePack(pack.id, packElement);
@@ -265,7 +252,6 @@ async function getTexturePackIcon(packId) {
 function uploadTexturePack() {
     const input = document.createElement("input");
     input.type = "file";
-    // Accept zip 7z rar
     input.accept = ".zip, .7z, .rar";
 
     input.onchange = (e) => {
@@ -281,7 +267,7 @@ function uploadTexturePack() {
                     name: file.name.replace(".zip", ""),
                     dateAdded: new Date().toLocaleString(),
                     icon: null,
-                    description: null, // Will be set below
+                    description: null,
                 };
 
                 const texturePackData = event.target.result;
@@ -300,7 +286,6 @@ function uploadTexturePack() {
                         base64: true,
                     });
 
-                    // Extract icon
                     const iconFilePath = Object.keys(zip.files).find(
                         (fileName) =>
                             fileName.endsWith("icon.png") ||
@@ -314,7 +299,6 @@ function uploadTexturePack() {
                         }
                     }
 
-                    // Extract pack.mcmeta description
                     const mcmetaFile = zip.file("pack.mcmeta");
                     if (mcmetaFile) {
                         const mcmetaText = await mcmetaFile.async("text");
@@ -324,12 +308,8 @@ function uploadTexturePack() {
                         }
                     }
                 } catch (err) {
-                    console.error(
-                        `Failed to process texture pack ${packId}:`,
-                        err
-                    );
-                    packInfo.icon = "Assets/sprites/menu/worldPreview.png"; // Fallback icon
-                    packInfo.description = "No description available"; // Fallback description
+                    packInfo.icon = "Assets/sprites/menu/worldPreview.png";
+                    packInfo.description = "No description available";
                 }
 
                 texturePackList.push(packInfo);
@@ -359,7 +339,7 @@ function uploadSkin() {
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
-                const skinData = event.target.result; // Base64 string (e.g., "data:image/png;base64,...")
+                const skinData = event.target.result;
                 localStorage.setItem("playerSkin", skinData);
                 alert("Skin uploaded successfully!");
             };
@@ -402,7 +382,6 @@ async function removeTexturePack() {
     populateTexturePacks();
 
     removeTexturePackButton.disabled = true;
-    // ldb.set(`texturePack_${selectedTexturePack}`, undefined);
     await deleteFromLdb(`texturePack_${oldSelectedPack}`);
 }
 
@@ -413,14 +392,12 @@ async function getTexturePackData(id) {
         const data = await getFromLdb(`texturePack_${id}`);
         return data;
     } catch (err) {
-        console.error(`Failed to get texture pack data for ${id}:`, err);
         return null;
     }
 }
 
 function gotoWorldCreate() {
     buttonSound();
-
     worldCreateContainer.style.display = "flex";
     menuContainer.style.display = "none";
     panorama.style.display = "none";
@@ -441,8 +418,6 @@ function createNewWorld() {
             gameMode: selectedGameMode,
         })
     );
-
-    // console.log("Selected World:", worldName, worldSeed, selectedGameMode);
 
     window.location.href = "./game.html";
 }
@@ -472,7 +447,6 @@ function removeWorld() {
 
 function backToMenu() {
     buttonSound();
-
     enableMenu();
 }
 
@@ -483,35 +457,33 @@ function enableMenu() {
     worldSelectContainer.style.display = "none";
     footer.style.display = "block";
     texturePackSelectContainer.style.display = "none";
+    serverSelectContainer.style.display = "none";
+    addServerContainer.style.display = "none";
+    quickConnectContainer.style.display = "none";
+
+    // Set disabled state for buttons
+    worldPlayButton.disabled = true;
+    removeWorldButton.disabled = true;
+    removeServerButton.disabled = true;
+    connectButton.disabled = true;
 }
 
 function backToWorldSelection() {
     buttonSound();
-
     worldCreateContainer.style.display = "none";
     worldSelectContainer.style.display = "flex";
-
-    worldNameInput.value = "New World";
-    worldSeedInput.value = "";
-    setGameMode(0);
-    updateWorldSeed(worldSeedInput.value);
-    updateWorldName(worldNameInput.value);
 }
 
 let selectedGameMode = 0;
 function switchGameMode() {
     buttonSound();
-
     selectedGameMode = (selectedGameMode + 1) % 4;
-
     setGameMode(selectedGameMode);
 }
 
 function setGameMode(gamemode) {
     const gameModes = ["Survival", "Creative", "Adventure", "Spectator"];
-
     selectedGameMode = gamemode;
-
     gameModeButton.textContent = "Game Mode: " + gameModes[gamemode];
 }
 
@@ -528,9 +500,7 @@ function updateWorldName(value) {
     if (value === "") {
         value = "World";
     }
-
     savedInText.textContent = "Will be saved in: " + value;
-
     worldName = value;
 }
 
@@ -563,14 +533,173 @@ function selectWorld(id, selectedElement) {
     selectedWorld = id;
 }
 
-worldPlayButton.disabled = true;
+// Server Management Functions
+function showServers() {
+    menuContainer.style.display = "none";
+    panorama.style.display = "none";
+    footer.style.display = "none";
+    worldSelectContainer.style.display = "none";
+    texturePackSelectContainer.style.display = "none";
+    serverSelectContainer.style.display = "flex";
+    addServerContainer.style.display = "none";
+    quickConnectContainer.style.display = "none";
+    displayServers();
+}
+
+function displayServers() {
+    serverListContainer.innerHTML = "";
+    const servers = JSON.parse(localStorage.getItem("servers") || "[]");
+
+    if (servers.length === 0) {
+        removeServerButton.disabled = true;
+        connectButton.disabled = true;
+        return;
+    }
+
+    servers.forEach((server) => {
+        const serverElement = worldContainer.cloneNode(true);
+        const serverNameElement = serverElement.querySelector(".world-name");
+        const serverIPElement = serverElement.querySelector(".world-date");
+
+        serverNameElement.textContent = server.name;
+        serverIPElement.textContent = server.ip;
+        serverElement.style.display = "flex";
+
+        serverElement.addEventListener("click", () => {
+            selectServer(server.id, serverElement);
+        });
+        serverListContainer.appendChild(serverElement);
+    });
+}
+
+function selectServer(id, selectedElement) {
+    const allServerContainers =
+        serverListContainer.querySelectorAll(".world-container");
+    allServerContainers.forEach((container) => {
+        container.classList.remove("selected");
+    });
+
+    selectedElement.classList.add("selected");
+    selectedServerId = id;
+    removeServerButton.disabled = false;
+    connectButton.disabled = false;
+}
+
+function gotoAddServer() {
+    buttonSound();
+    serverSelectContainer.style.display = "none";
+    addServerContainer.style.display = "flex";
+    tempServerName = "New Server";
+    tempServerIP = "";
+    serverNameInput.value = tempServerName;
+    serverIPInput.value = tempServerIP;
+}
+
+function updateServerName(value) {
+    tempServerName = value || "New Server";
+}
+
+function updateServerIP(value) {
+    tempServerIP = value || "";
+}
+
+function addServer() {
+    if (!tempServerIP) {
+        alert("Please enter a server IP.");
+        return;
+    }
+
+    const servers = JSON.parse(localStorage.getItem("servers") || "[]");
+    const newServer = {
+        id: Date.now(),
+        name: tempServerName,
+        ip: tempServerIP,
+    };
+    servers.push(newServer);
+    localStorage.setItem("servers", JSON.stringify(servers));
+
+    backToServerSelection();
+    displayServers();
+}
+
+function removeServer() {
+    if (!selectedServerId) return;
+
+    const servers = JSON.parse(localStorage.getItem("servers") || "[]");
+    if (!confirm("Are you sure you want to delete this server?")) return;
+
+    const updatedServers = servers.filter(
+        (server) => server.id !== selectedServerId
+    );
+    localStorage.setItem("servers", JSON.stringify(updatedServers));
+
+    selectedServerId = null;
+    removeServerButton.disabled = true;
+    connectButton.disabled = true;
+    displayServers();
+}
+
+function gotoQuickConnect() {
+    buttonSound();
+    serverSelectContainer.style.display = "none";
+    quickConnectContainer.style.display = "flex";
+    tempQuickConnectIP = "";
+    quickConnectIPInput.value = tempQuickConnectIP;
+
+    // If a server is selected, prefill the IP field with its IP
+    if (selectedServerId) {
+        const servers = JSON.parse(localStorage.getItem("servers") || "[]");
+        const server = servers.find((s) => s.id === selectedServerId);
+        if (server) {
+            tempQuickConnectIP = server.ip;
+            quickConnectIPInput.value = tempQuickConnectIP;
+        }
+    }
+}
+
+function updateQuickConnectIP(value) {
+    tempQuickConnectIP = value || "";
+}
+
+function connectToServer() {
+    if (!tempQuickConnectIP) {
+        alert("Please enter a server IP.");
+        return;
+    }
+
+    const [ip, port = "25565"] = tempQuickConnectIP.split(":");
+    localStorage.setItem("multiplayerIP", ip);
+    localStorage.setItem("multiplayerPort", port);
+
+    buttonSound();
+    setTimeout(() => {
+        window.location.href = "game.html?multiplayer=true";
+    }, 500);
+}
+
+function cancelQuickConnect() {
+    buttonSound();
+    quickConnectContainer.style.display = "none";
+    serverSelectContainer.style.display = "flex";
+    displayServers();
+}
+
+function backToServerSelection() {
+    buttonSound();
+    addServerContainer.style.display = "none";
+    quickConnectContainer.style.display = "none";
+    serverSelectContainer.style.display = "flex";
+    displayServers();
+}
 
 // Initialize everything after texture pack loading
 async function initialize() {
     populateWorlds();
-    initializeDefaultTexturePack(); // Sets up default pack and current selection
-    await populateTexturePacks(); // Populate UI with current selection
+    initializeDefaultTexturePack();
+    await populateTexturePacks();
     removeTexturePackButton.disabled = selectedTexturePack === "default";
+    removeServerButton.disabled = true;
+    connectButton.disabled = true;
 }
 
 initialize();
@@ -580,3 +709,4 @@ setTimeout(() => {
 }, 1000);
 
 removeTexturePackButton.addEventListener("click", removeTexturePack);
+worldPlayButton.disabled = true;

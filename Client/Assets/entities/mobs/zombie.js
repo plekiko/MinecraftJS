@@ -8,6 +8,7 @@ class Zombie extends Mob {
         body = createZombieBody(),
     } = {}) {
         super({
+            name: "Zombie",
             health: health,
             position: position,
             hitbox: new Vector2(0.4 * BLOCK_SIZE, 1.8 * BLOCK_SIZE),

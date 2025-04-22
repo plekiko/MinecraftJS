@@ -70,6 +70,10 @@ body {
 
     box-shadow: 0 0 20px black;
 
+    height: 92vh;
+
+    user-select: none;
+
     border-radius: 5px;
 }
 

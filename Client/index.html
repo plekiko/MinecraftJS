@@ -56,8 +56,6 @@
                 <a onclick="multiplayerButton()" class="btn"
                     >Multiplayer (beta)</a
                 >
-                <!-- <a onclick="downloadServer()" class="btn">Download server</a> -->
-                <!-- <a href="settings.html" class="btn">Settings</a> -->
                 <a
                     href="https://buymeacoffee.com/plekiko"
                     onclick="buttonSound()"
@@ -172,8 +170,128 @@
             <div src="Assets/sprites/blocks/dirt.png" class="background"></div>
         </div>
 
-        <div class="center-childs">
-            <div class="world-create-container">
+        <div class="world-select-container" id="server-select-container">
+            <div class="world-select-container-text">
+                <div class="big-text">Servers</div>
+                <button onclick="backToMenu()" class="btn">Back</button>
+                <div class="world-select" id="server-list">
+                    <!-- Servers will be dynamically added here -->
+                </div>
+
+                <div class="world-buttons-container">
+                    <button
+                        onclick="gotoAddServer()"
+                        id="add-server-btn"
+                        class="btn"
+                    >
+                        Add Server
+                    </button>
+                    <!-- <button
+                        onclick="gotoQuickConnect()"
+                        id="quick-connect-btn"
+                        class="btn"
+                    >
+                        Quick Connect
+                    </button> -->
+                    <button
+                        onclick="connectToServer()"
+                        id="connect-btn"
+                        class="btn"
+                    >
+                        Connect to Server
+                    </button>
+                    <button
+                        onclick="removeServer()"
+                        id="remove-server-btn"
+                        class="btn"
+                    >
+                        Remove Selected Server
+                    </button>
+                </div>
+            </div>
+            <div class="world-select-bar-container">
+                <div class="world-select-bar"></div>
+                <div class="world-select-bar"></div>
+            </div>
+            <div src="Assets/sprites/blocks/dirt.png" class="background"></div>
+        </div>
+
+        <div class="modal-container" id="add-server-container">
+            <div class="center-modal">
+                <div class="world-create-background"></div>
+                <div class="world-create-top-container">
+                    <div class="big-text">Add Server</div>
+                    <div class="input-field-container">
+                        <div class="input-field-title">Server Name</div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            id="server-name-input"
+                            maxlength="20"
+                            value="New Server"
+                            autocomplete="off"
+                            autofocus
+                            oninput="updateServerName(this.value)"
+                        />
+                        <div class="input-field-footer" id="server-name-footer">
+                            Enter the server name
+                        </div>
+                    </div>
+                    <div class="input-field-container">
+                        <div class="input-field-title">Server IP</div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            id="server-ip-input"
+                            maxlength="50"
+                            value=""
+                            autocomplete="off"
+                            autofocus
+                            oninput="updateServerIP(this.value)"
+                        />
+                        <div class="input-field-footer">
+                            Enter the server IP (e.g., 127.0.0.1:25565)
+                        </div>
+                    </div>
+                </div>
+                <div class="world-create-bottom-container">
+                    <a onclick="addServer()" class="btn">Add Server</a>
+                    <a onclick="backToServerSelection()" class="btn">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-container" id="quick-connect-container">
+            <div class="center-modal">
+                <div class="world-create-background"></div>
+                <div class="world-create-top-container">
+                    <div class="big-text">Quick Connect</div>
+                    <div class="input-field-container">
+                        <div class="input-field-title">Server IP</div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            id="quick-connect-ip-input"
+                            maxlength="50"
+                            value=""
+                            autocomplete="off"
+                            autofocus
+                            oninput="updateQuickConnectIP(this.value)"
+                        />
+                        <div class="input-field-footer">
+                            Enter the server IP (e.g., 127.0.0.1:25565)
+                        </div>
+                    </div>
+                </div>
+                <div class="world-create-bottom-container">
+                    <a onclick="connectToServer()" class="btn">Connect</a>
+                    <a onclick="cancelQuickConnect()" class="btn">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-container" id="world-create-container">
+            <div class="center-modal">
                 <div class="world-create-background"></div>
                 <div class="world-create-top-container">
                     <div class="big-text">Create New World</div>
@@ -219,9 +337,6 @@
                     >
                         Game Mode: Survival
                     </div>
-                    <!-- <div class="btn" id="world-options-button">
-                        More World Options...
-                    </div> -->
                 </div>
                 <div class="world-create-bottom-container">
                     <a onclick="createNewWorld()" class="btn"
@@ -233,10 +348,5 @@
         </div>
     </body>
 
-    <!-- <script src="Assets/world/block.js"></script>
-    <script src="Assets/world/blocks.js"></script>
-    <script src="Assets/game/item.js"></script> -->
-    <!-- <script src="Assets/game/items.js"></script> -->
-    <!-- <script src="Assets/utils/texturePackLoader.js"></script> -->
     <script src="menu.js"></script>
 </html>

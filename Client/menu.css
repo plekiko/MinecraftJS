@@ -91,8 +91,8 @@ body {
     text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
 }
 
-.world-create-container {
-    width: 50%;
+.modal-container {
+    width: 100%;
     height: 100%;
 
     display: none;
@@ -100,6 +100,18 @@ body {
     justify-content: space-between;
 
     align-items: center;
+    position: absolute;
+}
+
+.center-modal {
+    width: 50%;
+    height: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+
     position: absolute;
 }
 

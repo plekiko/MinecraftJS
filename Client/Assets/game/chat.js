@@ -52,14 +52,12 @@ class Chat {
         }
 
         if (multiplayer) {
+            if (!this.isValidText(message)) return;
             server.send({
                 type: "chat",
                 message: message,
                 sender: player.UUID,
             });
-
-            this.closeChat();
-            return;
         }
 
         this.message(message, "Player");
@@ -185,6 +183,8 @@ class Chat {
                 this.message("Invalid Command!");
                 break;
         }
+
+        this.closeChat();
     }
 
     dimension(messageArray) {
@@ -230,10 +230,10 @@ class Chat {
 
         if (value === "true") {
             GAMERULES[rule] = true;
-            this.message(`${rule} set to true.`);
+            this.cheatMessage(`${rule} set to true.`);
         } else if (value === "false") {
             GAMERULES[rule] = false;
-            this.message(`${rule} set to false.`);
+            this.cheatMessage(`${rule} set to false.`);
         } else {
             this.message("Invalid value. Use true or false.");
         }
@@ -270,6 +270,8 @@ class Chat {
             return;
         }
 
+        this.cheatMessage(`Time set to ${newTime}`);
+
         time = newTime;
     }
 
@@ -287,6 +289,10 @@ class Chat {
                 player.position.x,
                 player.position.y
             );
+
+            this.cheatMessage(
+                `Structure ${structureName} generated at ${player.position.x}, ${player.position.y}`
+            );
         } else {
             this.message(`Structure ${structureName} not found.`);
         }
@@ -298,13 +304,7 @@ class Chat {
             return;
         }
 
-        const entityPath = messageArray[1].split(".");
-        const category = entityPath[0];
-        const itemName = entityPath[1];
-
-        const collections = {
-            Entities,
-        };
+        const itemName = messageArray[1];
 
         const x = messageArray[2] !== "~" ? parseInt(messageArray[2]) : "~";
         const y = messageArray[3] !== "~" ? parseInt(messageArray[3]) : "~";
@@ -322,12 +322,18 @@ class Chat {
 
         position.y = -position.y + CHUNK_HEIGHT * BLOCK_SIZE;
 
-        if (collections[category] && collections[category][itemName] != null) {
-            const entity = collections[category][itemName];
+        console.log(itemName);
+
+        if (Entities[itemName] != null) {
+            const entity = Entities[itemName];
 
             for (let i = 0; i < count; i++) {
                 summonEntity(entity, structuredClone(position));
             }
+
+            this.cheatMessage(
+                `Summoned ${count} ${entity.name} at ${position.x}, ${position.y}`
+            );
         } else {
             this.message("Entity not found.");
         }
@@ -365,7 +371,7 @@ class Chat {
 
         player.teleport(targetPosition);
 
-        this.message(`Teleported player to x: ${x} y: ${y}`);
+        this.cheatMessage(`Teleported player to x: ${x} y: ${y}`);
     }
 
     gamemode(messageArray) {
@@ -412,7 +418,21 @@ class Chat {
             "Adventure",
             "Spectator",
         ];
-        this.message("Gamemode set to " + gamemodeNames[gamemode] + ".");
+        this.cheatMessage("Gamemode set to " + gamemodeNames[gamemode] + ".");
+    }
+
+    cheatMessage(message) {
+        if (multiplayer) {
+            server.send({
+                type: "chat",
+                message: message,
+                sender: player.UUID,
+            });
+        }
+
+        this.message(message);
+
+        this.closeChat();
     }
 
     invalidCommand(usage) {
@@ -429,7 +449,7 @@ class Chat {
             "/clearlog",
             "/gamemode <Gamemode>",
             "/tp <x> <y>",
-            "/summon <Category.ItemName> <x> <y> <count>",
+            "/summon <Entity> <x> <y> <count>",
             "/kill",
             "/time <1 - 7.5>",
             "/structure <StructureName>",
@@ -499,7 +519,7 @@ class Chat {
 
             player.inventory.addItem(inventoryItem);
 
-            this.message(
+            this.cheatMessage(
                 `Gave ${count} ${
                     category === "Blocks"
                         ? GetBlock(item).name
@@ -512,7 +532,7 @@ class Chat {
     }
 
     clear() {
-        this.message("Cleared Inventory");
+        this.cheatMessage("Cleared Inventory");
         player.inventory.createItemArray();
     }
 

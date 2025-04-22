@@ -121,12 +121,20 @@ function processMessage(message, ws) {
             break;
 
         case "chat":
-            console.log("Chat message from", data.sender, ":", data.message);
-            broadcast({
-                type: "chat",
-                message: data.message,
-                sender: getPlayerByUUID(data.sender).name,
-            });
+            console.log(
+                "Chat message from",
+                getPlayerByUUID(data.sender).name,
+                ":",
+                data.message
+            );
+            broadcast(
+                {
+                    type: "chat",
+                    message: data.message,
+                    sender: getPlayerByUUID(data.sender).name,
+                },
+                [data.sender]
+            );
             break;
         case "entityRPC":
             broadcast(data, [data.sender]);
@@ -136,11 +144,7 @@ function processMessage(message, ws) {
             const chunk = world
                 .getDimension(data.message.data.dimensionIndex)
                 .getChunk(data.message.data.x);
-            console.log(
-                `Dimension: ${JSON.stringify(
-                    world.getDimension(data.message.data.dimensionIndex).chunks
-                )}`
-            );
+
             ws.send(
                 JSON.stringify({
                     type: "response",
@@ -169,12 +173,6 @@ function processMessage(message, ws) {
             world
                 .getDimension(data.message.dimensionIndex)
                 .uploadChunk(data.message.chunk, data.message.x);
-
-            console.log(
-                `New World: ${JSON.stringify(
-                    world.getDimension(0).chunks.size
-                )}`
-            );
 
             // broadcast(data, [data.sender]);
             break;

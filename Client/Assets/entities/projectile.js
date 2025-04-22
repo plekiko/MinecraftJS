@@ -1,5 +1,6 @@
 class Projectile extends Entity {
     constructor({
+        name = "Projectile",
         position,
         sprite,
         scale = 1,
@@ -10,6 +11,7 @@ class Projectile extends Entity {
         props = {},
     }) {
         super({
+            name: "Projectile",
             position: position,
             hitbox: hitbox,
             sprite: sprite,

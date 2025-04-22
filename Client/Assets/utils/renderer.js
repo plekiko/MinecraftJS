@@ -494,17 +494,29 @@ function drawText({
     shadow = true,
     textAlign = "right",
     color = "white",
-    background = null,
+    background = false,
 }) {
-    // if (background) {
-    //     ctx.fillStyle = background;
+    if (background) {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
 
-    //     const metrics = ctx.measureText(text);
-    //     const textWidth =
-    //         metrics.actualBoundingBoxRight + metrics.actualBoundingBoxLeft;
-
-    //     ctx.fillRect(x - 5, y - size + 2, textWidth, size + 5);
-    // }
+        // Calculate the position based on text alignment
+        const textWidth = ctx.measureText(text).width;
+        let bgX = x - 5;
+        let bgY = y - size * 0.8 - 1;
+        let bgWidth = textWidth + 10;
+        let bgHeight = size + 2;
+        if (textAlign === "center") {
+            bgX -= textWidth / 2;
+        } else if (textAlign === "left") {
+            bgX -= textWidth;
+        }
+        if (textAlign === "top") {
+            bgY -= size;
+        } else if (textAlign === "bottom") {
+            bgY += size;
+        }
+        ctx.fillRect(bgX, bgY, bgWidth, bgHeight); // Draw background rectangle
+    }
 
     ctx.textAlign = textAlign;
 

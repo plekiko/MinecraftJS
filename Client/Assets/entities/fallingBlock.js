@@ -10,6 +10,7 @@ class FallingBlock extends Entity {
         const spriteScale = BLOCK_SIZE / Math.max(spriteWidth, spriteHeight);
 
         super({
+            name: "Falling Block",
             position: new Vector2(
                 position.x + BLOCK_SIZE / 20,
                 position.y + BLOCK_SIZE / 20

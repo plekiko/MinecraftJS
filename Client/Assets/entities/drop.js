@@ -19,6 +19,7 @@ class Drop extends Entity {
 
         // Set up the entity with dynamic scaling
         super({
+            name: isItem ? "Item" : "Block",
             position: position,
             hitbox: new Vector2(BLOCK_SIZE / 1.5, BLOCK_SIZE / 1.5),
             sprite: sprite,

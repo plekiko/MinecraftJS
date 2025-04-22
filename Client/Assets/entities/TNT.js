@@ -14,6 +14,7 @@ class TNT extends Entity {
 
         // Call the superclass constructor with dynamically calculated sprite scale
         super({
+            name: "TNT",
             position: new Vector2(
                 position.x + BLOCK_SIZE / 20,
                 position.y + BLOCK_SIZE / 20

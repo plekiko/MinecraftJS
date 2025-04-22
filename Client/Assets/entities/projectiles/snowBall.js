@@ -4,6 +4,7 @@ class Snowball extends Projectile {
         velocity = new Vector2(15 * BLOCK_SIZE, -15 * BLOCK_SIZE),
     }) {
         super({
+            name: "Snowball",
             position: position,
             sprite: getSpriteUrl("items/snowball"),
             damage: 0,

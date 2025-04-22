@@ -30,6 +30,7 @@ class Player extends Entity {
     }) {
         super({
             UUID: UUID,
+            name: name,
             position: position,
             hitbox: new Vector2(0.4 * BLOCK_SIZE, 1.8 * BLOCK_SIZE),
             type: EntityTypes.Player,
@@ -37,8 +38,6 @@ class Player extends Entity {
             fallDamage: true,
             despawn: false,
         });
-
-        this.name = name;
 
         this.health = health;
         this.maxHealth = health;
@@ -104,6 +103,31 @@ class Player extends Entity {
         this.mutliplayerSyncPlayerState();
 
         if (this.windowOpen) this.inventory.update();
+    }
+
+    drawOverride() {
+        this.drawNameTag();
+    }
+
+    drawNameTag() {
+        if (!multiplayer) return;
+
+        const nameTagOffset = 0.3 * BLOCK_SIZE;
+        const nameTagPosition = new Vector2(
+            this.position.x + this.hitbox.x / 2 - camera.x,
+            this.position.y - nameTagOffset - camera.y
+        );
+
+        drawText({
+            text: this.name,
+            x: nameTagPosition.x,
+            y: nameTagPosition.y,
+            color: "white",
+            size: 18,
+            textAlign: "center",
+            background: true,
+            shadow: false,
+        });
     }
 
     portalSoundLogic() {

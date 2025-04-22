@@ -9,6 +9,7 @@ const EntityTypes = Object.freeze({
 class Entity {
     constructor({
         UUID = uuidv4(),
+        name = "Entity",
         position = new Vector2(),
         rotation = new Vector2(),
         hitbox = new Vector2(1, 1),
@@ -51,6 +52,7 @@ class Entity {
         fire = -20,
     } = {}) {
         this.UUID = UUID;
+        this.name = name;
         this.position = position;
         this.rotation = rotation;
         this.hitbox = hitbox;
@@ -985,6 +987,8 @@ class Entity {
         this.drawEntity(ctx);
 
         this.drawFire(ctx);
+
+        if (this.drawOverride) this.drawOverride();
     }
 
     getLightLevel() {

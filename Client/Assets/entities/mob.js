@@ -1,5 +1,6 @@
 class Mob extends Entity {
     constructor({
+        name = "Mob",
         health = 10,
         noAi = false,
         position = new Vector2(),
@@ -18,6 +19,7 @@ class Mob extends Entity {
         myChunkX = 0,
     } = {}) {
         super({
+            name: name,
             position: position,
             hitbox: hitbox,
             float: float,

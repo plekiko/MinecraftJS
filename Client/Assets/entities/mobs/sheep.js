@@ -8,6 +8,7 @@ class Sheep extends Mob {
         body = createSheepBody(),
     } = {}) {
         super({
+            name: "Sheep",
             health: health,
             position: position,
             hitbox: new Vector2(0.9 * BLOCK_SIZE, 1 * BLOCK_SIZE),
