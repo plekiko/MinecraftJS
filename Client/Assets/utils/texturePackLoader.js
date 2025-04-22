@@ -26,6 +26,23 @@ async function loadVanillaTextures() {
         }
     }
 
+    // Loop through Entities
+    for (const entityKey in Entities) {
+        const entity = Entities[entityKey];
+
+        const initEntity = new entity();
+
+        if (initEntity.body?.sprite) {
+            spritePaths.push(`entity/${initEntity.body.sprite}`);
+        }
+    }
+
+    // Misc Entity Sprites
+    spritePaths.push(`entity/sheep/sheep_fur`);
+
+    // Player
+    spritePaths.push(`entity/steve`);
+
     // All GUI elements
     spritePaths.push(`gui/icons`);
     spritePaths.push(`gui/widgets`);

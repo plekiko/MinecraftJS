@@ -1,8 +1,8 @@
 class Snowball extends Projectile {
     constructor({
-        position,
+        position = new Vector2(),
         velocity = new Vector2(15 * BLOCK_SIZE, -15 * BLOCK_SIZE),
-    }) {
+    } = {}) {
         super({
             name: "Snowball",
             position: position,

@@ -1,5 +1,5 @@
 class FallingBlock extends Entity {
-    constructor({ position, blockType = Blocks.Sand } = {}) {
+    constructor({ position = new Vector2(), blockType = Blocks.Sand } = {}) {
         const spritePath = "blocks/" + GetBlock(blockType).sprite;
         const sprite = getSpriteUrl(spritePath);
 

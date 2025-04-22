@@ -25,22 +25,10 @@ class Body {
     setSprite(sprite) {
         this.sprite = sprite;
 
-        const spriteSize = getSpriteSize("entity/" + sprite);
-
-        if (!spriteSize.width) {
-            this.image.src = getSpriteUrl("entity/" + sprite);
-            return;
-        }
-
-        if (
-            spriteSize.width > spriteSize.originalWidth ||
-            spriteSize.height > spriteSize.originalHeight
-        ) {
-            this.image.src = getSpriteUrl("entity/" + sprite, false);
-            return;
-        }
-
-        this.image.src = getSpriteUrl("entity/" + sprite);
+        this.image.src = getSpriteUrl(
+            "entity/" + sprite,
+            isEqualToOriginal("entity/" + sprite)
+        );
     }
 
     initParts() {
@@ -376,7 +364,10 @@ class BodyPart {
 
         if (this.ownSpriteMap) {
             img = new Image();
-            img.src = getSpriteUrl("entity/" + this.ownSpriteMap);
+            img.src = getSpriteUrl(
+                "entity/" + this.ownSpriteMap,
+                isEqualToOriginal("entity/" + this.ownSpriteMap)
+            );
         }
 
         return img;
