@@ -26,6 +26,25 @@ async function loadVanillaTextures() {
         }
     }
 
+    // All GUI elements
+    spritePaths.push(`gui/icons`);
+    spritePaths.push(`gui/widgets`);
+    spritePaths.push(`gui/container/anvil`);
+    spritePaths.push(`gui/container/beacon`);
+    spritePaths.push(`gui/container/brewing_stand`);
+    spritePaths.push(`gui/container/converter`);
+    spritePaths.push(`gui/container/crafting_table`);
+    spritePaths.push(`gui/container/dispenser`);
+    spritePaths.push(`gui/container/enchanting_table`);
+    spritePaths.push(`gui/container/furnace`);
+    spritePaths.push(`gui/container/generic_54`);
+    spritePaths.push(`gui/container/hopper`);
+    spritePaths.push(`gui/container/horse`);
+    spritePaths.push(`gui/container/inventory`);
+    spritePaths.push(`gui/container/single_chest`);
+    spritePaths.push(`gui/container/stats_icons`);
+    spritePaths.push(`gui/container/villager`);
+
     // Remove duplicates (if any)
     const uniquePaths = [...new Set(spritePaths)];
 
@@ -221,8 +240,8 @@ function isEqualToOriginal(path) {
     }
 
     return (
-        spriteSize.width === spriteSize.originalWidth &&
-        spriteSize.height === spriteSize.originalHeight
+        spriteSize.width == spriteSize.originalWidth &&
+        spriteSize.height == spriteSize.originalHeight
     );
 }
 
