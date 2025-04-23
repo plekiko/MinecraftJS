@@ -44,23 +44,27 @@ class Chat {
 
         this.addToLog(this.currentMessage);
 
+        let color = "white"; // Default color for regular messages
         if (this.currentMessage.startsWith("/", 0)) {
             this.doCheat(
                 this.currentMessage.slice(1, this.currentMessage.length)
             );
             message = "";
+            color = "yellow"; // Cheat commands use yellow
         }
 
-        if (multiplayer) {
-            if (!this.isValidText(message)) return;
+        if (multiplayer && this.isValidText(message)) {
             server.send({
                 type: "chat",
                 message: message,
                 sender: player.UUID,
+                color, // Include color in multiplayer message
             });
         }
 
-        this.message(message, "Player");
+        if (message) {
+            this.message(message, "Player", color);
+        }
 
         this.closeChat();
     }
@@ -88,29 +92,30 @@ class Chat {
         }
 
         const biomeName = messageArray[1];
-
         const biome = AllBiomes[biomeName];
 
         if (biome) {
             const biomeChunkX = LocateBiome(biome);
 
             if (!biomeChunkX) {
-                this.message("Biome not found.");
+                this.message("Biome not found.", "", "red");
                 return;
             }
             const chunkPos = biomeChunkX * CHUNK_WIDTH;
-
-            chat.message(`Biome ${biomeName} found at ${chunkPos}.`);
+            this.message(
+                `Biome ${biomeName} found at ${chunkPos}.`,
+                "",
+                "green"
+            );
         } else {
-            this.message("Biome not found.");
+            this.message("Biome not found.", "", "red");
         }
     }
 
     clearLog() {
         this.chatLog = [];
         this.saveLog();
-
-        this.message("Cleared chat history");
+        this.message("Cleared chat history", "", "green");
     }
 
     isValidText(text) {
@@ -180,7 +185,7 @@ class Chat {
                 break;
 
             default:
-                this.message("Invalid Command!");
+                this.message("Invalid Command!", "", "red");
                 break;
         }
 
@@ -436,48 +441,54 @@ class Chat {
     }
 
     invalidCommand(usage) {
-        this.message("Invalid command. Usage: " + usage);
+        this.message("Usage: " + usage, "", "red");
     }
 
     printHelp() {
-        // List of all available commands
         const commands = [
-            "/help",
-            "Category's: Blocks, Items, Entities",
-            "/give <Category.ItemName> <count>",
-            "/clear",
-            "/clearlog",
-            "/gamemode <Gamemode>",
-            "/tp <x> <y>",
-            "/summon <Entity> <x> <y> <count>",
-            "/kill",
-            "/time <1 - 7.5>",
-            "/structure <StructureName>",
-            "/locatebiome <BiomeName>",
-            "/seed",
-            "/hit <damage>",
-            "/gamerule <rule/list> <value>",
-            "/dim <dimension>",
+            { text: "/help", color: "cyan" },
+            { text: "Category's: Blocks, Items, Entities", color: "cyan" },
+            { text: "/give <Category.ItemName> <count>", color: "cyan" },
+            { text: "/clear", color: "cyan" },
+            { text: "/clearlog", color: "cyan" },
+            { text: "/gamemode <Gamemode>", color: "cyan" },
+            { text: "/tp <x> <y>", color: "cyan" },
+            { text: "/summon <Entity> <x> <y> <count>", color: "cyan" },
+            { text: "/kill", color: "cyan" },
+            { text: "/time <1 - 7.5>", color: "cyan" },
+            { text: "/structure <StructureName>", color: "cyan" },
+            { text: "/locatebiome <BiomeName>", color: "cyan" },
+            { text: "/seed", color: "cyan" },
+            { text: "/hit <damage>", color: "cyan" },
+            { text: "/gamerule <rule/list> <value>", color: "cyan" },
+            { text: "/dim <dimension>", color: "cyan" },
         ];
 
-        // Print them one by one in chat
         commands.forEach((cmd) => {
-            this.message(cmd);
+            this.message(cmd.text, "", cmd.color);
         });
     }
 
-    message(message, sender = "Server") {
+    message(message, sender = "", color = "white") {
         if (!this.isValidText(message)) return;
 
-        const messageWithSender = `[${sender}] ${message}`;
-        this.messages.push(messageWithSender);
+        if (color === "red") {
+            color = "#FF5555";
+        }
 
-        // Add the new message to tempMessages with a timestamp
+        let finalMessage = sender ? `[${sender}] ${message}` : message;
+
+        // Store in messages array (for persistent history)
+        this.messages.push({ text: finalMessage, color });
+
+        // Store in tempMessages with timestamp for temporary display
         this.tempMessages.push({
-            text: messageWithSender,
+            text: finalMessage,
             timestamp: Date.now(),
+            color,
         });
 
+        // Trim messages to respect viewHistory limit
         if (this.messages.length > this.viewHistory) {
             this.messages.shift();
         }
@@ -543,12 +554,13 @@ class Chat {
                 this.tempMessages.length
             );
             for (let i = 0; i < maxMessages; i++) {
+                const msg = this.tempMessages[this.tempMessages.length - 1 - i];
                 drawText({
-                    text: this.tempMessages[this.tempMessages.length - 1 - i]
-                        .text, // Reverse order
+                    text: msg.text,
                     x: 17,
                     y: CANVAS.height - 60 - i * 30,
                     size: 30,
+                    color: msg.color, // Use stored color
                     shadow: true,
                     textAlign: "left",
                 });
@@ -560,18 +572,14 @@ class Chat {
         ctx.fillRect(10, CANVAS.height - 50, 1000, 40);
 
         const beforeCursor = this.currentMessage.slice(0, this.cursorPosition);
-        const cursorX = 17 + this.measureTextWidth(beforeCursor, 30); // Using the helper function
-
-        // const messageToDisplay =
-        //     this.currentMessage.slice(0, this.cursorPosition) +
-        //     (this.showCursor ? "_" : "") +
-        //     this.currentMessage.slice(this.cursorPosition);
+        const cursorX = 17 + this.measureTextWidth(beforeCursor, 30);
 
         drawText({
             text: this.currentMessage,
             x: 17,
             y: CANVAS.height - 20,
             size: 30,
+            color: "white", // Current message remains white for simplicity
             shadow: false,
             textAlign: "left",
         });
@@ -583,14 +591,15 @@ class Chat {
 
         for (let i = 0; i < this.viewHistory; i++) {
             const messageIndex = this.messages.length - 1 - i;
-
             if (!this.messages[messageIndex]) continue;
 
+            const msg = this.messages[messageIndex];
             drawText({
-                text: this.messages[messageIndex],
+                text: msg.text,
                 x: 17,
                 y: CANVAS.height - 60 - i * 30,
                 size: 30,
+                color: msg.color, // Use stored color
                 shadow: true,
                 textAlign: "left",
             });
@@ -750,9 +759,17 @@ class Chat {
     }
 
     update() {
-        if (!this.inChat && input.isKeyPressed("KeyT")) {
-            this.openChat();
+        if (!this.inChat) {
+            if (input.isKeyPressed("KeyT")) {
+                this.openChat();
+            }
+            if (input.isKeyPressed("Backslash")) {
+                this.openChat();
+                this.currentMessage = "/";
+                this.cursorPosition = 1;
+            }
         }
+
         if (input.isKeyPressed("Enter")) {
             if (this.inChat) {
                 this.send();
