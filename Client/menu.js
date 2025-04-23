@@ -702,6 +702,11 @@ function backToServerSelection() {
     buttonSound();
     addServerContainer.style.display = "none";
     serverSelectContainer.style.display = "flex";
+
+    // Button states
+    removeServerButton.disabled = true;
+    connectButton.disabled = true;
+
     displayServers();
 }
 
