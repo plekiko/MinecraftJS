@@ -68,7 +68,7 @@ class Chat {
         }
 
         if (message) {
-            this.message(message, "Player", color);
+            this.message(message, player.name, color);
         }
 
         this.closeChat();
@@ -148,7 +148,7 @@ class Chat {
                     return itemSuggestions;
                 case "count":
                 case "damage":
-                    return ["1", "10", "100"];
+                    return ["1", "64"];
                 case "mode":
                     return [
                         "survival",
@@ -223,10 +223,6 @@ class Chat {
             parts[cursorWordIndex] ||
             (this.currentMessage.startsWith("/") ? "/" : "");
 
-        console.log(
-            `Autocomplete: currentMessage="${this.currentMessage}", cursorPosition=${this.cursorPosition}, cursorWordIndex=${cursorWordIndex}, currentPart="${currentPart}"`
-        );
-
         // Initialize or continue autocomplete cycle
         if (this.suggestionIndex === -1) {
             this.originalInput = this.currentMessage;
@@ -237,17 +233,12 @@ class Chat {
             );
         }
 
-        if (this.suggestions.length === 0) {
-            console.log("No suggestions available");
-            return;
-        }
+        if (this.suggestions.length === 0) return;
 
         // Cycle to the next suggestion
         this.suggestionIndex =
             (this.suggestionIndex + 1) % this.suggestions.length;
         const suggestion = this.suggestions[this.suggestionIndex];
-
-        console.log(`Selected suggestion: ${suggestion}`);
 
         // Reconstruct the message
         if (cursorWordIndex === 0 && this.currentMessage.startsWith("/")) {
@@ -261,10 +252,6 @@ class Chat {
             parts.slice(0, cursorWordIndex).join(" ").length +
             (cursorWordIndex > 0 ? 1 : 0) +
             (parts[cursorWordIndex] || "").length;
-
-        console.log(
-            `Updated: currentMessage="${this.currentMessage}", cursorPosition=${this.cursorPosition}`
-        );
     }
 
     addToLog(message) {
@@ -497,7 +484,7 @@ class Chat {
                 `Structure ${structureName} generated at ${player.position.x}, ${player.position.y}`
             );
         } else {
-            this.message(`Structure ${structureName} not found.`);
+            this.message(`Structure ${structureName} not found.`, "", "red");
         }
     }
 
@@ -538,7 +525,7 @@ class Chat {
                 `Summoned ${count} ${entity.name} at ${position.x}, ${position.y}`
             );
         } else {
-            this.message("Entity not found.");
+            this.message("Entity not found.", "", "red");
         }
     }
 
@@ -737,7 +724,7 @@ class Chat {
                 } to the player.`
             );
         } else {
-            this.message(`Item ${messageArray[1]} not found.`);
+            this.message(`Item ${messageArray[1]} not found.`, "", "red");
         }
     }
 
