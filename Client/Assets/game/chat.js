@@ -18,6 +18,11 @@ class Chat {
         this.historyIndex = 0;
         this.viewHistory = 15;
 
+        this.suggestions = [];
+        this.suggestionIndex = -1;
+        this.originalInput = "";
+        this.autocompletePart = "";
+
         this.loadLog();
     }
 
@@ -58,7 +63,7 @@ class Chat {
                 type: "chat",
                 message: message,
                 sender: player.UUID,
-                color, // Include color in multiplayer message
+                color,
             });
         }
 
@@ -67,6 +72,199 @@ class Chat {
         }
 
         this.closeChat();
+    }
+
+    getCommandSuggestions() {
+        return [
+            { name: "give", args: ["category.item", "count"] },
+            { name: "clear", args: [] },
+            { name: "clearlog", args: [] },
+            { name: "gamemode", args: ["mode"] },
+            { name: "tp", args: ["x", "y"] },
+            { name: "summon", args: ["entity", "x", "y", "count"] },
+            { name: "kill", args: [] },
+            { name: "time", args: ["time"] },
+            { name: "help", args: [] },
+            { name: "structure", args: ["structure"] },
+            { name: "locatebiome", args: ["biome"] },
+            { name: "seed", args: [] },
+            { name: "hit", args: ["damage"] },
+            { name: "gamerule", args: ["rule", "value"] },
+            { name: "dim", args: ["dimension"] },
+            { name: "dimension", args: ["dimension"] },
+        ];
+    }
+
+    resetAutocomplete() {
+        this.suggestions = [];
+        this.suggestionIndex = -1;
+        this.originalInput = "";
+        this.autocompletePart = "";
+    }
+
+    generateSuggestions(input, argIndex) {
+        const commands = this.getCommandSuggestions();
+        const parts = input.trim().split(/\s+/); // Split on any whitespace
+        const isCommand = input.startsWith("/") && argIndex === 0;
+
+        console.log(
+            `Generating suggestions: input="${input}", argIndex=${argIndex}`
+        );
+
+        if (isCommand) {
+            const prefix = parts[0].slice(1).toLowerCase();
+            const suggestions = commands
+                .filter((cmd) => cmd.name.toLowerCase().startsWith(prefix))
+                .map((cmd) => cmd.name);
+            console.log(`Command suggestions: ${suggestions}`);
+            return suggestions;
+        } else {
+            const commandName = parts[0].slice(1).toLowerCase();
+            const command = commands.find(
+                (cmd) => cmd.name.toLowerCase() === commandName
+            );
+            if (!command) {
+                console.log("No matching command found");
+                return [];
+            }
+
+            const argType = command.args[argIndex - 1];
+            const prefix = parts[argIndex]?.toLowerCase() || "";
+
+            console.log(`Argument type: ${argType}, prefix: ${prefix}`);
+
+            switch (argType) {
+                case "category.item":
+                    const blockItems = Object.keys(Blocks).map(
+                        (name) => `Blocks.${name}`
+                    );
+                    const items = Object.keys(Items).map(
+                        (name) => `Items.${name}`
+                    );
+                    const itemSuggestions = [...blockItems, ...items].filter(
+                        (item) => item.toLowerCase().startsWith(prefix)
+                    );
+                    console.log(`Item suggestions: ${itemSuggestions}`);
+                    return itemSuggestions;
+                case "count":
+                case "damage":
+                    return ["1", "10", "100"];
+                case "mode":
+                    return [
+                        "survival",
+                        "creative",
+                        "adventure",
+                        "spectator",
+                        "0",
+                        "1",
+                        "2",
+                        "3",
+                    ];
+                case "x":
+                case "y":
+                    return [
+                        "~",
+                        "0",
+                        player
+                            ? Math.floor(
+                                  player.position.x / BLOCK_SIZE
+                              ).toString()
+                            : "0",
+                    ];
+                case "entity":
+                    const entitySuggestions = Object.keys(Entities).filter(
+                        (entity) => entity.toLowerCase().startsWith(prefix)
+                    );
+                    console.log(`Entity suggestions: ${entitySuggestions}`);
+                    return entitySuggestions;
+                case "structure":
+                    const structureSuggestions = Object.keys(Structures).filter(
+                        (structure) =>
+                            structure.toLowerCase().startsWith(prefix)
+                    );
+                    console.log(
+                        `Structure suggestions: ${structureSuggestions}`
+                    );
+                    return structureSuggestions;
+                case "biome":
+                    const biomeSuggestions = Object.keys(AllBiomes).filter(
+                        (biome) => biome.toLowerCase().startsWith(prefix)
+                    );
+                    console.log(`Biome suggestions: ${biomeSuggestions}`);
+                    return biomeSuggestions;
+                case "rule":
+                    const ruleSuggestions = [
+                        ...Object.keys(GAMERULES),
+                        "list",
+                    ].filter((rule) => rule.toLowerCase().startsWith(prefix));
+                    console.log(`Rule suggestions: ${ruleSuggestions}`);
+                    return ruleSuggestions;
+                case "value":
+                    return ["true", "false"];
+                case "dimension":
+                    return ["overworld", "nether", "eather", "0", "1", "2"];
+                case "time":
+                    return ["1", "3", "5", "7.5"];
+                default:
+                    console.log("No suggestions for unknown argType");
+                    return [];
+            }
+        }
+    }
+
+    autocomplete() {
+        if (!this.inChat) return; // Prevent autocomplete when chat is closed
+
+        const parts = this.currentMessage.trim().split(/\s+/);
+        const cursorWordIndex =
+            this.currentMessage.slice(0, this.cursorPosition).split(/\s+/)
+                .length - 1;
+        const currentPart =
+            parts[cursorWordIndex] ||
+            (this.currentMessage.startsWith("/") ? "/" : "");
+
+        console.log(
+            `Autocomplete: currentMessage="${this.currentMessage}", cursorPosition=${this.cursorPosition}, cursorWordIndex=${cursorWordIndex}, currentPart="${currentPart}"`
+        );
+
+        // Initialize or continue autocomplete cycle
+        if (this.suggestionIndex === -1) {
+            this.originalInput = this.currentMessage;
+            this.autocompletePart = currentPart;
+            this.suggestions = this.generateSuggestions(
+                this.currentMessage,
+                cursorWordIndex
+            );
+        }
+
+        if (this.suggestions.length === 0) {
+            console.log("No suggestions available");
+            return;
+        }
+
+        // Cycle to the next suggestion
+        this.suggestionIndex =
+            (this.suggestionIndex + 1) % this.suggestions.length;
+        const suggestion = this.suggestions[this.suggestionIndex];
+
+        console.log(`Selected suggestion: ${suggestion}`);
+
+        // Reconstruct the message
+        if (cursorWordIndex === 0 && this.currentMessage.startsWith("/")) {
+            parts[cursorWordIndex] = "/" + suggestion;
+        } else {
+            parts[cursorWordIndex] = suggestion;
+        }
+
+        this.currentMessage = parts.join(" ");
+        this.cursorPosition =
+            parts.slice(0, cursorWordIndex).join(" ").length +
+            (cursorWordIndex > 0 ? 1 : 0) +
+            (parts[cursorWordIndex] || "").length;
+
+        console.log(
+            `Updated: currentMessage="${this.currentMessage}", cursorPosition=${this.cursorPosition}`
+        );
     }
 
     addToLog(message) {
@@ -346,7 +544,8 @@ class Chat {
 
     getWorldPosition(position) {
         if (position.x === "~") position.x = player.position.x / BLOCK_SIZE;
-        if (position.y === "~") position.y = player.position.y / BLOCK_SIZE;
+        if (position.y === "~")
+            position.y = CHUNK_HEIGHT - player.position.y / BLOCK_SIZE;
 
         if (isNaN(position.x) || isNaN(position.y)) return null;
 
@@ -662,6 +861,14 @@ class Chat {
 
         trackedKeys.forEach((key) => {
             if (input.isKeyPressed(key)) {
+                if (key !== "Tab") {
+                    this.resetAutocomplete();
+                }
+
+                if (key === "Tab") {
+                    this.autocomplete();
+                    return;
+                }
                 if (key === "Backspace") {
                     if (this.cursorPosition > 0) {
                         this.currentMessage =
@@ -669,7 +876,7 @@ class Chat {
                                 0,
                                 this.cursorPosition - 1
                             ) + this.currentMessage.slice(this.cursorPosition);
-                        this.cursorPosition--; // Move cursor back
+                        this.cursorPosition--;
                     }
                     return;
                 }
@@ -699,60 +906,49 @@ class Chat {
                         this.currentMessage.slice(this.cursorPosition);
                     this.cursorPosition++;
                 }
-                if (this.currentMessage.length >= this.maxLenght) return;
+                if (this.currentMessage.length >= this.maxLength) return;
 
-                switch (key) {
-                    case key.startsWith("Key") && key:
-                        const letter = key.replace("Key", "");
+                if (key.startsWith("Key")) {
+                    const letter = key.replace("Key", "");
+                    this.currentMessage =
+                        this.currentMessage.slice(0, this.cursorPosition) +
+                        (isShiftPressed
+                            ? letter.toUpperCase()
+                            : letter.toLowerCase()) +
+                        this.currentMessage.slice(this.cursorPosition);
+                    this.cursorPosition++;
+                } else if (key.startsWith("Digit")) {
+                    this.currentMessage =
+                        this.currentMessage.slice(0, this.cursorPosition) +
+                        key.replace("Digit", "") +
+                        this.currentMessage.slice(this.cursorPosition);
+                    this.cursorPosition++;
+                } else if (key === "Space") {
+                    this.currentMessage =
+                        this.currentMessage.slice(0, this.cursorPosition) +
+                        " " +
+                        this.currentMessage.slice(this.cursorPosition);
+                    this.cursorPosition++;
+                } else if (key === "Slash") {
+                    this.currentMessage =
+                        this.currentMessage.slice(0, this.cursorPosition) +
+                        "/" +
+                        this.currentMessage.slice(this.cursorPosition);
+                    this.cursorPosition++;
+                } else if (key === "Period") {
+                    this.currentMessage =
+                        this.currentMessage.slice(0, this.cursorPosition) +
+                        "." +
+                        this.currentMessage.slice(this.cursorPosition);
+                    this.cursorPosition++;
+                } else if (key === "Backquote") {
+                    if (isShiftPressed) {
                         this.currentMessage =
                             this.currentMessage.slice(0, this.cursorPosition) +
-                            (isShiftPressed
-                                ? letter.toUpperCase()
-                                : letter.toLowerCase()) +
-                            this.currentMessage.slice(this.cursorPosition);
-                        this.cursorPosition++; // Move cursor forward
-                        break;
-                    case key.startsWith("Digit") && key:
-                        this.currentMessage =
-                            this.currentMessage.slice(0, this.cursorPosition) +
-                            key.replace("Digit", "") +
+                            "~" +
                             this.currentMessage.slice(this.cursorPosition);
                         this.cursorPosition++;
-                        break;
-                    case "Space":
-                        this.currentMessage =
-                            this.currentMessage.slice(0, this.cursorPosition) +
-                            " " +
-                            this.currentMessage.slice(this.cursorPosition);
-                        this.cursorPosition++;
-                        break;
-                    case "Backslash":
-                        this.currentMessage =
-                            this.currentMessage.slice(0, this.cursorPosition) +
-                            "/" +
-                            this.currentMessage.slice(this.cursorPosition);
-                        this.cursorPosition++;
-                        break;
-                    case "Period":
-                        this.currentMessage =
-                            this.currentMessage.slice(0, this.cursorPosition) +
-                            "." +
-                            this.currentMessage.slice(this.cursorPosition);
-                        this.cursorPosition++;
-                        break;
-                    case "Backquote":
-                        if (input.shiftPressed)
-                            this.currentMessage =
-                                this.currentMessage.slice(
-                                    0,
-                                    this.cursorPosition
-                                ) +
-                                "~" +
-                                this.currentMessage.slice(this.cursorPosition);
-                        this.cursorPosition++;
-                        break;
-                    default:
-                        break;
+                    }
                 }
             }
         });
@@ -763,7 +959,7 @@ class Chat {
             if (input.isKeyPressed("KeyT")) {
                 this.openChat();
             }
-            if (input.isKeyPressed("Backslash")) {
+            if (input.isKeyPressed("Slash")) {
                 this.openChat();
                 this.currentMessage = "/";
                 this.cursorPosition = 1;

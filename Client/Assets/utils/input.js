@@ -41,6 +41,8 @@ class InputHandler {
     _handleKeyDown(event) {
         const key = event.code;
 
+        event.preventDefault(); // Prevent default action for all keys
+
         // Check for Shift specifically
         if (key === "ShiftLeft" || key === "ShiftRight") {
             this.shiftPressed = true;
