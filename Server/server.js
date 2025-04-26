@@ -69,10 +69,6 @@ function playerJoined(ws) {
 
     players.push(newPlayer);
 
-    console.log(
-        `Player ${newPlayer.name} joined the game with UUID ${newPlayer.UUID}`
-    );
-
     // Send the new player their UUID and the list of existing players
     sendToPlayer(newPlayer.UUID, {
         type: "youJoined",
@@ -115,8 +111,12 @@ function processMessage(message, ws) {
         case "playerUpdate":
             broadcast(data, [data.sender]);
             break;
-        case "playerSkin":
+        case "playerData":
             getPlayerByUUID(data.message.UUID).skin = data.message.skin;
+            getPlayerByUUID(data.message.UUID).name = data.message.name;
+
+            console.log(data.message.name + " joined the game!");
+
             broadcast(data, [data.sender]);
             break;
 

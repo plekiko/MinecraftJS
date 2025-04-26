@@ -632,22 +632,22 @@ class Chat {
 
     printHelp() {
         const commands = [
-            { text: "/help", color: "cyan" },
-            { text: "Category's: Blocks, Items, Entities", color: "cyan" },
-            { text: "/give <Category.ItemName> <count>", color: "cyan" },
-            { text: "/clear", color: "cyan" },
-            { text: "/clearlog", color: "cyan" },
-            { text: "/gamemode <Gamemode>", color: "cyan" },
-            { text: "/tp <x> <y>", color: "cyan" },
-            { text: "/summon <Entity> <x> <y> <count>", color: "cyan" },
-            { text: "/kill", color: "cyan" },
-            { text: "/time <1 - 7.5>", color: "cyan" },
-            { text: "/structure <StructureName>", color: "cyan" },
-            { text: "/locatebiome <BiomeName>", color: "cyan" },
-            { text: "/seed", color: "cyan" },
-            { text: "/hit <damage>", color: "cyan" },
-            { text: "/gamerule <rule/list> <value>", color: "cyan" },
-            { text: "/dim <dimension>", color: "cyan" },
+            { text: "/help", color: "aqua" },
+            { text: "Category's: Blocks, Items, Entities", color: "aqua" },
+            { text: "/give <Category.ItemName> <count>", color: "aqua" },
+            { text: "/clear", color: "aqua" },
+            { text: "/clearlog", color: "aqua" },
+            { text: "/gamemode <Gamemode>", color: "aqua" },
+            { text: "/tp <x> <y>", color: "aqua" },
+            { text: "/summon <Entity> <x> <y> <count>", color: "aqua" },
+            { text: "/kill", color: "aqua" },
+            { text: "/time <1 - 7.5>", color: "aqua" },
+            { text: "/structure <StructureName>", color: "aqua" },
+            { text: "/locatebiome <BiomeName>", color: "aqua" },
+            { text: "/seed", color: "aqua" },
+            { text: "/hit <damage>", color: "aqua" },
+            { text: "/gamerule <rule/list> <value>", color: "aqua" },
+            { text: "/dim <dimension>", color: "aqua" },
         ];
 
         commands.forEach((cmd) => {
@@ -658,9 +658,7 @@ class Chat {
     message(message, sender = "", color = "white") {
         if (!this.isValidText(message)) return;
 
-        if (color === "red") {
-            color = "#FF5555";
-        }
+        color = this.palleteColor(color);
 
         let finalMessage = sender ? `[${sender}] ${message}` : message;
 
@@ -678,6 +676,23 @@ class Chat {
         if (this.messages.length > this.viewHistory) {
             this.messages.shift();
         }
+    }
+
+    palleteColor(color) {
+        switch (color) {
+            case "red":
+                return "#FF5555";
+            case "green":
+                return "#55FF55";
+            case "blue":
+                return "#5555FF";
+            case "yellow":
+                return "#FFFF55";
+            case "aqua":
+                return "#55FFFF";
+        }
+
+        return "#FFFFFF"; // Default color
     }
 
     give(messageArray) {

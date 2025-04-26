@@ -24,7 +24,7 @@ function playRandomSong() {
     let randomSongUrl = "Assets/audio/music/" + songs[randomSongIndex] + ".ogg";
 
     musicPlayer.src = randomSongUrl;
-    musicPlayer.volume = 0.3;
+    musicPlayer.volume = settings.music ? 0.3 : 0;
     musicPlayer.play();
 
     isPlaying = true;

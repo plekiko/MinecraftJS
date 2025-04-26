@@ -66,10 +66,13 @@ function processMessage(data) {
                 delete callbacks[data.message.requestId]; // Remove callback once executed
             }
             break;
-        case "playerSkin":
-            console.log("Received player skin:", message);
+        case "playerData":
+            console.log("Received player data:", message);
             const player = getEntityByUUID(message.UUID);
-            if (player) player.setSkin(message.skin);
+            if (player) {
+                player.setSkin(message.skin);
+                player.name = message.name;
+            }
             break;
 
         case "placeBlock":
@@ -153,21 +156,27 @@ function updatePlayerState(data) {
     }
 }
 
-function iJoined(player, existingPlayers) {
+async function iJoined(player, existingPlayers) {
+    // Wait until loadingWorld is false
+    while (loadingWorld) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
     const myPlayer = SpawnPlayer(
         new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
         true,
         player.UUID,
-        player.name
+        settings.username
     );
 
     // Upload skin to server
     server.send({
-        type: "playerSkin",
+        type: "playerData",
         sender: player.UUID,
         message: {
             UUID: player.UUID,
             skin: myPlayer.body.sprite,
+            name: settings.username,
         },
     });
 

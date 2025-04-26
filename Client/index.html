@@ -62,7 +62,9 @@
                     class="btn"
                     >Buy me a coffee!</a
                 >
-                <a class="btn" onclick="showTexturePacks()">Texture Packs</a>
+                <div class="button-space"></div>
+                <a onclick="gotoOptions()" class="btn">Options...</a>
+                <!-- <a class="btn" onclick="showTexturePacks()">Texture Packs</a> -->
             </div>
         </div>
 
@@ -119,7 +121,7 @@
         <div class="world-select-container" id="texture-pack-select-container">
             <div class="world-select-container-text">
                 <div class="big-text">Texture Packs</div>
-                <button onclick="backToMenu()" class="btn">Back</button>
+                <button onclick="gotoOptions()" class="btn">Back</button>
                 <div class="world-select">
                     <div class="world-container">
                         <img
@@ -346,6 +348,39 @@
                 </div>
             </div>
         </div>
+
+        <div class="modal-container" id="options-container">
+            <div class="center-modal">
+                <div class="world-create-background"></div>
+                <div class="world-create-top-container">
+                    <div class="big-text">Options</div>
+                </div>
+                <div class="options-modal">
+                    <a class="btn" id="music-toggle-btn" onclick="toggleMusic()">Music - ON</a>
+                    <a class="btn" id="sfx-toggle-btn" onclick="toggleSFX()">SFX - ON</a>
+                    <a class="btn" id="lighting-toggle-btn" onclick="toggleLighting()">Lighting - ON</a>
+                    
+                    <a class="btn" onclick="showTexturePacks()">Texture Packs...</a>
+
+                    <div class="input-field-container">
+                        <div class="input-field-title">Username</div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            id="username-input"
+                            maxlength="15"
+                            value="Player"
+                            autocomplete="off"
+                        />
+                        <div class="input-field-footer">
+                            Will be used for multiplayer
+                        </div>
+                    </div>
+                    <div class="button-space"></div>
+
+                    <a onclick="backToMenu(), saveSettings()" class="btn">Done</a>
+                </div>
+            </div>
     </body>
 
     <script src="menu.js"></script>

@@ -1,3 +1,17 @@
+const AUTOSAVE_INTERVAL = 300000;
+
+setInterval(() => {
+    autoSave();
+}, AUTOSAVE_INTERVAL);
+
+function autoSave() {
+    if (loadingWorld) return;
+    if (multiplayer) return;
+    SaveWorld(false);
+
+    chat.message("World auto-saved successfully!", "", "green");
+}
+
 let currentSave = {
     playerPosition: new Vector2(),
     gamemode: 0,

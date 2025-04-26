@@ -1,6 +1,13 @@
 let lastFrameTime = performance.now();
 let fpsDisplay = 0;
 
+let settings = {
+    sfx: true,
+    music: true,
+    lighting: true,
+    username: "Player",
+};
+
 chat = new Chat();
 
 function waitForTexturePack() {
@@ -15,6 +22,17 @@ function waitForTexturePack() {
         checkLoaded();
     });
 }
+
+function loadSettings() {
+    // load using local storage
+    const settingsString = localStorage.getItem("settings");
+
+    if (settingsString) {
+        settings = JSON.parse(settingsString);
+    }
+}
+
+loadSettings();
 
 function ReverseY(y) {
     return CHUNK_HEIGHT - y;

@@ -43,7 +43,7 @@ function tick() {
         chunk.updateChunk();
     });
 
-    if (lighting) {
+    if (settings.lighting) {
         globalUpdateSkyLight();
         globalRecalculateLight();
     }

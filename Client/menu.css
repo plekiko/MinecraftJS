@@ -28,6 +28,19 @@ body {
     z-index: -2;
 }
 
+.button-space {
+    width: 100%;
+    height: 25px;
+}
+
+.options-modal {
+    height: 100%;
+}
+
+.full-width {
+    width: 100%;
+}
+
 .footer-button {
     text-decoration: underline;
 
@@ -44,7 +57,7 @@ body {
 }
 
 .input-field-container {
-    width: 80%;
+    width: 90%;
     height: fit-content;
 
     color: white;

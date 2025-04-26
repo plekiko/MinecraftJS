@@ -39,6 +39,13 @@ const removeServerButton = document.getElementById("remove-server-btn");
 const quickConnectButton = document.getElementById("quick-connect-btn");
 const connectButton = document.getElementById("connect-btn");
 
+const optionsContainer = document.querySelector("#options-container");
+
+const musicToggleButton = document.getElementById("music-toggle-btn");
+const sfxToggleButton = document.getElementById("sfx-toggle-btn");
+const lightingToggleButton = document.getElementById("lighting-toggle-btn");
+const usernameInput = document.querySelector("#username-input");
+
 let selectedWorld = null;
 let selectedTexturePack = "default";
 let selectedServerId = null;
@@ -46,6 +53,13 @@ let tempServerName = "New Server";
 let tempServerIP = "";
 let tempQuickConnectIP = "";
 let randomTexts = [];
+
+let currentSettings = {
+    sfx: true,
+    music: true,
+    lighting: true,
+    username: "Player",
+};
 
 fetch("menu_text.json")
     .then((response) => response.json())
@@ -69,6 +83,8 @@ const musicTracks = [
 ];
 
 function buttonSound() {
+    if (!currentSettings.sfx) return;
+
     const audio = new Audio("Assets/audio/sfx/ui/click.ogg");
     audio.volume = 0.3;
     audio.play();
@@ -76,6 +92,9 @@ function buttonSound() {
 
 function multiplayerButton() {
     buttonSound();
+
+    hideMenu();
+
     showServers();
 }
 
@@ -90,11 +109,78 @@ function downloadServer() {
     document.body.removeChild(link);
 }
 
+function toggleSFX() {
+    buttonSound();
+
+    currentSettings.sfx = !currentSettings.sfx;
+
+    sfxToggleButton.textContent =
+        "SFX - " + (currentSettings.sfx ? "On" : "Off");
+}
+
+function toggleMusic() {
+    buttonSound();
+
+    currentSettings.music = !currentSettings.music;
+
+    if (!currentSettings.music) {
+        if (music) {
+            music.volume = 0;
+        }
+    } else {
+        if (music) {
+            music.volume = 0.3;
+        } else {
+            playRandomMusic();
+        }
+    }
+
+    musicToggleButton.textContent =
+        "Music - " + (currentSettings.music ? "On" : "Off");
+}
+
+function toggleLighting() {
+    buttonSound();
+
+    currentSettings.lighting = !currentSettings.lighting;
+
+    lightingToggleButton.textContent =
+        "Lighting - " + (currentSettings.lighting ? "On" : "Off");
+}
+
+function saveSettings() {
+    if (!usernameInput.value) {
+        currentSettings.username = "Player";
+    } else {
+        currentSettings.username = usernameInput.value;
+    }
+
+    localStorage.setItem("settings", JSON.stringify(currentSettings));
+}
+
+function loadSettings() {
+    const settings = JSON.parse(localStorage.getItem("settings"));
+    if (settings) {
+        currentSettings = { ...currentSettings, ...settings };
+    }
+
+    sfxToggleButton.textContent =
+        "SFX - " + (currentSettings.sfx ? "On" : "Off");
+    musicToggleButton.textContent =
+        "Music - " + (currentSettings.music ? "On" : "Off");
+    lightingToggleButton.textContent =
+        "Lighting - " + (currentSettings.lighting ? "On" : "Off");
+
+    usernameInput.value = currentSettings.username;
+}
+
+loadSettings();
+
 function showTexturePacks() {
     buttonSound();
-    menuContainer.style.display = "none";
-    panorama.style.display = "none";
-    footer.style.display = "none";
+
+    hideMenu();
+
     texturePackSelectContainer.style.display = "flex";
     populateTexturePacks();
 
@@ -112,19 +198,23 @@ function playGame() {
     populateWorlds();
 }
 
-function PlayRandomMusic() {
+function playRandomMusic() {
+    if (!currentSettings.music) return;
+
     const randomTrack =
         musicTracks[Math.floor(Math.random() * musicTracks.length)];
     playMusic(randomTrack);
 }
 
+let music = null;
+
 function playMusic(track) {
-    const audio = new Audio(`Assets/audio/music/menu/${track}.mp3`);
-    audio.volume = 0.3;
-    audio.play();
-    audio.addEventListener("ended", () => {
+    music = new Audio(`Assets/audio/music/menu/${track}.mp3`);
+    music.volume = 0.3;
+    music.play();
+    music.addEventListener("ended", () => {
         setTimeout(() => {
-            PlayRandomMusic();
+            playRandomMusic();
         }, 1000);
     });
 }
@@ -447,25 +537,7 @@ function removeWorld() {
 
 function backToMenu() {
     buttonSound();
-    enableMenu();
-}
-
-function enableMenu() {
-    worldCreateContainer.style.display = "none";
-    menuContainer.style.display = "flex";
-    panorama.style.display = "block";
-    worldSelectContainer.style.display = "none";
-    footer.style.display = "block";
-    texturePackSelectContainer.style.display = "none";
-    serverSelectContainer.style.display = "none";
-    addServerContainer.style.display = "none";
-    quickConnectContainer.style.display = "none";
-
-    // Set disabled state for buttons
-    worldPlayButton.disabled = true;
-    removeWorldButton.disabled = true;
-    removeServerButton.disabled = true;
-    connectButton.disabled = true;
+    showMenu();
 }
 
 function backToWorldSelection() {
@@ -535,9 +607,6 @@ function selectWorld(id, selectedElement) {
 
 // Server Management Functions
 function showServers() {
-    menuContainer.style.display = "none";
-    panorama.style.display = "none";
-    footer.style.display = "none";
     worldSelectContainer.style.display = "none";
     texturePackSelectContainer.style.display = "none";
     serverSelectContainer.style.display = "flex";
@@ -710,6 +779,61 @@ function backToServerSelection() {
     displayServers();
 }
 
+function gotoOptions() {
+    buttonSound();
+
+    hideMenu();
+
+    optionsContainer.style.display = "flex";
+}
+
+function showMenu() {
+    menuContainer.style.display = "flex";
+    panorama.style.display = "block";
+    worldSelectContainer.style.display = "none";
+    footer.style.display = "block";
+    texturePackSelectContainer.style.display = "none";
+    serverSelectContainer.style.display = "none";
+    addServerContainer.style.display = "none";
+    quickConnectContainer.style.display = "none";
+    optionsContainer.style.display = "none";
+    worldCreateContainer.style.display = "none";
+
+    // Reset selected states
+    selectedWorld = null;
+    selectedServerId = null;
+    selectedTexturePack = null;
+
+    // Button states
+    worldPlayButton.disabled = true;
+    removeWorldButton.disabled = true;
+    removeServerButton.disabled = true;
+    connectButton.disabled = true;
+}
+
+function hideMenu() {
+    menuContainer.style.display = "none";
+    panorama.style.display = "none";
+    worldSelectContainer.style.display = "none";
+    footer.style.display = "none";
+    texturePackSelectContainer.style.display = "none";
+    serverSelectContainer.style.display = "none";
+    addServerContainer.style.display = "none";
+    quickConnectContainer.style.display = "none";
+    optionsContainer.style.display = "none";
+
+    // Reset selected states
+    selectedWorld = null;
+    selectedServerId = null;
+    selectedTexturePack = null;
+
+    // Button states
+    worldPlayButton.disabled = true;
+    removeWorldButton.disabled = true;
+    removeServerButton.disabled = true;
+    connectButton.disabled = true;
+}
+
 // Initialize everything after texture pack loading
 async function initialize() {
     populateWorlds();
@@ -723,7 +847,7 @@ async function initialize() {
 initialize();
 
 setTimeout(() => {
-    PlayRandomMusic();
+    playRandomMusic();
 }, 1000);
 
 removeTexturePackButton.addEventListener("click", removeTexturePack);
