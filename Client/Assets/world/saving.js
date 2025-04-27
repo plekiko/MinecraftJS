@@ -139,21 +139,31 @@ function SaveChunk(chunk) {
             const wall = chunk.walls[y][x];
 
             // Save block
-            blocks[y][x] = { t: block.blockType };
+            blocks[y][x] = block.blockType;
             if (block.metaData) {
-                blocks[y][x].m = JSON.stringify(block.metaData);
+                blocks[y][x] = { t: block.blockType, m: block.metaData };
             }
             if (block.linkedBlocks && block.linkedBlocks.length > 1) {
-                blocks[y][x].l = JSON.stringify(block.linkedBlocks);
+                if (!typeof blocks[y][x] === "object") {
+                    blocks[y][x] = {
+                        t: block.blockType,
+                        l: JSON.stringify(block.linkedBlocks),
+                    };
+                } else blocks[y][x].l = JSON.stringify(block.linkedBlocks);
             }
 
             // Save wall
-            walls[y][x] = { t: wall.blockType };
+            walls[y][x] = wall.blockType;
             if (wall.metaData) {
-                walls[y][x].m = JSON.stringify(wall.metaData);
+                walls[y][x] = { t: wall.blockType, m: wall.metaData };
             }
             if (wall.linkedBlocks && wall.linkedBlocks.length > 1) {
-                walls[y][x].l = JSON.stringify(wall.linkedBlocks);
+                if (!typeof walls[y][x] === "object") {
+                    walls[y][x] = {
+                        t: wall.blockType,
+                        l: JSON.stringify(wall.linkedBlocks),
+                    };
+                } else wall[y][x].l = JSON.stringify(wall.linkedBlocks);
             }
         }
     }
