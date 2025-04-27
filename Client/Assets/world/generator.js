@@ -568,6 +568,48 @@ function generateStructures(dimensionIndex = activeDimension) {
     });
 }
 
+function fill(
+    startX,
+    startY,
+    endX,
+    endY,
+    blockType,
+    dimensionIndex = activeDimension
+) {
+    const originalStartX = startX;
+    const originalStartY = startY;
+
+    if (startX > endX) {
+        startX = endX;
+        endX = originalStartX;
+    }
+
+    if (startY > endY) {
+        startY = endY;
+        endY = originalStartY;
+    }
+
+    for (let x = startX; x <= endX; x += BLOCK_SIZE) {
+        for (let y = startY; y <= endY; y += BLOCK_SIZE) {
+            SetBlockTypeAtPosition(
+                x,
+                y,
+                blockType,
+                false,
+                dimensionIndex,
+                null
+            );
+        }
+    }
+}
+
+function worldToBlocks(position) {
+    const blockX = Math.floor(position.x / BLOCK_SIZE);
+    const blockY = Math.floor(position.y / BLOCK_SIZE);
+
+    return new Vector2(blockX, blockY);
+}
+
 function GetChunkByIndex(index) {
     // Calculate the world x-coordinate of the chunk based on its index
     const chunkX = index * CHUNK_WIDTH * BLOCK_SIZE;
@@ -715,13 +757,17 @@ function SetBlockTypeAtPosition(
     worldY,
     blockType,
     wall = false,
-    dimensionIndex = activeDimension
+    dimensionIndex = activeDimension,
+    metaData = null,
+    calculateY = true
 ) {
+    if (calculateY) worldY = CHUNK_HEIGHT * BLOCK_SIZE - worldY;
+
     const block = GetBlockAtWorldPosition(worldX, worldY, wall, dimensionIndex);
 
     if (!block) {
         // Buffer the block placement
-
+        bufferBlock(worldX, worldY, blockType, dimensionIndex, metaData, wall);
         return;
     }
 
@@ -737,9 +783,9 @@ function bufferBlock(
     wall = false,
     calculateY = true
 ) {
-    const targetChunkX = getChunkXForWorldX(worldX);
-
     if (calculateY) worldY = CHUNK_HEIGHT * BLOCK_SIZE - worldY;
+
+    const targetChunkX = getChunkXForWorldX(worldX);
 
     if (!getDimension(dimensionIndex).pendingBlocks.has(targetChunkX)) {
         getDimension(dimensionIndex).pendingBlocks.set(targetChunkX, {

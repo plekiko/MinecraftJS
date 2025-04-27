@@ -16,7 +16,7 @@ class Chat {
         this.messageDuration = 8000;
 
         this.historyIndex = 0;
-        this.viewHistory = 15;
+        this.viewHistory = 25;
 
         this.suggestions = [];
         this.suggestionIndex = -1;
@@ -92,6 +92,8 @@ class Chat {
             { name: "gamerule", args: ["rule", "value"] },
             { name: "dim", args: ["dimension"] },
             { name: "dimension", args: ["dimension"] },
+            { name: "setblock", args: ["block", "x", "y"] },
+            { name: "fill", args: ["block", "x", "y", "x", "y"] },
         ];
     }
 
@@ -107,16 +109,11 @@ class Chat {
         const parts = input.trim().split(/\s+/); // Split on any whitespace
         const isCommand = input.startsWith("/") && argIndex === 0;
 
-        console.log(
-            `Generating suggestions: input="${input}", argIndex=${argIndex}`
-        );
-
         if (isCommand) {
             const prefix = parts[0].slice(1).toLowerCase();
             const suggestions = commands
                 .filter((cmd) => cmd.name.toLowerCase().startsWith(prefix))
                 .map((cmd) => cmd.name);
-            console.log(`Command suggestions: ${suggestions}`);
             return suggestions;
         } else {
             const commandName = parts[0].slice(1).toLowerCase();
@@ -130,8 +127,6 @@ class Chat {
 
             const argType = command.args[argIndex - 1];
             const prefix = parts[argIndex]?.toLowerCase() || "";
-
-            console.log(`Argument type: ${argType}, prefix: ${prefix}`);
 
             switch (argType) {
                 case "category.item":
@@ -205,6 +200,11 @@ class Chat {
                     return ["overworld", "nether", "eather", "0", "1", "2"];
                 case "time":
                     return ["1", "3", "5", "7.5"];
+                case "block":
+                    const blockSuggestions = Object.keys(Blocks).filter(
+                        (block) => block.toLowerCase().startsWith(prefix)
+                    );
+                    return blockSuggestions;
                 default:
                     console.log("No suggestions for unknown argType");
                     return [];
@@ -368,13 +368,98 @@ class Chat {
             case "dim" || "dimension":
                 this.dimension(messageArray);
                 break;
-
+            case "setblock":
+                this.setBlock(messageArray);
+                break;
+            case "fill":
+                this.fill(messageArray);
+                break;
             default:
                 this.message("Invalid Command!", "", Colors.Red);
                 break;
         }
 
         this.closeChat();
+    }
+
+    fill(messageArray) {
+        // Use the fill function
+        if (!messageArray[1]) {
+            this.invalidCommand("/fill <block> <x1> <y1> <x2> <y2>");
+            return;
+        }
+
+        const blockName = messageArray[1];
+
+        const x1 = messageArray[2] !== "~" ? parseInt(messageArray[2]) : "~";
+        const y1 = messageArray[3] !== "~" ? parseInt(messageArray[3]) : "~";
+        const x2 = messageArray[4] !== "~" ? parseInt(messageArray[4]) : "~";
+        const y2 = messageArray[5] !== "~" ? parseInt(messageArray[5]) : "~";
+
+        const position1 = this.getWorldPosition(new Vector2(x1, y1));
+        const position2 = this.getWorldPosition(new Vector2(x2, y2));
+
+        if (
+            x1 === null ||
+            y1 === null ||
+            x2 === null ||
+            y2 === null ||
+            position1 === null ||
+            position2 === null
+        ) {
+            this.invalidCommand("/fill <block> <x1> <y1> <x2> <y2>");
+            return;
+        }
+
+        const blockType = Blocks[blockName];
+
+        if (!blockType) {
+            this.message(`Block ${blockName} not found.`, "", Colors.Red);
+            return;
+        }
+
+        fill(position1.x, position1.y, position2.x, position2.y, blockType);
+
+        this.cheatMessage(
+            `Filled area from (${worldToBlocks(position1).x}, ${
+                worldToBlocks(position1).y
+            }) to (${worldToBlocks(position2).x}, ${
+                worldToBlocks(position2).y
+            }) with ${blockName}.`
+        );
+    }
+
+    setBlock(messageArray) {
+        if (!messageArray[1]) {
+            this.invalidCommand("/setblock <block> <x> <y>");
+            return;
+        }
+
+        const blockName = messageArray[1];
+        const x = messageArray[2] !== "~" ? parseInt(messageArray[2]) : "~";
+        const y = messageArray[3] !== "~" ? parseInt(messageArray[3]) : "~";
+
+        const position = this.getWorldPosition(new Vector2(x, y));
+
+        if (!position) {
+            this.invalidCommand("/setblock <block> <x> <y>");
+            return;
+        }
+
+        position.y = -position.y + CHUNK_HEIGHT * BLOCK_SIZE;
+
+        const block = Blocks[blockName];
+
+        if (block) {
+            SetBlockTypeAtPosition(position.x, position.y, block);
+            this.cheatMessage(
+                `Set block ${blockName} at ${Math.floor(
+                    position.x
+                )}, ${Math.floor(position.y)}`
+            );
+        } else {
+            this.message("Block not found.", "", Colors.Red);
+        }
     }
 
     dimension(messageArray) {
@@ -635,27 +720,14 @@ class Chat {
     }
 
     printHelp() {
-        const commands = [
-            { text: "/help", color: Colors.Aqua },
-            { text: "Category's: Blocks, Items, Entities", color: Colors.Aqua },
-            { text: "/give <Category.ItemName> <count>", color: Colors.Aqua },
-            { text: "/clear", color: Colors.Aqua },
-            { text: "/clearlog", color: Colors.Aqua },
-            { text: "/gamemode <Gamemode>", color: Colors.Aqua },
-            { text: "/tp <x> <y>", color: Colors.Aqua },
-            { text: "/summon <Entity> <x> <y> <count>", color: Colors.Aqua },
-            { text: "/kill", color: Colors.Aqua },
-            { text: "/time <1 - 7.5>", color: Colors.Aqua },
-            { text: "/structure <StructureName>", color: Colors.Aqua },
-            { text: "/locatebiome <BiomeName>", color: Colors.Aqua },
-            { text: "/seed", color: Colors.Aqua },
-            { text: "/hit <damage>", color: Colors.Aqua },
-            { text: "/gamerule <rule/list> <value>", color: Colors.Aqua },
-            { text: "/dim <dimension>", color: Colors.Aqua },
-        ];
+        const commands = this.getCommandSuggestions();
 
-        commands.forEach((cmd) => {
-            this.message(cmd.text, "", cmd.color);
+        this.message("Available Commands:", "", Colors.LightPurple);
+        commands.forEach((command) => {
+            const args = command.args.length
+                ? command.args.map((arg) => `<${arg}>`).join(" ")
+                : "";
+            this.message(`/${command.name} ${args}`, "", Colors.Aqua);
         });
     }
 
@@ -893,6 +965,17 @@ class Chat {
                         this.currentMessage.slice(this.cursorPosition);
                     this.cursorPosition++;
                 }
+
+                if (input.shiftPressed) {
+                    if (key === "Equal") {
+                        this.currentMessage =
+                            this.currentMessage.slice(0, this.cursorPosition) +
+                            "+" +
+                            this.currentMessage.slice(this.cursorPosition);
+                        this.cursorPosition++;
+                    }
+                }
+
                 if (this.currentMessage.length >= this.maxLength) return;
 
                 if (key.startsWith("Key")) {
