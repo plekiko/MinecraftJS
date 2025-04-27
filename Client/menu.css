@@ -35,6 +35,11 @@ body {
 
 .options-modal {
     height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
 }
 
 .full-width {
@@ -268,11 +273,12 @@ body {
     pointer-events: none;
 }
 
-.button-flex {
-    display: flex;
-    gap: 5px;
-    justify-content: space-between;
-    align-items: center;
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    row-gap: 0px;
+    column-gap: 5px;
 }
 
 .world-data-container {

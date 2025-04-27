@@ -151,18 +151,9 @@
                     >
                         Remove Selected Pack
                     </button>
-                    <div class="button-flex">
-                        <button
-                            onclick="uploadSkin()"
-                            id="upload-skin-btn"
-                            class="btn"
-                        >
-                            Upload Skin
-                        </button>
-                        <button onclick="clearSkin()" class="btn">
-                            Clear Skin
-                        </button>
-                    </div>
+                    <!-- <div class="button-flex">
+                        
+                    </div> -->
                 </div>
             </div>
             <div class="world-select-bar-container">
@@ -356,12 +347,24 @@
                     <div class="big-text">Options</div>
                 </div>
                 <div class="options-modal">
-                    <a class="btn" id="music-toggle-btn" onclick="toggleMusic()">Music - ON</a>
-                    <a class="btn" id="sfx-toggle-btn" onclick="toggleSFX()">SFX - ON</a>
-                    <a class="btn" id="lighting-toggle-btn" onclick="toggleLighting()">Lighting - ON</a>
-                    
-                    <a class="btn" onclick="showTexturePacks()">Texture Packs...</a>
+                    <!-- <div class="button-grid">  -->
+                        <a class="btn" id="music-toggle-btn" onclick="toggleMusic()">Music - ON</a>
+                        <a class="btn" id="sfx-toggle-btn" onclick="toggleSFX()">SFX - ON</a>
+                        <a class="btn" id="lighting-toggle-btn" onclick="toggleLighting()">Lighting - ON</a>
+                        
+                        <a class="btn" onclick="showTexturePacks()">Texture Packs...</a>
 
+                        
+                        <button
+                        onclick="uploadSkin()"
+                        id="upload-skin-btn"
+                        class="btn"
+                        >
+                        Upload Skin
+                    </button>
+                    <button onclick="clearSkin()" class="btn">
+                        Clear Skin
+                    </button>
                     <div class="input-field-container">
                         <div class="input-field-title">Username</div>
                         <input
@@ -376,6 +379,8 @@
                             Will be used for multiplayer
                         </div>
                     </div>
+                    <!-- </div> -->
+
                     <div class="button-space"></div>
 
                     <a onclick="backToMenu(), saveSettings()" class="btn">Done</a>
