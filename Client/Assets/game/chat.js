@@ -49,13 +49,13 @@ class Chat {
 
         this.addToLog(this.currentMessage);
 
-        let color = "white"; // Default color for regular messages
+        let color = Colors.White; // Default color for regular messages
         if (this.currentMessage.startsWith("/", 0)) {
             this.doCheat(
                 this.currentMessage.slice(1, this.currentMessage.length)
             );
             message = "";
-            color = "yellow"; // Cheat commands use yellow
+            color = Colors.Yellow; // Cheat commands use yellow
         }
 
         if (multiplayer && this.isValidText(message)) {
@@ -283,24 +283,24 @@ class Chat {
             const biomeChunkX = LocateBiome(biome);
 
             if (!biomeChunkX) {
-                this.message("Biome not found.", "", "red");
+                this.message("Biome not found.", "", Colors.Red);
                 return;
             }
             const chunkPos = biomeChunkX * CHUNK_WIDTH;
             this.message(
                 `Biome ${biomeName} found at ${chunkPos}.`,
                 "",
-                "green"
+                Colors.Green
             );
         } else {
-            this.message("Biome not found.", "", "red");
+            this.message("Biome not found.", "", Colors.Red);
         }
     }
 
     clearLog() {
         this.chatLog = [];
         this.saveLog();
-        this.message("Cleared chat history", "", "green");
+        this.message("Cleared chat history", "", Colors.Green);
     }
 
     isValidText(text) {
@@ -370,7 +370,7 @@ class Chat {
                 break;
 
             default:
-                this.message("Invalid Command!", "", "red");
+                this.message("Invalid Command!", "", Colors.Red);
                 break;
         }
 
@@ -484,7 +484,11 @@ class Chat {
                 `Structure ${structureName} generated at ${player.position.x}, ${player.position.y}`
             );
         } else {
-            this.message(`Structure ${structureName} not found.`, "", "red");
+            this.message(
+                `Structure ${structureName} not found.`,
+                "",
+                Colors.Red
+            );
         }
     }
 
@@ -525,7 +529,7 @@ class Chat {
                 `Summoned ${count} ${entity.name} at ${position.x}, ${position.y}`
             );
         } else {
-            this.message("Entity not found.", "", "red");
+            this.message("Entity not found.", "", Colors.Red);
         }
     }
 
@@ -627,27 +631,27 @@ class Chat {
     }
 
     invalidCommand(usage) {
-        this.message("Usage: " + usage, "", "red");
+        this.message("Usage: " + usage, "", Colors.Red);
     }
 
     printHelp() {
         const commands = [
-            { text: "/help", color: "aqua" },
-            { text: "Category's: Blocks, Items, Entities", color: "aqua" },
-            { text: "/give <Category.ItemName> <count>", color: "aqua" },
-            { text: "/clear", color: "aqua" },
-            { text: "/clearlog", color: "aqua" },
-            { text: "/gamemode <Gamemode>", color: "aqua" },
-            { text: "/tp <x> <y>", color: "aqua" },
-            { text: "/summon <Entity> <x> <y> <count>", color: "aqua" },
-            { text: "/kill", color: "aqua" },
-            { text: "/time <1 - 7.5>", color: "aqua" },
-            { text: "/structure <StructureName>", color: "aqua" },
-            { text: "/locatebiome <BiomeName>", color: "aqua" },
-            { text: "/seed", color: "aqua" },
-            { text: "/hit <damage>", color: "aqua" },
-            { text: "/gamerule <rule/list> <value>", color: "aqua" },
-            { text: "/dim <dimension>", color: "aqua" },
+            { text: "/help", color: Colors.Aqua },
+            { text: "Category's: Blocks, Items, Entities", color: Colors.Aqua },
+            { text: "/give <Category.ItemName> <count>", color: Colors.Aqua },
+            { text: "/clear", color: Colors.Aqua },
+            { text: "/clearlog", color: Colors.Aqua },
+            { text: "/gamemode <Gamemode>", color: Colors.Aqua },
+            { text: "/tp <x> <y>", color: Colors.Aqua },
+            { text: "/summon <Entity> <x> <y> <count>", color: Colors.Aqua },
+            { text: "/kill", color: Colors.Aqua },
+            { text: "/time <1 - 7.5>", color: Colors.Aqua },
+            { text: "/structure <StructureName>", color: Colors.Aqua },
+            { text: "/locatebiome <BiomeName>", color: Colors.Aqua },
+            { text: "/seed", color: Colors.Aqua },
+            { text: "/hit <damage>", color: Colors.Aqua },
+            { text: "/gamerule <rule/list> <value>", color: Colors.Aqua },
+            { text: "/dim <dimension>", color: Colors.Aqua },
         ];
 
         commands.forEach((cmd) => {
@@ -655,10 +659,8 @@ class Chat {
         });
     }
 
-    message(message, sender = "", color = "white") {
+    message(message, sender = "", color = Colors.White) {
         if (!this.isValidText(message)) return;
-
-        color = this.palleteColor(color);
 
         let finalMessage = sender ? `[${sender}] ${message}` : message;
 
@@ -676,23 +678,6 @@ class Chat {
         if (this.messages.length > this.viewHistory) {
             this.messages.shift();
         }
-    }
-
-    palleteColor(color) {
-        switch (color) {
-            case "red":
-                return "#FF5555";
-            case "green":
-                return "#55FF55";
-            case "blue":
-                return "#5555FF";
-            case "yellow":
-                return "#FFFF55";
-            case "aqua":
-                return "#55FFFF";
-        }
-
-        return "#FFFFFF"; // Default color
     }
 
     give(messageArray) {
@@ -739,7 +724,7 @@ class Chat {
                 } to the player.`
             );
         } else {
-            this.message(`Item ${messageArray[1]} not found.`, "", "red");
+            this.message(`Item ${messageArray[1]} not found.`, "", Colors.Red);
         }
     }
 
@@ -990,3 +975,20 @@ class Chat {
         }
     }
 }
+
+const Colors = Object.freeze({
+    Red: "#FF5555",
+    DarkRed: "#AA0000",
+    Green: "#55FF55",
+    DarkGreen: "#00AA00",
+    Blue: "#5555FF",
+    DarkBlue: "#0000AA",
+    Yellow: "#FFFF55",
+    LightPurple: "#FF55FF",
+    DarkPurple: "#AA00AA",
+    Aqua: "#55FFFF",
+    White: "#FFFFFF",
+    Black: "#000000",
+    Gray: "#AAAAAA",
+    DarkGray: "#555555",
+});

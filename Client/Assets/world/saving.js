@@ -9,7 +9,7 @@ function autoSave() {
     if (multiplayer) return;
     SaveWorld(false);
 
-    chat.message("World auto-saved successfully!", "", "green");
+    chat.message("World auto-saved successfully!", "", Colors.Green);
 }
 
 let currentSave = {
