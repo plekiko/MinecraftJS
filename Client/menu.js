@@ -45,6 +45,7 @@ const musicToggleButton = document.getElementById("music-toggle-btn");
 const sfxToggleButton = document.getElementById("sfx-toggle-btn");
 const lightingToggleButton = document.getElementById("lighting-toggle-btn");
 const usernameInput = document.querySelector("#username-input");
+const usernameFooter = document.querySelector("#username-footer");
 
 let selectedWorld = null;
 let selectedTexturePack = "default";
@@ -58,7 +59,7 @@ let currentSettings = {
     sfx: true,
     music: true,
     lighting: true,
-    username: "Player",
+    username: "",
 };
 
 fetch("menu_text.json")
@@ -150,12 +151,18 @@ function toggleLighting() {
 
 function saveSettings() {
     if (!usernameInput.value) {
-        currentSettings.username = "Player";
+        if (!currentSettings.username) currentSettings.username = "Player";
     } else {
         currentSettings.username = usernameInput.value;
     }
 
+    setUsernameFooter(currentSettings.username);
+
     localStorage.setItem("settings", JSON.stringify(currentSettings));
+}
+
+function setUsernameFooter(username) {
+    usernameFooter.textContent = `Current Username: ${username}`;
 }
 
 function loadSettings() {
@@ -171,7 +178,9 @@ function loadSettings() {
     lightingToggleButton.textContent =
         "Lighting - " + (currentSettings.lighting ? "On" : "Off");
 
-    usernameInput.value = currentSettings.username;
+    setUsernameFooter(currentSettings.username);
+
+    usernameInput.value = "";
 }
 
 loadSettings();
@@ -785,6 +794,8 @@ function gotoOptions() {
     hideMenu();
 
     optionsContainer.style.display = "flex";
+
+    loadSettings();
 }
 
 function showMenu() {

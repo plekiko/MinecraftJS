@@ -86,11 +86,6 @@ function SaveWorld(message = true, toFile = false) {
 
     const saveData = JSON.stringify(currentSave);
 
-    if (toFile) {
-        saveJSONToFile(saveData, "world");
-        return;
-    }
-
     let worldName = "New World";
     let id = Date.now();
 
@@ -100,9 +95,20 @@ function SaveWorld(message = true, toFile = false) {
     if (selectedWorld) {
         selectedWorld = JSON.parse(selectedWorld);
         worldName = selectedWorld.name;
+
+        if (toFile) {
+            saveJSONToFile(saveData, worldName ? worldName : "world");
+            return;
+        }
+
         id = selectedWorld.id;
     } else {
         worldName = prompt("Enter world name: ", worldName);
+
+        if (toFile) {
+            saveJSONToFile(saveData, worldName ? worldName : "world");
+            return;
+        }
     }
 
     worldData = {
