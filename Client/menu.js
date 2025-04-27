@@ -247,8 +247,17 @@ function populateWorlds() {
             const worldNameElement = worldElement.querySelector(".world-name");
             const worldDateElement = worldElement.querySelector(".world-date");
 
+            const actualWorld = localStorage.getItem(world.id);
+
+            let worldSize = 0;
+
+            if (actualWorld) {
+                worldSize = (actualWorld.length / 1024).toFixed(0);
+            }
+
             worldNameElement.textContent = world.name;
-            worldDateElement.textContent = world.lastPlayed;
+            worldDateElement.textContent =
+                world.lastPlayed + ` - ${worldSize}KB`;
             worldElement.style.display = "flex";
 
             worldElement.addEventListener("click", () => {
