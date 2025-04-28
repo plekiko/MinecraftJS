@@ -12,7 +12,7 @@ class Chat {
         this.cursorBlinkTime = 0;
         this.showCursor = true;
 
-        this.maxLenght = 50;
+        this.maxLength = 50;
         this.messageDuration = 8000;
 
         this.historyIndex = 0;
