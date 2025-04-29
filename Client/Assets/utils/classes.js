@@ -390,6 +390,35 @@ function arePropsEqual(a, b) {
     return true;
 }
 
+function hexToRgb(hex) {
+    const cleanHex = hex.replace("#", "");
+    return {
+        r: parseInt(cleanHex.slice(0, 2), 16),
+        g: parseInt(cleanHex.slice(2, 4), 16),
+        b: parseInt(cleanHex.slice(4, 6), 16),
+    };
+}
+
+function adjustColorBrightness(hexColor, lighting) {
+    const { r, g, b } = hexToRgb(hexColor);
+    // Scale lighting from 0–15 to 0–1 (0 = black, 15 = original color)
+    const brightness = lighting / 15;
+    // Adjust RGB values by multiplying with brightness
+    const adjustedR = r * brightness;
+    const adjustedG = g * brightness;
+    const adjustedB = b * brightness;
+    return rgbToHex(adjustedR, adjustedG, adjustedB);
+}
+
+// Helper function to convert RGB to hex color
+function rgbToHex(r, g, b) {
+    return `#${Math.round(r).toString(16).padStart(2, "0")}${Math.round(g)
+        .toString(16)
+        .padStart(2, "0")}${Math.round(b)
+        .toString(16)
+        .padStart(2, "0")}`.toUpperCase();
+}
+
 function RandomRange(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }

@@ -440,9 +440,12 @@ class Entity {
             "blocks/" + GetBlock(this.standingOnBlockType).iconSprite
         );
 
-        if (!averageColor) return;
+        if (!averageColor || averageColor === "#000000") return;
 
-        this.footstepEmitter.color = averageColor;
+        const lighting = this.getLightLevel();
+        const adjustedColor = adjustColorBrightness(averageColor, lighting);
+
+        this.footstepEmitter.color = adjustedColor;
 
         this.footstepEmitter.x = this.position.x + this.hitbox.x / 2;
         this.footstepEmitter.y = this.position.y + this.hitbox.y - 10;
