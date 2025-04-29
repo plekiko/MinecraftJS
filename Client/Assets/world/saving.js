@@ -396,7 +396,7 @@ async function LoadChunk(
             // Blocks
             const blockData = chunk.blocks[y][x];
             const blockType = blockData.t ? blockData.t : blockData;
-            const metaData = blockData.m ? JSON.parse(blockData.m) : null;
+            const metaData = blockData.m ? blockData.m : null;
 
             constructedChunk.setBlockType(
                 x,

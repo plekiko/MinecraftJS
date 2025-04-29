@@ -680,34 +680,74 @@ function placePortalInDimension(dimension, position) {
         const blockX = position.x + i * BLOCK_SIZE;
         const blockY = position.y;
 
-        bufferBlock(blockX, blockY, Blocks.Obsidian, dimension);
+        SetBlockTypeAtPosition(
+            blockX,
+            blockY,
+            Blocks.Obsidian,
+            false,
+            dimension,
+            null,
+            false
+        );
     }
     // Top
     for (let i = 0; i < 4; i++) {
         const blockX = position.x + i * BLOCK_SIZE;
         const blockY = position.y + BLOCK_SIZE * 4;
 
-        bufferBlock(blockX, blockY, Blocks.Obsidian, dimension);
+        SetBlockTypeAtPosition(
+            blockX,
+            blockY,
+            Blocks.Obsidian,
+            false,
+            dimension,
+            null,
+            false
+        );
     }
     // Sides
     for (let i = 0; i < 4; i++) {
         const blockX = position.x;
         const blockY = position.y + i * BLOCK_SIZE;
 
-        bufferBlock(blockX, blockY, Blocks.Obsidian, dimension);
+        SetBlockTypeAtPosition(
+            blockX,
+            blockY,
+            Blocks.Obsidian,
+            false,
+            dimension,
+            null,
+            false
+        );
     }
     for (let i = 0; i < 4; i++) {
         const blockX = position.x + BLOCK_SIZE * 3;
         const blockY = position.y + i * BLOCK_SIZE;
 
-        bufferBlock(blockX, blockY, Blocks.Obsidian, dimension);
+        SetBlockTypeAtPosition(
+            blockX,
+            blockY,
+            Blocks.Obsidian,
+            false,
+            dimension,
+            null,
+            false
+        );
     }
     // Something to stand on under the portal
     for (let i = 0; i < 6; i++) {
         const blockX = position.x + i * BLOCK_SIZE - BLOCK_SIZE;
         const blockY = position.y + BLOCK_SIZE * 5;
 
-        bufferBlock(blockX, blockY, Blocks.Cobblestone, dimension);
+        SetBlockTypeAtPosition(
+            blockX,
+            blockY,
+            Blocks.Cobblestone,
+            false,
+            dimension,
+            null,
+            false
+        );
     }
 
     // Create the portal
@@ -716,7 +756,15 @@ function placePortalInDimension(dimension, position) {
             const blockX = position.x + x * BLOCK_SIZE;
             const blockY = position.y + y * BLOCK_SIZE;
 
-            bufferBlock(blockX, blockY, Blocks.NetherPortal, dimension);
+            SetBlockTypeAtPosition(
+                blockX,
+                blockY,
+                Blocks.NetherPortal,
+                false,
+                dimension,
+                null,
+                false
+            );
         }
     }
     // Return the bottom center of the portal

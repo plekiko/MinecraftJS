@@ -43,7 +43,6 @@ class Player extends Entity {
             x: this.position.x,
             y: this.position.y + this.hitbox.y,
             radius: 0.5,
-            type: null,
             maxParticles: 100,
             speed: 1,
             direction: 180,

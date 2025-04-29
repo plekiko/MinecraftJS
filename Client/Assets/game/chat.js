@@ -446,8 +446,6 @@ class Chat {
             return;
         }
 
-        position.y = -position.y + CHUNK_HEIGHT * BLOCK_SIZE;
-
         const block = Blocks[blockName];
 
         if (block) {

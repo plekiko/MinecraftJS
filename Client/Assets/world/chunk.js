@@ -1037,7 +1037,15 @@ class Chunk {
             const { x: currX, y: currY } = queue.shift();
 
             // Break the current portal block
-            SetBlockTypeAtPosition(currX, currY, Blocks.Air);
+            SetBlockTypeAtPosition(
+                currX,
+                currY,
+                Blocks.Air,
+                false,
+                activeDimension,
+                null,
+                false
+            );
 
             // Check adjacent blocks for more NetherPortal blocks
             for (const { dx, dy } of directions) {
@@ -1286,8 +1294,8 @@ class Chunk {
         // Minimum and maximum inner portal dimensions (in blocks)
         const minInnerWidth = 2;
         const minInnerHeight = 3;
-        const maxInnerWidth = 8;
-        const maxInnerHeight = 8;
+        const maxInnerWidth = 32;
+        const maxInnerHeight = 32;
 
         // Check for a valid portal frame of any size within min/max bounds
         for (
@@ -1320,7 +1328,11 @@ class Chunk {
                                     SetBlockTypeAtPosition(
                                         wx,
                                         wy,
-                                        Blocks.NetherPortal
+                                        Blocks.NetherPortal,
+                                        false,
+                                        activeDimension,
+                                        null,
+                                        false
                                     );
                                 }
                             }
