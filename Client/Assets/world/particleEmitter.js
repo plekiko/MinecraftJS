@@ -10,7 +10,7 @@ class ParticleEmitter {
         gravity = 0,
         initialVelocity = new Vector2(),
         fadeOutTime = 1000,
-        color = "white",
+        color = Colors.White,
         randomScale = false,
         range = 0,
         lighting = false,
