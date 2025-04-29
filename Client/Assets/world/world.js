@@ -1,4 +1,5 @@
 let entities = [];
+let particleEmitters = [];
 
 let chunks_in_render_distance = new Map();
 
@@ -18,6 +19,7 @@ function removeEntity(entity, sync = false) {
     const index = entities.findIndex((e) => e.UUID === entity.UUID);
 
     if (index !== -1) {
+        removeParticleEmitter(entity.footstepEmitter);
         entities.splice(index, 1);
     }
 
@@ -37,6 +39,8 @@ function tick() {
 
     updatePositionalAudioVolumes();
 
+    updateParticleEmitters();
+
     updateEntities(true);
 
     chunks_in_render_distance.forEach((chunk) => {
@@ -49,6 +53,12 @@ function tick() {
     }
 
     globalRecalculateRedstone();
+}
+
+function updateParticleEmitters() {
+    for (const emitter of particleEmitters) {
+        emitter.update();
+    }
 }
 
 function globalRecalculateRedstone() {

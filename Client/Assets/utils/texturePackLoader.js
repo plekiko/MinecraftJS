@@ -22,16 +22,14 @@ async function loadVanillaTextures() {
     for (const itemKey in Items) {
         const item = GetItem(Items[itemKey]);
         if (item.sprite) {
-            spritePaths.push(`items/${item.sprite}`);
+            spritePaths.push(`items Recomendado por favor intenta de nuevo.`);
         }
     }
 
     // Loop through Entities
     for (const entityKey in Entities) {
         const entity = Entities[entityKey];
-
         const initEntity = new entity();
-
         if (initEntity.body?.sprite) {
             spritePaths.push(`entity/${initEntity.body.sprite}`);
         }
@@ -62,6 +60,9 @@ async function loadVanillaTextures() {
     spritePaths.push(`gui/container/stats_icons`);
     spritePaths.push(`gui/container/villager`);
 
+    // Particle textures
+    spritePaths.push(`particle/particles`);
+
     // Remove duplicates (if any)
     const uniquePaths = [...new Set(spritePaths)];
 
@@ -73,13 +74,15 @@ async function loadVanillaTextures() {
                 img.src = imgUrl;
 
                 await new Promise((resolve, reject) => {
-                    img.onload = () => {
+                    img.onload = async () => {
+                        const averageColor = await getAverageColor(img);
                         vanillaTextureCache[path] = {
                             url: imgUrl,
                             width: img.width,
                             height: img.height,
                             originalWidth: img.width,
                             originalHeight: img.height,
+                            averageColor,
                         };
                         resolve();
                     };
@@ -90,6 +93,7 @@ async function loadVanillaTextures() {
                             height: 16,
                             originalWidth: 16,
                             originalHeight: 16,
+                            averageColor: { r: 0, g: 0, b: 0 },
                         };
                         resolve();
                     };
@@ -102,6 +106,7 @@ async function loadVanillaTextures() {
                     height: 16,
                     originalWidth: 16,
                     originalHeight: 16,
+                    averageColor: { r: 0, g: 0, b: 0 },
                 };
             }
         })
@@ -168,12 +173,15 @@ async function loadTexturePack() {
                             relativePath
                         ] || { width: 16, height: 16 };
 
+                        const averageColor = await getAverageColor(img);
+
                         texturePackFiles[relativePath] = {
                             url: imgUrl,
                             width: img.width,
                             height: img.height,
                             originalWidth: originalSize.width,
                             originalHeight: originalSize.height,
+                            averageColor,
                         };
                         resolve();
                     };
@@ -213,6 +221,22 @@ function getSpriteUrl(path, useTexturePack = true) {
     }
 
     return `Assets/sprites/${path}.png`;
+}
+
+function getSpriteAverageColor(path) {
+    if (isBase64(path)) {
+        return { r: 0, g: 0, b: 0 }; // Base64 images not cached
+    }
+
+    if (texturePackFiles && texturePackFiles[path]) {
+        return texturePackFiles[path].averageColor;
+    }
+
+    if (vanillaTextureCache && vanillaTextureCache[path]) {
+        return vanillaTextureCache[path].averageColor;
+    }
+
+    return { r: 0, g: 0, b: 0 }; // Default if not found
 }
 
 function getSpriteSize(path) {
@@ -282,5 +306,59 @@ function isBase64(str) {
         );
     } catch {
         return false;
+    }
+}
+
+async function getAverageColor(img) {
+    try {
+        // Create an ImageBitmap from the image
+        const bitmap = await createImageBitmap(img);
+        // Create an OffscreenCanvas to draw the bitmap
+        const offscreen = new OffscreenCanvas(bitmap.width, bitmap.height);
+        const ctx = offscreen.getContext("2d");
+        ctx.drawImage(bitmap, 0, 0);
+
+        // Get pixel data
+        const imageData = ctx.getImageData(
+            0,
+            0,
+            bitmap.width,
+            bitmap.height
+        ).data;
+        let r = 0,
+            g = 0,
+            b = 0,
+            count = 0;
+
+        // Iterate through pixels
+        for (let i = 0; i < imageData.length; i += 4) {
+            const alpha = imageData[i + 3];
+            if (alpha > 0) {
+                // Only count non-transparent pixels
+                r += imageData[i];
+                g += imageData[i + 1];
+                b += imageData[i + 2];
+                count++;
+            }
+        }
+
+        bitmap.close(); // Clean up
+
+        if (count === 0) {
+            return "#000000"; // Default for fully transparent images
+        }
+
+        // Convert to hex
+        const avgR = Math.round(r / count);
+        const avgG = Math.round(g / count);
+        const avgB = Math.round(b / count);
+        return `#${avgR.toString(16).padStart(2, "0")}${avgG
+            .toString(16)
+            .padStart(2, "0")}${avgB
+            .toString(16)
+            .padStart(2, "0")}`.toUpperCase();
+    } catch (err) {
+        console.warn(`Failed to compute average color:`, err);
+        return "#000000";
     }
 }

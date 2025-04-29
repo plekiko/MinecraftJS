@@ -431,10 +431,30 @@ class Entity {
         );
     }
 
+    footstepEmitterLogic() {
+        if (!this.footstepEmitter) return;
+        if (!this.grounded) return;
+        if (this.velocity.x === 0) return;
+
+        const averageColor = getSpriteAverageColor(
+            "blocks/" + GetBlock(this.standingOnBlockType).iconSprite
+        );
+
+        if (!averageColor) return;
+
+        this.footstepEmitter.color = averageColor;
+
+        this.footstepEmitter.x = this.position.x + this.hitbox.x / 2;
+        this.footstepEmitter.y = this.position.y + this.hitbox.y - 10;
+
+        this.footstepEmitter.emitSingle();
+    }
+
     entityTickUpdate() {
         this.fireLogic();
         this.voidLogic();
         this.portalLogic();
+        this.footstepEmitterLogic();
     }
 
     portalLogic() {
@@ -970,7 +990,7 @@ class Entity {
         }
     }
 
-    drawFire(ctx) {
+    drawFire() {
         if (!this.hasVisualFire) return;
 
         const fireX = this.position.x;
@@ -980,13 +1000,13 @@ class Entity {
         this.fireSprite.transform.position = new Vector2(fireX, fireY);
         this.fireSprite.transform.size = fireSize;
 
-        this.fireSprite.draw(ctx, camera);
+        this.fireSprite.draw(camera);
     }
 
     draw(ctx) {
         this.drawEntity(ctx);
 
-        this.drawFire(ctx);
+        this.drawFire();
 
         if (this.drawOverride) this.drawOverride();
     }

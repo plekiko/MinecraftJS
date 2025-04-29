@@ -291,66 +291,89 @@ class Square {
 }
 
 class SimpleSprite {
-    constructor({ sprite, transform, alpha = 1, frameRate = 0 }) {
+    constructor({
+        sprite,
+        transform,
+        alpha = 1,
+        frameRate = 0,
+        crop = null,
+        color = "white",
+        scale = 1,
+    } = {}) {
         this.sprite = sprite;
+        this.color = color;
 
-        this.img = new Image();
-        this.img.src = getSpriteUrl(sprite);
-        this.spriteSize = getSpriteSize(sprite);
+        if (sprite) {
+            this.img = new Image();
+            this.img.src = getSpriteUrl(sprite);
+            this.spriteSize = getSpriteSize(sprite);
+            this.frameCount = this.spriteSize.height / this.spriteSize.width;
+        }
+
+        this.scale = scale;
+
+        this.crop = crop;
 
         this.transform = transform;
         this.alpha = alpha;
         this.frameRate = frameRate;
-        this.frameCount = this.spriteSize.height / this.spriteSize.width;
     }
 
-    draw(ctx, camera) {
-        const centerX = this.transform.position.x + this.transform.size.x / 2;
-        const centerY = this.transform.position.y + this.transform.size.y / 2;
-        ctx.save();
-        ctx.translate(centerX, centerY);
+    draw(camera) {
+        if (!this.img) {
+            ctx.fillStyle = this.color;
+            ctx.globalAlpha = this.alpha;
 
-        // Rotate if necessary
-        if (this.transform.rotation !== 0) {
-            ctx.rotate((this.transform.rotation * Math.PI) / 180);
+            ctx.fillRect(
+                this.transform.position.x - camera.x,
+                this.transform.position.y - camera.y,
+                this.transform.size.x * this.scale,
+                this.transform.size.y * this.scale
+            );
+
+            ctx.globalAlpha = 1;
+            return;
         }
-
-        // Draw the sprite
-        ctx.globalAlpha = this.alpha;
 
         if (this.frameCount > 1) {
-            this.drawAnimation(ctx, camera);
+            this.drawAnimation(camera);
         } else {
-            ctx.drawImage(
-                this.img,
-                -this.transform.size.x / 2 - camera.x,
-                -this.transform.size.y / 2 - camera.y,
-                this.transform.size.x,
-                this.transform.size.y
-            );
+            drawSimpleImage({
+                image: this.img,
+                x: this.transform.position.x - camera.x,
+                y: this.transform.position.y - camera.y,
+                width: this.transform.size.x * this.scale,
+                height: this.transform.size.y * this.scale,
+                crop: this.crop,
+                opacity: this.alpha,
+            });
         }
-
-        ctx.restore();
     }
 
-    drawAnimation(ctx, camera) {
+    drawAnimation(camera) {
         const frameHeight = this.spriteSize.width;
 
         const effectiveFrame =
             Math.floor(globalFrame / this.frameRate) % this.frameCount;
         const frameY = effectiveFrame * frameHeight;
 
-        ctx.drawImage(
-            this.img,
-            0,
-            frameY,
-            this.spriteSize.width,
-            frameHeight,
-            -this.transform.size.x / 2 - camera.x,
-            -this.transform.size.y / 2 - camera.y,
-            this.transform.size.x,
-            this.transform.size.y
-        );
+        // Crop using animation frame
+        const animatedCrop = {
+            x: this.crop?.x || 0,
+            y: frameY,
+            width: this.crop?.width || this.spriteSize.width,
+            height: frameHeight,
+        };
+
+        drawSimpleImage({
+            image: this.img,
+            x: this.transform.position.x - camera.x,
+            y: this.transform.position.y - camera.y,
+            width: this.transform.size.x,
+            height: this.transform.size.y,
+            crop: animatedCrop,
+            opacity: this.alpha,
+        });
     }
 }
 

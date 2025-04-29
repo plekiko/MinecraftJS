@@ -39,6 +39,21 @@ class Player extends Entity {
             despawn: false,
         });
 
+        this.footstepEmitter = createParticleEmitter({
+            x: this.position.x,
+            y: this.position.y + this.hitbox.y,
+            radius: 0.5,
+            type: null,
+            maxParticles: 100,
+            speed: 1,
+            direction: 180,
+            gravity: 1,
+            initialVelocity: new Vector2(0, -3),
+            fadeOutTime: 500,
+            color: Colors.Green,
+            randomScale: true,
+        });
+
         this.health = health;
         this.maxHealth = health;
         this.abilities = abilities;

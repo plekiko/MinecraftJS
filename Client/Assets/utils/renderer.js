@@ -103,6 +103,12 @@ function isColliding(pos1, size1, pos2, size2) {
     );
 }
 
+function DrawParticleEmitters() {
+    for (const particleEmitter of particleEmitters) {
+        particleEmitter.draw(camera);
+    }
+}
+
 function Draw(chunks, frames) {
     fps = frames;
 
@@ -113,9 +119,16 @@ function Draw(chunks, frames) {
         DrawDestroyStage();
     }
 
+    DrawParticleEmitters();
+
     DrawEntities();
+
     AfterDraw();
 
+    DrawLoadScreen();
+}
+
+function DrawLoadScreen() {
     if (!isTexturePackLoaded || loadingWorld) {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
@@ -537,6 +550,49 @@ function drawHitboxes() {
     entities.forEach((entity) => {
         entity.drawHitbox(ctx);
     });
+}
+
+function drawSimpleImage({
+    image,
+    x = 0,
+    y = 0,
+    width = 0,
+    height = 0,
+    scale = 1,
+    centerX = false,
+    centerY = false,
+    opacity = 1,
+    crop = { x: 0, y: 0, width: 0, height: 0 },
+}) {
+    if (!image) return;
+
+    ctx.globalAlpha = opacity;
+
+    const shouldCrop = crop.width > 0 && crop.height > 0;
+    const sourceWidth = shouldCrop ? crop.width : image.width;
+    const sourceHeight = shouldCrop ? crop.height : image.height;
+    const sourceX = shouldCrop ? crop.x : 0;
+    const sourceY = shouldCrop ? crop.y : 0;
+
+    const drawWidth = width || sourceWidth * scale;
+    const drawHeight = height || sourceHeight * scale;
+
+    // Adjust position based on centering
+    const drawX = centerX ? x - drawWidth / 2 : x;
+    const drawY = centerY ? y - drawHeight / 2 : y;
+
+    // Draw the image
+    ctx.drawImage(
+        image,
+        sourceX, // Source x
+        sourceY, // Source y
+        sourceWidth, // Source width
+        sourceHeight, // Source height
+        drawX, // Canvas x
+        drawY, // Canvas y
+        drawWidth, // Scaled width
+        drawHeight // Scaled height
+    );
 }
 
 function drawImage({
