@@ -1539,6 +1539,8 @@ class Block extends Square {
 
         this.playBreakSound();
 
+        this.playBreakParticles();
+
         if (this.metaData) {
             if (this.metaData.props.storage) {
                 this.dropStorage();
@@ -1554,6 +1556,34 @@ class Block extends Square {
         if (blockDef.changeToBlockWhenBroken) {
             setBlockType(this, blockDef.changeToBlockWhenBroken);
         }
+    }
+
+    playBreakParticles() {
+        const blockDef = GetBlock(this.blockType);
+
+        if (!blockDef.iconSprite) return;
+
+        const averageColor = getSpriteAverageColor(
+            "blocks/" + blockDef.iconSprite
+        );
+
+        if (!averageColor) return;
+
+        const particleEmitter = createParticleEmitter({
+            x: this.transform.position.x + BLOCK_SIZE / 2,
+            y: this.transform.position.y + BLOCK_SIZE / 2,
+            maxParticles: 20,
+            fadeOutTime: 300,
+            gravity: 300,
+            radius: 1,
+            randomScale: true,
+            range: BLOCK_SIZE / 2,
+            speed: 40,
+            lighting: true,
+            color: averageColor,
+        });
+
+        particleEmitter.emitAndDie();
     }
 
     dropCropLoot(blockDef) {

@@ -25,11 +25,11 @@ class Particle extends SimpleSprite {
         const elapsedTime = Date.now() - this.startTime;
 
         // Update position based on speed
-        this.transform.position.x += this.speedX;
-        this.transform.position.y += this.speedY;
+        this.transform.position.x += this.speedX * deltaTime;
+        this.transform.position.y += this.speedY * deltaTime;
 
         // Apply gravity
-        this.speedY += this.gravity;
+        this.speedY += this.gravity * deltaTime;
 
         // Fade out effect
         if (this.fadeOutTime > 0) {

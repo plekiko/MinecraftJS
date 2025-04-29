@@ -442,10 +442,7 @@ class Entity {
 
         if (!averageColor || averageColor === "#000000") return;
 
-        const lighting = this.getLightLevel();
-        const adjustedColor = adjustColorBrightness(averageColor, lighting);
-
-        this.footstepEmitter.color = adjustedColor;
+        this.footstepEmitter.color = averageColor;
 
         this.footstepEmitter.x = this.position.x + this.hitbox.x / 2;
         this.footstepEmitter.y = this.position.y + this.hitbox.y - 10;

@@ -47,11 +47,12 @@ class Player extends Entity {
             maxParticles: 100,
             speed: 1,
             direction: 180,
-            gravity: 1,
-            initialVelocity: new Vector2(0, -3),
+            gravity: 200,
+            initialVelocity: new Vector2(0, -40),
             fadeOutTime: 500,
             color: Colors.Green,
             randomScale: true,
+            lighting: true,
         });
 
         this.health = health;

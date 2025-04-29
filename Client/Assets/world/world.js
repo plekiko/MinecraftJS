@@ -39,8 +39,6 @@ function tick() {
 
     updatePositionalAudioVolumes();
 
-    updateParticleEmitters();
-
     updateEntities(true);
 
     chunks_in_render_distance.forEach((chunk) => {

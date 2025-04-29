@@ -128,6 +128,8 @@ async function gameLoop() {
 
 function updateGame() {
     updateEntities();
+    updateParticleEmitters();
+
     if (player) cursorBlockLogic();
     if (hotbar) hotbar.update();
     if (chat) chat.update();
