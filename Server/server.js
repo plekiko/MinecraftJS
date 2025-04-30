@@ -122,10 +122,7 @@ function processMessage(message, ws) {
 
         case "chat":
             console.log(
-                "Chat message from",
-                getPlayerByUUID(data.sender).name,
-                ":",
-                data.message
+                getPlayerByUUID(data.sender).name + ": " + data.message
             );
             broadcast(
                 {
