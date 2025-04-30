@@ -1121,10 +1121,8 @@ const recipes = [
     new Recipe({
         type: RecipeType.Shapeless,
         input: [
-            [
-                new RecipeItem({ blockId: Blocks.Cobblestone }),
-                new RecipeItem({ blockId: Blocks.Vines }),
-            ],
+            new RecipeItem({ blockId: Blocks.Cobblestone }),
+            new RecipeItem({ blockId: Blocks.Vines }),
         ],
         output: new InventoryItem({
             blockId: Blocks.MossyCobblestone,
@@ -1135,10 +1133,8 @@ const recipes = [
     new Recipe({
         type: RecipeType.Shapeless,
         input: [
-            [
-                new RecipeItem({ blockId: Blocks.StoneBricks }),
-                new RecipeItem({ blockId: Blocks.Vines }),
-            ],
+            new RecipeItem({ blockId: Blocks.StoneBricks }),
+            new RecipeItem({ blockId: Blocks.Vines }),
         ],
         output: new InventoryItem({
             blockId: Blocks.MossyStoneBricks,

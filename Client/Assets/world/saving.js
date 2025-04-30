@@ -150,12 +150,10 @@ function SaveChunk(chunk) {
                 blocks[y][x] = { t: block.blockType, m: block.metaData };
             }
             if (block.linkedBlocks && block.linkedBlocks.length > 1) {
-                if (!typeof blocks[y][x] === "object") {
-                    blocks[y][x] = {
-                        t: block.blockType,
-                        l: JSON.stringify(block.linkedBlocks),
-                    };
-                } else blocks[y][x].l = JSON.stringify(block.linkedBlocks);
+                blocks[y][x] = {
+                    t: block.blockType,
+                    l: block.linkedBlocks,
+                };
             }
 
             // Save wall
@@ -434,15 +432,14 @@ async function LoadChunk(
             const blockData = chunk.blocks[y][x];
             const block = constructedChunk.blocks[y][x];
             if (blockData.l) {
-                console.log("Linked blocks:", JSON.parse(blockData.l));
-                block.linkedBlocks = JSON.parse(blockData.l);
+                block.linkedBlocks = blockData.l;
             }
 
             // Walls
             const wallData = chunk.walls[y][x];
             const wall = constructedChunk.walls[y][x];
             if (wallData.l) {
-                wall.linkedBlocks = JSON.parse(wallData.l);
+                wall.linkedBlocks = wallData.l;
             }
         }
     }
