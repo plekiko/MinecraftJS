@@ -197,7 +197,7 @@ class Chat {
                 case "value":
                     return ["true", "false"];
                 case "dimension":
-                    return ["overworld", "nether", "eather", "0", "1", "2"];
+                    return ["overworld", "nether", "0", "1"];
                 case "time":
                     return ["1", "3", "5", "7.5"];
                 case "block":
@@ -472,8 +472,6 @@ class Chat {
             gotoDimension(0);
         } else if (dimension === "nether" || dimension === "1") {
             gotoDimension(1);
-        } else if (dimension === "eather" || dimension === "2") {
-            gotoDimension(2);
         } else {
             this.message("Invalid dimension.");
         }

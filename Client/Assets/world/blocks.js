@@ -143,6 +143,8 @@ const Blocks = Object.freeze({
     QuartzBlock: 404,
 
     NetherPortal: 405,
+
+    Gravel: 406,
 });
 
 const blockTypes = [
@@ -222,6 +224,23 @@ const blockTypes = [
         smeltOutput: { blockId: Blocks.Glass },
         fall: true,
         noteBlockSound: "snare",
+    }),
+    // gravel
+    new BlockType({
+        blockId: 406,
+        sprite: "gravel",
+        name: "Gravel",
+        hardness: 1.3,
+        breakSound: Sounds.Break_Gravel,
+        breakingSound: Sounds.Breaking_Gravel,
+        toolType: ToolType.Shovel,
+        fall: true,
+        dropTable: new LootTable([
+            new LootItem({
+                itemId: Items.Flint,
+                subtract: 10,
+            }),
+        ]),
     }),
     new BlockType({
         blockId: 7,

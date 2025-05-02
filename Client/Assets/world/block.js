@@ -1612,7 +1612,7 @@ class Block extends Square {
             blockType: this.blockType,
         });
 
-        this.breakBlock(false);
+        setBlockType(this, Blocks.Air);
     }
 
     playBreakSound() {

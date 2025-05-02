@@ -108,6 +108,7 @@ const Items = Object.freeze({
     NetherQuartz: 151,
 
     FlintAndSteel: 2000,
+    Flint: 2001,
 });
 
 const items = [
@@ -528,6 +529,11 @@ const items = [
     //#endregion
 
     //#region Ores
+    new Item({
+        itemId: 2001,
+        name: "Flint",
+        sprite: "flint",
+    }),
     new Item({
         itemId: 20,
         name: "Coal",

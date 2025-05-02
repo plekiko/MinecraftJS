@@ -34,6 +34,10 @@ const ORE_THRESHOLDS = {
     gold: 1.4,
     quartz: 1.5,
     glowstone: 1.5,
+    lavaPockets: 1.5,
+    gravel: 1.5,
+    sand: 1.5,
+    dirt: 1.5,
 };
 
 const SPAWN_PLAYER = true;

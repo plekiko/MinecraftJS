@@ -546,68 +546,24 @@ class Chunk {
     generateOres() {
         const noiseMaps = getDimension(this.dimension).noiseMaps;
 
-        if (noiseMaps.coal)
+        if (!noiseMaps.ores) return;
+
+        const oreEntries = Object.entries(noiseMaps.ores);
+
+        oreEntries.forEach(([oreKey, ore], index) => {
+            // Offset is the index of the ore in the ores array * 10000
+            const offset = index * 10000;
+
+            const depth = ore.depth || CHUNK_HEIGHT;
+
             this.generateOre(
-                noiseMaps.coal,
-                ORE_THRESHOLDS.coal,
-                Blocks.CoalOre,
-                0
-            );
-        if (noiseMaps.iron)
-            this.generateOre(
-                noiseMaps.iron,
-                ORE_THRESHOLDS.iron,
-                Blocks.IronOre,
-                100000
-            );
-        if (noiseMaps.diamond)
-            this.generateOre(
-                noiseMaps.diamond,
-                ORE_THRESHOLDS.diamond,
-                Blocks.DiamondOre,
-                200000,
-                25
-            );
-        if (noiseMaps.redstone)
-            this.generateOre(
-                noiseMaps.redstone,
-                ORE_THRESHOLDS.redstone,
-                Blocks.RedstoneOre,
-                300000,
-                30
-            );
-        if (noiseMaps.gold)
-            this.generateOre(
-                noiseMaps.gold,
-                ORE_THRESHOLDS.gold,
-                Blocks.GoldOre,
-                400000,
-                25
-            );
-        if (noiseMaps.quartz)
-            this.generateOre(
-                noiseMaps.quartz,
-                ORE_THRESHOLDS.quartz,
-                Blocks.QuartzOre,
-                500000,
-                CHUNK_HEIGHT
-            );
-        if (noiseMaps.glowstone)
-            this.generateOre(
-                noiseMaps.glowstone,
-                ORE_THRESHOLDS.glowstone,
-                Blocks.Glowstone,
-                600000,
-                CHUNK_HEIGHT
-            );
-        if (noiseMaps.lavaPockets)
-            this.generateOre(
-                noiseMaps.lavaPockets,
-                1.5,
-                Blocks.Lava,
-                700000,
-                CHUNK_HEIGHT
-            );
+                ore.noise,
+                ore.thresshold,
+                ore.block,
+                offset,
+                depth
+            ); // Generate ores
+        });
     }
 
     generateOre(noise, threshold, block, offset, height = CHUNK_HEIGHT) {
