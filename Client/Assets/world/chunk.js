@@ -409,6 +409,19 @@ class Chunk {
             block.breakBlock(blockData.dropWithoutTool);
 
         if (blockData.fall) block.gravityBlock();
+
+        // check block above
+        const blockAbove = this.getBlock(x, y - 2, false);
+
+        if (blockAbove) {
+            const blockAboveData = this.getBlockTypeData(x, y - 2, false);
+            if (blockAboveData.breakWithoutBlockUnderneath)
+                blockAbove.breakBlock(blockAboveData.dropWithoutTool);
+            if (blockAboveData.fall) {
+                blockAbove.gravityBlock();
+                this.checkForBlockWithAirBeneath(x, y - 2);
+            }
+        }
     }
 
     getAllBlocks(blockType) {
