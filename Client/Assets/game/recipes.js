@@ -388,6 +388,15 @@ const recipes = [
         ],
         output: new InventoryItem({ itemId: Items.Bucket, count: 1 }),
     }),
+    // Flint and Steel
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: [
+            new RecipeItem({ itemId: Items.IronIngot }),
+            new RecipeItem({ itemId: Items.Flint }),
+        ],
+        output: new InventoryItem({ itemId: Items.FlintAndSteel, count: 1 }),
+    }),
     //#endregion
 
     //#region Diamond Tools
