@@ -163,6 +163,20 @@ function PlayRandomSoundFromArray({
 // Remove an audio object from the playing list
 function removeAudio(audio) {
     if (!audio || !(audio instanceof Audio)) return;
+
+    // Find the audio object in playingAudio
+    const audioObj = playingAudio.find((item) => item.audioElem === audio);
+    if (audioObj) {
+        // Disconnect the panner and source nodes
+        if (audioObj.panner) {
+            audioObj.panner.disconnect();
+        }
+        if (audioObj.sourceNode) {
+            audioObj.sourceNode.disconnect();
+        }
+    }
+
+    // Pause and remove the audio element
     audio.pause();
     playingAudio = playingAudio.filter((item) => item.audioElem !== audio);
 }

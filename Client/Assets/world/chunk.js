@@ -1037,15 +1037,7 @@ class Chunk {
             const { x: currX, y: currY } = queue.shift();
 
             // Break the current portal block
-            SetBlockTypeAtPosition(
-                currX,
-                currY,
-                Blocks.Air,
-                false,
-                activeDimension,
-                null,
-                false
-            );
+            GetBlockAtWorldPosition(currX, currY).breakBlock();
 
             // Check adjacent blocks for more NetherPortal blocks
             for (const { dx, dy } of directions) {
@@ -1061,13 +1053,6 @@ class Chunk {
                 }
             }
         }
-
-        PlayRandomSoundFromArray({
-            array: Sounds.Break_Glass,
-            positional: true,
-            origin: new Vector2(worldX, worldY),
-            volume: 0.5,
-        });
     }
 
     checkPortalFrame(worldX, worldY, innerWidth, innerHeight) {
