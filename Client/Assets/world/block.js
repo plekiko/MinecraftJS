@@ -1524,7 +1524,7 @@ class Block extends Square {
             this.dropBlock();
         }
 
-        if (this.linkedBlocks) {
+        if (this.linkedBlocks && this.linkedBlocks.length > 1) {
             for (let block of this.linkedBlocks) {
                 const blockAtPos = GetBlockAtWorldPosition(block.x, block.y);
 

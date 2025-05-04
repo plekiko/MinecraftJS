@@ -1301,17 +1301,15 @@ class Player extends Entity {
             hover.breakBlock(false, wall);
             this.playerSwing();
 
-            if (multiplayer) {
-                ServerBreakBlock(
-                    hover.chunkX,
-                    hover.x,
-                    hover.y,
-                    Blocks.Air,
-                    wall,
-                    false,
-                    activeDimension
-                );
-            }
+            ServerBreakBlock(
+                hover.chunkX,
+                hover.x,
+                hover.y,
+                Blocks.Air,
+                wall,
+                false,
+                activeDimension
+            );
             return;
         }
 

@@ -113,7 +113,7 @@ function processMessage(data) {
                 return;
             }
 
-            // console.log("Breaking block:", message);
+            console.log("Breaking block:", message);
 
             // get the block at the given coordinates
             const block = getDimensionChunks(message.dimensionIndex)
@@ -122,7 +122,7 @@ function processMessage(data) {
 
             if (!block) console.log("Block not found:", message.x, message.y);
 
-            block.breakBlock(message.shouldDrop);
+            block.breakBlock(message.shouldDrop, message.isWall);
         case "playerDimension":
             const otherPlayer = getEntityByUUID(message.player);
             if (otherPlayer) otherPlayer.dimension = message.dimension;
