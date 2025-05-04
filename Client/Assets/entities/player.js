@@ -440,6 +440,15 @@ class Player extends Entity {
                 this.hoverBlock.setBlockType(Blocks.Water, true);
                 // setBlockType(this.hoverBlock, Blocks.Water);
 
+                ServerPlaceBlock(
+                    getChunkXForWorldX(this.hoverBlock.transform.position.x),
+                    this.hoverBlock.x,
+                    this.hoverBlock.y,
+                    Blocks.Water,
+                    false,
+                    activeDimension
+                );
+
                 this.hoverBlock.updateSprite();
                 return;
             }
@@ -451,6 +460,16 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.Bucket, count: 1 })
                 );
                 this.hoverBlock.setBlockType(Blocks.Lava, true);
+
+                ServerPlaceBlock(
+                    getChunkXForWorldX(this.hoverBlock.transform.position.x),
+                    this.hoverBlock.x,
+                    this.hoverBlock.y,
+                    Blocks.Lava,
+                    false,
+                    activeDimension
+                );
+
                 // setBlockType(this.hoverBlock, Blocks.Lava);
 
                 this.hoverBlock.updateSprite();
@@ -475,6 +494,15 @@ class Player extends Entity {
                 );
 
                 if (!chunk) return;
+
+                ServerPlaceBlock(
+                    chunk.x,
+                    this.hoverBlock.x,
+                    this.hoverBlock.y,
+                    Blocks.Air,
+                    false,
+                    activeDimension
+                );
 
                 chunk.setBlockType(
                     this.hoverBlock.x,
@@ -501,6 +529,15 @@ class Player extends Entity {
                 );
 
                 if (!chunk) return;
+
+                ServerPlaceBlock(
+                    chunk.x,
+                    this.hoverBlock.x,
+                    this.hoverBlock.y,
+                    Blocks.Air,
+                    false,
+                    activeDimension
+                );
 
                 chunk.setBlockType(
                     this.hoverBlock.x,
@@ -1061,16 +1098,14 @@ class Player extends Entity {
 
         if (!succeeded) return;
 
-        if (multiplayer) {
-            ServerPlaceBlock(
-                chunk.x,
-                this.hoverBlock.x,
-                this.hoverBlock.y,
-                blockToPlace.blockId,
-                isWall,
-                activeDimension
-            );
-        }
+        ServerPlaceBlock(
+            chunk.x,
+            this.hoverBlock.x,
+            this.hoverBlock.y,
+            blockToPlace.blockId,
+            isWall,
+            activeDimension
+        );
 
         // Play appropriate break sound
         if (!isWall) {

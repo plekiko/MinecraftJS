@@ -381,9 +381,7 @@ async function LoadChunk(
         CHUNK_WIDTH,
         biome,
         previousChunk,
-        pendingBlocks,
-        true,
-        dimensionIndex
+        true
     );
 
     constructedChunk.generateArray();
