@@ -39,7 +39,7 @@ function ReverseY(y) {
 }
 
 function summonEntity(entity, position, props, sync = false, uuid = null) {
-    console.log("Summoning entity:", entity, position, props, uuid);
+    // console.log("Summoning entity:", entity, position, props, uuid);
     const UUID = uuid ? uuid : uuidv4();
 
     const newEntity = new entity({ UUID: UUID, position: position, ...props });

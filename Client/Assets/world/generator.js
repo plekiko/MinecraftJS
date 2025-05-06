@@ -610,6 +610,15 @@ function worldToBlocks(position) {
     return new Vector2(blockX, blockY);
 }
 
+function worldToLocal(x, y) {
+    const chunkX = getChunkXForWorldX(x);
+
+    const localX = Math.floor((x - chunkX) / BLOCK_SIZE);
+    const localY = Math.floor(y / BLOCK_SIZE);
+
+    return new Vector2(localX, localY);
+}
+
 function GetChunkByIndex(index) {
     // Calculate the world x-coordinate of the chunk based on its index
     const chunkX = index * CHUNK_WIDTH * BLOCK_SIZE;

@@ -290,12 +290,22 @@ body {
 
 .world-name {
     font-family: "Pixel";
-    font-size: 2rem;
-
+    font-size: 1.8rem;
     color: white;
     user-select: none;
-    -webkit-user-select: none;
     text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.world-name .ip {
+    font-size: 1.2rem;
+    color: #777;
+    opacity: 0.6;
 }
 
 .world-date {
@@ -319,6 +329,48 @@ body {
     overflow-y: auto;
 
     /* background-color: rosybrown; */
+}
+
+.world-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pinging::after {
+    content: "";
+    display: inline-block;
+    width: 14px; /* Slightly larger for visibility */
+    height: 14px;
+    background: #55ff55; /* Start with Minecraft green */
+    border: 2px solid #000000; /* Black border for pixelated look */
+    border-radius: 2px; /* Slight rounding for chiseled effect */
+    animation: spin-and-color 1.5s linear infinite;
+    margin-left: 6px;
+    image-rendering: pixelated; /* Ensure pixelated rendering */
+}
+
+@keyframes spin-and-color {
+    0% {
+        transform: rotate(0deg);
+        background: #55ff55; /* Green */
+        border-color: #000000;
+    }
+    33% {
+        transform: rotate(120deg);
+        background: #ffff55; /* Yellow */
+        border-color: #555555; /* Dark gray for contrast */
+    }
+    66% {
+        transform: rotate(240deg);
+        background: #ff5555; /* Red */
+        border-color: #000000;
+    }
+    100% {
+        transform: rotate(360deg);
+        background: #55ff55; /* Back to green */
+        border-color: #000000;
+    }
 }
 
 .menu-container {

@@ -55,11 +55,41 @@ let tempServerIP = "";
 let tempQuickConnectIP = "";
 let randomTexts = [];
 
+let lastPingTime = 0;
+let cachedServerStatuses = [];
+
 let currentSettings = {
     sfx: true,
     music: true,
     lighting: true,
     username: "",
+};
+
+const colorMap = {
+    0: "#000000", // Black
+    1: "#0000AA", // Dark Blue
+    2: "#00AA00", // Dark Green
+    3: "#00AAAA", // Dark Aqua
+    4: "#AA0000", // Dark Red
+    5: "#AA00AA", // Dark Purple
+    6: "#FFAA00", // Gold
+    7: "#AAAAAA", // Gray
+    8: "#555555", // Dark Gray
+    9: "#5555FF", // Blue
+    a: "#55FF55", // Green
+    b: "#55FFFF", // Aqua
+    c: "#FF5555", // Red
+    d: "#FF55FF", // Light Purple
+    e: "#FFFF55", // Yellow
+    f: "#FFFFFF", // White
+};
+
+const formatMap = {
+    l: "font-weight: bold;",
+    o: "font-style: italic;",
+    n: "text-decoration: underline;",
+    m: "text-decoration: line-through;",
+    r: "", // Reset formatting
 };
 
 fetch("menu_text.json")
@@ -623,6 +653,203 @@ function selectWorld(id, selectedElement) {
     selectedWorld = id;
 }
 
+async function pingServer(server) {
+    return new Promise((resolve) => {
+        const [ip, port = "25565"] = server.ip.split(":");
+
+        // Validate IP and port
+        if (!isValidServerIp(ip) || isNaN(port) || port < 1 || port > 65535) {
+            resolve({
+                server,
+                status: null,
+                latency: null,
+                error: "Invalid IP or port",
+            });
+            return;
+        }
+
+        const ws = new WebSocket(`ws://${ip}:${port}`);
+        const startTime = Date.now();
+        let latency = null;
+        let status = null;
+
+        const timeoutId = setTimeout(() => {
+            if (ws.readyState !== ws.CLOSED) {
+                ws.close();
+                resolve({
+                    server,
+                    status: null,
+                    latency: null,
+                    error: "Timeout",
+                });
+            }
+        }, 5000);
+
+        ws.onopen = () => {
+            ws.send(
+                JSON.stringify({
+                    type: "status",
+                    message: { requestId: Date.now() },
+                })
+            );
+        };
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === "statusResponse") {
+                    latency = Date.now() - startTime;
+                    status = data.message;
+                    clearTimeout(timeoutId);
+                    ws.close();
+                    resolve({
+                        server,
+                        status,
+                        latency,
+                        error: null,
+                    });
+                }
+            } catch (e) {
+                // Silently handle parsing errors
+            }
+        };
+
+        ws.onerror = () => {
+            clearTimeout(timeoutId);
+            ws.close();
+            resolve({
+                server,
+                status: null,
+                latency: null,
+                error: "Connection failed",
+            });
+        };
+
+        ws.onclose = () => {
+            clearTimeout(timeoutId);
+            if (!status) {
+                resolve({
+                    server,
+                    status: null,
+                    latency: null,
+                    error: "No response",
+                });
+            }
+        };
+    });
+}
+
+async function pingServerAndUpdate(server, container) {
+    try {
+        const result = await pingServer(server);
+        if (!result || typeof result !== "object") {
+            console.warn(
+                `Invalid ping result for server ${server.id}:`,
+                result
+            );
+            updateServerStatus(
+                server,
+                {
+                    status: null,
+                    latency: null,
+                    error: "Ping failed",
+                },
+                container
+            );
+            return (
+                result || {
+                    server,
+                    status: null,
+                    latency: null,
+                    error: "Ping failed",
+                }
+            );
+        }
+        updateServerStatus(server, result, container);
+        return result;
+    } catch (error) {
+        console.error(`Ping error for server ${server.id}:`, error);
+        updateServerStatus(
+            server,
+            {
+                status: null,
+                latency: null,
+                error: "Connection failed",
+            },
+            container
+        );
+        return {
+            server,
+            status: null,
+            latency: null,
+            error: "Connection failed",
+        };
+    }
+}
+
+function updateServerStatus(server, result, container) {
+    const { status, latency, error } = result || {
+        status: null,
+        latency: null,
+        error: "Unknown error",
+    };
+
+    const serverElement = container.querySelector(`[data-id="${server.id}"]`);
+    if (!serverElement) {
+        console.warn(`Server element not found for ID ${server.id}`);
+        return;
+    }
+
+    const serverNameElement = serverElement.querySelector(".world-name");
+    const serverIPElement = serverElement.querySelector(".world-date");
+    const serverImageElement = serverElement.querySelector(".world-image");
+
+    const safeName = sanitizeHtml(server.name);
+    const safeIp = sanitizeHtml(server.ip);
+
+    serverNameElement.innerHTML = `${safeName} <span class="ip">(${safeIp})</span>`;
+
+    let statusText = "";
+    if (error) {
+        statusText = `<span class="${
+            error === "Pinging..." ? "pinging" : ""
+        }">${sanitizeHtml(error)}</span>`;
+        serverElement.style.opacity = error === "Pinging..." ? "0.7" : "0.5";
+        serverImageElement.src = "Assets/sprites/menu/worldPreview.png";
+    } else if (status) {
+        statusText = `<span class="world-status">${status.onlinePlayers}/${status.maxPlayers}</span>`;
+        statusText += ` - ${parseMotdToHtml(status.motd)}`;
+        if (latency !== null) {
+            let latencyColor =
+                latency < 100
+                    ? "#55FF55"
+                    : latency < 200
+                    ? "#FFFF55"
+                    : "#FF5555";
+            statusText += ` - <span class="world-status" style="color: ${latencyColor}">${latency}ms</span>`;
+        }
+        console.log(
+            `Server ${server.id} (${server.name}) pinged successfully:`,
+            status
+        );
+        serverElement.style.opacity = "1";
+        serverImageElement.src =
+            status.icon && status.icon.startsWith("data:image/")
+                ? status.icon
+                : "Assets/sprites/menu/worldPreview.png";
+    }
+
+    serverIPElement.innerHTML = statusText;
+}
+
+async function pingAllServers() {
+    const servers = JSON.parse(localStorage.getItem("servers") || "[]");
+    const results = await Promise.all(
+        servers.map((server) => pingServer(server))
+    );
+    return results;
+}
+
 // Server Management Functions
 function showServers() {
     worldSelectContainer.style.display = "none";
@@ -633,7 +860,94 @@ function showServers() {
     displayServers();
 }
 
-function displayServers() {
+async function displayServers() {
+    const servers = JSON.parse(localStorage.getItem("servers") || "[]");
+
+    serverListContainer.innerHTML = "";
+    cachedServerStatuses = []; // Clear cached statuses
+
+    if (servers.length === 0) {
+        removeServerButton.disabled = true;
+        connectButton.disabled = true;
+        serverListContainer.innerHTML = "<p>No servers added.</p>";
+        return;
+    }
+
+    renderServers(
+        servers.map((server) => ({
+            server,
+            status: null,
+            latency: null,
+            error: "Pinging...",
+        }))
+    );
+
+    pingAndRenderServers();
+}
+
+async function pingAndRenderServers() {
+    if (serverSelectContainer.style.display !== "flex") return;
+
+    const now = Date.now();
+    if (now - lastPingTime < 100 && cachedServerStatuses.length > 0) {
+        renderServers(cachedServerStatuses);
+        return;
+    }
+
+    const servers = JSON.parse(localStorage.getItem("servers") || "[]");
+    cachedServerStatuses = [];
+
+    const pingPromises = servers.map((server) =>
+        pingServerAndUpdate(server, serverListContainer)
+    );
+
+    try {
+        cachedServerStatuses = await Promise.all(pingPromises);
+        lastPingTime = now;
+    } catch (error) {
+        console.error("Error during server pinging:", error);
+        cachedServerStatuses = servers.map((server) => ({
+            server,
+            status: null,
+            latency: null,
+            error: "Ping failed",
+        }));
+        renderServers(cachedServerStatuses);
+    }
+
+    setTimeout(() => {
+        pingAndRenderServers();
+    }, 500);
+}
+
+function forceRefreshServers() {
+    lastPingTime = 0;
+    displayServers();
+}
+
+function sanitizeHtml(str) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function isValidServerName(name) {
+    // Allow alphanumeric, spaces, and common punctuation; max length 20
+    const nameRegex = /^[a-zA-Z0-9\s!@#$%^&*()-_=+[\]{}|;:,.<>?]{1,20}$/;
+    return nameRegex.test(name);
+}
+
+function isValidServerIp(ip) {
+    // Allow IPv4, domain names, localhost, with optional port
+    const ipRegex =
+        /^(?:(?:[0-9]{1,3}\.){3}[0-9]{1,3}|localhost|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?::[0-9]{1,5})?$/;
+    return ipRegex.test(ip);
+}
+
+function renderServers(serverStatuses) {
     serverListContainer.innerHTML = "";
     const servers = JSON.parse(localStorage.getItem("servers") || "[]");
 
@@ -643,13 +957,48 @@ function displayServers() {
         return;
     }
 
-    servers.forEach((server) => {
+    serverStatuses.forEach(({ server, status, latency, error }) => {
         const serverElement = worldContainer.cloneNode(true);
         const serverNameElement = serverElement.querySelector(".world-name");
         const serverIPElement = serverElement.querySelector(".world-date");
+        const serverImageElement = serverElement.querySelector(".world-image");
 
-        serverNameElement.textContent = server.name;
-        serverIPElement.textContent = server.ip;
+        const safeName = sanitizeHtml(server.name);
+        const safeIp = sanitizeHtml(server.ip);
+
+        serverNameElement.innerHTML = `${safeName} <span class="ip">(${safeIp})</span>`;
+
+        serverElement.setAttribute("data-id", server.id);
+
+        if (server.id === selectedServerId) {
+            serverElement.classList.add("selected");
+        }
+
+        let statusText = "";
+        if (error) {
+            statusText = `<span class="${
+                error === "Pinging..." ? "pinging" : ""
+            }">${sanitizeHtml(error)}</span>`;
+            serverElement.style.opacity =
+                error === "Pinging..." ? "0.7" : "0.5";
+            serverImageElement.src = "Assets/sprites/menu/worldPreview.png";
+        } else if (status) {
+            statusText = `<span class="world-status">${status.onlinePlayers}/${status.maxPlayers}</span>`;
+            statusText += ` - ${parseMotdToHtml(status.motd)}`;
+            if (latency !== null) {
+                let latencyColor =
+                    latency < 100
+                        ? "#55FF55"
+                        : latency < 200
+                        ? "#FFFF55"
+                        : "#FF5555";
+                statusText += ` - <span class="world-status" style="color: ${latencyColor}">${latency}ms</span>`;
+            }
+            serverElement.style.opacity = "1";
+            serverImageElement.src = "Assets/sprites/menu/worldPreview.png";
+        }
+
+        serverIPElement.innerHTML = statusText;
         serverElement.style.display = "flex";
 
         serverElement.addEventListener("click", () => {
@@ -657,13 +1006,37 @@ function displayServers() {
         });
         serverListContainer.appendChild(serverElement);
     });
+}
 
-    // Auto-select the first server if none is selected
-    if (!selectedServerId && servers.length > 0) {
-        const firstServerElement =
-            serverListContainer.querySelector(".world-container");
-        selectServer(servers[0].id, firstServerElement);
+function parseMotdToHtml(motd) {
+    let html = "";
+    let currentColor = "";
+    let currentStyles = [];
+    let i = 0;
+
+    while (i < motd.length) {
+        if (motd[i] === "§" && i + 1 < motd.length) {
+            const code = motd[i + 1].toLowerCase();
+            i += 2;
+            if (colorMap[code]) {
+                currentColor = `color: ${colorMap[code]};`;
+            } else if (formatMap[code]) {
+                if (code === "r") {
+                    currentColor = "";
+                    currentStyles = [];
+                } else {
+                    currentStyles.push(formatMap[code]);
+                }
+            }
+            continue;
+        }
+        const char = sanitizeHtml(motd[i]);
+        const style = currentColor + currentStyles.join("");
+        html += style ? `<span style="${style}">${char}</span>` : char;
+        i++;
     }
+
+    return html;
 }
 
 function selectServer(id, selectedElement) {
@@ -700,6 +1073,20 @@ function updateServerIP(value) {
 function addServer() {
     if (!tempServerIP) {
         alert("Please enter a server IP.");
+        return;
+    }
+
+    // Validate server name and IP
+    if (!isValidServerName(tempServerName)) {
+        alert(
+            "Invalid server name. Use 1-20 characters (alphanumeric, spaces, or common punctuation)."
+        );
+        return;
+    }
+    if (!isValidServerIp(tempServerIP)) {
+        alert(
+            "Invalid server IP. Use a valid IPv4 address, domain, or localhost with optional port."
+        );
         return;
     }
 

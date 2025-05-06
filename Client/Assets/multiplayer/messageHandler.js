@@ -6,9 +6,13 @@ function processMessage(data) {
     const type = data.type;
 
     switch (type) {
+        case "serverFull":
+            alert("Server is full. Please try again later.");
+            break;
+
         case "youJoined":
             console.log(data);
-            iJoined(message.player, message.existingPlayers);
+            iJoined(message.player, message.existingPlayers, message.gamemode);
             break;
         case "playerJoined":
             console.log(data);
@@ -156,7 +160,7 @@ function updatePlayerState(data) {
     }
 }
 
-async function iJoined(player, existingPlayers) {
+async function iJoined(player, existingPlayers, gamemode = 0) {
     // Wait until loadingWorld is false
     while (loadingWorld) {
         await new Promise((resolve) => setTimeout(resolve, 100));
@@ -168,6 +172,8 @@ async function iJoined(player, existingPlayers) {
         player.UUID,
         settings.username
     );
+
+    myPlayer.setGamemode(gamemode);
 
     // Upload skin to server
     server.send({

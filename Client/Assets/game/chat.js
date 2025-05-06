@@ -450,6 +450,14 @@ class Chat {
 
         if (block) {
             SetBlockTypeAtPosition(position.x, position.y, block);
+
+            ServerPlaceBlock(
+                getChunkXForWorldX(position.x),
+                worldToLocal(position.x, position.y).x,
+                worldToLocal(position.x, position.y).y,
+                block
+            );
+
             this.cheatMessage(
                 `Set block ${blockName} at ${Math.floor(
                     position.x
