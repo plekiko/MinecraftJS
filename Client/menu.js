@@ -869,7 +869,6 @@ async function displayServers() {
     if (servers.length === 0) {
         removeServerButton.disabled = true;
         connectButton.disabled = true;
-        serverListContainer.innerHTML = "<p>No servers added.</p>";
         return;
     }
 
