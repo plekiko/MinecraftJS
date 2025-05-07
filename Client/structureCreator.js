@@ -293,8 +293,6 @@ sortedBlocks.forEach((block) => {
         .replace(/([A-Z])/g, " $1")
         .trim();
 
-    if (block.excludeFromCreativeInventory) return;
-
     const imgSrc = block.sprite
         ? "Assets/sprites/blocks/" + block.iconSprite + ".png"
         : "Assets/sprites/misc/placeholder.png";

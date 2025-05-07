@@ -159,7 +159,7 @@ let dimensions = [
 function gotoDimension(dimension) {
     if (dimension === activeDimension) return;
 
-    player.dimension = dimension;
+    if (player) player.dimension = dimension;
 
     if (multiplayer) {
         server.send({

@@ -295,8 +295,6 @@ async function UploadChunkToServer(chunkX, dimensionIndex) {
 }
 
 function GenerateStructure(structure, x, y) {
-    console.log("Generating structure", structure, x, y);
-
     const structureData = Structures[structure];
     if (!structureData) return;
 
@@ -530,8 +528,18 @@ function generateStructures(dimensionIndex = activeDimension) {
             const underground = Math.random() < 0.5;
             const filteredCandidates = candidates.filter((name) => {
                 const structure = Structures[name];
-                return structure.underground === underground;
+                const correctDimension = dimensionIndex === structure.dimension;
+                return (
+                    structure.underground === underground && correctDimension
+                );
             });
+
+            // console.log(
+            //     "Filtered candidates for chunk",
+            //     chunkIndex,
+            //     "are",
+            //     filteredCandidates
+            // );
 
             if (filteredCandidates.length === 0) return;
 
@@ -548,7 +556,7 @@ function generateStructures(dimensionIndex = activeDimension) {
             if (structure.underground) {
                 const localX = chunk.getLocalX(structureX);
                 const surfaceBlockY = chunk.findGroundLevel(localX, true);
-                if (surfaceBlockY === 0) return;
+                // if (surfaceBlockY === 0) return;
                 const surfaceY = surfaceBlockY * BLOCK_SIZE;
                 const undergroundOffset =
                     RandomRange(8, CHUNK_HEIGHT / 2.5) * BLOCK_SIZE;

@@ -1203,9 +1203,10 @@ class Player extends Entity {
             const blockBeneathDef = GetBlock(blockBeneath.blockType);
 
             if (
-                !blockBeneathDef.collision &&
-                block.onlyPlacableOn === null &&
-                blockBeneathDef.transparent
+                (!blockBeneathDef.collision &&
+                    block.onlyPlacableOn === null &&
+                    blockBeneathDef.transparent) ||
+                blockBeneathDef.fluid
             )
                 return false;
 

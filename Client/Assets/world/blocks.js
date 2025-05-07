@@ -145,6 +145,7 @@ const Blocks = Object.freeze({
     NetherPortal: 405,
 
     Gravel: 406,
+    NetherBricks: 407,
 });
 
 const blockTypes = [
@@ -2044,6 +2045,16 @@ const blockTypes = [
         animationSpeed: 1.5,
 
         lightLevel: 11,
+    }),
+    new BlockType({
+        blockId: 407,
+        name: "Nether Bricks",
+        sprite: "nether_brick",
+        hardness: 10,
+        breakSound: Sounds.Break_Stone,
+        breakingSound: Sounds.Breaking_Stone,
+        toolType: ToolType.Pickaxe,
+        dropWithoutTool: false,
     }),
     //#endregion
 ];

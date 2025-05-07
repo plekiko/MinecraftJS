@@ -413,7 +413,7 @@ function uploadTexturePack() {
 
                 try {
                     const base64Data = texturePackData.startsWith(
-                        "data:application/x-zip-compressed;base64,"
+                        "data:application/x-zip-compressed;`base64`,"
                     )
                         ? texturePackData.replace(
                               "data:application/x-zip-compressed;base64,",
