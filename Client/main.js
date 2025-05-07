@@ -43,6 +43,8 @@ function summonEntity(entity, position, props, sync = false, uuid = null) {
     const UUID = uuid ? uuid : uuidv4();
 
     const newEntity = new entity({ UUID: UUID, position: position, ...props });
+    newEntity.dimension = activeDimension;
+
     entities.push(newEntity);
 
     if (sync) {
