@@ -78,9 +78,18 @@ function loadProperties() {
 function beforeInit() {
     console.log("Welcome to the Minecraft JS server panel!");
     loadProperties();
+    if (loadWorldFromDir()) {
+        console.log("World loaded successfully!");
+    } else {
+        console.log("No world save found. Creating a new world!");
+    }
     console.log(
         `Server started at "${properties.serverIp}:${properties.serverPort}". Press Ctrl+C to stop the server.`
     );
+
+    setInterval(() => {
+        if (players.length > 0) saveWorldToDir();
+    }, 1000);
 }
 
 function parseMotd(motd) {
@@ -363,4 +372,81 @@ function processMessage(message, ws) {
 
 function getPlayerByUUID(UUID) {
     return players.find((player) => player.UUID === UUID);
+}
+
+function loadWorldFromDir() {
+    const worldDir = `./${properties.levelName}`;
+    const worldFile = `${worldDir}/world.save`; // Explicitly a file
+    try {
+        // Check if the path exists and is a file
+        if (fs.existsSync(worldFile)) {
+            const stats = fs.statSync(worldFile);
+            if (stats.isDirectory()) {
+                console.error(
+                    `Error: ${worldFile} is a directory, expected a file.`
+                );
+                return false;
+            }
+            // Read and parse the world.save file
+            const fileContent = fs.readFileSync(worldFile, "utf8");
+            if (!fileContent) {
+                console.error(`Error: ${worldFile} is empty.`);
+                return false;
+            }
+            const worldData = JSON.parse(fileContent);
+            // Load the world data into the World instance
+            const success = world.loadWorld(worldData);
+            if (success) {
+                // console.log("World loaded successfully from", worldFile);
+                return true;
+            } else {
+                // console.error("Failed to load world data from", worldFile);
+                return false;
+            }
+        } else {
+            // console.log(
+            //     "No world save found at",
+            //     worldFile,
+            //     ". Creating a new world."
+            // );
+            // Save the default world to create a new save file
+            saveWorldToDir();
+            return false;
+        }
+    } catch (error) {
+        console.error(
+            "Error loading world from",
+            worldFile,
+            ":",
+            error.message
+        );
+        return false;
+    }
+}
+
+function saveWorldToDir() {
+    const worldDir = `./${properties.levelName}`;
+    const worldFile = `${worldDir}/world.save`; // Explicitly a file
+    const worldSave = world.saveWorld();
+    try {
+        // Check if the path exists and is a directory
+        if (fs.existsSync(worldFile)) {
+            const stats = fs.statSync(worldFile);
+            if (stats.isDirectory()) {
+                console.error(
+                    `Error: ${worldFile} is a directory, cannot save world.`
+                );
+                return false;
+            }
+        }
+        // Ensure the directory exists
+        fs.mkdirSync(worldDir, { recursive: true });
+        // Write the world data to world.save
+        fs.writeFileSync(worldFile, JSON.stringify(worldSave, null));
+        // console.log("World saved successfully to", worldFile);
+        return true;
+    } catch (error) {
+        console.error("Error saving world to", worldFile, ":", error.message);
+        return false;
+    }
 }

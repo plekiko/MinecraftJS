@@ -1,0 +1,17 @@
+{
+    "seed": "-97300637",
+    "dimensions": [
+        {
+            "name": "Overworld",
+            "chunks": []
+        },
+        {
+            "name": "Nether",
+            "chunks": []
+        },
+        {
+            "name": "Eather",
+            "chunks": []
+        }
+    ]
+}

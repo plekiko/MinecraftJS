@@ -1,7 +1,7 @@
 export class Dimension {
-    constructor(name) {
+    constructor(name, chunks = new Map()) {
         this.name = name;
-        this.chunks = new Map();
+        this.chunks = chunks;
     }
 
     getChunk(x) {
@@ -10,5 +10,13 @@ export class Dimension {
 
     uploadChunk(chunk, x) {
         this.chunks.set(x, chunk);
+    }
+
+    getChunksForSaving() {
+        const chunks = [];
+        this.chunks.forEach((chunk, x) => {
+            chunks.push({ x: x, chunk: chunk });
+        });
+        return chunks;
     }
 }

@@ -29,6 +29,7 @@ function SaveWorld(message = true, toFile = false) {
     dimensions.forEach((dimension, index) => {
         let savedChunks = [];
         dimension.chunks.forEach((chunk) => {
+            ``;
             const newSaveChunk = SaveChunk(chunk);
             savedChunks.push({
                 x: chunk.x,
