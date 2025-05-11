@@ -6,6 +6,8 @@ import { createInterface } from "readline";
 import fs from "fs";
 
 const propertiesFile = "server.properties";
+const userCacheFile = "usercache.json";
+const bannedIPsFile = "banned-ips.json";
 const iconPaths = [
     { path: "server-icon.png", mime: "image/png" },
     { path: "server-icon.gif", mime: "image/gif" },
@@ -13,6 +15,8 @@ const iconPaths = [
 const maxIconSize = 1 * 1024 * 1024; // 1 MB
 
 let serverIcon = null;
+let userCache = [];
+let bannedIPs = [];
 
 const properties = {};
 
@@ -75,9 +79,105 @@ function loadProperties() {
     serverIcon = loadServerIcon();
 }
 
+function loadUserCache() {
+    try {
+        if (fs.existsSync(userCacheFile)) {
+            const stats = fs.statSync(userCacheFile);
+            if (stats.isDirectory()) {
+                console.error(
+                    `Error: ${userCacheFile} is a directory, expected a file.`
+                );
+                userCache = [];
+                return;
+            }
+            const fileContent = fs.readFileSync(userCacheFile, "utf8");
+            if (!fileContent) {
+                console.error(`Error: ${userCacheFile} is empty.`);
+                userCache = [];
+                return;
+            }
+            userCache = JSON.parse(fileContent);
+            if (!Array.isArray(userCache)) {
+                console.error(
+                    `Error: ${userCacheFile} contains invalid data, expected an array.`
+                );
+                userCache = [];
+            }
+        } else {
+            console.log(
+                `No user cache found at ${userCacheFile}. Initializing empty cache.`
+            );
+            userCache = [];
+            saveUserCache();
+        }
+    } catch (error) {
+        console.error(
+            `Error loading user cache from ${userCacheFile}: ${error.message}`
+        );
+        userCache = [];
+    }
+}
+
+function saveUserCache() {
+    try {
+        fs.writeFileSync(userCacheFile, JSON.stringify(userCache, null, 2));
+    } catch (error) {
+        console.error(
+            `Error saving user cache to ${userCacheFile}: ${error.message}`
+        );
+    }
+}
+
+function updateUserCache(username, ip) {
+    userCache = userCache.filter((entry) => entry.ip !== ip);
+    userCache.push({ username, ip });
+    saveUserCache();
+}
+
+function loadBannedIPs() {
+    try {
+        if (fs.existsSync(bannedIPsFile)) {
+            const stats = fs.statSync(bannedIPsFile);
+            if (stats.isDirectory()) {
+                console.error(
+                    `Error: ${bannedIPsFile} is a directory, expected a file.`
+                );
+                bannedIPs = [];
+                return;
+            }
+            const fileContent = fs.readFileSync(bannedIPsFile, "utf8");
+            if (!fileContent) {
+                console.error(`Error: ${bannedIPsFile} is empty.`);
+                bannedIPs = [];
+                return;
+            }
+            bannedIPs = JSON.parse(fileContent);
+            if (!Array.isArray(bannedIPs)) {
+                console.error(
+                    `Error: ${bannedIPsFile} contains invalid data, expected an array.`
+                );
+                bannedIPs = [];
+            }
+        } else {
+            console.log(
+                `No banned IPs found at ${bannedIPsFile}. Initializing empty list.`
+            );
+            bannedIPs = [];
+            fs.writeFileSync(bannedIPsFile, JSON.stringify(bannedIPs, null, 2));
+        }
+    } catch (error) {
+        console.error(
+            `Error loading banned IPs from ${bannedIPsFile}: ${error.message}`
+        );
+        bannedIPs = [];
+    }
+}
+
 function beforeInit() {
     console.log("Welcome to the Minecraft JS server panel!");
     loadProperties();
+    loadUserCache();
+    loadBannedIPs();
     if (loadWorldFromDir()) {
         console.log("World loaded successfully!");
     } else {
@@ -89,7 +189,7 @@ function beforeInit() {
 
     setInterval(() => {
         if (players.length > 0) saveWorldToDir();
-    }, 1000);
+    }, 30000); // Autosave every 30 seconds
 }
 
 function parseMotd(motd) {
@@ -100,19 +200,17 @@ function parseMotd(motd) {
 
 beforeInit();
 
-// Create a WebSocket server
 const wss = new WebSocketServer({ port: properties.serverPort });
 
 let players = [];
 
 wss.on("connection", (ws) => {
-    // Set a timeout to close the connection if no initial message is received
     const connectionTimeout = setTimeout(() => {
         ws.close();
     }, 5000);
 
     ws.on("message", (message) => {
-        clearTimeout(connectionTimeout); // Clear timeout once a message is received
+        clearTimeout(connectionTimeout);
         let data;
         try {
             data = JSON.parse(message);
@@ -121,10 +219,8 @@ wss.on("connection", (ws) => {
             return;
         }
 
-        // Handle the first message to determine connection type
         if (!players.some((p) => p.ws === ws)) {
             if (data.type === "status") {
-                // Handle status request without creating a player
                 ws.send(
                     JSON.stringify({
                         type: "statusResponse",
@@ -140,7 +236,6 @@ wss.on("connection", (ws) => {
                 );
                 return;
             } else {
-                // Check for max players
                 if (players.length >= properties.maxPlayers) {
                     ws.send(
                         JSON.stringify({
@@ -152,12 +247,10 @@ wss.on("connection", (ws) => {
                     return;
                 }
 
-                // Create a player for this connection
                 playerJoined(ws, data.message);
             }
         }
 
-        // Process subsequent messages as normal
         processMessage(message, ws);
     });
 
@@ -188,6 +281,19 @@ function sendToPlayer(UUID, data) {
 }
 
 function playerJoined(ws, playerData) {
+    const ip = ws._socket.remoteAddress.replace(/^::ffff:/, "") || "127.0.0.1";
+    if (bannedIPs.includes(ip)) {
+        ws.send(
+            JSON.stringify({
+                type: "disconnect",
+                message: "You are banned from this server.",
+            })
+        );
+        console.log(`Banned IP ${ip} attempted to join.`);
+        ws.close();
+        return;
+    }
+
     const newPlayer = new Player({
         UUID: uuidv4(),
         name: playerData?.name || `Player ${players.length + 1}`,
@@ -196,6 +302,8 @@ function playerJoined(ws, playerData) {
     });
 
     players.push(newPlayer);
+
+    updateUserCache(newPlayer.name, ip);
 
     sendToPlayer(newPlayer.UUID, {
         type: "youJoined",
@@ -231,11 +339,9 @@ function playerLeft(player) {
 }
 
 function loadServerIcon() {
-    // Find the first existing icon file
     for (const { path, mime } of iconPaths) {
         if (fs.existsSync(path)) {
             try {
-                // Get file stats to check size before reading
                 const stats = fs.statSync(path);
                 if (stats.size > maxIconSize) {
                     console.error(
@@ -246,14 +352,11 @@ function loadServerIcon() {
                             (1024 * 1024)
                         ).toFixed(2)} MB)`
                     );
-                    continue; // Skip to next file
+                    continue;
                 }
 
-                // Read the icon file
                 const iconBuffer = fs.readFileSync(path);
-                // Convert to base64
                 const base64Icon = iconBuffer.toString("base64");
-                // Verify base64 string is non-empty
                 if (!base64Icon) {
                     console.error(`Empty base64 data for server icon ${path}`);
                     continue;
@@ -287,11 +390,17 @@ function processMessage(message, ws) {
         case "playerData": {
             const player = getPlayerByUUID(data.message.UUID);
             if (player) {
+                const oldName = player.name;
                 player.skin = data.message.skin;
                 player.name = data.message.name;
                 broadcast(data, [data.sender]);
 
-                console.log(player.name + " joined the game!");
+                console.log(`${player.name} joined the game!`);
+
+                const ip =
+                    ws._socket.remoteAddress.replace(/^::ffff:/, "") ||
+                    "127.0.0.1";
+                updateUserCache(player.name, ip);
             }
             break;
         }
@@ -376,9 +485,8 @@ function getPlayerByUUID(UUID) {
 
 function loadWorldFromDir() {
     const worldDir = `./${properties.levelName}`;
-    const worldFile = `${worldDir}/world.save`; // Explicitly a file
+    const worldFile = `${worldDir}/world.save`;
     try {
-        // Check if the path exists and is a file
         if (fs.existsSync(worldFile)) {
             const stats = fs.statSync(worldFile);
             if (stats.isDirectory()) {
@@ -387,29 +495,20 @@ function loadWorldFromDir() {
                 );
                 return false;
             }
-            // Read and parse the world.save file
             const fileContent = fs.readFileSync(worldFile, "utf8");
             if (!fileContent) {
                 console.error(`Error: ${worldFile} is empty.`);
                 return false;
             }
             const worldData = JSON.parse(fileContent);
-            // Load the world data into the World instance
             const success = world.loadWorld(worldData);
             if (success) {
-                // console.log("World loaded successfully from", worldFile);
                 return true;
             } else {
-                // console.error("Failed to load world data from", worldFile);
+                console.error("Failed to load world data from", worldFile);
                 return false;
             }
         } else {
-            // console.log(
-            //     "No world save found at",
-            //     worldFile,
-            //     ". Creating a new world."
-            // );
-            // Save the default world to create a new save file
             saveWorldToDir();
             return false;
         }
@@ -426,10 +525,9 @@ function loadWorldFromDir() {
 
 function saveWorldToDir() {
     const worldDir = `./${properties.levelName}`;
-    const worldFile = `${worldDir}/world.save`; // Explicitly a file
+    const worldFile = `${worldDir}/world.save`;
     const worldSave = world.saveWorld();
     try {
-        // Check if the path exists and is a directory
         if (fs.existsSync(worldFile)) {
             const stats = fs.statSync(worldFile);
             if (stats.isDirectory()) {
@@ -439,11 +537,8 @@ function saveWorldToDir() {
                 return false;
             }
         }
-        // Ensure the directory exists
         fs.mkdirSync(worldDir, { recursive: true });
-        // Write the world data to world.save
-        fs.writeFileSync(worldFile, JSON.stringify(worldSave, null));
-        // console.log("World saved successfully to", worldFile);
+        fs.writeFileSync(worldFile, JSON.stringify(worldSave, null, 2));
         return true;
     } catch (error) {
         console.error("Error saving world to", worldFile, ":", error.message);
