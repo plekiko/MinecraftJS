@@ -1492,8 +1492,8 @@ class Inventory {
         ctx.fillRect(
             slot.position.x + this.inventoryUI.x - 4 + this.openUIOffset.x,
             slot.position.y + this.inventoryUI.y - 4 + this.openUIOffset.y,
-            20 * 3,
-            20 * 3
+            18.5 * 3,
+            18.5 * 3
         );
         ctx.globalAlpha = 1;
     }
