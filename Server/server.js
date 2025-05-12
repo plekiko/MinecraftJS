@@ -538,7 +538,7 @@ function saveWorldToDir() {
             }
         }
         fs.mkdirSync(worldDir, { recursive: true });
-        fs.writeFileSync(worldFile, JSON.stringify(worldSave, null, 2));
+        fs.writeFileSync(worldFile, JSON.stringify(worldSave, null));
         return true;
     } catch (error) {
         console.error("Error saving world to", worldFile, ":", error.message);
