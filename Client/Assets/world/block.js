@@ -498,6 +498,7 @@ class Block extends Square {
 
         server.send({
             type: "syncMetaData",
+            sender: player.UUID,
             message: {
                 x: this.x,
                 y: this.y,

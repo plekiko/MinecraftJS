@@ -528,6 +528,8 @@ function serverLog(log = "") {
 
     const date = new Date();
 
+    date.setHours(date.getHours() + 2);
+
     const formattedDate = date
         .toISOString()
         .replace(/T/, " ")
