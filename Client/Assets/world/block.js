@@ -492,6 +492,41 @@ class Block extends Square {
         this.metaData = new Metadata({ props: props });
     }
 
+    syncMetaData() {
+        if (!multiplayer) return;
+        if (!this.metaData) return;
+
+        server.send({
+            type: "syncMetaData",
+            message: {
+                x: this.x,
+                y: this.y,
+                chunkX: this.chunkX,
+                dimensionIndex: activeDimension,
+                blockType: this.blockType,
+                metaData: this.metaData.props,
+            },
+        });
+    }
+
+    recieveSyncMetaData(metaData) {
+        if (!this.metaData?.props) return;
+
+        this.metaData.props = structuredClone(metaData);
+
+        if (this.metaData.props.storage) {
+            const storage = this.metaData.props.storage.map((row) =>
+                row.map((item) => new InventoryItem(item))
+            );
+
+            this.metaData.props.storage = storage;
+        }
+
+        if (player?.inventory.interactedBlock === this) {
+            player.inventory.reloadStorageSlots();
+        }
+    }
+
     setBlockMetaData(metaData) {
         this.metaData = metaData;
 

@@ -132,6 +132,21 @@ function processMessage(data) {
             if (otherPlayer) otherPlayer.dimension = message.dimension;
             break;
 
+        case "syncMetaData":
+            const chunk = getDimensionChunks(message.dimensionIndex)?.get(
+                message.chunkX
+            );
+
+            if (!chunk) break;
+
+            const blockToChange = chunk.getBlock(message.x, message.y, false);
+
+            if (!blockToChange) break;
+
+            blockToChange.recieveSyncMetaData(message.metaData);
+
+            break;
+
         default:
             console.log("Unknown message type:", type);
             break;

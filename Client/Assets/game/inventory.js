@@ -350,6 +350,8 @@ class Inventory {
                 );
             }
         }
+
+        // console.log("sync storage slots", this.storageSlots);
     }
 
     openConverter(storage) {
@@ -376,6 +378,51 @@ class Inventory {
         ];
 
         this.storageSlots = slots;
+    }
+
+    reloadStorageSlots() {
+        if (!this.storageSlots || !this.storage || !this.interactedBlock)
+            return;
+
+        const blockStorage = this.interactedBlock?.metaData?.props?.storage;
+        if (!blockStorage) return;
+
+        // Ensure storage arrays are properly sized
+        if (
+            this.storage.length !== blockStorage.length ||
+            this.storageSlots.length !== blockStorage.length
+        ) {
+            console.warn("Storage array size mismatch, reinitializing...");
+            this.storage = blockStorage.map((row) =>
+                row.map((item) => this.cloneItem(item))
+            );
+            this.storageSlots =
+                this.createStorageSlotsFromBlockStorage(blockStorage);
+        } else {
+            // Update storage and storageSlots to match blockStorage
+            for (let i = 0; i < blockStorage.length; i++) {
+                if (!this.storage[i] || !this.storageSlots[i]) {
+                    console.warn("Invalid storage row, reinitializing row", i);
+                    this.storage[i] = [];
+                    this.storageSlots[i] = [];
+                }
+                for (let j = 0; j < blockStorage[i].length; j++) {
+                    this.storage[i][j] = this.cloneItem(blockStorage[i][j]);
+                    this.storageSlots[i][j].item = this.cloneItem(
+                        blockStorage[i][j]
+                    );
+                }
+            }
+        }
+
+        // Sync block metadata to ensure consistency
+        this.interactedBlock.metaData.props.storage = this.storage.map((row) =>
+            row.map((item) => this.cloneItem(item))
+        );
+        this.interactedBlock.syncMetaData();
+
+        // Refresh the UI to reflect changes
+        // this.refreshInventoryUI();
     }
 
     openHopper(storage) {
@@ -732,6 +779,10 @@ class Inventory {
                 );
             }
         }
+
+        if (!this.interactedBlock) return;
+
+        this.interactedBlock.syncMetaData();
     }
 
     handleRightClickGetHalf(item, x, y, array) {
