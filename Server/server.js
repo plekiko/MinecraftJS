@@ -104,7 +104,7 @@ function loadUserCache() {
                 userCache = [];
             }
         } else {
-            console.log(
+            serverLog(
                 `No user cache found at ${userCacheFile}. Initializing empty cache.`
             );
             userCache = [];
@@ -159,7 +159,7 @@ function loadBannedIPs() {
                 bannedIPs = [];
             }
         } else {
-            console.log(
+            serverLog(
                 `No banned IPs found at ${bannedIPsFile}. Initializing empty list.`
             );
             bannedIPs = [];
@@ -174,16 +174,16 @@ function loadBannedIPs() {
 }
 
 function beforeInit() {
-    console.log("Welcome to the Minecraft JS server panel!");
+    serverLog("Welcome to the Minecraft JS server panel!");
     loadProperties();
     loadUserCache();
     loadBannedIPs();
     if (loadWorldFromDir()) {
-        console.log("World loaded successfully!");
+        serverLog("World loaded successfully!");
     } else {
-        console.log("No world save found. Creating a new world!");
+        serverLog("No world save found. Creating a new world!");
     }
-    console.log(
+    serverLog(
         `Server started at "${properties.serverIp}:${properties.serverPort}". Press Ctrl+C to stop the server.`
     );
 
@@ -289,7 +289,7 @@ function playerJoined(ws, playerData) {
                 message: "You are banned from this server.",
             })
         );
-        console.log(`Banned IP ${ip} attempted to join.`);
+        serverLog(`Banned IP ${ip} attempted to join.`);
         ws.close();
         return;
     }
@@ -331,7 +331,7 @@ function playerJoined(ws, playerData) {
 function playerLeft(player) {
     if (!player) return;
     players = players.filter((p) => p.UUID !== player.UUID);
-    console.log(player.name + " left the game!");
+    serverLog(player.name + " left the game!");
     broadcast({
         type: "playerLeft",
         message: player.UUID,
@@ -395,7 +395,7 @@ function processMessage(message, ws) {
                 player.name = data.message.name;
                 broadcast(data, [data.sender]);
 
-                console.log(`${player.name} joined the game!`);
+                serverLog(`${player.name} joined the game!`);
 
                 const ip =
                     ws._socket.remoteAddress.replace(/^::ffff:/, "") ||
@@ -407,7 +407,7 @@ function processMessage(message, ws) {
 
         case "chat": {
             const player = getPlayerByUUID(data.sender);
-            console.log(player.name + ": " + data.message);
+            serverLog(player.name + ": " + data.message);
             broadcast(
                 {
                     type: "chat",
@@ -521,6 +521,21 @@ function loadWorldFromDir() {
         );
         return false;
     }
+}
+
+function serverLog(log = "") {
+    if (!log) return;
+
+    const date = new Date();
+
+    const formattedDate = date
+        .toISOString()
+        .replace(/T/, " ")
+        .replace(/\..+/, "");
+
+    const formattedLog = `[${formattedDate}] ${log}`;
+
+    console.log(formattedLog);
 }
 
 function saveWorldToDir() {
