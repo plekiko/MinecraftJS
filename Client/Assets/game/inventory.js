@@ -231,6 +231,7 @@ class Inventory {
                     !slot.isEmpty() &&
                     slot.item.blockId === newItem.blockId &&
                     slot.item.itemId === newItem.itemId &&
+                    this.arePropsEqual(slot.item.props, newItem.props) && // Check props equality
                     slot.item.count < this.getStackSize(slot.item)
                 ) {
                     if (slot.onlyTake) continue;
@@ -303,7 +304,7 @@ class Inventory {
         let itemToTransfer = this.cloneItem(slot.item);
         let originalCount = itemToTransfer.count;
 
-        // Add items to the target array (addItemToArray now respects onlyTake)
+        // Add items to the target array (addItemToArray now respects onlyTake and props)
         let remaining = this.addItemToArray(itemToTransfer, targetArray);
         let moved = originalCount - remaining;
 
@@ -381,48 +382,34 @@ class Inventory {
     }
 
     reloadStorageSlots() {
-        if (!this.storageSlots || !this.storage || !this.interactedBlock)
-            return;
+        if (!this.storage || !this.storageSlots) return;
 
-        const blockStorage = this.interactedBlock?.metaData?.props?.storage;
-        if (!blockStorage) return;
+        console.log("Reloading storage slots...");
 
-        // Ensure storage arrays are properly sized
-        if (
-            this.storage.length !== blockStorage.length ||
-            this.storageSlots.length !== blockStorage.length
-        ) {
-            console.warn("Storage array size mismatch, reinitializing...");
-            this.storage = blockStorage.map((row) =>
-                row.map((item) => this.cloneItem(item))
-            );
-            this.storageSlots =
-                this.createStorageSlotsFromBlockStorage(blockStorage);
-        } else {
-            // Update storage and storageSlots to match blockStorage
-            for (let i = 0; i < blockStorage.length; i++) {
-                if (!this.storage[i] || !this.storageSlots[i]) {
-                    console.warn("Invalid storage row, reinitializing row", i);
-                    this.storage[i] = [];
-                    this.storageSlots[i] = [];
-                }
-                for (let j = 0; j < blockStorage[i].length; j++) {
-                    this.storage[i][j] = this.cloneItem(blockStorage[i][j]);
-                    this.storageSlots[i][j].item = this.cloneItem(
-                        blockStorage[i][j]
-                    );
-                }
-            }
+        if (this.interactedBlock) {
+            this.storage =
+                this.interactedBlock.metaData?.props?.storage || this.storage;
         }
 
-        // Sync block metadata to ensure consistency
-        this.interactedBlock.metaData.props.storage = this.storage.map((row) =>
-            row.map((item) => this.cloneItem(item))
-        );
-        this.interactedBlock.syncMetaData();
+        // Determine the type of storage (chest, hopper, furnace, converter) based on openUIImage.url
+        const storageType = this.openUIImage.url;
 
-        // Refresh the UI to reflect changes
-        // this.refreshInventoryUI();
+        if (storageType === "single_chest") {
+            // Reload chest slots
+            this.createChestSlots();
+        } else if (storageType === "hopper") {
+            // Reload hopper slots
+            this.openHopper(this.storage);
+        } else if (storageType === "furnace") {
+            // Reload furnace slots
+            this.createFurnaceSlots();
+        } else if (storageType === "converter") {
+            // Reload converter slots
+            this.openConverter(this.storage);
+        }
+
+        // Ensure the storageSlots are synchronized with the storage
+        this.syncStorageSlots();
     }
 
     openHopper(storage) {
@@ -487,6 +474,8 @@ class Inventory {
             this.wasItemInConverterOutput = false;
             leftSlot.clear();
             rightSlot.clear();
+
+            this.reverseSync();
 
             playPositionalSound(player.position, "blocks/anvil_use.ogg");
             return;

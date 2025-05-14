@@ -276,6 +276,7 @@ const blockTypes = [
         breakSound: Sounds.Break_Cloth,
         breakingSound: Sounds.Breaking_Cloth,
         transparent: true,
+        cannotBeConverted: true,
 
         smeltOutput: { itemId: Items.GreenDye },
 
@@ -1269,6 +1270,7 @@ const blockTypes = [
         noteBlockSound: "bd",
         updateSpeed: 0.6,
         defaultCutoff: 0.08,
+        cannotBeConverted: true,
     }),
     // Lever
     new BlockType({

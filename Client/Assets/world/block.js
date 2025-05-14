@@ -508,6 +508,8 @@ class Block extends Square {
                 metaData: this.metaData.props,
             },
         });
+
+        UploadChunkToServer(this.chunkX);
     }
 
     recieveSyncMetaData(metaData) {
@@ -1380,6 +1382,8 @@ class Block extends Square {
                 this.metaData.props.storage[0][0] = new InventoryItem();
             }
 
+            this.syncMetaData();
+
             return;
         }
 
@@ -1397,6 +1401,8 @@ class Block extends Square {
 
             player.removeFromCurrentSlot();
         }
+
+        this.syncMetaData();
     }
 
     checkLavaWaterInteraction(pos) {

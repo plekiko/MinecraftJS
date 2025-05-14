@@ -279,7 +279,8 @@ function ServerBreakBlock(
     UploadChunkToServer(chunkX, dimensionIndex);
 }
 
-async function UploadChunkToServer(chunkX, dimensionIndex) {
+async function UploadChunkToServer(chunkX, dimensionIndex = activeDimension) {
+    if (!player) return;
     if (!multiplayer) return;
     const chunk = GetChunkForX(chunkX, dimensionIndex);
     await server.send({
