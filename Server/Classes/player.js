@@ -5,5 +5,11 @@ export class Player {
         this.ws = ws;
         this.skin = skin;
         this.dimension = dimension;
+
+        this.position = { x: 0, y: 0 };
+        this.gamemode = 0;
+        this.health = 20;
+        this.food = 20;
+        this.inventory = [[]];
     }
 }

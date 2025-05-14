@@ -1,7 +1,6 @@
 let texturePackZip = null;
 let texturePackFiles = null;
 let vanillaTextureCache = null;
-let isTexturePackLoaded = false;
 
 // Load vanilla textures by iterating over Blocks and Items
 async function loadVanillaTextures() {

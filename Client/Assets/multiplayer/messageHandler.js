@@ -79,6 +79,35 @@ function processMessage(data) {
             }
             break;
 
+        case "playerDataFromFile":
+            console.log("Received player data from file:", message);
+
+            const playerFromFile = getEntityByUUID(message.UUID);
+
+            playerFromFile.setGamemode(
+                message.gamemode &&
+                    message.gamemode <= 3 &&
+                    message.gamemode >= 0
+                    ? message.gamemode
+                    : 0
+            );
+
+            playerFromFile.dimension = message.dimension
+                ? message.dimension
+                : 0;
+
+            playerFromFile.position = new Vector2(
+                message.position.x ? message.position.x : 0,
+                message.position.y ? message.position.y : 0
+            );
+
+            playerFromFile.health = message.health ? message.health : 20;
+            playerFromFile.food = message.food ? message.food : 20;
+
+            gotoDimension(message.dimension ? message.dimension : 0);
+
+            break;
+
         case "placeBlock":
             if (
                 !getDimensionChunks(message.dimensionIndex)?.has(message.chunkX)

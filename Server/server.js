@@ -17,6 +17,7 @@ const maxIconSize = 1 * 1024 * 1024; // 1 MB
 let serverIcon = null;
 let userCache = [];
 let bannedIPs = [];
+let players = [];
 
 const properties = {};
 
@@ -189,7 +190,7 @@ function beforeInit() {
 
     setInterval(() => {
         if (players.length > 0) saveWorldToDir();
-    }, 30000); // Autosave every 30 seconds
+    }, 1000);
 }
 
 function parseMotd(motd) {
@@ -201,8 +202,6 @@ function parseMotd(motd) {
 beforeInit();
 
 const wss = new WebSocketServer({ port: properties.serverPort });
-
-let players = [];
 
 wss.on("connection", (ws) => {
     const connectionTimeout = setTimeout(() => {
@@ -272,6 +271,184 @@ function broadcast(data, exclude = []) {
     });
 }
 
+function getSafeIp(ip) {
+    // Sanitize IP address for use as a filename (replace : with _ for IPv6)
+    return ip.replace(/[^0-9a-fA-F.]/g, "_");
+}
+
+function savePlayerData(player, ip) {
+    if (!player || !ip || !player.position || !player.inventory) {
+        serverLog(`Cannot save player data: Invalid player object or IP`);
+        return;
+    }
+
+    const playerDir = `./${properties.levelName}/players`;
+    const safeIp = getSafeIp(ip);
+    const playerFile = `${playerDir}/${safeIp}.json`;
+    try {
+        fs.mkdirSync(playerDir, { recursive: true });
+        const playerData = {
+            position: {
+                x: player.position.x || 0,
+                y: player.position.y || 0,
+            },
+            inventory: Array.isArray(player.inventory?.items)
+                ? player.inventory.items.map((row) =>
+                      Array.isArray(row)
+                          ? row.map((item) => ({
+                                blockId: item?.blockId || null,
+                                itemId: item?.itemId || null,
+                                count: item?.count || 0,
+                                props: item?.props || {},
+                            }))
+                          : []
+                  )
+                : [],
+            gamemode:
+                player.gamemode !== undefined
+                    ? player.gamemode
+                    : properties.gamemode,
+        };
+        fs.writeFileSync(playerFile, JSON.stringify(playerData, null, 2));
+        serverLog(`Saved player data for ${player.name} to ${playerFile}`);
+    } catch (error) {
+        console.error(
+            `Error saving player data for ${player.name} to ${playerFile}: ${error.message}`
+        );
+    }
+}
+
+function loadPlayerData(player, ip) {
+    if (!player || !ip) {
+        serverLog(`Cannot load player data: Invalid player object or IP`);
+        return;
+    }
+
+    const playerDir = `./${properties.levelName}/players`;
+    const safeIp = getSafeIp(ip);
+    const playerFile = `${playerDir}/${safeIp}.json`;
+    try {
+        if (fs.existsSync(playerFile)) {
+            const stats = fs.statSync(playerFile);
+            if (stats.isDirectory()) {
+                console.error(
+                    `Error: ${playerFile} is a directory, expected a file.`
+                );
+                return;
+            }
+            const fileContent = fs.readFileSync(playerFile, "utf8");
+            if (!fileContent) {
+                console.error(`Error: ${playerFile} is empty.`);
+                return;
+            }
+            const playerData = JSON.parse(fileContent);
+
+            // Load position
+            if (
+                playerData.position &&
+                typeof playerData.position.x === "number" &&
+                typeof playerData.position.y === "number"
+            ) {
+                player.position = new Vector2(
+                    playerData.position.x,
+                    playerData.position.y
+                );
+            } else {
+                player.position = new Vector2(0, 0);
+            }
+
+            // Load inventory
+            if (Array.isArray(playerData.inventory)) {
+                player.inventory = player.inventory || {};
+                player.inventory.items = playerData.inventory.map((row) =>
+                    Array.isArray(row)
+                        ? row.map((item) => ({
+                              blockId: item?.blockId || null,
+                              itemId: item?.itemId || null,
+                              count: item?.count || 0,
+                              props: item?.props || {},
+                          }))
+                        : []
+                );
+            } else {
+                player.inventory = player.inventory || {};
+                player.inventory.items = Array(4)
+                    .fill()
+                    .map(() =>
+                        Array(9).fill({
+                            blockId: null,
+                            itemId: null,
+                            count: 0,
+                            props: {},
+                        })
+                    );
+            }
+
+            // Load gamemode
+            if (typeof playerData.gamemode === "number") {
+                player.gamemode = playerData.gamemode;
+            } else {
+                player.gamemode = properties.gamemode;
+            }
+
+            serverLog(
+                `Loaded player data for ${player.name} from ${playerFile}`
+            );
+        } else {
+            // Set default values for new players
+            player.inventory = player.inventory || {};
+            player.inventory.items = Array(4)
+                .fill()
+                .map(() =>
+                    Array(9).fill({
+                        blockId: null,
+                        itemId: null,
+                        count: 0,
+                        props: {},
+                    })
+                );
+            player.gamemode = properties.gamemode;
+            serverLog(
+                `No player data found for ${player.name}, using defaults`
+            );
+        }
+
+        // Send player data to the player
+        sendToPlayer(player.UUID, {
+            type: "playerDataFromFile",
+            message: {
+                UUID: player.UUID,
+                name: player.name,
+                skin: player.skin,
+                position: player.position,
+                dimension: player.dimension,
+                inventory: player.inventory.items,
+                gamemode: player.gamemode,
+                health: 10,
+            },
+        });
+    } catch (error) {
+        console.error(
+            `Error loading player data for ${player.name} from ${playerFile}: ${error.message}`
+        );
+        // Fallback to defaults
+        player.position = new Vector2(0, 0);
+        player.inventory = player.inventory || {};
+        player.inventory.items = Array(4)
+            .fill()
+            .map(() =>
+                Array(9).fill({
+                    blockId: null,
+                    itemId: null,
+                    count: 0,
+                    props: {},
+                })
+            );
+        player.gamemode = properties.gamemode;
+        serverLog(`Using default player data for ${player.name}`);
+    }
+}
+
 function sendToPlayer(UUID, data) {
     const player = players.find((p) => p.UUID === UUID);
     if (player) {
@@ -301,6 +478,9 @@ function playerJoined(ws, playerData) {
         skin: playerData?.skin || null,
     });
 
+    // Load player data (position, inventory, gamemode)
+    loadPlayerData(newPlayer, ip);
+
     players.push(newPlayer);
 
     updateUserCache(newPlayer.name, ip);
@@ -310,7 +490,7 @@ function playerJoined(ws, playerData) {
         message: {
             player: newPlayer,
             existingPlayers: players.filter((p) => p.UUID !== newPlayer.UUID),
-            gamemode: properties.gamemode,
+            gamemode: newPlayer.gamemode || properties.gamemode,
         },
     });
 
@@ -330,6 +510,10 @@ function playerJoined(ws, playerData) {
 
 function playerLeft(player) {
     if (!player) return;
+    // Save player data before removing
+    const ip =
+        player.ws._socket.remoteAddress.replace(/^::ffff:/, "") || "127.0.0.1";
+    savePlayerData(player, ip);
     players = players.filter((p) => p.UUID !== player.UUID);
     serverLog(player.name + " left the game!");
     broadcast({
@@ -556,9 +740,24 @@ function saveWorldToDir() {
         }
         fs.mkdirSync(worldDir, { recursive: true });
         fs.writeFileSync(worldFile, JSON.stringify(worldSave, null));
+
+        // Save all player data during autosave
+        if (Array.isArray(players)) {
+            players.forEach((player) => {
+                const ip =
+                    player.ws._socket.remoteAddress.replace(/^::ffff:/, "") ||
+                    "127.0.0.1";
+                savePlayerData(player, ip);
+            });
+        } else {
+            serverLog(
+                "Warning: players array is not initialized, skipping player data save"
+            );
+        }
+
         return true;
     } catch (error) {
-        console.error("Error saving world to", worldFile, ":", error.message);
+        console.error(`Error saving world to ${worldFile}: ${error.message}`);
         return false;
     }
 }

@@ -191,6 +191,10 @@ class Player extends Entity {
             holdItem: this.holdItem,
 
             bodyParts: [],
+
+            health: this.health,
+            food: this.foodLevel,
+            gamemode: this.gamemode,
         };
 
         if (this.body) {

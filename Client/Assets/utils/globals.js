@@ -18,6 +18,8 @@ let deltaTime;
 
 const mobSpawnDelay = { min: 10, max: 120 };
 
+let isTexturePackLoaded = false;
+
 let passedTime = 0;
 
 let lighting = true;
