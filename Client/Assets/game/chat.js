@@ -74,6 +74,41 @@ class Chat {
         this.closeChat();
     }
 
+    welcomeMessage() {
+        this.message(
+            "------------------------------------------------------",
+            "",
+            Colors.Green,
+            true
+        );
+        this.message(
+            "Welcome to Minecraft JS! Type /help for commands.",
+            "",
+            Colors.Green
+        );
+        this.message(
+            "This is a 2D Minecraft experience built with JavaScript.",
+            "",
+            Colors.Green
+        );
+        this.message(
+            "This project is open source and available on GitHub.",
+            "",
+            Colors.Green
+        );
+        this.message(
+            "Donations are appreciated to support development. :)",
+            "",
+            Colors.Green
+        );
+        this.message(
+            "------------------------------------------------------",
+            "",
+            Colors.Green,
+            true
+        );
+    }
+
     getCommandSuggestions() {
         return [
             { name: "give", args: ["category.item", "count"] },
@@ -735,8 +770,8 @@ class Chat {
         });
     }
 
-    message(message, sender = "", color = Colors.White) {
-        if (!this.isValidText(message)) return;
+    message(message, sender = "", color = Colors.White, force = false) {
+        if (!this.isValidText(message) && !force) return;
 
         let finalMessage = sender ? `[${sender}] ${message}` : message;
 

@@ -191,6 +191,7 @@ function LoadWorldFromLocalStorage() {
                 SpawnPlayer();
             }, 100);
         }
+
         return;
     }
 
@@ -198,6 +199,7 @@ function LoadWorldFromLocalStorage() {
 
     if (!selectedWorldData) {
         console.log("World not found in local storage", selectedWorld);
+        chat.welcomeMessage();
         if (selectedWorld.seed) LoadCustomSeed(selectedWorld.seed);
         if (SPAWN_PLAYER) {
             setTimeout(() => {
