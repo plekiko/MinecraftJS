@@ -1,5 +1,7 @@
 {
     "javascript.suggest.alwaysAllProjects": true,
     "javascript.suggest.includeCompletionsForImportStatements": true,
-    "explorer.fileNesting.enabled": false
+    "explorer.fileNesting.enabled": false,
+    "editor.fontSize": 32,
+    "editor.lineHeight": 4
 }
