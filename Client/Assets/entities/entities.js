@@ -5,4 +5,5 @@ const Entities = Object.freeze({
     Sand: FallingBlock,
     Snowball: Snowball,
     Sheep: Sheep,
+    WitherSkeleton: WitherSkeleton,
 });

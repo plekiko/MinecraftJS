@@ -17,6 +17,7 @@ class Mob extends Entity {
         ambientSoundRange = { min: 5, max: 20 },
         lootTable = null,
         myChunkX = 0,
+        burnInSunlight = false,
     } = {}) {
         super({
             name: name,
@@ -56,6 +57,10 @@ class Mob extends Entity {
         this.state = aiState.Wander;
 
         this.attackCooldown = 1;
+
+        this.attackCooldownMax = 1;
+
+        this.burnInSunlight = burnInSunlight;
     }
 
     aiUpdate() {
@@ -65,6 +70,12 @@ class Mob extends Entity {
                 break;
             case aiState.Agression:
                 this.agressionWalk();
+        }
+
+        if (this.burnInSunlight) {
+            if (this.getSunLight() && this.getLightLevel() >= 14) {
+                this.fire = 100;
+            }
         }
 
         if (this.ai.agressionLevel === Agression.Agressive)

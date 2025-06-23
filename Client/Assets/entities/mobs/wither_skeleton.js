@@ -1,17 +1,16 @@
-class Zombie extends Mob {
+class WitherSkeleton extends Mob {
     constructor({
         health = 20,
         noAi = false,
         position = new Vector2(),
         invulnerable = false,
         myChunkX = 0,
-        body = createZombieBody(),
+        body = createWitherSkeletonBody(),
     } = {}) {
         super({
-            name: "Zombie",
+            name: "Wither Skeleton",
             health: health,
             position: position,
-            burnInSunlight: true,
             hitbox: new Vector2(0.4 * BLOCK_SIZE, 1.8 * BLOCK_SIZE),
             invulnerable: invulnerable,
             body: body,
@@ -94,10 +93,10 @@ class Zombie extends Mob {
     interact(player, item) {}
 }
 
-function createZombieBody() {
+function createWitherSkeletonBody() {
     return new Body({
         flipCorrection: 0,
-        sprite: "zombie/zombie",
+        sprite: "skeleton/wither_skeleton",
         parts: {
             head: new BodyPart({
                 spriteCrop: { x: 0, y: 8, width: 8, height: 8 },
@@ -112,7 +111,7 @@ function createZombieBody() {
             }),
             leftArm: new BodyPart({
                 offset: { x: 0, y: 30 },
-                spriteCrop: { x: 44, y: 20, width: 4, height: 12 },
+                spriteCrop: { x: 16, y: 30, width: 4, height: 12 },
                 zIndex: 2,
                 rotationOrigin: { x: 5, y: 4 },
                 flipOrigin: { x: 1, y: 4 },
