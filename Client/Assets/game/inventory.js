@@ -283,6 +283,9 @@ class Inventory {
         } else if (array === this.storageSlots && this.items) {
             targetArray = this.items; // Shift-clicking from hopper/chest to inventory
         } else {
+            if (this.creativeSlots && !slot.infiniteTake) {
+                this.clearSlot(slot);
+            }
             return false;
         }
 
