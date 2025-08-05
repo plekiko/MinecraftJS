@@ -1553,7 +1553,7 @@ class Block extends Square {
 
         if (!chunk) return;
 
-        chunk.checkForBlockWithAirBeneath(this.x, this.y);
+        if (!wall) chunk.checkForBlockWithAirBeneath(this.x, this.y);
 
         const blockDef = GetBlock(this.blockType);
 
