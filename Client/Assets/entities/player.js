@@ -93,6 +93,8 @@ class Player extends Entity {
 
         this.portalSound = playSound("portal/travel.ogg", 0, 1, true);
 
+        this.pressedSpace = false;
+
         // this.setGamemode(1);
     }
 
@@ -917,7 +919,20 @@ class Player extends Entity {
 
     flyingToggleLogic() {
         if (!this.abilities.mayFly) return;
-        if (!input.isKeyPressed("Backquote")) return;
+
+        if(input.isKeyPressed("Space")) {
+            if(!this.pressedSpace) {
+                this.pressedSpace = true;
+
+                setTimeout(() => {
+                    this.pressedSpace = false;
+                }, 200);
+
+                return;
+            }
+        } else {
+            return;
+        }
 
         this.abilities.flying = !this.abilities.flying;
     }
