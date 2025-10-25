@@ -114,12 +114,13 @@ class InputHandler {
     }
 
     isKeyPressed(keyCode) {
-        if (this.keysDown[keyCode]) {
-            // True only on the first press event
-            this.keysDown[keyCode] = false; // Reset after being checked once
-            return true;
+        return this.keysDown[keyCode] || false;
+    }
+
+    resetKeysPressed() {
+        for (const key in this.keysDown) {
+            this.keysDown[key] = false;
         }
-        return false;
     }
 
     // Getters for mouse state

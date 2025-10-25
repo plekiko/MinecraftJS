@@ -160,26 +160,44 @@ function PlayRandomSoundFromArray({
     }
 }
 
-// Remove an audio object from the playing list
 function removeAudio(audio) {
     if (!audio || !(audio instanceof Audio)) return;
 
-    // Find the audio object in playingAudio
-    const audioObj = playingAudio.find((item) => item.audioElem === audio);
-    if (audioObj) {
-        // Disconnect the panner and source nodes
-        if (audioObj.panner) {
-            audioObj.panner.disconnect();
-        }
+    const index = playingAudio.findIndex((item) => item.audioElem === audio);
+    if (index !== -1) {
+        const audioObj = playingAudio[index];
+
+        // Disconnect and clean up audio graph
         if (audioObj.sourceNode) {
-            audioObj.sourceNode.disconnect();
+            try {
+                audioObj.sourceNode.disconnect();
+            } catch (e) {}
+            audioObj.sourceNode = null;
         }
+
+        if (audioObj.panner) {
+            try {
+                audioObj.panner.disconnect();
+            } catch (e) {}
+            audioObj.panner = null;
+        }
+
+        // Remove from active list
+        playingAudio.splice(index, 1);
     }
 
-    // Pause and remove the audio element
-    audio.pause();
-    playingAudio = playingAudio.filter((item) => item.audioElem !== audio);
+    // Stop playback and release element
+    try {
+        audio.pause();
+        audio.src = "";
+        audio.load(); // releases media element resources
+    } catch (e) {}
+
+    // Remove event listeners to prevent leaks
+    audio.onended = null;
+    audio.onerror = null;
 }
+
 
 // Play a non-positional sound with error handling
 function playSound(sound, volume = 1, pitch = 1, loop = false) {

@@ -125,6 +125,8 @@ async function gameLoop() {
 
     lastFrameTime = currentFrameTime;
 
+    input.resetKeysPressed();
+
     requestAnimationFrame(gameLoop);
 }
 

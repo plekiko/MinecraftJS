@@ -1070,7 +1070,6 @@ class Chat {
             }
             if (input.isKeyPressed("Slash")) {
                 this.openChat();
-                this.currentMessage = "/";
                 this.cursorPosition = 1;
             }
         }
