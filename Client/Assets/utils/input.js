@@ -143,7 +143,10 @@ class InputHandler {
     }
 
     getMousePosition() {
-        return { ...this.mouse.position };
+        return {
+            x: this.mouse.position.x - CANVAS.getBoundingClientRect().left,
+            y: this.mouse.position.y - CANVAS.getBoundingClientRect().top,
+        };
     }
 
     getMouseWorldPosition() {

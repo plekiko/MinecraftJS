@@ -24,6 +24,21 @@ class Camera {
         return chunkIndex;
     }
 
+    worldToScreen(worldPos) {
+        return new Vector2(worldPos.x - this.x, worldPos.y - this.y);
+    }
+
+    isInScreen(worldPos, worldSize) {
+        const screenPos = this.worldToScreen(worldPos);
+
+        return !(
+            screenPos.x + worldSize.x < 0 ||
+            screenPos.x > CANVAS.width ||
+            screenPos.y + worldSize.y < 0 ||
+            screenPos.y > CANVAS.height
+        );
+    }
+
     update(player) {
         if (!player) {
             const calculatedSpeed = input.isKeyDown("ShiftLeft")

@@ -354,7 +354,8 @@ class Chunk {
 
             setTimeout(() => {
                 entity.setOnGround();
-            }, 200);
+                entity.position.y -= entity.hitbox.y * 2;
+            }, 400);
         }
     }
 
@@ -1650,6 +1651,14 @@ class Chunk {
                 const worldX = j * BLOCK_SIZE; // Use j for x (horizontal)
 
                 const worldY = i * BLOCK_SIZE; // Use i for y (vertical)
+
+                if (
+                    !camera.isInScreen(
+                        new Vector2(worldX + this.x, worldY),
+                        new Vector2(BLOCK_SIZE, BLOCK_SIZE)
+                    )
+                )
+                    continue;
 
                 this.drawBlockAtPosition(ctx, block, worldX, worldY, camera);
             }
