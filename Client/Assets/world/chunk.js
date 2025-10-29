@@ -354,7 +354,6 @@ class Chunk {
 
             setTimeout(() => {
                 entity.setOnGround();
-                entity.position.y -= entity.hitbox.y * 2;
             }, 400);
         }
     }

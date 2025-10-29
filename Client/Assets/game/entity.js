@@ -379,8 +379,7 @@ class Entity {
         if (!currentChunk) return;
         const groundLevel = currentChunk.findGroundLevel(this.getXInChunk());
         if (groundLevel === 0) return false;
-        const y =
-            (CHUNK_HEIGHT - groundLevel) * BLOCK_SIZE - (this.hitbox.y - 1);
+        const y = (CHUNK_HEIGHT - groundLevel) * BLOCK_SIZE - this.hitbox.y;
         this.position.y = y;
     }
 
@@ -638,6 +637,8 @@ class Entity {
     }
 
     updatePositionWithVelocity() {
+        if (!this.getCurrentChunk()?.generated) return;
+
         this.wasColliding = false;
 
         this.handleTargetVelocity();
