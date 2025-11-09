@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Minecraft JS - Menu</title>
+        <link rel="stylesheet" href="menu.css" />
+        <link rel="icon" href="Assets/sprites/misc/icon_16x16.png" />
+    </head>
+    <body>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+        <script src="Assets/utils/indexDB.js"></script>
+
+        <!-- Panoramic background container -->
+        <div class="panorama">
+            <div class="cube">
+                <div class="face face0"></div>
+                <div class="face face1"></div>
+                <div class="face face2"></div>
+                <div class="face face3"></div>
+                <div class="face face4"></div>
+                <div class="face face5"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                Made by Plekiko - For the best experience use Firefox<br />
+                <a class="footer-button" onclick="downloadServer()"
+                    >Download Server</a
+                >
+            </p>
+        </div>
+        <div class="menu-container">
+            <div class="title">
+                <div class="logo-container">
+                    <div class="logo-column">
+                        <img
+                            class="logo"
+                            src="Assets/sprites/menu/logo.png"
+                            alt="Minecraft JS"
+                        />
+                        <div class="random-text">
+                            <button
+                                title="Click me!"
+                                onclick="setRandomText()"
+                                class="splash"
+                            ></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <a onclick="playGame()" class="btn">Singleplayer</a>
+                <a onclick="multiplayerButton()" class="btn"
+                    >Multiplayer (beta)</a
+                >
+                <a
+                    href="https://buymeacoffee.com/plekiko"
+                    onclick="buttonSound()"
+                    class="btn"
+                    >Buy me a coffee!</a
+                >
+                <div class="button-space"></div>
+                <a onclick="gotoOptions()" class="btn">Options...</a>
+                <!-- <a class="btn" onclick="showTexturePacks()">Texture Packs</a> -->
+            </div>
+        </div>
+
+        <div class="world-select-container" id="world-select-container">
+            <div class="world-select-container-text">
+                <div class="big-text">Select World</div>
+                <button onclick="backToMenu()" id="" class="btn">Back</button>
+                <div class="world-select">
+                    <div class="world-container">
+                        <img
+                            alt="World Preview"
+                            src="Assets/sprites/menu/worldPreview.png"
+                            class="world-image"
+                        />
+                        <div class="world-data-container">
+                            <div class="world-name">Test World</div>
+                            <div class="world-date">Right Now</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="world-buttons-container">
+                    <button
+                        onclick="gotoWorldCreate()"
+                        id="create-new-btn"
+                        class="btn"
+                    >
+                        Create new world
+                    </button>
+                    <button
+                        onclick="playSelectedWorld()"
+                        id="play-selected-btn"
+                        class="btn"
+                    >
+                        Play selected world
+                    </button>
+                    <button
+                        onclick="removeWorld()"
+                        id="remove-world-btn"
+                        class="btn"
+                    >
+                        Remove selected world
+                    </button>
+                </div>
+            </div>
+            <div class="world-select-bar-container">
+                <div class="world-select-bar"></div>
+                <div class="world-select-bar"></div>
+            </div>
+
+            <div src="Assets/sprites/blocks/dirt.png" class="background"></div>
+        </div>
+
+        <div class="world-select-container" id="texture-pack-select-container">
+            <div class="world-select-container-text">
+                <div class="big-text">Texture Packs</div>
+                <button onclick="gotoOptions()" class="btn">Back</button>
+                <div class="world-select">
+                    <div class="world-container">
+                        <img
+                            alt="Texture Pack Preview"
+                            src="Assets/sprites/menu/worldPreview.png"
+                            class="world-image"
+                        />
+                        <div class="world-data-container">
+                            <div class="world-name">Default</div>
+                            <div class="world-date">Right Now</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="world-buttons-container">
+                    <button
+                        onclick="uploadTexturePack()"
+                        id="upload-texture-btn"
+                        class="btn"
+                    >
+                        Upload Texture Pack
+                    </button>
+                    <button
+                        onclick="removeTexturePack()"
+                        id="remove-texture-btn"
+                        class="btn"
+                    >
+                        Remove Selected Pack
+                    </button>
+                    <!-- <div class="button-flex">
+                        
+                    </div> -->
+                </div>
+            </div>
+            <div class="world-select-bar-container">
+                <div class="world-select-bar"></div>
+                <div class="world-select-bar"></div>
+            </div>
+            <div src="Assets/sprites/blocks/dirt.png" class="background"></div>
+        </div>
+
+        <div class="world-select-container" id="server-select-container">
+            <div class="world-select-container-text">
+                <div class="big-text">Servers</div>
+                <button onclick="backToMenu()" class="btn">Back</button>
+                <div class="world-select" id="server-list">
+                    <!-- Servers will be dynamically added here -->
+                </div>
+
+                <div class="world-buttons-container">
+                    <button
+                        onclick="gotoAddServer()"
+                        id="add-server-btn"
+                        class="btn"
+                    >
+                        Add Server
+                    </button>
+                    <!-- <button
+                        onclick="gotoQuickConnect()"
+                        id="quick-connect-btn"
+                        class="btn"
+                    >
+                        Quick Connect
+                    </button> -->
+                    <button
+                        onclick="connectToServer()"
+                        id="connect-btn"
+                        class="btn"
+                    >
+                        Connect to Server
+                    </button>
+                    <button
+                        onclick="removeServer()"
+                        id="remove-server-btn"
+                        class="btn"
+                    >
+                        Remove Selected Server
+                    </button>
+                </div>
+            </div>
+            <div class="world-select-bar-container">
+                <div class="world-select-bar"></div>
+                <div class="world-select-bar"></div>
+            </div>
+            <div src="Assets/sprites/blocks/dirt.png" class="background"></div>
+        </div>
+
+        <div class="modal-container" id="add-server-container">
+            <div class="center-modal">
+                <div class="world-create-background"></div>
+                <div class="world-create-top-container">
+                    <div class="big-text">Add Server</div>
+                    <div class="input-field-container">
+                        <div class="input-field-title">Server Name</div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            id="server-name-input"
+                            maxlength="20"
+                            value="New Server"
+                            autocomplete="off"
+                            autofocus
+                            oninput="updateServerName(this.value)"
+                        />
+                        <div class="input-field-footer" id="server-name-footer">
+                            Enter the server name
+                        </div>
+                    </div>
+                    <div class="input-field-container">
+                        <div class="input-field-title">Server IP</div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            id="server-ip-input"
+                            maxlength="50"
+                            value=""
+                            autocomplete="off"
+                            autofocus
+                            oninput="updateServerIP(this.value)"
+                        />
+                        <div class="input-field-footer">
+                            Enter the server IP (e.g., 127.0.0.1:25565)
+                        </div>
+                    </div>
+                </div>
+                <div class="world-create-bottom-container">
+                    <a onclick="addServer()" class="btn">Add Server</a>
+                    <a onclick="backToServerSelection()" class="btn">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-container" id="quick-connect-container">
+            <div class="center-modal">
+                <div class="world-create-background"></div>
+                <div class="world-create-top-container">
+                    <div class="big-text">Quick Connect</div>
+                    <div class="input-field-container">
+                        <div class="input-field-title">Server IP</div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            id="quick-connect-ip-input"
+                            maxlength="50"
+                            value=""
+                            autocomplete="off"
+                            autofocus
+                            oninput="updateQuickConnectIP(this.value)"
+                        />
+                        <div class="input-field-footer">
+                            Enter the server IP (e.g., 127.0.0.1:25565)
+                        </div>
+                    </div>
+                </div>
+                <div class="world-create-bottom-container">
+                    <a onclick="connectToServer()" class="btn">Connect</a>
+                    <a onclick="cancelQuickConnect()" class="btn">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-container" id="world-create-container">
+            <div class="center-modal">
+                <div class="world-create-background"></div>
+                <div class="world-create-top-container">
+                    <div class="big-text">Create New World</div>
+                    <div class="input-field-container">
+                        <div class="input-field-title">World Name</div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            id="world-name-input"
+                            maxlength="20"
+                            value="New World"
+                            autocomplete="off"
+                            autofocus
+                            oninput="updateWorldName(this.value)"
+                        />
+                        <div class="input-field-footer" id="saved-in-text">
+                            Will be saved in: New World
+                        </div>
+                    </div>
+                    <div class="input-field-container">
+                        <div class="input-field-title">
+                            Seed for the world generator
+                        </div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            maxlength="20"
+                            id="world-seed-input"
+                            autocomplete="off"
+                            value=""
+                            autofocus
+                            oninput="updateWorldSeed(this.value)"
+                        />
+                        <div class="input-field-footer">
+                            Leave blank for a random seed
+                        </div>
+                    </div>
+
+                    <div
+                        class="btn"
+                        id="game-mode-button"
+                        onclick="switchGameMode()"
+                    >
+                        Game Mode: Survival
+                    </div>
+                </div>
+                <div class="world-create-bottom-container">
+                    <a onclick="createNewWorld()" class="btn"
+                        >Create New World</a
+                    >
+                    <a onclick="backToWorldSelection()" class="btn">Cancel</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-container" id="options-container">
+            <div class="center-modal">
+                <div class="world-create-background"></div>
+                <div class="world-create-top-container">
+                    <div class="big-text">Options</div>
+                </div>
+                <div class="options-modal">
+                    <!-- <div class="button-grid">  -->
+                        <a class="btn" id="music-toggle-btn" onclick="toggleMusic()">Music - ON</a>
+                        <a class="btn" id="sfx-toggle-btn" onclick="toggleSFX()">SFX - ON</a>
+                        <a class="btn" id="lighting-toggle-btn" onclick="toggleLighting()">Lighting - ON</a>
+                        
+                        <a class="btn" onclick="showTexturePacks()">Texture Packs...</a>
+
+                        
+                        <button
+                        onclick="uploadSkin()"
+                        id="upload-skin-btn"
+                        class="btn"
+                        >
+                        Upload Skin
+                    </button>
+                    <button onclick="clearSkin()" class="btn">
+                        Clear Skin
+                    </button>
+                    <div class="input-field-container">
+                        <div class="input-field-title">Username</div>
+                        <input
+                            class="input-field"
+                            type="text"
+                            id="username-input"
+                            maxlength="15"
+                            value=""
+                            autocomplete="off"
+                        />
+                        <div class="input-field-footer" id="username-footer">
+                            Will be used for multiplayer
+                        </div>
+                    </div>
+                    <!-- </div> -->
+
+                    <div class="button-space"></div>
+
+                    <a onclick="backToMenu(), saveSettings()" class="btn">Done</a>
+                </div>
+            </div>
+    </body>
+
+    <script src="menu.js"></script>
+</html>

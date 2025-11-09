@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Minecraft JS</title>
+        <link rel="stylesheet" href="style.css" />
+        <link rel="icon" href="Assets/sprites/misc/icon_16x16.png" />
+    </head>
+    <body oncontextmenu="return false;">
+        <!-- <canvas id="canvas"></canvas> -->
+        <h3 class="title">Minecraft JS</h3>
+        <div class="chromium-issue-1092080-workaround__wrapper">
+            <canvas id="canvas"></canvas>
+            <div class="chromium-issue-1092080-workaround__overlay"></div>
+        </div>
+
+        <div class="help-container">
+            <div class="help-text"></div>
+            <div class="help-text">Chat</div>
+            <div class="help-text">/ - Cheats</div>
+            <!-- <div class="help-text">/give (Blocks.[block] or Item.[item])</div> -->
+            <!-- <div class="help-text">/tp x y</div>
+            <div class="help-text">/clear</div>
+            <div class="help-text">/clearlog</div>
+            <div class="help-text">/gamemode</div> -->
+            <div class="help-text">/help</div>
+            <div class="help-text"></div>
+            <div class="help-text"></div>
+            <div class="help-text"><br /></div>
+            <div class="help-text">Debug</div>
+            <div class="help-text">O - Save World</div>
+            <div class="help-text">P - Save World File</div>
+            <div class="help-text">M - Print Block</div>
+            <div class="help-text">N - Camera</div>
+            <div class="help-text">F - File Size</div>
+            <div class="help-text">I - FPS</div>
+            <div class="help-text">B - Chunks</div>
+            <div class="help-text">C - Coords</div>
+            <div class="help-text">H - Hitbox</div>
+            <div class="help-text">T - Chat</div>
+            <div class="help-text"><br />Z - Close Panel</div>
+        </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+        <script src="node_modules/tooloud/dist/tooloud.min.js"></script>
+        <script src="Assets/utils/indexDB.js"></script>
+
+        <script src="Assets/utils/globals.js"></script>
+
+        <script src="Assets/utils/input.js"></script>
+        <script src="Assets/utils/classes.js"></script>
+        <script src="Assets/game/camera.js"></script>
+        <script src="Assets/utils/object.js"></script>
+        <script src="Assets/game/sounds.js"></script>
+        <script src="Assets/game/music.js"></script>
+        <script src="Assets/game/lootTable.js"></script>
+        <script src="Assets/game/item.js"></script>
+        <script src="Assets/game/items.js"></script>
+        <script src="Assets/world/block.js"></script>
+        <script src="Assets/world/blocks.js"></script>
+
+        <script src="Assets/world/particle.js"></script>
+        <script src="Assets/world/particleEmitter.js"></script>
+
+        <script src="Assets/world/chestLoot.js"></script>
+        <script src="Assets/world/trees.js"></script>
+        <script src="Assets/utils/noise.js"></script>
+        <script src="Assets/world/biome.js"></script>
+        <script src="Assets/world/dimension.js"></script>
+        <script src="Assets/world/structure.js"></script>
+        <script src="Assets/world/structures.js"></script>
+        <script src="Assets/world/chunk.js"></script>
+        <script src="Assets/game/inventoryItem.js"></script>
+        <script src="Assets/game/recipe.js"></script>
+        <script src="Assets/game/recipes.js"></script>
+        <script src="Assets/game/inventory.js"></script>
+        <script src="Assets/game/hotbar.js"></script>
+        <script src="Assets/utils/renderer.js"></script>
+        <script src="Assets/world/generator.js"></script>
+        <script src="Assets/world/world.js"></script>
+        <script src="Assets/world/saving.js"></script>
+        <script src="Assets/game/body.js"></script>
+        <script src="Assets/game/entity.js"></script>
+        <script src="Assets/entities/drop.js"></script>
+        <script src="Assets/entities/mob.js"></script>
+        <script src="Assets/entities/projectile.js"></script>
+
+        <script src="Assets/entities/projectiles/snowBall.js"></script>
+
+        <script src="Assets/entities/mobs/pig.js"></script>
+        <script src="Assets/entities/mobs/cow.js"></script>
+        <script src="Assets/entities/mobs/sheep.js"></script>
+        <script src="Assets/entities/mobs/zombie.js"></script>
+        <script src="Assets/entities/mobs/wither_skeleton.js"></script>
+
+        <script src="Assets/entities/fallingBlock.js"></script>
+        <script src="Assets/entities/TNT.js"></script>
+        <script src="Assets/entities/entities.js"></script>
+
+        <script src="Assets/entities/player.js"></script>
+        <script src="Assets/game/chat.js"></script>
+        <script src="main.js"></script>
+        <script src="debug.js"></script>
+
+        <script src="Assets/utils/texturePackLoader.js"></script>
+
+        <script src="Assets/multiplayer/messageHandler.js"></script>
+        <script src="Assets/multiplayer/server.js"></script>
+    </body>
+</html>

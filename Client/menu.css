@@ -1,0 +1,612 @@
+* {
+    image-rendering: optimizeSpeed;
+    image-rendering: pixelated; /* Chrome and modern browsers */
+}
+
+body {
+    background-image: url("Assets/sprites/misc/End_Poem_background.webp");
+    background-size: cover;
+    height: 100vh;
+    overflow: hidden;
+
+    margin: 0;
+
+    font-family: "Pixel";
+}
+
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("Assets/sprites/blocks/dirt.png");
+    background-size: 100px;
+    background-repeat: repeat;
+    filter: brightness(20%);
+
+    z-index: -2;
+}
+
+.button-space {
+    width: 100%;
+    height: 25px;
+}
+
+.options-modal {
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.footer-button {
+    text-decoration: underline;
+
+    cursor: pointer;
+}
+
+.center-childs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100%;
+    height: 100%;
+}
+
+.input-field-container {
+    width: 90%;
+    height: fit-content;
+
+    color: white;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.input-field:focus {
+    outline: none;
+}
+
+.input-field {
+    border: none;
+    padding: 0;
+
+    width: 100%;
+    height: 50px;
+
+    background-color: black;
+
+    border: solid rgb(209, 209, 209) 2px;
+
+    color: white;
+
+    font-family: "Pixel";
+
+    font-size: 25px;
+
+    padding-left: 10px;
+}
+
+.input-field-title {
+    color: rgb(209, 209, 209);
+    font-size: x-large;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+}
+
+.input-field-footer {
+    color: rgb(209, 209, 209);
+    font-size: x-large;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+}
+
+.modal-container {
+    width: 100%;
+    height: 100%;
+
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+
+    align-items: center;
+    position: absolute;
+}
+
+.center-modal {
+    width: 50%;
+    height: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+
+    position: absolute;
+}
+
+.world-create-top-container {
+    width: 70%;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 35px;
+}
+
+.world-create-bottom-container {
+    width: 100%;
+    height: fit-content;
+
+    justify-content: center;
+
+    display: flex;
+
+    gap: 20px;
+
+    padding: 10px;
+}
+
+.world-create-background {
+    position: absolute;
+
+    width: 100vw;
+    height: 100%;
+
+    background-image: url("Assets/sprites/blocks/dirt.png");
+    background-size: 100px;
+    background-repeat: repeat;
+    filter: brightness(35%);
+
+    z-index: -1;
+}
+
+.world-buttons-container {
+    bottom: 0;
+
+    width: 50%;
+    height: 20%;
+    position: absolute;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    display: flex;
+}
+
+.world-select-container {
+    width: 100%;
+    height: 80%;
+
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.world-select-bar-container {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+
+    position: absolute;
+
+    left: 0;
+    top: 0;
+}
+
+.world-select-container-text {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+
+    z-index: 1;
+}
+
+.big-text {
+    font-family: "Pixel";
+    font-size: 2rem;
+    color: white;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+
+    padding: 20px;
+}
+
+.world-select-bar {
+    width: 100%;
+    height: 20%;
+
+    background-image: url("Assets/sprites/blocks/dirt.png");
+    background-size: 100px;
+    background-repeat: repeat;
+    filter: brightness(35%);
+
+    box-shadow: 0 0 20px 5px rgba(0, 0, 0, 1);
+}
+
+.world-container {
+    width: 95%;
+    height: 120px; /* Fixed height */
+    flex-shrink: 0; /* Prevent the container from shrinking */
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    display: none;
+}
+
+.world-container.selected {
+    background-color: rgba(0, 0, 0, 0.6);
+
+    outline: solid rgb(210, 210, 210) 3px;
+}
+
+.world-image {
+    height: 100%;
+    aspect-ratio: 1/1;
+    user-select: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+}
+
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+
+    row-gap: 0px;
+    column-gap: 5px;
+}
+
+.world-data-container {
+    display: flex;
+    flex-direction: column;
+
+    height: 100%;
+}
+
+.world-name {
+    font-family: "Pixel";
+    font-size: 1.8rem;
+    color: white;
+    user-select: none;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.world-name .ip {
+    font-size: 1.2rem;
+    color: #777;
+    opacity: 0.6;
+}
+
+.world-date {
+    font-family: "Pixel";
+    font-size: 2rem;
+    user-select: none;
+    -webkit-user-select: none;
+    color: rgb(123, 123, 123);
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+}
+
+.world-select {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 50%;
+    height: 72.5%;
+
+    overflow-y: auto;
+
+    /* background-color: rosybrown; */
+}
+
+.world-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pinging::after {
+    content: "";
+    display: inline-block;
+    width: 14px; /* Slightly larger for visibility */
+    height: 14px;
+    background: #55ff55; /* Start with Minecraft green */
+    border: 2px solid #000000; /* Black border for pixelated look */
+    border-radius: 2px; /* Slight rounding for chiseled effect */
+    animation: spin-and-color 1.5s linear infinite;
+    margin-left: 6px;
+    image-rendering: pixelated; /* Ensure pixelated rendering */
+}
+
+@keyframes spin-and-color {
+    0% {
+        transform: rotate(0deg);
+        background: #55ff55; /* Green */
+        border-color: #000000;
+    }
+    33% {
+        transform: rotate(120deg);
+        background: #ffff55; /* Yellow */
+        border-color: #555555; /* Dark gray for contrast */
+    }
+    66% {
+        transform: rotate(240deg);
+        background: #ff5555; /* Red */
+        border-color: #000000;
+    }
+    100% {
+        transform: rotate(360deg);
+        background: #55ff55; /* Back to green */
+        border-color: #000000;
+    }
+}
+
+.menu-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10vh;
+    width: 100%;
+    height: 80%;
+
+    contain: layout paint;
+}
+
+.title {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 30%;
+}
+
+/* Panorama container takes up the full screen */
+.panorama {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Perspective allows us to see the cube in 3D */
+    perspective: 500px;
+    perspective-origin: center;
+    /* Put it behind everything else */
+    z-index: -1;
+
+    filter: blur(15px);
+    backface-visibility: hidden;
+}
+
+.random-text,
+.splash {
+    transform: translateZ(0);
+    will-change: transform, opacity;
+}
+
+/* The cube that will hold the 6 faces */
+.cube {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1124px; /* Adjust as needed to match your panorama images */
+    height: 1124px; /* Adjust as needed */
+    transform-style: preserve-3d;
+    transform: translate(-50%, -50%) rotateX(-10deg);
+    /* Slowly rotate the cube around Y axis */
+    animation: spin 120s infinite linear;
+
+    transform-origin: center center;
+}
+
+/* Common face styles */
+.face {
+    position: absolute;
+    width: 1124px; /* same as .cube */
+    height: 1124px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Face 0 (front) */
+.face0 {
+    transform: rotateY(0deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_0.png");
+}
+
+/* Face 1 (right) */
+.face1 {
+    transform: rotateY(90deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_1.png");
+}
+
+/* Face 2 (back) */
+.face2 {
+    transform: rotateY(180deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_2.png");
+}
+
+/* Face 3 (left) */
+.face3 {
+    transform: rotateY(-90deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_3.png");
+}
+
+/* Face 4 (top) */
+.face4 {
+    transform: rotateX(90deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_4.png");
+}
+
+/* Face 5 (bottom) */
+.face5 {
+    transform: rotateX(-90deg) translateZ(512px);
+    background-image: url("Assets/sprites/menu/background/panorama_5.png");
+}
+
+/* Slow rotation of the cube around the Y axis */
+@keyframes spin {
+    0% {
+        transform: translate(-50%, -50%) rotateX(0) rotateY(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateX(0) rotateY(360deg);
+    }
+}
+
+.btn {
+    width: 30rem;
+    height: 4rem;
+    background-position: center;
+    background-image: url("Assets/sprites/menu/menu_button.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+    font-family: "Pixel";
+    text-decoration: none;
+    font-size: 130%;
+
+    user-select: none;
+
+    cursor: pointer;
+
+    background-color: transparent;
+    border: none;
+
+    margin: 0;
+}
+
+.btn:disabled {
+    background-image: url("Assets/sprites/menu/menu_button_disabled.png");
+}
+
+.btn:disabled:hover {
+    cursor: auto;
+    background-image: url("Assets/sprites/menu/menu_button_disabled.png");
+}
+
+.btn:hover {
+    background-image: url("Assets/sprites/menu/menu_button_hover.png");
+}
+
+.logo-container {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+}
+
+.logo-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    align-items: end;
+    gap: 2vh;
+}
+
+.logo {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain;
+
+    pointer-events: none;
+}
+
+.random-text {
+    position: absolute;
+
+    display: flex;
+
+    justify-content: center;
+
+    text-align: center;
+    width: 100px;
+    animation: randomText 2s infinite ease-in-out;
+}
+
+.splash {
+    text-align: center;
+
+    text-wrap: nowrap;
+    font-family: "Pixel";
+    color: yellow;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+    font-size: 2.5rem;
+
+    background-color: transparent;
+    border: none;
+
+    cursor: pointer;
+}
+
+@keyframes randomText {
+    0% {
+        transform: scale(1) rotate(-10deg) translateY(-2rem);
+    }
+    50% {
+        transform: scale(1.1) rotate(-10deg) translateY(-2rem);
+    }
+    100% {
+        transform: scale(1) rotate(-10deg) translateY(-2rem);
+    }
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+
+    font-family: "Pixel";
+    color: rgba(255, 255, 255, 0.378);
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+}
+
+@font-face {
+    font-family: "Pixel";
+    src: url("Assets/fonts/minecraft-font/MinecraftRegular-Bmg3.otf");
+}
