@@ -1030,7 +1030,8 @@ class Entity {
         const blockLightLevel = this.getLightLevel();
 
         if (blockLightLevel !== null) {
-            if (this.body) this.body.brightness = blockLightLevel / 15;
+            if (this.body)
+                this.body.brightness = Math.max(0.1, blockLightLevel / 15);
         }
 
         if (this.body) {

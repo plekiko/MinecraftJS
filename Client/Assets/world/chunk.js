@@ -288,7 +288,7 @@ class Chunk {
     generateWater() {
         const maxWaterLevel = TERRAIN_HEIGHT + this.biome.waterLevel; // Calculate max water height
 
-        for (let x = 0; x < this.width; x++) {
+        for (let x = 0; x < this.width - 1; x++) {
             const terrainHeight = this.getHeight(x); // Get terrain height at this x
 
             // Loop from one level above the terrain up to the max water level
@@ -936,7 +936,6 @@ class Chunk {
                 this.update.splice(index, 1);
             }
         }
-
         if (updateBlocks) {
             this.updateAdjacentBlocks(
                 x,
@@ -1651,6 +1650,9 @@ class Chunk {
 
                 const worldY = i * BLOCK_SIZE; // Use i for y (vertical)
 
+                block.transform.position.x = worldX + this.x;
+                block.transform.position.y = worldY;
+
                 if (
                     !camera.isInScreen(
                         new Vector2(worldX + this.x, worldY),
@@ -1665,9 +1667,6 @@ class Chunk {
     }
 
     drawBlockAtPosition(ctx, block, x, y, camera) {
-        block.transform.position.x = x + this.x;
-        block.transform.position.y = y;
-
         block.draw(ctx, camera);
     }
 

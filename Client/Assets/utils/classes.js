@@ -116,8 +116,8 @@ class Square {
 
     getBrightness() {
         // Calculate the brightness of the block based on the light level
-        // 15 is fully bright, 0 is fully dark
-        return this.lightLevel / 15;
+        // 15 is fully bright, 0 is almost dark
+        return Math.max(0.1, this.lightLevel / 15);
     }
 
     draw(ctx, camera) {
