@@ -331,6 +331,10 @@ body {
     /* background-color: rosybrown; */
 }
 
+.small-text {
+    color: rgb(178, 178, 178);
+}
+
 .world-status {
     display: inline-flex;
     align-items: center;
