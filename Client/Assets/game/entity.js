@@ -44,6 +44,7 @@ class Entity {
         despawn = true,
         direction = 1,
         holdItem = new InventoryItem(),
+        canBurn = true,
 
         maxPortalCooldown = 40,
 
@@ -111,6 +112,7 @@ class Entity {
         this.portalCooldown = maxPortalCooldown;
         this.maxPortalCooldown = maxPortalCooldown;
 
+        this.canBurn = canBurn;
         this.hasVisualFire = false;
         this.fire = fire;
         this.fireMin = fire;
@@ -525,6 +527,8 @@ class Entity {
     }
 
     fireLogic() {
+        if (!this.canBurn) return;
+
         // When standing on Fire or Lava
         if (this.noCollision) {
             this.fire = this.fireMin;

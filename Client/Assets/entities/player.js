@@ -341,6 +341,12 @@ class Player extends Entity {
 
         const block = GetBlock(this.hoverBlock.blockType);
 
+        if (this.hoverBlock.blockType === Blocks.TNT) {
+            this.hoverBlock.explode();
+            playPositionalSound(this.position, "items/ignite.ogg", 10);
+            return;
+        }
+
         // Check if block is placeable
         if (!this.checkBlockForPlacing(GetBlock(Blocks.Fire))) return;
 

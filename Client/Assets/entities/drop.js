@@ -30,6 +30,7 @@ class Drop extends Entity {
             float: true,
             playWaterEnterSound: false,
             dark: props.wall === true,
+            canBurn: false,
         });
 
         this.position = position;

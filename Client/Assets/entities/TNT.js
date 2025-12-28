@@ -26,6 +26,7 @@ class TNT extends Entity {
             ),
             spriteScale: spriteScale, // Dynamically calculated sprite scale
             canSwim: false,
+            canBurn: false,
         });
 
         this.velocity.y = -4 * BLOCK_SIZE;

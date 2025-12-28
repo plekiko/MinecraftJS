@@ -35,6 +35,12 @@ class Chunk {
 
                 this.blocks[y][x].setBlockType(Blocks.Air, true);
                 this.walls[y][x].setBlockType(Blocks.Air, true);
+
+                const worldX = x * BLOCK_SIZE; // Use x for horizontal
+                const worldY = y * BLOCK_SIZE; // Use y for vertical
+
+                this.blocks[y][x].transform.position.x = worldX + this.x;
+                this.blocks[y][x].transform.position.y = worldY;
             }
         }
     }
@@ -1647,11 +1653,10 @@ class Chunk {
                 const block = blocks[i][j];
 
                 const worldX = j * BLOCK_SIZE; // Use j for x (horizontal)
-
                 const worldY = i * BLOCK_SIZE; // Use i for y (vertical)
 
-                block.transform.position.x = worldX + this.x;
-                block.transform.position.y = worldY;
+                // block.transform.position.x = worldX + this.x;
+                // block.transform.position.y = worldY;
 
                 if (
                     !camera.isInScreen(
