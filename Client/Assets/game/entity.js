@@ -1093,7 +1093,10 @@ class Entity {
             const spriteOffsetY = (this.hitbox.y - spriteHeight) / 2;
 
             if (blockLightLevel !== null) {
-                ctx.filter = `brightness(${blockLightLevel / 15})`;
+                ctx.filter = `brightness(${Math.max(
+                    0.1,
+                    blockLightLevel / 15
+                )})`;
             }
 
             if (this.cutoff > 0 && this.cutoff <= 1) {
