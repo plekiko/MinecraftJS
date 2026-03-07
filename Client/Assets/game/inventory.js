@@ -1,3 +1,24 @@
+const INVENTORY_PLAYER_OFFSET = { x: 128, y: 48 };
+const INVENTORY_PLAYER_SCALE = 6.65;
+// Denoted by position on player (Left on player = Right in UI)
+// all front-facing
+const INVENTORY_PLAYER_PARTS = [
+    { crop: { x: 4, y: 20, width: 4, height: 12 }, pos: { x: 4, y: 20 } },   // left leg
+    { crop: { x: 20, y: 52, width: 4, height: 12 }, pos: { x: 8, y: 20 } },  // right leg
+    { crop: { x: 20, y: 20, width: 8, height: 12 }, pos: { x: 4, y: 8 } },   // torso
+    { crop: { x: 43, y: 20, width: 4, height: 12 }, pos: { x: 0, y: 8 } },   // right arm
+    { crop: { x: 36, y: 52, width: 4, height: 12 }, pos: { x: 12, y: 8 } },  // left arm
+    { crop: { x: 8, y: 8, width: 8, height: 8 }, pos: { x: 4, y: 0 } },      // head
+];
+const INVENTORY_PLAYER_OVERLAY_PARTS = [
+    { crop: { x: 4, y: 36, width: 4, height: 12 }, pos: { x: 4, y: 20 } },   // right leg overlay
+    { crop: { x: 4, y: 52, width: 4, height: 12 }, pos: { x: 8, y: 20 } },   // left leg overlay
+    { crop: { x: 20, y: 32, width: 8, height: 12 }, pos: { x: 4, y: 8 } },   // torso overlay
+    { crop: { x: 43, y: 36, width: 4, height: 12 }, pos: { x: 0, y: 8 } },   // right arm overlay
+    { crop: { x: 52, y: 52, width: 4, height: 12 }, pos: { x: 12, y: 8 } },  // left arm overlay
+    { crop: { x: 40, y: 8, width: 8, height: 8 }, pos: { x: 4, y: 0 } },     // head overlay
+];
+
 class Inventory {
     constructor() {
         this.inventoryUI = { x: 492, y: 150 };
@@ -1497,6 +1518,9 @@ class Inventory {
         this.inventoryUI = drawImage(drawParams);
 
         this.drawItems();
+        if (this.openUIImage.url === "inventory") {
+            this.drawPlayerSkin(ctx);
+        }
         this.drawHoldItem();
         this.drawButtons(ctx);
         this.drawHoverTitle();
@@ -1504,6 +1528,25 @@ class Inventory {
         if (this.inventoryText) {
             this.inventoryText.draw(this.inventoryUI, this.openUIOffset);
         }
+    }
+
+    drawPlayerSkin(ctx) {
+        if (!player?.body?.image?.complete) return;
+
+        const baseX = this.inventoryUI.x + INVENTORY_PLAYER_OFFSET.x + this.openUIOffset.x;
+        const baseY = this.inventoryUI.y + INVENTORY_PLAYER_OFFSET.y + this.openUIOffset.y;
+        const drawParts = (parts) => {
+            for (const part of parts) {
+                const { crop, pos } = part;
+                const dx = Math.round(baseX + pos.x * INVENTORY_PLAYER_SCALE);
+                const dy = Math.round(baseY + pos.y * INVENTORY_PLAYER_SCALE);
+                const dw = Math.round(crop.width * INVENTORY_PLAYER_SCALE);
+                const dh = Math.round(crop.height * INVENTORY_PLAYER_SCALE);
+                ctx.drawImage(player.body.image, crop.x, crop.y, crop.width, crop.height, dx, dy, dw, dh);
+            }
+        };
+        drawParts(INVENTORY_PLAYER_PARTS);
+        drawParts(INVENTORY_PLAYER_OVERLAY_PARTS);
     }
 
     drawButtons(ctx) {
