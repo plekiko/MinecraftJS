@@ -1497,6 +1497,9 @@ class Inventory {
         this.inventoryUI = drawImage(drawParams);
 
         this.drawItems();
+        if (this.openUIImage.url === "inventory") {
+            this.drawPlayerSkin(ctx);
+        }
         this.drawHoldItem();
         this.drawButtons(ctx);
         this.drawHoverTitle();
@@ -1504,6 +1507,17 @@ class Inventory {
         if (this.inventoryText) {
             this.inventoryText.draw(this.inventoryUI, this.openUIOffset);
         }
+    }
+
+    drawPlayerSkin(ctx) {
+        if (!player?.body?.image?.complete || typeof drawSkinPreview !== "function") return;
+
+        const INVENTORY_PLAYER_OFFSET = { x: 128, y: 48 };
+        const INVENTORY_PLAYER_SCALE = 6.65;
+
+        const baseX = this.inventoryUI.x + INVENTORY_PLAYER_OFFSET.x + this.openUIOffset.x;
+        const baseY = this.inventoryUI.y + INVENTORY_PLAYER_OFFSET.y + this.openUIOffset.y;
+        drawSkinPreview(ctx, player.body.image, baseX, baseY, INVENTORY_PLAYER_SCALE);
     }
 
     drawButtons(ctx) {
