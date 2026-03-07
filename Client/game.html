@@ -5,14 +5,24 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Minecraft JS</title>
         <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="menu.css" />
         <link rel="icon" href="Assets/sprites/misc/icon_16x16.png" />
     </head>
     <body oncontextmenu="return false;">
-        <!-- <canvas id="canvas"></canvas> -->
         <h3 class="title">Minecraft JS</h3>
         <div class="chromium-issue-1092080-workaround__wrapper">
             <canvas id="canvas"></canvas>
             <div class="chromium-issue-1092080-workaround__overlay"></div>
+
+            <div class="pause-menu">
+                <button class="btn">Back to Game</button>
+                <div>
+                    <button class="btn" disabled>Advancements</button>
+                    <button class="btn" disabled>Statistics</button>
+                </div>
+                <button class="btn">Report Bugs</button>
+                <button class="btn">Save and Quit to Title</button>
+            </div>
         </div>
 
         <div class="help-container">

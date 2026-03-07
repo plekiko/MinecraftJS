@@ -77,6 +77,37 @@ body {
     border-radius: 5px;
 }
 
+.pause-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    div {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        width: 30rem;
+        height: 4rem;
+        gap: 32px;
+
+        button {
+            background-size: 100% 100%;
+            height: 3rem;
+        }
+    }
+}
+
 @font-face {
     font-family: "Pixel";
     src: url("Assets/fonts/minecraft-font/MinecraftRegular-Bmg3.otf");
