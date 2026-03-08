@@ -123,8 +123,10 @@ class Body {
                     this.position.x +
                     (direction < 0
                         ? this.flipCorrection * (BLOCK_SIZE / 64)
-                        : 0),
-                y: this.position.y,
+                        : 0) +
+                    BLOCK_SIZE * (part.offset.x / 64),
+                y:
+                    this.position.y + BLOCK_SIZE * (part.offset.y / 64),
             };
             part.draw(
                 ctx,
@@ -170,6 +172,7 @@ class BodyPart {
         rotation = 0,
         swaySpeed = 90,
         swayIntensity = 1,
+        swayPhase = 0,
         maxSwayAngle = 90,
         mainArm = false,
         holdOrigin = { x: 0, y: 0 },
@@ -201,6 +204,7 @@ class BodyPart {
 
         this.swaySpeed = swaySpeed;
         this.swayIntensity = swayIntensity;
+        this.swayPhase = swayPhase;
         this.maxSwayAngle = maxSwayAngle;
 
         this.direction = -1;
@@ -215,7 +219,8 @@ class BodyPart {
     }
     getSwayRotation(speed, grounded) {
         const oscillation = Math.sin(
-            Date.now() / (grounded ? this.swaySpeed : this.swaySpeed * 5)
+            Date.now() / (grounded ? this.swaySpeed : this.swaySpeed * 5) +
+                this.swayPhase
         );
         const effectiveSwayAngle = Math.abs(speed / 1000) * this.maxSwayAngle;
         const output =
@@ -374,10 +379,7 @@ class BodyPart {
     }
 
     applyTranslation(ctx) {
-        ctx.translate(
-            this.position.x + BLOCK_SIZE * (this.offset.x / 64),
-            this.position.y + BLOCK_SIZE * (this.offset.y / 64)
-        );
+        ctx.translate(this.position.x, this.position.y);
         ctx.translate(this.rotationOrigin.x, this.rotationOrigin.y); // Use precomputed origin
     }
 

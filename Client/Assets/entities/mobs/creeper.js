@@ -12,7 +12,7 @@ class Creeper extends Mob {
             health: health,
             position: position,
             burnInSunlight: false,
-            hitbox: new Vector2(0.4 * BLOCK_SIZE, 1.7 * BLOCK_SIZE),
+            hitbox: new Vector2(0.6 * BLOCK_SIZE, 1.5 * BLOCK_SIZE),
             invulnerable: invulnerable,
             body: body,
             noAi: noAi,
@@ -37,6 +37,7 @@ class Creeper extends Mob {
         this.explosionDamage = 12;
         this.explosionPower = 12;
         this.primed = false;
+        this.primedPulsePeriod = 600; // ms per full pulse cycle
     }
 
     update() {
@@ -65,8 +66,10 @@ class Creeper extends Mob {
             if (this.fuse <= 0) {
                 this.explode();
                 removeEntity(this);
-            } else {
-                this.body?.flashColor("white", 0.05);
+            } else if (this.body) {
+                // Pulse white: 50% of each cycle show flash
+                const phase = (Date.now() % this.primedPulsePeriod) / this.primedPulsePeriod;
+                this.body.flashingColor = phase < 0.5 ? "white" : null;
             }
         }
     }
@@ -216,38 +219,40 @@ function createCreeperBody() {
                 eyes: true,
             }),
             torso: new BodyPart({
-                spriteCrop: { x: 20, y: 8, width: 4, height: 12 },
-                offset: { x: 0, y: 32 },
+                spriteCrop: { x: 20, y: 8, width: 4, height: 10 },
+                offset: { x: 0, y: 33 },
             }),
-            backLeftLeg: new BodyPart({
-                spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
-                offset: { x: -4, y: 69 },
-                rotationOrigin: { x: 5, y: 0 },
-                zIndex: 0,
+            back_back_leg: new BodyPart({
+                spriteCrop: { x: 4, y: 20, width: 4, height: 6 },
+                offset: { x: -8, y: 72 },
+                rotationOrigin: { x: 4, y: 0 },
+                zIndex: -1,
                 sways: true,
                 swayIntensity: 4,
+                swayPhase: Math.PI,
             }),
-            backRightLeg: new BodyPart({
-                spriteCrop: { x: 8, y: 20, width: 4, height: 12 },
-                offset: { x: 0, y: 69 },
-                rotationOrigin: { x: 5, y: 0 },
+            back_leg: new BodyPart({
+                spriteCrop: { x: 8, y: 20, width: 4, height: 6 },
+                offset: { x: -8, y: 72 },
+                rotationOrigin: { x: 4, y: 0 },
                 zIndex: 1,
                 sways: true,
-                swayIntensity: 4,
+                swayIntensity: -4,
             }),
-            frontLeftLeg: new BodyPart({
-                spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
-                offset: { x: -4, y: 69 },
-                rotationOrigin: { x: 5, y: 0 },
-                zIndex: 2,
+            front_back_leg: new BodyPart({
+                spriteCrop: { x: 4, y: 20, width: 4, height: 6 },
+                offset: { x: 4, y: 72 },
+                rotationOrigin: { x: 4, y: 0 },
+                zIndex: -1,
                 sways: true,
-                swayIntensity: 4,
+                swayIntensity: -4,
+                swayPhase: Math.PI,
             }),
-            frontRightLeg: new BodyPart({
-                spriteCrop: { x: 8, y: 20, width: 4, height: 12 },
-                offset: { x: 0, y: 69 },
-                rotationOrigin: { x: 5, y: 0 },
-                zIndex: 3,
+            front_leg: new BodyPart({
+                spriteCrop: { x: 8, y: 20, width: 4, height: 6 },
+                offset: { x: 8, y: 72 },
+                rotationOrigin: { x: 4, y: 0 },
+                zIndex: 1,
                 sways: true,
                 swayIntensity: 4,
             }),
