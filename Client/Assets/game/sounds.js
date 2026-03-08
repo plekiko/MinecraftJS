@@ -102,6 +102,13 @@ const Sounds = Object.freeze({
     Player_Eat: ["player/eat1", "player/eat2", "player/eat3"],
 
     Explosion: ["tnt/explode1", "tnt/explode2", "tnt/explode3", "tnt/explode4"],
+    TNT_Fuse: ["tnt/fuse"],
+    Creeper_Hurt: [
+        "mobs/creeper/hurt1",
+        "mobs/creeper/hurt2",
+        "mobs/creeper/hurt3",
+        "mobs/creeper/hurt4",
+    ],
 });
 
 // Base URL for audio files

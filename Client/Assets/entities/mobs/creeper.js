@@ -55,6 +55,11 @@ class Creeper extends Mob {
         if (distance <= 2.5 * BLOCK_SIZE) {
             this.primed = true;
             this.fuse = this.fuseMax;
+            PlayRandomSoundFromArray({
+                array: Sounds.TNT_Fuse,
+                positional: true,
+                origin: this.position,
+            });
         }
     }
 
@@ -190,6 +195,11 @@ class Creeper extends Mob {
         if (!this.damage(damage)) return;
 
         this.knockBack(hitfromX, kb);
+        PlayRandomSoundFromArray({
+            array: Sounds.Creeper_Hurt,
+            positional: true,
+            origin: this.position,
+        });
 
         // reset fuse when punched
         if (this.primed) {
@@ -200,6 +210,7 @@ class Creeper extends Mob {
 
     dieEvent() {
         this.dropLoot();
+        playPositionalSound(this.position, "mobs/creeper/death.ogg");
         removeEntity(this);
     }
 

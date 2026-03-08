@@ -1123,6 +1123,28 @@ const recipes = [
         ],
         output: new InventoryItem({ blockId: Blocks.Ladder, count: 3 }),
     }),
+    // TNT
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockId: Blocks.Sand }),
+                new RecipeItem({ itemId: Items.Gunpowder }),
+                new RecipeItem({ blockId: Blocks.Sand }),
+            ],
+            [
+                new RecipeItem({ itemId: Items.Gunpowder }),
+                new RecipeItem({ blockId: Blocks.Sand }),
+                new RecipeItem({ itemId: Items.Gunpowder }),
+            ],
+            [
+                new RecipeItem({ blockId: Blocks.Sand }),
+                new RecipeItem({ itemId: Items.Gunpowder }),
+                new RecipeItem({ blockId: Blocks.Sand }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.TNT, count: 1 }),
+    }),
     //#endregion
 
     //#region Mossy Blocks
