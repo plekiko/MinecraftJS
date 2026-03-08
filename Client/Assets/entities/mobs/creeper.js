@@ -33,9 +33,6 @@ class Creeper extends Mob {
 
         this.fuse = -1;
         this.fuseMax = 30;
-        this.explosionRadius = 3 * BLOCK_SIZE;
-        this.explosionDamage = 12;
-        this.explosionPower = 12;
         this.primed = false;
         this.primedPulsePeriod = 600; // ms per full pulse cycle
     }
@@ -80,114 +77,12 @@ class Creeper extends Mob {
     }
 
     explode() {
-        PlayRandomSoundFromArray({
-            array: Sounds.Explosion,
-            positional: true,
-            origin: this.position,
+        createExplosion(this.position, {
+            radius: 3 * BLOCK_SIZE,
+            damage: 12,
+            power: 12,
+            excludeEntity: this,
         });
-
-        const entitiesInRange = this.getEntitiesInRadius(this.explosionRadius);
-        entitiesInRange.forEach((entity) => {
-            if (entity !== this && !entity.invulnerable) {
-                const distance = Vector2.Distance(
-                    this.position,
-                    entity.position
-                );
-                const damage = this.calculateDamage(distance);
-                if (typeof entity.hit === "function") entity.hit(damage);
-                if (entity.type === EntityTypes.Drop) {
-                    removeEntity(entity);
-                    return;
-                }
-                const knockbackForce = this.calculateKnockback(distance);
-                const dx = entity.position.x - this.position.x;
-                const dy = entity.position.y - this.position.y;
-                const angle = Math.atan2(dy, dx);
-                entity.knockBack(
-                    this.position.x - this.hitbox.x / 2,
-                    knockbackForce * Math.cos(angle)
-                );
-            }
-        });
-
-        this.destroyBlocksInRadius();
-    }
-
-    getEntitiesInRadius(radius) {
-        const nearbyEntities = [];
-        for (let entity of entities) {
-            const distance = Vector2.Distance(this.position, entity.position);
-            if (distance <= radius) {
-                nearbyEntities.push(entity);
-            }
-        }
-        return nearbyEntities;
-    }
-
-    calculateDamage(distance) {
-        const maxDistance = this.explosionRadius;
-        const damageFactor = 1 - distance / maxDistance;
-        return Math.max(0, Math.round(this.explosionDamage * damageFactor));
-    }
-
-    calculateKnockback(distance) {
-        const maxDistance = this.explosionRadius;
-        const knockbackFactor = (1 - distance / maxDistance) / 5;
-        return Math.max(0, this.explosionPower * BLOCK_SIZE * knockbackFactor);
-    }
-
-    destroyBlocksInRadius() {
-        const startX = Math.floor(this.position.x / BLOCK_SIZE);
-        const startY = Math.floor(this.position.y / BLOCK_SIZE);
-        const maxPower = this.explosionPower;
-
-        const visited = new Set();
-        const queue = [[startX, startY, maxPower]];
-
-        while (queue.length > 0) {
-            const [x, y, power] = queue.shift();
-
-            const worldX = x * BLOCK_SIZE;
-            const worldY = y * BLOCK_SIZE;
-            const distance = Math.sqrt(
-                Math.pow(worldX - this.position.x, 2) +
-                    Math.pow(worldY - this.position.y, 2)
-            );
-
-            if (distance > this.explosionRadius || power <= 0) continue;
-
-            const key = `${x},${y}`;
-            if (visited.has(key)) continue;
-            visited.add(key);
-
-            const block = GetBlockAtWorldPosition(worldX, worldY);
-            if (!block) continue;
-
-            const blockDef = GetBlock(block.blockType);
-            if (!blockDef) continue;
-
-            const resistance = blockDef.hardness || 0;
-            const powerThreshold = resistance + 1;
-
-            if (power >= powerThreshold) {
-                if (blockDef.hardness >= 0) {
-                    if (blockDef.specialType === SpecialType.TNT) {
-                        block.explode(true);
-                    } else {
-                        block.breakBlock(blockDef.dropWithoutTool);
-                        setBlockType(block, Blocks.Air);
-                    }
-                }
-
-                const reducedPower = power - 1 - resistance * 0.3;
-                if (reducedPower > 0) {
-                    queue.push([x, y - 1, reducedPower]);
-                    queue.push([x, y + 1, reducedPower]);
-                    queue.push([x - 1, y, reducedPower]);
-                    queue.push([x + 1, y, reducedPower]);
-                }
-            }
-        }
     }
 
     hit(damage, hitfromX = 0, kb = 0) {
