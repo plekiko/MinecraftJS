@@ -9,6 +9,7 @@ let settings = {
 };
 
 chat = new Chat();
+pauseMenu = new PauseMenu();
 
 function waitForTexturePack() {
     return new Promise((resolve) => {
@@ -136,6 +137,7 @@ function updateGame() {
 
     if (player) cursorBlockLogic();
     if (hotbar) hotbar.update();
+    if (pauseMenu) pauseMenu.update();
     if (chat) chat.update();
     camera.update(player);
     dayNightCycle();
@@ -210,6 +212,15 @@ function updateArray(array, deltaTime) {
 }
 
 function cursorBlockLogic() {
+    if (pauseMenu?.active) {
+        cursorInRange = false;
+        if (player) {
+            player.hoverBlock = null;
+            player.hoverWall = null;
+        }
+        return;
+    }
+
     const cursorDistance = Math.floor(
         Vector2.Distance(
             player.position,

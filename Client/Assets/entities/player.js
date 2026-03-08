@@ -663,6 +663,7 @@ class Player extends Entity {
 
     interactLogic() {
         if (this.windowOpen) return;
+        if (pauseMenu?.active) return;
 
         const rightClick = input.isRightMouseButtonPressed();
 
@@ -947,6 +948,7 @@ class Player extends Entity {
 
     breakingAndPlacingLogic() {
         if (this.windowOpen) return;
+        if (pauseMenu?.active) return;
 
         if (input.isLeftMouseButtonPressed()) {
             this.playerSwing();
