@@ -143,10 +143,12 @@ async function loadTexturePack() {
             return;
         }
 
-        const base64Data = texturePackData.replace(
-            "data:application/x-zip-compressed;base64,",
-            ""
-        );
+        const base64Data =
+            typeof texturePackData === "string" &&
+            texturePackData.startsWith("data:") &&
+            texturePackData.includes(",")
+                ? texturePackData.slice(texturePackData.indexOf(",") + 1)
+                : texturePackData;
 
         const zip = await JSZip.loadAsync(base64Data, { base64: true });
         texturePackZip = zip;

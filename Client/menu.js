@@ -412,14 +412,14 @@ function uploadTexturePack() {
                 ldb.set(`texturePack_${packId}`, texturePackData);
 
                 try {
-                    const base64Data = texturePackData.startsWith(
-                        "data:application/x-zip-compressed;`base64`,"
-                    )
-                        ? texturePackData.replace(
-                              "data:application/x-zip-compressed;base64,",
-                              ""
-                          )
-                        : texturePackData;
+                    const base64Data =
+                        typeof texturePackData === "string" &&
+                        texturePackData.startsWith("data:") &&
+                        texturePackData.includes(",")
+                            ? texturePackData.slice(
+                                  texturePackData.indexOf(",") + 1
+                              )
+                            : texturePackData;
                     const zip = await JSZip.loadAsync(base64Data, {
                         base64: true,
                     });
