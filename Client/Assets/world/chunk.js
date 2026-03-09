@@ -404,32 +404,6 @@ class Chunk {
         }
     }
 
-    checkForBlockWithAirBeneath(x, y) {
-        const blockData = this.getBlockTypeData(x, y - 1, false);
-
-        if (!blockData) return;
-
-        const block = this.getBlock(x, y - 1, false);
-
-        if (blockData.breakWithoutBlockUnderneath)
-            block.breakBlock(blockData.dropWithoutTool);
-
-        if (blockData.fall) block.gravityBlock();
-
-        // check block above
-        const blockAbove = this.getBlock(x, y - 2, false);
-
-        if (blockAbove) {
-            const blockAboveData = this.getBlockTypeData(x, y - 2, false);
-            if (blockAboveData.breakWithoutBlockUnderneath)
-                blockAbove.breakBlock(blockAboveData.dropWithoutTool);
-            if (blockAboveData.fall) {
-                blockAbove.gravityBlock();
-                this.checkForBlockWithAirBeneath(x, y - 2);
-            }
-        }
-    }
-
     getAllBlocks(blockType) {
         const returnBlocks = [];
         for (let y = 0; y < this.height; y++) {
@@ -719,6 +693,16 @@ class Chunk {
     getBlock(x, y, calculated = true, wall = false) {
         if (calculated) y = this.calculateY(y);
 
+        // Handle x out of bounds by getting from correct chunk
+        if (x < 0 || x >= this.width) {
+            const worldX = this.x + x * BLOCK_SIZE;
+            const targetChunk = this.getChunkForBlock(worldX);
+            if (!targetChunk) return null;
+
+            const localX = this.getLocalX(worldX, targetChunk);
+            return targetChunk.getBlock(localX, y, false, wall);
+        }
+
         if (!wall) {
             if (!this.blocks[y]) return null;
             if (!this.blocks[y][x]) return null;
@@ -943,14 +927,7 @@ class Chunk {
             }
         }
         if (updateBlocks) {
-            this.updateAdjacentBlocks(
-                x,
-                y,
-                blockType,
-                wall,
-                metaData,
-                calculate
-            );
+            this.updateAdjacentBlocks(x, y, wall, calculate);
         }
 
         block.dark = wall;
@@ -1474,40 +1451,20 @@ class Chunk {
         return { x: x * BLOCK_SIZE + this.x, y: y * BLOCK_SIZE };
     }
 
-    updateAdjacentBlocks(x, y, blockType, wall, metaData, calculate) {
-        const currentBlockDef = GetBlock(blockType);
-        const blockBeneath = GetBlock(
-            this.getBlock(x, y + 1, calculate, wall)?.blockType
-        );
-        const blockAbove = GetBlock(
-            this.getBlock(x, y - 1, calculate, wall)?.blockType
-        );
+    updateAdjacentBlocks(x, y, wall, calculate) {
+        const directions = [
+            { dx: 0, dy: -1 }, // Up
+            { dx: 0, dy: 1 }, // Down
+            { dx: -1, dy: 0 }, // Left
+            { dx: 1, dy: 0 }, // Right
+        ];
 
-        // Case 1: Update block beneath (e.g., grass below turns to dirt)
-        if (blockBeneath && blockBeneath.changeToBlockWithBlockAbove) {
-            if (currentBlockDef?.collision) {
-                this.setBlockType(
-                    x,
-                    y + 1,
-                    blockBeneath.changeToBlockWithBlockAbove,
-                    wall,
-                    metaData,
-                    calculate
-                );
-            }
-        }
-
-        // Case 2: Update the placed block itself (e.g., grass turns to dirt if block above)
-        if (currentBlockDef?.changeToBlockWithBlockAbove) {
-            if (blockAbove && blockAbove.collision) {
-                this.setBlockType(
-                    x,
-                    y,
-                    currentBlockDef.changeToBlockWithBlockAbove,
-                    wall,
-                    metaData,
-                    calculate
-                );
+        for (const { dx, dy } of directions) {
+            const adjX = x + dx;
+            const adjY = y + dy;
+            const adjBlock = this.getBlock(adjX, adjY, calculate, wall);
+            if (adjBlock) {
+                adjBlock.blockUpdate();
             }
         }
     }

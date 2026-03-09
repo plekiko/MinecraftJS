@@ -70,7 +70,9 @@ class Creeper extends Mob {
                 removeEntity(this);
             } else if (this.body) {
                 // Pulse white: 50% of each cycle show flash
-                const phase = (Date.now() % this.primedPulsePeriod) / this.primedPulsePeriod;
+                const phase =
+                    (Date.now() % this.primedPulsePeriod) /
+                    this.primedPulsePeriod;
                 this.body.flashingColor = phase < 0.5 ? "white" : null;
             }
         }
@@ -119,18 +121,18 @@ function createCreeperBody() {
         parts: {
             head: new BodyPart({
                 spriteCrop: { x: 16, y: 0, width: 8, height: 8 },
-                offset: { x: -6, y: 0 },
+                offset: { x: -6, y: 5 },
                 rotationOrigin: { x: 12, y: 32 },
                 zIndex: 1,
                 eyes: true,
             }),
             torso: new BodyPart({
                 spriteCrop: { x: 20, y: 8, width: 4, height: 10 },
-                offset: { x: 0, y: 33 },
+                offset: { x: 0, y: 37 },
             }),
             back_back_leg: new BodyPart({
                 spriteCrop: { x: 4, y: 20, width: 4, height: 6 },
-                offset: { x: -8, y: 72 },
+                offset: { x: -8, y: 75 },
                 rotationOrigin: { x: 4, y: 0 },
                 zIndex: -1,
                 sways: true,
@@ -139,7 +141,7 @@ function createCreeperBody() {
             }),
             back_leg: new BodyPart({
                 spriteCrop: { x: 8, y: 20, width: 4, height: 6 },
-                offset: { x: -8, y: 72 },
+                offset: { x: -8, y: 75 },
                 rotationOrigin: { x: 4, y: 0 },
                 zIndex: 1,
                 sways: true,
@@ -147,7 +149,7 @@ function createCreeperBody() {
             }),
             front_back_leg: new BodyPart({
                 spriteCrop: { x: 4, y: 20, width: 4, height: 6 },
-                offset: { x: 4, y: 72 },
+                offset: { x: 4, y: 75 },
                 rotationOrigin: { x: 4, y: 0 },
                 zIndex: -1,
                 sways: true,
@@ -156,7 +158,7 @@ function createCreeperBody() {
             }),
             front_leg: new BodyPart({
                 spriteCrop: { x: 8, y: 20, width: 4, height: 6 },
-                offset: { x: 8, y: 72 },
+                offset: { x: 8, y: 75 },
                 rotationOrigin: { x: 4, y: 0 },
                 zIndex: 1,
                 sways: true,

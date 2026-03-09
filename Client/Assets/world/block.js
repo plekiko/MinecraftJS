@@ -252,10 +252,18 @@ function flowDownward(block, worldPos) {
     return below;
 }
 
-function setBlockType(block, type) {
+function setBlockType(block, type, updateAdjacent = true) {
     const chunk = getDimensionChunks(activeDimension).get(block.chunkX);
     if (!chunk) return;
-    chunk.setBlockType(block.x, block.y, type, block.wall, null, false, true);
+    chunk.setBlockType(
+        block.x,
+        block.y,
+        type,
+        block.wall,
+        null,
+        false,
+        updateAdjacent
+    );
 }
 
 function verticalCheckAbove(block, worldPos) {
@@ -1546,6 +1554,27 @@ class Block extends Square {
         this.metaData.props.progression = 0;
     }
 
+    blockUpdate() {
+        const blockDef = GetBlock(this.blockType);
+
+        // Check for blocks that should break if they don't have a solid block underneath
+        if (blockDef.breakWithoutBlockUnderneath || blockDef.fall) {
+            const blockBelow = GetBlockAtWorldPosition(
+                this.transform.position.x,
+                this.transform.position.y + BLOCK_SIZE
+            );
+
+            // No block below
+            if (!blockBelow || GetBlock(blockBelow.blockType).air) {
+                if (blockDef.fall) {
+                    this.gravityBlock();
+                } else {
+                    this.breakBlock(blockDef.dropWithoutTool, true);
+                }
+            }
+        }
+    }
+
     breakBlock(drop = false, wall = false) {
         if (GetBlock(this.blockType).air) return;
 
@@ -1553,7 +1582,7 @@ class Block extends Square {
 
         if (!chunk) return;
 
-        if (!wall) chunk.checkForBlockWithAirBeneath(this.x, this.y);
+        // if (!wall) chunk.checkForBlockWithAirBeneath(this.x, this.y);
 
         const blockDef = GetBlock(this.blockType);
 
@@ -1593,10 +1622,10 @@ class Block extends Square {
             }
         }
 
-        chunk.setBlockType(this.x, this.y, Blocks.Air, wall, null, false);
-
         if (blockDef.changeToBlockWhenBroken) {
             setBlockType(this, blockDef.changeToBlockWhenBroken);
+        } else {
+            setBlockType(this, Blocks.Air);
         }
     }
 

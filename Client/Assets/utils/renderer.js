@@ -620,6 +620,12 @@ function drawImage({
         if (!imageCache.has(url)) {
             const newImg = new Image();
             newImg.src = url;
+
+            // If it doesnt find the image, revert to the missing texture
+            newImg.onerror = () => {
+                newImg.src = getSpriteUrl("blocks/missing_texture");
+            };
+
             imageCache.set(url, newImg);
         }
         img = imageCache.get(url);

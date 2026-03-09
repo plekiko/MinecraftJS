@@ -2,8 +2,7 @@ const panel = document.querySelector(".help-container");
 
 setInterval(() => {
     updateDebug();
-}, 1000 / 60);
-
+}, 1000 / 144);
 function updateDebug() {
     HandleInput();
     HandleDebugging();

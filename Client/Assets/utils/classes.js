@@ -88,14 +88,21 @@ class Square {
 
         this.img = new Image();
         this.img.src = sprite;
+
+        this.img.onerror = () => {
+            this.img.src = getSpriteUrl("blocks/missing_texture");
+        };
     }
 
     async setSprite(sprite) {
         if (!sprite) return;
 
         this.img = new Image();
-
         this.img.src = sprite;
+
+        this.img.onerror = () => {
+            this.img.src = getSpriteUrl("blocks/missing_texture");
+        };
 
         if (this.img)
             if (this.isAnimated())

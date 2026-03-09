@@ -15,15 +15,36 @@
             <div class="chromium-issue-1092080-workaround__overlay"></div>
 
             <div id="pause-menu">
-                <h2 class="input-field-title" style="margin-top: -2rem; margin-bottom: 2rem; font-size: xx-large;">Game Menu</h2>
-                <button class="btn" onclick="pauseMenu.close()">Back to Game</button>
+                <h2
+                    class="input-field-title"
+                    style="
+                        margin-top: -2rem;
+                        margin-bottom: 2rem;
+                        font-size: xx-large;
+                    "
+                >
+                    Game Menu
+                </h2>
+                <button class="btn" onclick="pauseMenu.close()">
+                    Back to Game
+                </button>
                 <!-- These will be uncommented when advancements are added -->
                 <!-- <div>
                     <button class="btn">Advancements</button>
                     <button class="btn">Statistics</button>
                 </div> -->
-                <a class="btn" href="https://github.com/plekiko/MinecraftJS/issues/new" target="_blank">Report Bugs</a>
-                <button class="btn" onclick="if(typeof SaveWorld==='function')SaveWorld(false);window.location.href='index.html'">Save and Quit to Title</button>
+                <a
+                    class="btn"
+                    href="https://github.com/plekiko/MinecraftJS/issues/new"
+                    target="_blank"
+                    >Report Bugs</a
+                >
+                <button
+                    class="btn"
+                    onclick="if(typeof SaveWorld==='function')SaveWorld(false);window.location.href='index.html'"
+                >
+                    Save and Quit to Title
+                </button>
             </div>
         </div>
 
@@ -53,6 +74,9 @@
             <div class="help-text">T - Chat</div>
             <div class="help-text"><br />Z - Close Panel</div>
         </div>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
         <script src="node_modules/jszip/dist/jszip.min.js"></script>
 
         <script src="node_modules/tooloud/dist/tooloud.min.js"></script>
