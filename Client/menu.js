@@ -1,24 +1,3 @@
-// Crops center of button image for CSS to tile (used for dynamic UI scaling)
-// I wanted to do this in CSS but apparently it's not possible
-(function () {
-    const base = new URL("Assets/sprites/menu/", document.baseURI || document.URL).href;
-    const w = 192, h = 20, slice = 4;
-    ["menu_button.png", "menu_button_hover.png", "menu_button_disabled.png"].forEach((file, i) => {
-        const img = new Image();
-        const varName = i === 0 ? "--btn-center-img" : i === 1 ? "--btn-center-img-hover" : "--btn-center-img-disabled";
-        img.onload = () => {
-            const canvas = document.createElement("canvas");
-            canvas.width = w;
-            canvas.height = h;
-            canvas.getContext("2d").drawImage(img, slice, 0, w, h, 0, 0, w, h);
-            canvas.toBlob((blob) => {
-                if (blob) document.documentElement.style.setProperty(varName, `url("${URL.createObjectURL(blob)}")`);
-            }, "image/png");
-        };
-        img.src = base + file;
-    });
-})();
-
 const randomTextElement = document.querySelector(".splash");
 const menuContainer = document.querySelector(".menu-container");
 const worldsContainer = document.querySelector(".world-select");
@@ -132,17 +111,7 @@ const musicTracks = [
     "Moog City 2",
 ];
 
-function buttonSound() {
-    if (!currentSettings.sfx) return;
-
-    const audio = new Audio("Assets/audio/sfx/ui/click.ogg");
-    audio.volume = 0.3;
-    audio.play();
-}
-
 function multiplayerButton() {
-    buttonSound();
-
     hideMenu();
 
     showServers();
@@ -160,8 +129,6 @@ function downloadServer() {
 }
 
 function toggleSFX() {
-    buttonSound();
-
     currentSettings.sfx = !currentSettings.sfx;
 
     sfxToggleButton.textContent =
@@ -169,8 +136,6 @@ function toggleSFX() {
 }
 
 function toggleMusic() {
-    buttonSound();
-
     currentSettings.music = !currentSettings.music;
 
     if (!currentSettings.music) {
@@ -190,8 +155,6 @@ function toggleMusic() {
 }
 
 function toggleLighting() {
-    buttonSound();
-
     currentSettings.lighting = !currentSettings.lighting;
 
     lightingToggleButton.textContent =
@@ -235,8 +198,6 @@ function loadSettings() {
 loadSettings();
 
 function showTexturePacks() {
-    buttonSound();
-
     hideMenu();
 
     texturePackSelectContainer.style.display = "flex";
@@ -248,7 +209,6 @@ function showTexturePacks() {
 }
 
 function playGame() {
-    buttonSound();
     menuContainer.style.display = "none";
     worldSelectContainer.style.display = "flex";
     footer.style.display = "none";
@@ -277,10 +237,8 @@ function playMusic(track) {
 }
 
 function parseDate(dateStr) {
-    const [datePart, timePart] = dateStr.split(", ");
-    const [day, month, year] = datePart.split("-").map(Number);
-    const [hour, minute, second] = timePart.split(":").map(Number);
-    return new Date(year, month - 1, day, hour, minute, second);
+    const ms = new Date(dateStr).getTime();
+    return isNaN(ms) ? 0 : ms;
 }
 
 function populateWorlds() {
@@ -305,7 +263,7 @@ function populateWorlds() {
 
             worldNameElement.textContent = world.name;
             worldDateElement.textContent =
-                world.lastPlayed + ` - ${worldSize}KB`;
+                new Date(world.lastPlayed).toLocaleString() + ` - ${worldSize}KB`;
             worldElement.style.display = "flex";
 
             worldElement.addEventListener("click", () => {
@@ -553,7 +511,6 @@ async function getTexturePackData(id) {
 }
 
 function gotoWorldCreate() {
-    buttonSound();
     worldCreateContainer.style.display = "flex";
     menuContainer.style.display = "none";
     worldSelectContainer.style.display = "none";
@@ -601,19 +558,16 @@ function removeWorld() {
 }
 
 function backToMenu() {
-    buttonSound();
     showMenu();
 }
 
 function backToWorldSelection() {
-    buttonSound();
     worldCreateContainer.style.display = "none";
     worldSelectContainer.style.display = "flex";
 }
 
 let selectedGameMode = 0;
 function switchGameMode() {
-    buttonSound();
     selectedGameMode = (selectedGameMode + 1) % 4;
     setGameMode(selectedGameMode);
 }
@@ -652,7 +606,6 @@ function playSelectedWorld() {
         })
     );
 
-    buttonSound();
     setInterval(() => {
         window.location.href = "game.html";
     }, 500);
@@ -1069,7 +1022,6 @@ function selectServer(id, selectedElement) {
 }
 
 function gotoAddServer() {
-    buttonSound();
     serverSelectContainer.style.display = "none";
     addServerContainer.style.display = "flex";
     tempServerName = "New Server";
@@ -1137,7 +1089,6 @@ function removeServer() {
 }
 
 function gotoQuickConnect() {
-    buttonSound();
     serverSelectContainer.style.display = "none";
     quickConnectContainer.style.display = "flex";
     tempQuickConnectIP = "";
@@ -1175,21 +1126,18 @@ function connectToServer() {
     localStorage.setItem("multiplayerIP", ip);
     localStorage.setItem("multiplayerPort", port);
 
-    buttonSound();
     setTimeout(() => {
         window.location.href = "game.html?multiplayer=true";
     }, 500);
 }
 
 function cancelQuickConnect() {
-    buttonSound();
     quickConnectContainer.style.display = "none";
     serverSelectContainer.style.display = "flex";
     displayServers();
 }
 
 function backToServerSelection() {
-    buttonSound();
     addServerContainer.style.display = "none";
     serverSelectContainer.style.display = "flex";
 
@@ -1201,8 +1149,6 @@ function backToServerSelection() {
 }
 
 function gotoOptions() {
-    buttonSound();
-
     hideMenu();
 
     optionsContainer.style.display = "flex";
