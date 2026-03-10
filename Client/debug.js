@@ -1,10 +1,7 @@
-const panel = document.querySelector(".help-container");
-
 setInterval(() => {
     updateDebug();
 }, 1000 / 144);
 function updateDebug() {
-    HandleInput();
     HandleDebugging();
     CameraLogic();
 }
@@ -13,20 +10,60 @@ function HandleDebugging() {
     if (drawDebugMouseBlock) PrintBlockLogic();
 }
 
-function HandleInput() {
-    if (player && !player.canMove) return;
-    if (input.isKeyPressed("KeyB")) drawingChunkBorders = !drawingChunkBorders;
-    if (input.isKeyPressed("KeyN")) drawCamera = !drawCamera;
-    if (input.isKeyPressed("KeyH")) drawHitbox = !drawHitbox;
-    if (input.isKeyPressed("KeyM")) drawDebugMouseBlock = !drawDebugMouseBlock;
-    if (input.isKeyPressed("KeyF")) drawFileSize = !drawFileSize;
-    if (input.isKeyPressed("KeyI")) drawFps = !drawFps;
-    if (input.isKeyPressed("KeyC")) drawCoordinates = !drawCoordinates;
-    if (input.isKeyPressed("KeyO")) SaveWorld();
-    if (input.isKeyPressed("KeyP")) SaveWorld(false, true);
-    if (input.isKeyPressed("KeyZ"))
-        panel.style.display = panel.style.display === "none" ? "flex" : "none";
-    // if (input.isKeyPressed("KeyR")) RegenerateWorld();
+function handleDebugInput() {
+    if (player && !player.canMove) return; // e.g. pause menu open
+    if (input.isKeyPressed("KeyB")) toggleChunkBorders();
+    if (input.isKeyPressed("KeyN")) toggleCamera();
+    if (input.isKeyPressed("KeyH")) toggleHitbox();
+    if (input.isKeyPressed("KeyM")) togglePrintBlock();
+    if (input.isKeyPressed("KeyF")) toggleFileSize();
+    if (input.isKeyPressed("KeyI")) toggleFps();
+    if (input.isKeyPressed("KeyC")) toggleCoordinates();
+    if (input.isKeyPressed("KeyO") && typeof SaveWorld === "function") SaveWorld();
+    if (input.isKeyPressed("KeyP") && typeof SaveWorld === "function") SaveWorld(false, true);
+}
+
+function updateDebugButtonLabels() {
+    const set = (id, label, on) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = `${label} - ${on ? "ON" : "OFF"}`;
+    };
+    set("debug-chunk-borders", "Chunk Borders", drawingChunkBorders);
+    set("debug-camera", "Camera", drawCamera);
+    set("debug-hitbox", "Hitbox", drawHitbox);
+    set("debug-print-block", "Print Block", drawDebugMouseBlock);
+    set("debug-file-size", "File Size", drawFileSize);
+    set("debug-fps", "FPS", drawFps);
+    set("debug-coords", "Coords", drawCoordinates);
+}
+
+function toggleChunkBorders() {
+    drawingChunkBorders = !drawingChunkBorders;
+    updateDebugButtonLabels();
+}
+function toggleCamera() {
+    drawCamera = !drawCamera;
+    updateDebugButtonLabels();
+}
+function toggleHitbox() {
+    drawHitbox = !drawHitbox;
+    updateDebugButtonLabels();
+}
+function togglePrintBlock() {
+    drawDebugMouseBlock = !drawDebugMouseBlock;
+    updateDebugButtonLabels();
+}
+function toggleFileSize() {
+    drawFileSize = !drawFileSize;
+    updateDebugButtonLabels();
+}
+function toggleFps() {
+    drawFps = !drawFps;
+    updateDebugButtonLabels();
+}
+function toggleCoordinates() {
+    drawCoordinates = !drawCoordinates;
+    updateDebugButtonLabels();
 }
 
 function PrintBlockLogic() {

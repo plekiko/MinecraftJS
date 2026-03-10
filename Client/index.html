@@ -26,12 +26,14 @@
 
         <div class="footer">
             <p>
-                Made by Plekiko - For the best experience use Firefox<br />
-                <a class="footer-button" onclick="downloadServer()"
-                    >Download Server</a
-                >
+                Made by Plekiko<br />
+                <a class="footer-button" href="https://github.com/plekiko/MinecraftJS" target="_blank">
+                    View Source Code on GitHub
+                </a>
             </p>
         </div>
+
+        <!-- Title screen -->
         <div class="menu-container">
             <div class="title">
                 <div class="logo-container">
@@ -54,76 +56,76 @@
 
             <div class="buttons">
                 <a onclick="playGame()" class="btn">Singleplayer</a>
-                <a onclick="multiplayerButton()" class="btn"
-                    >Multiplayer (beta)</a
-                >
+                <a onclick="multiplayerButton()" class="btn">Multiplayer</a>
                 <a
                     href="https://buymeacoffee.com/plekiko"
-                    onclick="buttonSound()"
+                    target="_blank"
                     class="btn"
                     >Buy me a coffee!</a
                 >
                 <div class="button-space"></div>
                 <a onclick="gotoOptions()" class="btn">Options...</a>
-                <!-- <a class="btn" onclick="showTexturePacks()">Texture Packs</a> -->
             </div>
         </div>
 
+        <!-- Singleplayer menu -->
         <div class="world-select-container" id="world-select-container">
             <div class="world-select-container-text">
                 <div class="big-text">Select World</div>
-                <button onclick="backToMenu()" id="" class="btn">Back</button>
                 <div class="world-select">
-                    <div class="world-container">
-                        <img
-                            alt="World Preview"
-                            src="Assets/sprites/menu/worldPreview.png"
-                            class="world-image"
-                        />
-                        <div class="world-data-container">
-                            <div class="world-name">Test World</div>
-                            <div class="world-date">Right Now</div>
-                        </div>
-                    </div>
+                    <!-- Worlds are inserted at runtime here -->
                 </div>
 
                 <div class="world-buttons-container">
-                    <button
-                        onclick="gotoWorldCreate()"
-                        id="create-new-btn"
-                        class="btn"
-                    >
-                        Create new world
-                    </button>
-                    <button
-                        onclick="playSelectedWorld()"
-                        id="play-selected-btn"
-                        class="btn"
-                    >
-                        Play selected world
-                    </button>
-                    <button
-                        onclick="removeWorld()"
-                        id="remove-world-btn"
-                        class="btn"
-                    >
-                        Remove selected world
-                    </button>
+                    <div>
+                        <button
+                            onclick="playSelectedWorld()"
+                            id="play-selected-btn"
+                            class="btn"
+                        >
+                            Play Selected World
+                        </button>
+                        <button
+                            onclick="gotoWorldCreate()"
+                            id="create-new-btn"
+                            class="btn"
+                        >
+                            Create New World
+                        </button>
+                    </div>
+
+                    <div>
+                        <button
+                            onclick="uploadWorld()"
+                            id="upload-world-btn"
+                            class="btn"
+                        >
+                            Upload
+                        </button>
+                        <button
+                            onclick="removeWorld()"
+                            id="remove-world-btn"
+                            class="btn"
+                        >
+                            Delete
+                        </button>
+                        <button
+                            onclick="downloadSelectedWorld()"
+                            id="download-world-btn"
+                            class="btn"
+                        >
+                            Download
+                        </button>
+                        <button onclick="backToMenu()" id="" class="btn">Cancel</button>
+                    </div>
                 </div>
             </div>
-            <div class="world-select-bar-container">
-                <div class="world-select-bar"></div>
-                <div class="world-select-bar"></div>
-            </div>
-
-            <div src="Assets/sprites/blocks/dirt.png" class="background"></div>
         </div>
 
+        <!-- Texture pack menu -->
         <div class="world-select-container" id="texture-pack-select-container">
             <div class="world-select-container-text">
                 <div class="big-text">Texture Packs</div>
-                <div class="small-text">Supports original Minecraft 1.8.9 texture packs!</div>
-                <button onclick="gotoOptions()" class="btn">Back</button>
                 <div class="world-select">
                     <div class="world-container">
                         <img
@@ -138,6 +140,7 @@
                     </div>
                 </div>
 
+                <!-- <div class="small-text">Supports original Minecraft 1.8.9 texture packs!</div> -->
                 <div class="world-buttons-container">
                     <button
                         onclick="uploadTexturePack()"
@@ -153,64 +156,79 @@
                     >
                         Remove Selected Pack
                     </button>
-                    <!-- <div class="button-flex">
-                        
-                    </div> -->
+                    <button onclick="gotoOptions()" class="btn">Done</button>
                 </div>
             </div>
-            <div class="world-select-bar-container">
-                <div class="world-select-bar"></div>
-                <div class="world-select-bar"></div>
-            </div>
-            <div src="Assets/sprites/blocks/dirt.png" class="background"></div>
         </div>
 
+        <!-- Multiplayer menu -->
         <div class="world-select-container" id="server-select-container">
+            <style>
+                #server-download-btn {
+                    position: fixed;
+                    bottom: 2rem;
+                    left: 2rem;
+                    z-index: 10;
+                    width: 16rem;
+                }
+            </style>
+            <button id="server-download-btn" class="btn" onclick="downloadServer()">Download Server</button>
             <div class="world-select-container-text">
-                <div class="big-text">Servers</div>
-                <button onclick="backToMenu()" class="btn">Back</button>
+                <div class="big-text">
+                    Play Multiplayer
+                    <p class="title-disclaimer">WORK IN PROGRESS</p>
+                </div>
                 <div class="world-select" id="server-list">
                     <!-- Servers will be dynamically added here -->
                 </div>
 
                 <div class="world-buttons-container">
-                    <button
-                        onclick="gotoAddServer()"
-                        id="add-server-btn"
-                        class="btn"
-                    >
-                        Add Server
-                    </button>
-                    <!-- <button
-                        onclick="gotoQuickConnect()"
-                        id="quick-connect-btn"
-                        class="btn"
-                    >
-                        Quick Connect
-                    </button> -->
-                    <button
-                        onclick="connectToServer()"
-                        id="connect-btn"
-                        class="btn"
-                    >
-                        Connect to Server
-                    </button>
-                    <button
-                        onclick="removeServer()"
-                        id="remove-server-btn"
-                        class="btn"
-                    >
-                        Remove Selected Server
-                    </button>
+                    <div>
+                        <button
+                            onclick="connectToServer()"
+                            id="connect-btn"
+                            class="btn"
+                        >
+                            Join Server
+                        </button>
+                        <button
+                            onclick="gotoQuickConnect()"
+                            id="quick-connect-btn"
+                            class="btn"
+                        >
+                            Direct Connection
+                        </button>
+                        <button
+                            onclick="gotoAddServer()"
+                            id="add-server-btn"
+                            class="btn"
+                        >
+                            Add Server
+                        </button>
+                    </div>
+
+                    <div>
+                        <!-- <button class="btn">Edit</button> -->
+                        <button
+                            onclick="removeServer()"
+                            id="remove-server-btn"
+                            class="btn"
+                        >
+                            Delete
+                        </button>
+                        <button
+                            onclick="forceRefreshServers()"
+                            class="btn"
+                        >
+                            Refresh
+                        </button>
+                        <button onclick="backToMenu()" class="btn">Cancel</button>
+                    </div>
                 </div>
             </div>
-            <div class="world-select-bar-container">
-                <div class="world-select-bar"></div>
-                <div class="world-select-bar"></div>
-            </div>
-            <div src="Assets/sprites/blocks/dirt.png" class="background"></div>
         </div>
 
+        <!-- Add server & direct connection dialogs -->
         <div class="modal-container" id="add-server-container">
             <div class="center-modal">
                 <div class="world-create-background"></div>
@@ -285,6 +303,7 @@
             </div>
         </div>
 
+        <!-- World creation dialog -->
         <div class="modal-container" id="world-create-container">
             <div class="center-modal">
                 <div class="world-create-background"></div>
@@ -342,26 +361,25 @@
             </div>
         </div>
 
+        <!-- Options menu -->
         <div class="modal-container" id="options-container">
             <div class="center-modal">
-                <div class="world-create-background"></div>
                 <div class="world-create-top-container">
                     <div class="big-text">Options</div>
                 </div>
                 <div class="options-modal">
-                    <!-- <div class="button-grid">  -->
-                        <a class="btn" id="music-toggle-btn" onclick="toggleMusic()">Music - ON</a>
-                        <a class="btn" id="sfx-toggle-btn" onclick="toggleSFX()">SFX - ON</a>
-                        <a class="btn" id="lighting-toggle-btn" onclick="toggleLighting()">Lighting - ON</a>
-                        
-                        <a class="btn" onclick="showTexturePacks()">Texture Packs...</a>
+                    <a class="btn" id="music-toggle-btn" onclick="toggleMusic()">Music - ON</a>
+                    <a class="btn" id="sfx-toggle-btn" onclick="toggleSFX()">SFX - ON</a>
+                    <a class="btn" id="lighting-toggle-btn" onclick="toggleLighting()">Lighting - ON</a>
+                    
+                    <a class="btn" onclick="showTexturePacks()">Texture Packs...</a>
 
                         
-                        <button
+                    <button
                         onclick="uploadSkin()"
                         id="upload-skin-btn"
                         class="btn"
-                        >
+                    >
                         Upload Skin
                     </button>
                     <button onclick="clearSkin()" class="btn">
@@ -381,7 +399,6 @@
                             Will be used for multiplayer
                         </div>
                     </div>
-                    <!-- </div> -->
 
                     <div class="button-space"></div>
 
@@ -390,5 +407,6 @@
             </div>
     </body>
 
+    <script src="buttonUtils.js"></script>
     <script src="menu.js"></script>
 </html>

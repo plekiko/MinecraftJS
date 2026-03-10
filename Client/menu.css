@@ -35,9 +35,11 @@ body {
 
 .options-modal {
     height: 100%;
+    width: 32rem;
 
     display: flex;
     flex-direction: column;
+    gap: 1rem;
 
     align-items: center;
 }
@@ -46,9 +48,13 @@ body {
     width: 100%;
 }
 
-.footer-button {
+.footer-button,
+.footer-button:link,
+.footer-button:visited,
+.footer-button:hover,
+.footer-button:active {
+    color: inherit;
     text-decoration: underline;
-
     cursor: pointer;
 }
 
@@ -175,39 +181,33 @@ body {
 .world-buttons-container {
     bottom: 0;
 
-    width: 50%;
-    height: 20%;
-    position: absolute;
+    width: 100%;
     flex-direction: column;
+    gap: 1rem;
+
+    margin: 2rem;
 
     justify-content: center;
     align-items: center;
 
     display: flex;
+
+    /* put buttons in div to stack horizontally */
+    div {
+        display: flex;
+        gap: 1rem;
+        max-width: 48rem;
+        width: 100%;
+    }
 }
 
 .world-select-container {
     width: 100%;
-    height: 80%;
+    height: 100%;
 
     display: none;
     justify-content: center;
     align-items: center;
-}
-
-.world-select-bar-container {
-    width: 100%;
-    height: 100%;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-
-    position: absolute;
-
-    left: 0;
-    top: 0;
 }
 
 .world-select-container-text {
@@ -217,7 +217,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
 
     z-index: 1;
 }
@@ -228,23 +227,26 @@ body {
     color: white;
     text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
 
-    padding: 20px;
-}
+    padding: 32px;
 
-.world-select-bar {
-    width: 100%;
-    height: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 
-    background-image: url("Assets/sprites/blocks/dirt.png");
-    background-size: 100px;
-    background-repeat: repeat;
-    filter: brightness(35%);
-
-    box-shadow: 0 0 20px 5px rgba(0, 0, 0, 1);
+    .title-disclaimer {
+        background-color: yellow;
+        padding: 4px 16px;
+        margin: 0;
+        margin-top: 8px;
+        color: black;
+        text-align: center;
+        width: fit-content;
+    }
 }
 
 .world-container {
-    width: 95%;
+    width: 56rem;
     height: 120px; /* Fixed height */
     flex-shrink: 0; /* Prevent the container from shrinking */
     display: flex;
@@ -323,12 +325,13 @@ body {
     align-items: center;
     padding-top: 10px;
     padding-bottom: 10px;
-    width: 50%;
-    height: 72.5%;
+    width: 100%;
+    height: 100%;
 
     overflow-y: auto;
 
-    /* background-color: rosybrown; */
+    background-color: #00000080;
+    box-shadow: inset 0 -12px 24px -12px rgba(0,0,0,0.5), inset 0 12px 24px -12px rgba(0,0,0,0.5);
 }
 
 .small-text {
@@ -339,42 +342,6 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-}
-
-.pinging::after {
-    content: "";
-    display: inline-block;
-    width: 14px; /* Slightly larger for visibility */
-    height: 14px;
-    background: #55ff55; /* Start with Minecraft green */
-    border: 2px solid #000000; /* Black border for pixelated look */
-    border-radius: 2px; /* Slight rounding for chiseled effect */
-    animation: spin-and-color 1.5s linear infinite;
-    margin-left: 6px;
-    image-rendering: pixelated; /* Ensure pixelated rendering */
-}
-
-@keyframes spin-and-color {
-    0% {
-        transform: rotate(0deg);
-        background: #55ff55; /* Green */
-        border-color: #000000;
-    }
-    33% {
-        transform: rotate(120deg);
-        background: #ffff55; /* Yellow */
-        border-color: #555555; /* Dark gray for contrast */
-    }
-    66% {
-        transform: rotate(240deg);
-        background: #ff5555; /* Red */
-        border-color: #000000;
-    }
-    100% {
-        transform: rotate(360deg);
-        background: #55ff55; /* Back to green */
-        border-color: #000000;
-    }
 }
 
 .menu-container {
@@ -398,10 +365,12 @@ body {
 .buttons {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
     justify-content: center;
     align-items: center;
     text-align: center;
     width: 30%;
+    min-width: 14rem;
 }
 
 /* Panorama container takes up the full screen */
@@ -498,13 +467,31 @@ body {
     }
 }
 
+:root {
+    --btn-center: #6b6b6b;
+    --btn-center-fill: linear-gradient(var(--btn-center), var(--btn-center));
+    --btn-center-img: var(--btn-center-fill);
+    --btn-center-img-hover: var(--btn-center-fill);
+    --btn-center-img-disabled: var(--btn-center-fill);
+}
 .btn {
-    width: 30rem;
-    height: 4rem;
-    background-position: center;
-    background-image: url("Assets/sprites/menu/menu_button.png");
-    background-size: contain;
-    background-repeat: no-repeat;
+    --btn-img: url("Assets/sprites/menu/menu_button.png");
+    --btn-width: 200px; /* img horizontal resolution */
+    --btn-height: 48px; /* change this to set button scale */
+    --btn-edge: calc(var(--btn-height) * 0.2);
+    height: var(--btn-height);
+    width: 100%;
+    max-width: 32rem;
+    min-width: 60px;
+    flex: 0 1 auto;
+    box-sizing: border-box;
+    padding: 0 calc(var(--btn-edge) + 0.5rem);
+    position: relative;
+    border: solid transparent;
+    border-width: 0 var(--btn-edge);
+    border-image: var(--btn-img) 0 4 0 4 / 0 var(--btn-edge) stretch;
+    border-image-outset: 0;
+    background: none;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -513,28 +500,33 @@ body {
     font-family: "Pixel";
     text-decoration: none;
     font-size: 130%;
-
     user-select: none;
-
     cursor: pointer;
-
-    background-color: transparent;
-    border: none;
-
     margin: 0;
 }
-
-.btn:disabled {
-    background-image: url("Assets/sprites/menu/menu_button_disabled.png");
+.btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    padding: 0 var(--btn-edge);
+    box-sizing: border-box;
+    background: var(--btn-center-img) repeat-x 0 0 / 192px var(--btn-height);
+    background-origin: content-box;
+    pointer-events: none;
 }
-
+.btn:hover {
+    --btn-img: url("Assets/sprites/menu/menu_button_hover.png");
+    --btn-center-img: var(--btn-center-img-hover);
+}
+.btn:disabled {
+    --btn-img: url("Assets/sprites/menu/menu_button_disabled.png");
+    --btn-center-img: var(--btn-center-img-disabled);
+}
 .btn:disabled:hover {
     cursor: auto;
-    background-image: url("Assets/sprites/menu/menu_button_disabled.png");
-}
-
-.btn:hover {
-    background-image: url("Assets/sprites/menu/menu_button_hover.png");
+    --btn-img: url("Assets/sprites/menu/menu_button_disabled.png");
+    --btn-center-img: var(--btn-center-img-disabled);
 }
 
 .logo-container {

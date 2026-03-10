@@ -139,6 +139,7 @@ function updateGame() {
     if (hotbar) hotbar.update();
     if (pauseMenu) pauseMenu.update();
     if (chat) chat.update();
+    if (typeof handleDebugInput === "function") handleDebugInput();
     camera.update(player);
     dayNightCycle();
 }
@@ -212,7 +213,7 @@ function updateArray(array, deltaTime) {
 }
 
 function cursorBlockLogic() {
-    if (pauseMenu?.active) {
+    if (pauseMenu?.getActive()) {
         cursorInRange = false;
         if (player) {
             player.hoverBlock = null;

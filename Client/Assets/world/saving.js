@@ -98,7 +98,7 @@ function SaveWorld(message = true, toFile = false) {
         worldName = selectedWorld.name;
 
         if (toFile) {
-            saveJSONToFile(saveData, worldName ? worldName : "world");
+            downloadWorldSave(saveData, worldName ? worldName : "world");
             return;
         }
 
@@ -107,7 +107,7 @@ function SaveWorld(message = true, toFile = false) {
         worldName = prompt("Enter world name: ", worldName);
 
         if (toFile) {
-            saveJSONToFile(saveData, worldName ? worldName : "world");
+            downloadWorldSave(saveData, worldName ? worldName : "world");
             return;
         }
     }
@@ -215,18 +215,6 @@ function LoadWorldFromLocalStorage() {
 
     LoadWorld(selectedWorldData);
 }
-
-const saveJSONToFile = (obj, filename) => {
-    const blob = new Blob([JSON.stringify(obj, null, 2)], {
-        type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${filename}.save`;
-    a.click();
-    URL.revokeObjectURL(url);
-};
 
 async function LoadWorld(save) {
     if (!isTexturePackLoaded) {

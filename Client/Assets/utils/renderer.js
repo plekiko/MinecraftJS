@@ -114,7 +114,7 @@ function Draw(chunks, frames) {
 
     DrawBackground();
     DrawChunks(chunks);
-    if (player && !pauseMenu?.active) {
+    if (player && !pauseMenu?.getActive()) {
         DrawBreakAndPlaceCursor(cursorInRange);
         DrawDestroyStage();
     }
@@ -265,7 +265,7 @@ function DrawLate(chunk) {
 function AfterDraw() {
     if (player) {
         DrawUI();
-        if (!window.pauseMenu?.active) DrawCursor();
+        if (!window.pauseMenu?.getActive()) DrawCursor();
         if (drawCoordinates) DrawCoordinates();
     }
     if (drawCamera) DrawCamera();

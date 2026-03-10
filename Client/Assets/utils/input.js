@@ -143,9 +143,13 @@ class InputHandler {
     }
 
     getMousePosition() {
+        const rect = CANVAS.getBoundingClientRect();
+        const displayX = this.mouse.position.x - rect.left;
+        const displayY = this.mouse.position.y - rect.top;
+        // Scale from displayed canvas size to internal resolution (so cursor and hit-testing match)
         return {
-            x: this.mouse.position.x - CANVAS.getBoundingClientRect().left,
-            y: this.mouse.position.y - CANVAS.getBoundingClientRect().top,
+            x: (displayX / rect.width) * CANVAS.width,
+            y: (displayY / rect.height) * CANVAS.height,
         };
     }
 
