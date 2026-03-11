@@ -33,6 +33,9 @@ document.addEventListener("click", (e) => {
     const btn = e.target.closest(".btn");
     if (btn && !btn.disabled) playButtonSound();
 });
+document.addEventListener("change", (e) => {
+    if (e.target.matches?.(".slider-input")) playButtonSound();
+});
 
 function downloadWorldSave(saveData, filename) {
     const blob = new Blob([saveData], { type: "application/json" });
