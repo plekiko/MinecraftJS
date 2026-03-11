@@ -22,42 +22,32 @@ class Hotbar {
             this.flashingHearts = true;
         }
 
-        // Empty Hearts
+        const heartSize = 9 * 3; // 3x original res
+        const heartTop = Math.round(hotbar.y - 32);
+
+        const drawHeartAt = (i, cropX) => {
+            const leftX = Math.round(hotbar.x + 12 + i * heartSize - heartSize / 2);
+            drawImage({
+                url: getSpriteUrl(`gui/icons`),
+                x: leftX + heartSize / 2,
+                y: heartTop,
+                scale: 3,
+                centerX: true,
+                crop: { x: cropX, y: 0, width: 9, height: 9 },
+            });
+        };
+
+        const fullHearts = Math.floor(health / 2);
+        // Empty hearts (always render beneath)
         for (let i = 0; i < maxHealth / 2; i++) {
-            drawImage({
-                url: getSpriteUrl(`gui/icons`),
-                x: hotbar.x + i * 9 * 2.9 + 12,
-                y: hotbar.y - 35,
-                scale: 3,
-                crop: {
-                    x: this.flashingHearts ? 25 : 16,
-                    y: 0,
-                    width: 9,
-                    height: 9,
-                },
-            });
+            drawHeartAt(i, this.flashingHearts ? 25 : 16);
         }
-
-        // Draw Full and Half Hearts
-        for (let i = 0; i < Math.floor(health / 2); i++) {
-            drawImage({
-                url: getSpriteUrl(`gui/icons`),
-                x: hotbar.x + i * 9 * 2.9 + 12,
-                y: hotbar.y - 35,
-                scale: 3,
-                crop: { x: 52, y: 0, width: 9, height: 9 },
-            });
+        // Full and half hearts on top
+        for (let i = 0; i < fullHearts; i++) {
+            drawHeartAt(i, 52);
         }
-
-        // Check for Half Heart
         if (health % 2 !== 0) {
-            drawImage({
-                url: getSpriteUrl(`gui/icons`),
-                x: hotbar.x + Math.floor(health / 2) * 9 * 2.9 + 12,
-                y: hotbar.y - 35,
-                scale: 3,
-                crop: { x: 61, y: 0, width: 9, height: 9 },
-            });
+            drawHeartAt(fullHearts, 61);
         }
     }
 
@@ -111,7 +101,7 @@ class Hotbar {
     drawItems() {
         for (let i = 0; i < this.inventory.items[3].length; i++) {
             const position = {
-                x: CANVAS.width / 2 - 261.7 + i * 60, // Exact original X position and 60px gap
+                x: CANVAS.width / 2 - 262 + i * 60, // Exact original X position and 60px gap
                 y: CANVAS.height - 76 + 12, // Adjusted to align items with hotbar slots
             };
             this.drawSlot(this.inventory.items[3][i], position);
