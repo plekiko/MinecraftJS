@@ -529,6 +529,103 @@ body {
     --btn-center-img: var(--btn-center-img-disabled);
 }
 
+.slider-container {
+    --btn-img: url("Assets/sprites/menu/menu_button_disabled.png");
+    --btn-height: 48px;
+    --btn-edge: calc(var(--btn-height) * 0.2);
+    --slider-thumb-width: calc(2 * var(--btn-edge) - 2px);
+
+    height: var(--btn-height);
+    width: 100%;
+    max-width: 32rem;
+    min-width: 60px;
+    box-sizing: border-box;
+    padding: 0 calc(var(--btn-edge) + 0.5rem);
+    position: relative;
+    border: solid transparent;
+    border-width: 0 var(--btn-edge);
+    border-image: var(--btn-img) 0 4 0 4 / 0 var(--btn-edge) stretch;
+    border-image-outset: 0;
+    background: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.slider-container::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    padding: 0 var(--btn-edge);
+    box-sizing: border-box;
+    background: var(--btn-center-img-disabled) repeat-x 0 0 / 192px var(--btn-height);
+    background-origin: content-box;
+    pointer-events: none;
+}
+.slider-label {
+    position: relative;
+    z-index: 2;
+    color: white;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+    font-family: "Pixel";
+    font-size: 130%;
+    user-select: none;
+    pointer-events: none;
+}
+.slider-input {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(-1 * var(--btn-edge));
+    width: calc(100% + 2 * var(--btn-edge));
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    z-index: 1;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+}
+.slider-input::-webkit-slider-runnable-track {
+    height: 100%;
+    background: transparent;
+}
+.slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    width: var(--slider-thumb-width);
+    height: var(--btn-height);
+    margin-top: 0;
+    border: solid transparent;
+    border-width: 0 var(--btn-edge) 0 var(--btn-edge);
+    border-image: url("Assets/sprites/menu/menu_button.png") 0 4 0 4 / 0 var(--btn-edge) stretch;
+    background: transparent;
+    image-rendering: pixelated;
+    cursor: pointer;
+}
+.slider-input::-moz-range-track {
+    background: transparent;
+}
+.slider-input::-moz-range-thumb {
+    box-sizing: border-box;
+    width: var(--slider-thumb-width);
+    height: var(--btn-height);
+    border: solid transparent;
+    border-width: 0 var(--btn-edge) 0 var(--btn-edge);
+    border-image: url("Assets/sprites/menu/menu_button.png") 0 4 0 4 / 0 var(--btn-edge) stretch;
+    background: transparent;
+    image-rendering: pixelated;
+}
+.slider-input:hover::-webkit-slider-thumb {
+    border-image: url("Assets/sprites/menu/menu_button_hover.png") 0 4 0 4 / 0 var(--btn-edge) stretch;
+}
+.slider-input:hover::-moz-range-thumb {
+    border-image: url("Assets/sprites/menu/menu_button_hover.png") 0 4 0 4 / 0 var(--btn-edge) stretch;
+}
+
 .logo-container {
     width: 50%;
     display: flex;
