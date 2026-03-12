@@ -140,7 +140,6 @@ function updateGame() {
     if (pauseMenu) pauseMenu.update();
     if (chat) chat.update();
     if (typeof handleDebugInput === "function") handleDebugInput();
-    camera.update(player);
     dayNightCycle();
 }
 
@@ -191,6 +190,7 @@ function updateEntities(tick = false) {
 
     entities.forEach((entity) => {
         if (entity === player) {
+            camera.update(player);
             if (tick) entity.tickUpdate();
             else entity.update();
             return;

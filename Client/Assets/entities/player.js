@@ -973,28 +973,26 @@ class Player extends Entity {
     }
 
     checkForEntityOnMouse() {
-        const entity = this.entities.find((entity) => {
-            return mouseOverPosition(
-                entity.position.x - camera.x,
-                entity.position.y - camera.y,
-                entity.hitbox.x,
-                entity.hitbox.y,
-                true
-            );
-        });
-
-        return entity;
+        return (
+            this.entities.find((entity) => {
+                if (entity.dimension !== activeDimension) return false;
+                const worldX = entity.position.x + (entity.offset?.x ?? 0);
+                const worldY = entity.position.y + (entity.offset?.y ?? 0);
+                return mouseOverPosition(
+                    worldX,
+                    worldY,
+                    entity.hitbox.x,
+                    entity.hitbox.y,
+                    true
+                );
+            }) ?? null
+        );
     }
 
     tryHit() {
+        const mouseWorld = input.getMousePositionOnBlockGrid();
         const cursorDistance =
-            Vector2.Distance(
-                this.position,
-                new Vector2(
-                    input.getMouseWorldPosition().x,
-                    input.getMouseWorldPosition().y
-                )
-            ) / BLOCK_SIZE;
+            Vector2.Distance(this.position, mouseWorld) / BLOCK_SIZE;
 
         cursorInRange = !this.abilities.instaBuild
             ? cursorDistance <= INTERACT_DISTANCE
@@ -1003,7 +1001,6 @@ class Player extends Entity {
         if (!cursorInRange) return;
 
         const entity = this.checkForEntityOnMouse();
-
         this.hitEntity(entity);
     }
 

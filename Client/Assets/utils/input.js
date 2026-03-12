@@ -154,9 +154,10 @@ class InputHandler {
     }
 
     getMouseWorldPosition() {
+        const pos = this.getMousePosition();
         return {
-            x: this.mouse.position.x + camera.x,
-            y: this.mouse.position.y + camera.y,
+            x: pos.x + camera.x,
+            y: pos.y + camera.y,
         };
     }
 

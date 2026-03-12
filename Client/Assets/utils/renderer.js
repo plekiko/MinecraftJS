@@ -82,9 +82,9 @@ function hexToRgb(hex) {
 }
 
 function mouseOverPosition(x, y, sizeX, sizeY, world = false) {
-    const mousePos = !world
-        ? input.getMousePosition()
-        : input.getMouseWorldPosition();
+    const mousePos = world
+        ? input.getMouseWorldPosition()
+        : input.getMousePosition();
 
     return (
         mousePos.x >= x &&
@@ -343,18 +343,6 @@ function DrawCursor() {
         centerY: true,
         crop: { x: 3, y: 3, width: 9, height: 9 },
     });
-}
-
-function mouseOverPosition(x, y, sizeX, sizeY) {
-    const mousePos = input.getMousePosition();
-
-    const isOver =
-        mousePos.x >= x &&
-        mousePos.x <= x + sizeX &&
-        mousePos.y >= y &&
-        mousePos.y <= y + sizeY;
-
-    return isOver;
 }
 
 function DrawFps() {
