@@ -1,0 +1,25 @@
+name: Deploy client to itch.io
+
+on:
+  push:
+    branches:
+      - live
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy client folder to itch.io
+        uses: manleydev/butler-publish-itchio-action@v1.0.3
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+          ITCH_USER: plekiko
+          ITCH_GAME: minecraft-js
+          CHANNEL: html
+          PACKAGE: ./rep/client
+        with:
+          args: push ${{ env.PACKAGE }} ${{ env.ITCH_USER }}/${{ env.ITCH_GAME }}:${{ env.CHANNEL }} --if-changed
