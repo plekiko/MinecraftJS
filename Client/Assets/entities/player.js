@@ -183,12 +183,12 @@ class Player extends Entity {
             this.velocity.y !== 0;
 
         if (this.swimming && (isMovingHorizontally || isPressingUp)) {
-            this.addFoodExhaustion(0.035);
+            this.addFoodExhaustion(0.03);
             return;
         }
 
         if (this.grounded && isMovingHorizontally) {
-            this.addFoodExhaustion(input.isKeyDown("ShiftLeft") ? 0.05 : 0.02);
+            this.addFoodExhaustion(input.isKeyDown("ShiftLeft") ? 0.03 : 0.01);
         }
     }
 
@@ -225,10 +225,10 @@ class Player extends Entity {
                 this.foodTickTimer = 0;
 
                 if (canRegen) {
-                    this.addHealth(2);
+                    this.addHealth(1);
                     this.addFoodExhaustion(6);
                 } else {
-                    this.forceDamage(2);
+                    this.forceDamage(1);
                 }
             }
 
@@ -1660,7 +1660,7 @@ class Player extends Entity {
         this.velocity.y = -this.abilities.jumpForce * BLOCK_SIZE;
         this.grounded = false;
 
-        this.addFoodExhaustion(input.isKeyDown("ShiftLeft") ? 1 : 0.6);
+        this.addFoodExhaustion(input.isKeyDown("ShiftLeft") ? 0.6 : 0.4);
     }
 
     handleSwimming() {

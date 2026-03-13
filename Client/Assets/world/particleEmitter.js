@@ -14,6 +14,7 @@ class ParticleEmitter {
         randomScale = false,
         range = 0,
         lighting = false,
+        scale = 1,
     } = {}) {
         this.x = x;
         this.y = y;
@@ -30,6 +31,7 @@ class ParticleEmitter {
         this.randomScale = randomScale; // Random scale for particles
         this.range = range; // Range for random scale
         this.lighting = lighting; // Lighting effect
+        this.scale = scale; // Scale for particles
 
         this.checkForDeath = false;
     }
@@ -48,13 +50,15 @@ class ParticleEmitter {
             const particleY =
                 this.y + Math.sin(angle) + RandomRange(-this.range, this.range);
 
-            const scale = this.randomScale ? RandomRange(8, 12) / 10 : 1; // Random scale between 0.5 and 1.5
+            const scale = this.randomScale
+                ? RandomRange(this.scale - 2, this.scale + 2) / 10
+                : this.scale;
 
             const particle = new Particle(
                 particleX,
                 particleY,
                 this.particleType,
-                scale
+                scale,
             );
 
             let color = this.color;
@@ -132,7 +136,8 @@ function createParticleEmitter({
     color = Colors.White,
     randomScale = false,
     range = 0,
-    lighting = false,
+    lighting = true,
+    scale = 1,
 } = {}) {
     const newEmitter = new ParticleEmitter({
         x: x,
@@ -149,6 +154,7 @@ function createParticleEmitter({
         randomScale: randomScale,
         range: range,
         lighting: lighting,
+        scale: scale,
     });
 
     particleEmitters.push(newEmitter);
@@ -167,7 +173,7 @@ function createParticleEmitterAtPlayer(
     radius,
     type,
     maxParticles,
-    direction = 0
+    direction = 0,
 ) {
     const emitter = createParticleEmitter({
         x: player.position.x,

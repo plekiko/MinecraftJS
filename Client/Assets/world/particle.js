@@ -4,7 +4,7 @@ class Particle extends SimpleSprite {
             sprite: type ? "particle/particles" : null,
             transform: new Transform(
                 new Vector2(x, y),
-                new Vector2(type?.width || 8, type?.width || 8)
+                new Vector2(type?.width || 8, type?.width || 8),
             ),
             crop: {
                 x: type?.x * 8 || 0,
@@ -53,4 +53,5 @@ class ParticleType {
 
 const PARTICLE = Object.freeze({
     Heart: new ParticleType(0, 5, 1),
+    Smoke: new ParticleType(5, 0, 1),
 });
