@@ -2,7 +2,7 @@
 
 // Crops center of button image for CSS to tile (used for dynamic UI scaling)
 // I wanted to do this in CSS but apparently it's not possible
-(function () {
+function initButtonCenterImages() {
     const base = new URL("Assets/sprites/menu/", document.baseURI || document.URL).href;
     const w = 192, h = 20, slice = 4;
     ["menu_button.png", "menu_button_hover.png", "menu_button_disabled.png"].forEach((file, i) => {
@@ -19,7 +19,12 @@
         };
         img.src = base + file;
     });
-})();
+}
+if (document.readyState === "complete") {
+    initButtonCenterImages();
+} else {
+    window.addEventListener("load", initButtonCenterImages);
+}
 
 function playButtonSound() {
     const s = JSON.parse(localStorage.getItem("settings") || "{}");
