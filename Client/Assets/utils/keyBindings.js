@@ -50,7 +50,7 @@ const ACTION_LABELS = {
     moveRight: "Move Right",
     jump: "Jump",
     sprint: "Sprint",
-    use: "Use / Inventory",
+    use: "Inventory",
     drop: "Drop",
     hotbarUp: "Hotbar Left",
     hotbarDown: "Hotbar Right",
