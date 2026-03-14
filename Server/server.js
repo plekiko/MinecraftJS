@@ -310,7 +310,6 @@ function savePlayerData(player, ip) {
                     : properties.gamemode,
         };
         fs.writeFileSync(playerFile, JSON.stringify(playerData, null, 2));
-        serverLog(`Saved player data for ${player.name} to ${playerFile}`);
     } catch (error) {
         console.error(
             `Error saving player data for ${player.name} to ${playerFile}: ${error.message}`
