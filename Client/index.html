@@ -368,8 +368,14 @@
                     <div class="big-text">Options</div>
                 </div>
                 <div class="options-modal">
-                    <a class="btn" id="music-toggle-btn" onclick="toggleMusic()">Music - ON</a>
-                    <a class="btn" id="sfx-toggle-btn" onclick="toggleSFX()">SFX - ON</a>
+                    <div class="slider-container">
+                        <span class="slider-label" id="music-volume-label">Music - 100%</span>
+                        <input type="range" class="slider-input" id="music-volume-slider" min="0" max="100" value="100">
+                    </div>
+                    <div class="slider-container">
+                        <span class="slider-label" id="sfx-volume-label">SFX - 100%</span>
+                        <input type="range" class="slider-input" id="sfx-volume-slider" min="0" max="100" value="100">
+                    </div>
                     <a class="btn" id="lighting-toggle-btn" onclick="toggleLighting()">Lighting - ON</a>
                     
                     <a class="btn" onclick="showTexturePacks()">Texture Packs...</a>

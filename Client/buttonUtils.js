@@ -23,9 +23,10 @@
 
 function playButtonSound() {
     const s = JSON.parse(localStorage.getItem("settings") || "{}");
-    if (s.sfx === false) return;
+    const sfxVol = s.sfxVolume ?? (s.sfx === false ? 0 : 100);
+    if (sfxVol === 0) return;
     const audio = new Audio("Assets/audio/sfx/ui/click.ogg");
-    audio.volume = 0.3;
+    audio.volume = (sfxVol / 100) * 0.3;
     audio.play();
 }
 

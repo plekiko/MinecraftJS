@@ -2,8 +2,8 @@ let lastFrameTime = performance.now();
 let fpsDisplay = 0;
 
 let settings = {
-    sfx: true,
-    music: true,
+    musicVolume: 100,
+    sfxVolume: 100,
     lighting: true,
     username: "Player",
 };
@@ -29,7 +29,13 @@ function loadSettings() {
     const settingsString = localStorage.getItem("settings");
 
     if (settingsString) {
-        settings = JSON.parse(settingsString);
+        const loaded = JSON.parse(settingsString);
+        settings.lighting = loaded.lighting !== false;
+        settings.username = loaded.username || "Player";
+        settings.musicVolume =
+            loaded.musicVolume ?? (loaded.music === false ? 0 : 100);
+        settings.sfxVolume =
+            loaded.sfxVolume ?? (loaded.sfx === false ? 0 : 100);
     }
 }
 
