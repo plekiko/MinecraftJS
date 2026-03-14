@@ -574,7 +574,7 @@ class Player extends Entity {
             return;
         }
 
-        if (!input.isRightMouseDown()) {
+        if (!input.isActionDown("place")) {
             this.eating = false;
             this.eatTimer = 0;
             return;
@@ -670,21 +670,21 @@ class Player extends Entity {
         if (this.windowOpen) return;
         if (pauseMenu?.getActive()) return;
 
-        const rightClick = input.isRightMouseButtonPressed();
+        const usePressed = input.isActionPressed("place");
 
-        if (rightClick) this.useItemInHand();
+        if (usePressed) this.useItemInHand();
 
-        if (rightClick) this.tryEntityInteract();
+        if (usePressed) this.tryEntityInteract();
 
         if (!this.hoverBlock) return;
 
         const block = GetBlock(this.hoverBlock.blockType);
 
-        if (input.mouse.wheelDown) {
+        if (input.isActionPressed("pickBlock")) {
             this.handleQuickBlockSelect(block);
         }
 
-        if (!rightClick) return;
+        if (!usePressed) return;
 
         this.hoverBlock.interact(this);
 
@@ -960,14 +960,14 @@ class Player extends Entity {
         if (this.windowOpen) return;
         if (pauseMenu?.getActive()) return;
 
-        if (input.isLeftMouseButtonPressed()) {
+        if (input.isActionPressed("attack")) {
             this.playerSwing();
             this.tryHit();
         }
 
         if (!this.hoverBlock) return;
 
-        if (input.isLeftMouseDown())
+        if (input.isActionDown("attack"))
             if (
                 this.inventory.selectedItem &&
                 this.inventory.selectedItem.toolType === ToolType.Hammer
@@ -979,7 +979,7 @@ class Player extends Entity {
         else {
             this.resetBreaking();
         }
-        if (input.isRightMouseDown()) this.placingLogic();
+        if (input.isActionDown("place")) this.placingLogic();
     }
 
     checkForEntityOnMouse() {

@@ -1230,10 +1230,20 @@ function gotoOptions() {
     if (optionsMain) optionsMain.style.display = "flex";
     if (controlsPanel) controlsPanel.style.display = "none";
     if (optionsPanelTitle) optionsPanelTitle.textContent = "Options";
-    if (rebindKeydownHandler) {
-        document.removeEventListener("keydown", rebindKeydownHandler);
-        rebindKeydownHandler = null;
+    if (rebindDocumentContextmenuHandler) {
+        document.removeEventListener("contextmenu", rebindDocumentContextmenuHandler, true);
+        rebindDocumentContextmenuHandler = null;
     }
+    rebindSuppressContextMenuUntil = 0;
+    if (rebindKeydownHandler) document.removeEventListener("keydown", rebindKeydownHandler, true);
+    if (rebindMousedownHandler) document.removeEventListener("mousedown", rebindMousedownHandler, true);
+    if (rebindWheelHandler) document.removeEventListener("wheel", rebindWheelHandler, true);
+    if (rebindContextmenuHandler) document.removeEventListener("contextmenu", rebindContextmenuHandler, true);
+    if (controlsPanel) controlsPanel.style.pointerEvents = "";
+    rebindKeydownHandler = null;
+    rebindMousedownHandler = null;
+    rebindWheelHandler = null;
+    rebindContextmenuHandler = null;
     waitingForRebindAction = null;
 
     loadSettings();
@@ -1242,6 +1252,11 @@ function gotoOptions() {
 let controlsBindings = null;
 let waitingForRebindAction = null;
 let rebindKeydownHandler = null;
+let rebindMousedownHandler = null;
+let rebindWheelHandler = null;
+let rebindContextmenuHandler = null;
+let rebindDocumentContextmenuHandler = null;
+let rebindSuppressContextMenuUntil = 0;
 
 function gotoControls() {
     if (!optionsMain || !controlsPanel || !controls) return;
@@ -1271,7 +1286,7 @@ function renderControlRow(action) {
     btn.className = "btn";
     const keys = controlsBindings[action];
     if (waitingForRebindAction === action) {
-        btn.textContent = "Press a key...";
+        btn.textContent = "Press a key or mouse button...";
     } else if (keys && keys.length > 0) {
         btn.textContent = keys.map(getKeyDisplayName).join(", ");
     } else {
@@ -1318,45 +1333,73 @@ function renderControlsList() {
 
 function startRebind(action) {
     if (waitingForRebindAction) return;
+    if (rebindDocumentContextmenuHandler) {
+        document.removeEventListener("contextmenu", rebindDocumentContextmenuHandler, true);
+        rebindDocumentContextmenuHandler = null;
+    }
     waitingForRebindAction = action;
     renderControlsList();
-    const handler = (e) => {
-        e.preventDefault();
-        if (e.code === "Escape") {
-            cancelRebind(handler);
-            controlsBindings[action] = [];
-            saveKeyBindings(controlsBindings);
-            renderControlsList();
-            return;
+    if (controlsPanel) controlsPanel.style.pointerEvents = "none";
+
+    const documentContextmenuHandler = (e) => {
+        if (waitingForRebindAction || Date.now() < rebindSuppressContextMenuUntil) {
+            e.preventDefault();
+            e.stopPropagation();
         }
-        const key = e.code;
-        if (!key) return;
+    };
 
-        cancelRebind(handler);
-
-        if (key === "ControlLeft" || key === "ControlRight") {
-            const proceed = confirm("Ctrl is not recommended as a binding because we can't prevent browser shortcuts (such as Ctrl+W to close the tab) from taking place.\n\nDo you want to use Ctrl anyway?");
-
-            if (!proceed) {
-                renderControlsList();
-                return;
-            }
-        }
-        controlsBindings[action] = [key];
+    const finishRebind = (binding) => {
+        cancelRebind(keyHandler, mouseHandler, wheelHandler);
+        if (binding !== undefined) controlsBindings[action] = binding;
         saveKeyBindings(controlsBindings);
         renderControlsList();
     };
-    rebindKeydownHandler = handler;
-    document.addEventListener("keydown", handler, { once: true });
+
+    const keyHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.code === "Escape") return finishRebind([]);
+        if (!e.code) return;
+        if (["ControlLeft", "ControlRight"].includes(e.code) && !confirm("Ctrl is not recommended as a binding because we can't prevent browser shortcuts (such as Ctrl+W to close the tab) from taking place.\n\nDo you want to use Ctrl anyway?")) {
+            finishRebind();
+            return;
+        }
+        finishRebind([e.code]);
+    };
+
+    const mouseHandler = (e) => {
+        if (e.button < 0 || e.button > 2) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.button === 2) rebindSuppressContextMenuUntil = Date.now() + 400;
+        finishRebind(["Mouse" + e.button]);
+    };
+
+    const wheelHandler = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        finishRebind([e.deltaY < 0 ? "ScrollUp" : "ScrollDown"]);
+    };
+
+    rebindKeydownHandler = keyHandler;
+    rebindMousedownHandler = mouseHandler;
+    rebindWheelHandler = wheelHandler;
+    rebindContextmenuHandler = documentContextmenuHandler;
+    rebindDocumentContextmenuHandler = documentContextmenuHandler;
+    document.addEventListener("keydown", keyHandler, { once: true, capture: true });
+    document.addEventListener("mousedown", mouseHandler, true);
+    document.addEventListener("wheel", wheelHandler, { passive: false, capture: true });
+    document.addEventListener("contextmenu", documentContextmenuHandler, true);
 }
 
-function cancelRebind(handler) {
-    if (handler) {
-        document.removeEventListener("keydown", handler);
-    }
-    if (rebindKeydownHandler === handler) {
-        rebindKeydownHandler = null;
-    }
+function cancelRebind(keyHandler, mouseHandler, wheelHandler) {
+    if (keyHandler) document.removeEventListener("keydown", keyHandler, true);
+    if (mouseHandler) document.removeEventListener("mousedown", mouseHandler, true);
+    if (wheelHandler) document.removeEventListener("wheel", wheelHandler, true);
+    if (controlsPanel) controlsPanel.style.pointerEvents = "";
+    rebindKeydownHandler = null;
+    rebindMousedownHandler = null;
+    rebindWheelHandler = null;
     waitingForRebindAction = null;
 }
 

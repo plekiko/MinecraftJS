@@ -15,11 +15,8 @@ class InputHandler {
         });
 
         this.mouse = {
-            leftMouseDown: false,
-            rightMouseDown: false,
-            leftMouseClicked: false, // Single-click tracking for left button
-            rightMouseClicked: false, // Single-click tracking for right button
-            wheelDown: false,
+            buttons: [false, false, false], // [left, middle, right] down state
+            clicked: [false, false, false], // [left, middle, right] single-press (consumed when read)
             position: { x: 0, y: 0 },
         };
         this.scroll = { deltaX: 0, deltaY: 0 }; // Store scroll delta
@@ -92,30 +89,18 @@ class InputHandler {
     }
 
     _handleMouseDown(event) {
-        if (event.button === 0) {
-            if (!this.mouse.leftMouseDown) {
-                this.mouse.leftMouseClicked = true; // Set left mouse clicked only on the first press
+        if (event.button >= 0 && event.button <= 2) {
+            if (!this.mouse.buttons[event.button]) {
+                this.mouse.clicked[event.button] = true;
             }
-            this.mouse.leftMouseDown = true;
-        } else if (event.button === 2) {
-            if (!this.mouse.rightMouseDown) {
-                this.mouse.rightMouseClicked = true; // Set right mouse clicked only on the first press
-            }
-            this.mouse.rightMouseDown = true;
-        } else if (event.button === 1) {
-            this.mouse.wheelDown = true;
+            this.mouse.buttons[event.button] = true;
         }
     }
 
     _handleMouseUp(event) {
-        if (event.button === 0) {
-            this.mouse.leftMouseDown = false;
-            this.mouse.leftMouseClicked = false; // Reset single-click state
-        } else if (event.button === 2) {
-            this.mouse.rightMouseDown = false;
-            this.mouse.rightMouseClicked = false; // Reset single-click state
-        } else if (event.button === 1) {
-            this.mouse.wheelDown = false;
+        if (event.button >= 0 && event.button <= 2) {
+            this.mouse.buttons[event.button] = false;
+            this.mouse.clicked[event.button] = false;
         }
     }
 
@@ -129,19 +114,44 @@ class InputHandler {
         this.scroll.deltaY = event.deltaY;
     }
 
+    _mouseBindingToIndex(b) {
+        if (b === "Mouse0") return 0;
+        if (b === "Mouse1") return 1;
+        if (b === "Mouse2") return 2;
+        return -1;
+    }
+
     isActionDown(action) {
-        if (action === "attack") return this.mouse.leftMouseDown;
-        if (action === "place") return this.mouse.rightMouseDown;
         const keys = this.keyBindings[action];
         if (!keys) return false;
-        return keys.some((k) => this.keys[k]);
+        return keys.some((b) => {
+            if (b === "ScrollUp" || b === "ScrollDown") return false; // scroll has no hold state
+            const idx = this._mouseBindingToIndex(b);
+            if (idx >= 0) return this.mouse.buttons[idx];
+            return !!this.keys[b];
+        });
     }
     isActionPressed(action) {
-        if (action === "attack") return this.isLeftMouseButtonPressed();
-        if (action === "place") return this.isRightMouseButtonPressed();
         const keys = this.keyBindings[action];
         if (!keys) return false;
-        return keys.some((k) => this.keysDown[k]);
+        for (const b of keys) {
+            const idx = this._mouseBindingToIndex(b);
+            if (idx >= 0) {
+                if (this.mouse.clicked[idx]) {
+                    this.mouse.clicked[idx] = false;
+                    return true;
+                }
+            } else if (b === "ScrollUp" && this.scroll.deltaY < 0) {
+                this.scroll.deltaY = 0;
+                return true;
+            } else if (b === "ScrollDown" && this.scroll.deltaY > 0) {
+                this.scroll.deltaY = 0;
+                return true;
+            } else if (this.keysDown[b]) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Getters for key state
@@ -163,20 +173,18 @@ class InputHandler {
         }
     }
 
-    // Getters for mouse state
+    // Getters for mouse state (physical buttons; inventory UI uses these)
     isLeftMouseButtonPressed() {
-        if (this.mouse.leftMouseClicked) {
-            // Check for single-click event
-            this.mouse.leftMouseClicked = false; // Reset after being read
+        if (this.mouse.clicked[0]) {
+            this.mouse.clicked[0] = false;
             return true;
         }
         return false;
     }
 
     isRightMouseButtonPressed() {
-        if (this.mouse.rightMouseClicked) {
-            // Check for single-click event
-            this.mouse.rightMouseClicked = false; // Reset after being read
+        if (this.mouse.clicked[2]) {
+            this.mouse.clicked[2] = false;
             return true;
         }
         return false;
@@ -219,19 +227,21 @@ class InputHandler {
 
     // Resetters for mouse button states
     resetMouseState() {
-        this.mouse.leftMouseDown = false;
-        this.mouse.rightMouseDown = false;
-        this.mouse.leftMouseClicked = false;
-        this.mouse.rightMouseClicked = false;
+        this.mouse.buttons[0] = false;
+        this.mouse.buttons[1] = false;
+        this.mouse.buttons[2] = false;
+        this.mouse.clicked[0] = false;
+        this.mouse.clicked[1] = false;
+        this.mouse.clicked[2] = false;
     }
 
     // Direct mouse state checkers for continuous state
     isLeftMouseDown() {
-        return this.mouse.leftMouseDown;
+        return this.mouse.buttons[0];
     }
 
     isRightMouseDown() {
-        return this.mouse.rightMouseDown;
+        return this.mouse.buttons[2];
     }
 }
 

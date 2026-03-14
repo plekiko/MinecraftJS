@@ -1,5 +1,8 @@
 // intended for latin layouts
 const DEFAULT_KEY_BINDINGS = {
+    attack: ["Mouse0"],
+    pickBlock: ["Mouse1"],
+    place: ["Mouse2"],
     moveUp: ["KeyW"],
     moveDown: ["KeyS"],
     moveLeft: ["KeyA"],
@@ -8,6 +11,8 @@ const DEFAULT_KEY_BINDINGS = {
     sprint: ["ShiftLeft", "ShiftRight"],
     use: ["KeyE"],
     drop: ["KeyQ"],
+    hotbarUp: ["ScrollUp"],
+    hotbarDown: ["ScrollDown"],
     hotbar1: ["Digit1"],
     hotbar2: ["Digit2"],
     hotbar3: ["Digit3"],
@@ -36,6 +41,9 @@ const DEFAULT_KEY_BINDINGS = {
 };
 
 const ACTION_LABELS = {
+    attack: "Attack/Destroy",
+    pickBlock: "Pick Block",
+    place: "Use Item/Place Block",
     moveUp: "Move Up",
     moveDown: "Move Down",
     moveLeft: "Move Left",
@@ -44,6 +52,8 @@ const ACTION_LABELS = {
     sprint: "Sprint",
     use: "Use / Inventory",
     drop: "Drop",
+    hotbarUp: "Hotbar Left",
+    hotbarDown: "Hotbar Right",
     hotbar1: "Hotbar Slot 1",
     hotbar2: "Hotbar Slot 2",
     hotbar3: "Hotbar Slot 3",
@@ -72,6 +82,9 @@ const ACTION_LABELS = {
 };
 
 const GAMEPLAY_ACTIONS = [
+    "attack",
+    "pickBlock",
+    "place",
     "moveUp",
     "moveDown",
     "moveLeft",
@@ -80,6 +93,8 @@ const GAMEPLAY_ACTIONS = [
     "sprint",
     "use",
     "drop",
+    "hotbarUp",
+    "hotbarDown",
     "hotbar1",
     "hotbar2",
     "hotbar3",
@@ -108,6 +123,11 @@ const DEBUG_ACTIONS = [
 const REBINDABLE_ACTIONS = [...GAMEPLAY_ACTIONS, ...DEBUG_ACTIONS];
 
 const KEY_DISPLAY_NAMES = {
+    Mouse0: "Left Click",
+    Mouse1: "Middle Click",
+    Mouse2: "Right Click",
+    ScrollUp: "Scroll Up",
+    ScrollDown: "Scroll Down",
     KeyA: "A",
     KeyB: "B",
     KeyC: "C",
