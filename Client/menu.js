@@ -127,8 +127,8 @@ function multiplayerButton() {
 
 function downloadServer() {
     const link = document.createElement("a");
-    link.href = "Server.zip";
-    link.download = "Server.zip";
+    link.href = "server.zip";
+    link.download = "server.zip";
     document.body.appendChild(link);
 
     link.click();
