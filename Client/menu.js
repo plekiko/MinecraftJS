@@ -1350,7 +1350,24 @@ function startRebind(action) {
 
     const finishRebind = (binding) => {
         cancelRebind(keyHandler, mouseHandler, wheelHandler);
-        if (binding !== undefined) controlsBindings[action] = binding;
+        if (binding !== undefined) {
+            const key = binding[0];
+            const existingAction = REBINDABLE_ACTIONS.find(
+                (a) => a !== action && (controlsBindings[a] || []).includes(key)
+            );
+            if (existingAction) {
+                if (
+                    !confirm(
+                        `"${getKeyDisplayName(key)}" is already bound to "${getActionLabel(existingAction)}". Override and unbind it from that action?`
+                    )
+                ) {
+                    renderControlsList();
+                    return;
+                }
+                controlsBindings[existingAction] = [];
+            }
+            controlsBindings[action] = binding;
+        }
         saveKeyBindings(controlsBindings);
         renderControlsList();
     };
