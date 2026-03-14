@@ -51,6 +51,7 @@ class Player extends Entity {
             fadeOutTime: 500,
             color: Colors.Green,
             randomScale: true,
+            scale: 10,
             lighting: true,
         });
 
