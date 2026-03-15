@@ -89,9 +89,9 @@ class Chunk {
         }
         // Dirt layers 2 thick
         for (
-            let y = (CHUNK_HEIGHT / 2) * BLOCK_SIZE - BLOCK_SIZE;
-            y > (CHUNK_HEIGHT / 2) * BLOCK_SIZE - BLOCK_SIZE * 3;
-            y -= BLOCK_SIZE
+            let y = (CHUNK_HEIGHT / 2) * BLOCK_SIZE + BLOCK_SIZE;
+            y < (CHUNK_HEIGHT / 2) * BLOCK_SIZE + BLOCK_SIZE * 3;
+            y += BLOCK_SIZE
         ) {
             for (
                 let i = -BLOCK_SIZE * length;
@@ -110,13 +110,13 @@ class Chunk {
                 new LootItem({ itemId: Items.Seeds, maxCount: 3 }),
             ]),
             -BLOCK_SIZE * 3,
-            (CHUNK_HEIGHT / 2) * BLOCK_SIZE + BLOCK_SIZE,
+            (CHUNK_HEIGHT / 2) * BLOCK_SIZE - BLOCK_SIZE,
             this
         );
 
         // Tree
         setTimeout(() => {
-            this.spawnTreeAt(Trees.Oak.variants[1], 2, CHUNK_HEIGHT / 2 + 1);
+            this.spawnTreeAt(Trees.Oak.variants[1], 2, CHUNK_HEIGHT / 2);
         }, 10);
     }
 

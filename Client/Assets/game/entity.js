@@ -165,11 +165,11 @@ class Entity {
     checkDownCollision(futureY) {
         const blockBelowRight = this.getBlockAtPosition(
             this.position.x + this.hitbox.x,
-            futureY + this.hitbox.y,
+            futureY + this.hitbox.y
         );
         const blockBelowLeft = this.getBlockAtPosition(
             this.position.x,
-            futureY + this.hitbox.y,
+            futureY + this.hitbox.y
         );
 
         const checkBlockWithCutoff = (block, x, y) => {
@@ -192,7 +192,7 @@ class Entity {
             const collision = checkBlockWithCutoff(
                 blockBelowLeft,
                 this.position.x,
-                futureY + this.hitbox.y,
+                futureY + this.hitbox.y
             );
             if (collision) return collision;
         }
@@ -200,7 +200,7 @@ class Entity {
             const collision = checkBlockWithCutoff(
                 blockBelowRight,
                 this.position.x + this.hitbox.x,
-                futureY + this.hitbox.y,
+                futureY + this.hitbox.y
             );
             if (collision) return collision;
         }
@@ -210,11 +210,11 @@ class Entity {
     checkLeftCollision(futureX) {
         const blockLeft = this.getBlockAtPosition(
             futureX,
-            this.position.y + this.hitbox.y / 2,
+            this.position.y + this.hitbox.y / 2
         );
         const blockLeftBottom = this.getBlockAtPosition(
             futureX,
-            this.position.y + this.hitbox.y,
+            this.position.y + this.hitbox.y
         );
         const blockLeftTop = this.getBlockAtPosition(futureX, this.position.y);
 
@@ -256,15 +256,15 @@ class Entity {
     checkRightCollision(futureX) {
         const blockRight = this.getBlockAtPosition(
             futureX + this.hitbox.x,
-            this.position.y + this.hitbox.y / 2,
+            this.position.y + this.hitbox.y / 2
         );
         const blockRightBottom = this.getBlockAtPosition(
             futureX + this.hitbox.x,
-            this.position.y + this.hitbox.y,
+            this.position.y + this.hitbox.y
         );
         const blockRightTop = this.getBlockAtPosition(
             futureX + this.hitbox.x,
-            this.position.y,
+            this.position.y
         );
 
         const checkBlockWithCutoff = (block, x, y) => {
@@ -289,7 +289,7 @@ class Entity {
             checkBlockWithCutoff(
                 blockRight,
                 futureX + this.hitbox.x,
-                this.position.y,
+                this.position.y
             )
         )
             return blockRight;
@@ -298,7 +298,7 @@ class Entity {
             checkBlockWithCutoff(
                 blockRightBottom,
                 futureX + this.hitbox.x,
-                this.position.y,
+                this.position.y
             )
         )
             return blockRightBottom;
@@ -307,7 +307,7 @@ class Entity {
             checkBlockWithCutoff(
                 blockRightTop,
                 futureX + this.hitbox.x,
-                this.position.y,
+                this.position.y
             )
         )
             return blockRightTop;
@@ -317,7 +317,7 @@ class Entity {
     checkUpCollision(futureY) {
         const blockUpRight = this.getBlockAtPosition(
             this.position.x + this.hitbox.x,
-            futureY,
+            futureY
         );
         const blockUpLeft = this.getBlockAtPosition(this.position.x, futureY);
 
@@ -334,7 +334,7 @@ class Entity {
         this.isGettingKnockback = true;
         this.addForce(
             fromX < this.position.x ? kb : -kb,
-            this.grounded ? -kb : 0,
+            this.grounded ? -kb : 0
         );
     }
 
@@ -378,11 +378,12 @@ class Entity {
 
     setOnGround() {
         const currentChunk = this.getCurrentChunk();
-        if (!currentChunk) return;
+        if (!currentChunk) return false;
         const groundLevel = currentChunk.findGroundLevel(this.getXInChunk());
         if (groundLevel === 0) return false;
         const y = (CHUNK_HEIGHT - groundLevel) * BLOCK_SIZE - this.hitbox.y;
         this.position.y = y;
+        return true;
     }
 
     getXInChunk() {
@@ -427,7 +428,7 @@ class Entity {
         this.body?.updateBody(
             this.velocity.x,
             this.grounded,
-            this.lookDirection,
+            this.lookDirection
         );
     }
 
@@ -437,7 +438,7 @@ class Entity {
         if (this.velocity.x === 0) return;
 
         const averageColor = getSpriteAverageColor(
-            "blocks/" + getBlock(this.standingOnBlockType).iconSprite,
+            "blocks/" + getBlock(this.standingOnBlockType).iconSprite
         );
 
         if (!averageColor || averageColor === "#000000") return;
@@ -486,8 +487,8 @@ class Entity {
                         Dimensions.Nether,
                         new Vector2(
                             block.transform.position.x / 8,
-                            block.transform.position.y,
-                        ),
+                            block.transform.position.y
+                        )
                     );
 
                     gotoDimension(Dimensions.Nether);
@@ -503,8 +504,8 @@ class Entity {
                         Dimensions.Overworld,
                         new Vector2(
                             block.transform.position.x * 8,
-                            block.transform.position.y,
-                        ),
+                            block.transform.position.y
+                        )
                     );
 
                     gotoDimension(Dimensions.Overworld);
@@ -564,7 +565,7 @@ class Entity {
         if (
             this.filterBlocksByProperty(
                 this.collidingWithBlocks,
-                "extinguishEntity",
+                "extinguishEntity"
             ).length > 0
         ) {
             if (this.fire > this.fireMin) {
@@ -646,11 +647,11 @@ class Entity {
         const maxCatchupDeltaTime = 0.25;
         const totalDeltaTime = Math.min(
             Math.max(0, delta),
-            maxCatchupDeltaTime,
+            maxCatchupDeltaTime
         );
         const stepCount = Math.max(
             1,
-            Math.ceil(totalDeltaTime / maxStepDeltaTime),
+            Math.ceil(totalDeltaTime / maxStepDeltaTime)
         );
         const stepDeltaTime = totalDeltaTime / stepCount;
 
@@ -704,7 +705,7 @@ class Entity {
                     const checkAbove = this.checkUpCollision(newY);
                     const blockAboveSlab = getBlockAtWorldPosition(
                         rightCollision.transform.position.x,
-                        blockTopY - BLOCK_SIZE,
+                        blockTopY - BLOCK_SIZE
                     );
 
                     if (
@@ -745,7 +746,7 @@ class Entity {
                     const checkAbove = this.checkUpCollision(newY);
                     const blockAboveSlab = getBlockAtWorldPosition(
                         leftCollision.transform.position.x,
-                        blockTopY - BLOCK_SIZE,
+                        blockTopY - BLOCK_SIZE
                     );
 
                     if (
@@ -1070,7 +1071,7 @@ class Entity {
                 ctx,
                 this.direction,
                 this.lookDirection,
-                this.holdItem,
+                this.holdItem
             );
 
             // this.drawFire(ctx);
@@ -1091,7 +1092,7 @@ class Entity {
                 -this.outline,
                 -this.outline,
                 this.hitbox.x + this.outline * 2,
-                this.hitbox.y + this.outline * 2,
+                this.hitbox.y + this.outline * 2
             );
         }
 
@@ -1117,7 +1118,7 @@ class Entity {
             if (blockLightLevel !== null) {
                 ctx.filter = `brightness(${Math.max(
                     0.1,
-                    blockLightLevel / 15,
+                    blockLightLevel / 15
                 )})`;
             }
 
@@ -1133,7 +1134,7 @@ class Entity {
                     spriteOffsetX,
                     spriteOffsetY + (spriteHeight - visibleHeight), // Start at bottom minus visible height
                     spriteWidth,
-                    visibleHeight,
+                    visibleHeight
                 );
                 ctx.clip();
 
@@ -1143,7 +1144,7 @@ class Entity {
                     spriteOffsetX,
                     spriteOffsetY,
                     spriteWidth,
-                    spriteHeight,
+                    spriteHeight
                 );
 
                 if (this.dark) {
@@ -1153,7 +1154,7 @@ class Entity {
                         spriteOffsetX,
                         spriteOffsetY + (spriteHeight - visibleHeight),
                         spriteWidth,
-                        visibleHeight,
+                        visibleHeight
                     );
                 }
                 ctx.restore();
@@ -1164,7 +1165,7 @@ class Entity {
                     spriteOffsetX,
                     spriteOffsetY,
                     spriteWidth,
-                    spriteHeight,
+                    spriteHeight
                 );
 
                 if (this.dark) {
@@ -1174,7 +1175,7 @@ class Entity {
                         spriteOffsetX,
                         spriteOffsetY,
                         spriteWidth,
-                        spriteHeight,
+                        spriteHeight
                     );
                 }
 

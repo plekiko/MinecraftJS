@@ -14,6 +14,8 @@ const iconPaths = [
     { path: "server-icon.gif", mime: "image/gif" },
 ];
 const maxIconSize = 1 * 1024 * 1024; // 1 MB
+const BLOCK_SIZE = 64;
+const CHUNK_HEIGHT = 110;
 
 let serverIcon = null;
 let userCache = [];
@@ -336,6 +338,10 @@ function getPlayerInventoryItems(player) {
     return createEmptyInventoryGrid();
 }
 
+function getDefaultPlayerPosition() {
+    return new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE);
+}
+
 function savePlayerData(player, ip) {
     if (!player || !ip || !player.position) {
         serverLog(`Cannot save player data: Invalid player object or IP`);
@@ -410,7 +416,7 @@ function loadPlayerData(player, ip) {
                     playerData.position.y
                 );
             } else {
-                player.position = new Vector2(0, 0);
+                player.position = getDefaultPlayerPosition();
             }
 
             // Load inventory
@@ -438,6 +444,7 @@ function loadPlayerData(player, ip) {
                 typeof playerData.food === "number" ? playerData.food : 20;
         } else {
             // Set default values for new players
+            player.position = getDefaultPlayerPosition();
             player.inventory = player.inventory || {};
             player.inventory.items = createEmptyInventoryGrid();
             player.dimension = 0;
@@ -450,7 +457,7 @@ function loadPlayerData(player, ip) {
             `Error loading player data for ${player.name} from ${playerFile}: ${error.message}`
         );
         // Fallback to defaults
-        player.position = new Vector2(0, 0);
+        player.position = getDefaultPlayerPosition();
         player.inventory = player.inventory || {};
         player.inventory.items = createEmptyInventoryGrid();
         player.dimension = 0;

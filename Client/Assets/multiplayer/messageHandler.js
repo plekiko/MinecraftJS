@@ -124,6 +124,7 @@ function processMessage(data) {
         case "seed":
             console.log("Received seed:", message);
             loadCustomSeed(message);
+            multiplayerSeedLoaded = true;
             break;
         case "removeEntity":
             console.log("Removing entity:", message);
@@ -213,7 +214,7 @@ function processMessage(data) {
 
             if (!block) console.log("Block not found:", message.x, message.y);
 
-            block.breakBlock(message.shouldDrop, message.isWall);
+            block.breakBlock(message.shouldDrop, message.isWall, true);
         case "playerDimension":
             const otherPlayer = getEntityByUUID(message.player);
             if (otherPlayer) otherPlayer.dimension = message.dimension;
@@ -232,6 +233,16 @@ function processMessage(data) {
 
             blockToChange.recieveSyncMetaData(message.metaData);
 
+            break;
+
+        case "summonDrop":
+            summonEntity(
+                Drop,
+                message.position,
+                message.props,
+                false,
+                message.UUID
+            );
             break;
 
         default:
@@ -270,7 +281,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
 
     const myPlayer = spawnPlayer(
         new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
-        true,
+        false,
         player.UUID,
         settings.username
     );
@@ -278,6 +289,20 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
     if (pendingPlayerDataFromFile.has(player.UUID)) {
         applyPlayerDataFromFile(pendingPlayerDataFromFile.get(player.UUID));
         pendingPlayerDataFromFile.delete(player.UUID);
+    }
+
+    // Set on ground AFTER save data is applied so it isn't overridden by a stale saved position
+    const trySetOnGround = () => {
+        if (myPlayer.getCurrentChunk()) {
+            return myPlayer.setOnGround() === true;
+        }
+        return false;
+    };
+    if (!trySetOnGround()) {
+        const intervalId = setInterval(() => {
+            if (trySetOnGround()) clearInterval(intervalId);
+        }, 100);
+        setTimeout(() => clearInterval(intervalId), 10000);
     }
 
     myPlayer.setGamemode(gamemode);

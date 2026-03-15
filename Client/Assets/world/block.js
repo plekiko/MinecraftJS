@@ -212,7 +212,7 @@ function checkDissipation(block, worldPos) {
     neighborOffsets.forEach((offset) => {
         const neighbor = getBlockAtWorldPosition(
             worldPos.x + offset.dx,
-            worldPos.y + offset.dy,
+            worldPos.y + offset.dy
         );
         // Note: In your original code you check if neighbor.waterLevel < block.waterLevel.
         // (This may be counterintuitive, but we keep it exactly as provided.)
@@ -262,7 +262,7 @@ function setBlockType(block, type, updateAdjacent = true) {
         type,
         block.wall,
         null,
-        updateAdjacent,
+        updateAdjacent
     );
 }
 
@@ -285,7 +285,7 @@ function verticalCheckAbove(block, worldPos) {
 function flowSideways(block, worldPos, direction) {
     let target = getBlockAtWorldPosition(
         worldPos.x + direction.dx,
-        worldPos.y + direction.dy,
+        worldPos.y + direction.dy
     );
     // Check if the target is air or can be broken by fluid.
     if (
@@ -328,7 +328,7 @@ class Block extends Square {
         y = 0,
         blockType = Blocks.Air,
         chunkX = 0,
-        wall = false,
+        wall = false
     ) {
         super(
             new Transform(new Vector2(), new Vector2()),
@@ -337,7 +337,7 @@ class Block extends Square {
                 ? getSpriteUrl("blocks/" + getBlock(blockType).sprite)
                 : null,
             BLOCK_SIZE / 16,
-            wall,
+            wall
         );
         this.wall = wall;
         this.x = x;
@@ -529,7 +529,7 @@ class Block extends Square {
 
         if (this.metaData.props.storage) {
             const storage = this.metaData.props.storage.map((row) =>
-                row.map((item) => new InventoryItem(item)),
+                row.map((item) => new InventoryItem(item))
             );
 
             this.metaData.props.storage = storage;
@@ -546,7 +546,7 @@ class Block extends Square {
         if (this.metaData.props.storage) {
             // Create a deep copy of the storage array and create new InventoryItem instances with the copied data
             const storage = this.metaData.props.storage.map((row) =>
-                row.map((item) => new InventoryItem(item)),
+                row.map((item) => new InventoryItem(item))
             );
 
             this.metaData.props.storage = storage;
@@ -615,7 +615,7 @@ class Block extends Square {
                 getBlockWorldPosition(this),
                 block.ambientSound + ".ogg",
                 10,
-                0.4,
+                0.4
             );
         }
 
@@ -710,7 +710,7 @@ class Block extends Square {
                             hopperItem.itemId = dropItem.itemId;
                             hopperItem.blockId = dropItem.blockId;
                             hopperItem.props = structuredClone(
-                                dropItem.props || {},
+                                dropItem.props || {}
                             );
                             hopperItem.count = 1;
 
@@ -762,7 +762,7 @@ class Block extends Square {
         // Check block above for storage (pulling items)
         const above = getBlockAtWorldPosition(
             this.transform.position.x,
-            this.transform.position.y - BLOCK_SIZE,
+            this.transform.position.y - BLOCK_SIZE
         );
         let transferredFromAbove = false;
 
@@ -797,7 +797,7 @@ class Block extends Square {
                                 hopperItem.itemId = aboveItem.itemId;
                                 hopperItem.blockId = aboveItem.blockId;
                                 hopperItem.props = structuredClone(
-                                    aboveItem.props || {},
+                                    aboveItem.props || {}
                                 );
                                 hopperItem.count = 1;
 
@@ -854,7 +854,7 @@ class Block extends Square {
         // Check block below for storage (pushing items)
         const below = getBlockAtWorldPosition(
             this.transform.position.x,
-            this.transform.position.y + BLOCK_SIZE,
+            this.transform.position.y + BLOCK_SIZE
         );
 
         if (
@@ -971,7 +971,7 @@ class Block extends Square {
             y: -BLOCK_SIZE / 2,
         });
         return entitiesOnBlock.filter(
-            (entity) => entity.type === EntityTypes.Drop,
+            (entity) => entity.type === EntityTypes.Drop
         );
     }
 
@@ -1011,7 +1011,7 @@ class Block extends Square {
 
         // Clean up despawned or dead mobs from the tracking array
         props.spawnedMobs = props.spawnedMobs.filter(
-            (mob) => mob && getEntityByUUID(mob)?.health > 0,
+            (mob) => mob && getEntityByUUID(mob)?.health > 0
         );
 
         // Check if we can spawn more entities
@@ -1044,7 +1044,7 @@ class Block extends Square {
 
         const entity = summonEntity(
             entityType,
-            new Vector2(spawnPos.x + offsetX, spawnPos.y),
+            new Vector2(spawnPos.x + offsetX, spawnPos.y)
         );
 
         if (!entity) return;
@@ -1069,7 +1069,7 @@ class Block extends Square {
         // Calculate current stage based on growth progress
         const currentStage = Math.min(
             Math.floor(this.metaData.props.growth / ticksPerStage),
-            totalStages - 1,
+            totalStages - 1
         );
 
         // Update sprite if stage has changed
@@ -1101,7 +1101,7 @@ class Block extends Square {
         getChunkForX(this.chunkX).spawnTreeAt(
             randomVariant,
             this.x,
-            this.getUserLocalY(),
+            this.getUserLocalY()
         );
     }
 
@@ -1139,7 +1139,7 @@ class Block extends Square {
             getBlockWorldPosition(this),
             "blocks/wood_click.ogg",
             10,
-            0.4,
+            0.4
         );
     }
 
@@ -1266,7 +1266,7 @@ class Block extends Square {
     getSoundBasedOfBlockBelow() {
         const blockBelow = getBlockAtWorldPosition(
             this.transform.position.x,
-            this.transform.position.y + BLOCK_SIZE,
+            this.transform.position.y + BLOCK_SIZE
         );
 
         if (!blockBelow) return "harp";
@@ -1309,7 +1309,7 @@ class Block extends Square {
             getBlockWorldPosition(this),
             "blocks/wood_click.ogg",
             10,
-            0.4,
+            0.4
         );
     }
 
@@ -1330,11 +1330,11 @@ class Block extends Square {
         // For diagonal connections, we want to only consider them if the adjacent cardinal blocks are not blocking.
         const northWest = getBlockAtWorldPosition(
             bx - BLOCK_SIZE,
-            by - BLOCK_SIZE,
+            by - BLOCK_SIZE
         );
         const northEast = getBlockAtWorldPosition(
             bx + BLOCK_SIZE,
-            by - BLOCK_SIZE,
+            by - BLOCK_SIZE
         );
 
         // Helper function that returns true if a block is redstone dust.
@@ -1385,7 +1385,7 @@ class Block extends Square {
         if (!item || this.metaData.props.storage[0][0].itemId !== null) {
             // Remove disc from jukebox'
             if (this.metaData.props.storage[0][0].itemId !== null) {
-                summonEntity(Drop, getBlockWorldPosition(this), {
+                spawnDrop(getBlockWorldPosition(this), {
                     itemId: this.metaData.props.storage[0][0].itemId,
                     blockId: null,
                     count: 1,
@@ -1410,7 +1410,7 @@ class Block extends Square {
                 getBlockWorldPosition(this),
                 "../music/" + item.playMusicInJukebox,
                 20,
-                1,
+                1
             );
 
             player.removeFromCurrentSlot();
@@ -1452,7 +1452,7 @@ class Block extends Square {
             getBlockWorldPosition(this),
             "blocks/fizz.ogg",
             10,
-            0.5,
+            0.5
         );
     }
 
@@ -1572,7 +1572,7 @@ class Block extends Square {
         if (blockDef.breakWithoutBlockUnderneath || blockDef.fall) {
             const blockBelow = getBlockAtWorldPosition(
                 this.transform.position.x,
-                this.transform.position.y + BLOCK_SIZE,
+                this.transform.position.y + BLOCK_SIZE
             );
 
             // No block below
@@ -1586,7 +1586,7 @@ class Block extends Square {
         }
     }
 
-    breakBlock(drop = false, wall = false) {
+    breakBlock(drop = false, wall = false, skipDrops = false) {
         if (getBlock(this.blockType).air) return;
 
         const chunk = getDimensionChunks(activeDimension).get(this.chunkX);
@@ -1598,12 +1598,14 @@ class Block extends Square {
         const blockDef = getBlock(this.blockType);
 
         // Handle crop loot when fully grown
-        if (blockDef.cropOutcome) {
-            if (this.metaData?.props?.stage === blockDef.states.length - 1)
-                this.dropCropLoot(blockDef);
-            else this.dropBlock();
-        } else if (drop) {
-            this.dropBlock();
+        if (!skipDrops) {
+            if (blockDef.cropOutcome) {
+                if (this.metaData?.props?.stage === blockDef.states.length - 1)
+                    this.dropCropLoot(blockDef);
+                else this.dropBlock();
+            } else if (drop) {
+                this.dropBlock();
+            }
         }
 
         if (this.linkedBlocks && this.linkedBlocks.length > 1) {
@@ -1617,14 +1619,14 @@ class Block extends Square {
             }
         }
 
-        if (blockDef.dropTable) this.dropTable();
+        if (!skipDrops && blockDef.dropTable) this.dropTable();
 
         this.playBreakSound();
 
         this.playBreakParticles();
 
         if (this.metaData) {
-            if (this.metaData.props.storage) {
+            if (!skipDrops && this.metaData.props.storage) {
                 this.dropStorage();
             }
 
@@ -1646,7 +1648,7 @@ class Block extends Square {
         if (!blockDef.iconSprite) return;
 
         const averageColor = getSpriteAverageColor(
-            "blocks/" + blockDef.iconSprite,
+            "blocks/" + blockDef.iconSprite
         );
 
         if (!averageColor) return;
@@ -1672,17 +1674,16 @@ class Block extends Square {
         const loot = blockDef.cropOutcome.getRandomLoot();
 
         loot.forEach((item) => {
-            summonEntity(
-                Drop,
+            spawnDrop(
                 new Vector2(
                     this.transform.position.x + randomRange(0, BLOCK_SIZE / 3),
-                    this.transform.position.y + BLOCK_SIZE / 4,
+                    this.transform.position.y + BLOCK_SIZE / 4
                 ),
                 {
                     blockId: item.blockId,
                     itemId: item.itemId,
                     count: item.count,
-                },
+                }
             );
         });
     }
@@ -1715,17 +1716,16 @@ class Block extends Square {
         const loot = block.dropTable.getRandomLoot();
 
         loot.forEach((item) => {
-            summonEntity(
-                Drop,
+            spawnDrop(
                 new Vector2(
                     this.transform.position.x + randomRange(0, BLOCK_SIZE / 3),
-                    this.transform.position.y + BLOCK_SIZE / 4,
+                    this.transform.position.y + BLOCK_SIZE / 4
                 ),
                 {
                     blockId: item.blockId,
                     itemId: item.itemId,
                     count: item.count,
-                },
+                }
             );
         });
     }
@@ -1740,17 +1740,16 @@ class Block extends Square {
             props.wall = true;
         }
 
-        summonEntity(
-            Drop,
+        spawnDrop(
             new Vector2(
                 this.transform.position.x + randomRange(0, BLOCK_SIZE / 3),
-                this.transform.position.y + BLOCK_SIZE / 4,
+                this.transform.position.y + BLOCK_SIZE / 4
             ),
             {
                 blockId: block.dropItem == null ? block.dropBlock : null,
                 itemId: block.dropItem != null ? block.dropItem : null,
                 props: props,
-            },
+            }
         );
     }
 
@@ -1761,19 +1760,18 @@ class Block extends Square {
             for (let x = 0; x < storage[y].length; x++) {
                 const item = storage[y][x];
                 if (!item.blockId && item.itemId === null) continue;
-                summonEntity(
-                    Drop,
+                spawnDrop(
                     new Vector2(
                         this.transform.position.x +
                             randomRange(0, BLOCK_SIZE / 3),
-                        this.transform.position.y + BLOCK_SIZE / 4,
+                        this.transform.position.y + BLOCK_SIZE / 4
                     ),
                     {
                         blockId: item.blockId,
                         itemId: item.itemId,
                         count: item.count,
                         props: structuredClone(item.props || {}),
-                    },
+                    }
                 );
             }
         }

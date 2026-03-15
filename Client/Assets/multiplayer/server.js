@@ -5,6 +5,14 @@ class Server {
 
         this.ws.onopen = () => {
             console.log("Connected to server!");
+
+            this.send({
+                type: "playerData",
+                message: {
+                    name: settings?.username || "Player",
+                    skin: null,
+                },
+            });
         };
 
         this.ws.onerror = (error) => {

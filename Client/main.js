@@ -65,12 +65,25 @@ function summonEntity(entity, position, props, sync = false, uuid = null) {
     return newEntity;
 }
 
+function spawnDrop(position, props) {
+    const uuid = uuidv4();
+    const drop = summonEntity(Drop, position, props, false, uuid);
+    if (multiplayer) {
+        server.send({
+            type: "summonDrop",
+            message: { UUID: uuid, position: position, props: props },
+            sender: player?.UUID,
+        });
+    }
+    return drop;
+}
+
 function spawnPlayer(
     position = new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
     setOnGround = true,
     UUID = null,
     name = null,
-    local = true,
+    local = true
 ) {
     const newPlayer = new Player({
         position: position,
@@ -84,8 +97,7 @@ function spawnPlayer(
     if (setOnGround) {
         const trySetOnGround = () => {
             if (newPlayer.getCurrentChunk()) {
-                newPlayer.setOnGround();
-                return true;
+                return newPlayer.setOnGround() === true;
             }
             return false;
         };
@@ -135,7 +147,7 @@ async function gameLoop() {
     draw(
         getDimensionChunks(activeDimension),
         calculateFPS(currentFrameTime),
-        deltaTime,
+        deltaTime
     );
 
     lastFrameTime = currentFrameTime;
@@ -170,6 +182,10 @@ async function initGame() {
     // Load world from local storage if not multiplayer
     if (!multiplayer) {
         loadWorldFromLocalStorage();
+    } else {
+        while (!multiplayerSeedLoaded) {
+            await new Promise((resolve) => setTimeout(resolve, 50));
+        }
     }
 
     loadingWorld = false;
@@ -241,9 +257,9 @@ function cursorBlockLogic() {
             player.position,
             new Vector2(
                 input.getMousePositionOnBlockGrid().x,
-                input.getMousePositionOnBlockGrid().y,
-            ),
-        ) / BLOCK_SIZE,
+                input.getMousePositionOnBlockGrid().y
+            )
+        ) / BLOCK_SIZE
     );
 
     cursorInRange = !player.abilities.instaBuild
@@ -253,14 +269,14 @@ function cursorBlockLogic() {
     player.hoverBlock = cursorInRange
         ? getBlockAtWorldPosition(
               input.getMousePositionOnBlockGrid().x,
-              input.getMousePositionOnBlockGrid().y,
+              input.getMousePositionOnBlockGrid().y
           )
         : null;
     player.hoverWall = cursorInRange
         ? getBlockAtWorldPosition(
               input.getMousePositionOnBlockGrid().x,
               input.getMousePositionOnBlockGrid().y,
-              true,
+              true
           )
         : null;
 }

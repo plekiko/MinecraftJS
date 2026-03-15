@@ -164,8 +164,7 @@ class Inventory {
                 if (!item.blockId && (!item.itemId || item.itemId === 0))
                     continue;
 
-                summonEntity(
-                    Drop,
+                spawnDrop(
                     new Vector2(
                         position.x + randomRange(-BLOCK_SIZE, BLOCK_SIZE),
                         position.y

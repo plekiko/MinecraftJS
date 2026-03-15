@@ -1,5 +1,6 @@
 class Drop extends Entity {
     constructor({
+        UUID = null,
         position,
         blockId = null,
         itemId = null,
@@ -19,6 +20,7 @@ class Drop extends Entity {
 
         // Set up the entity with dynamic scaling
         super({
+            UUID: UUID || uuidv4(),
             name: isItem ? "Item" : "Block",
             position: position,
             hitbox: new Vector2(BLOCK_SIZE / 1.5, BLOCK_SIZE / 1.5),

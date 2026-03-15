@@ -4,6 +4,7 @@ let seed = 0;
 tooloud.Perlin.setSeed(seed);
 
 let specialWorldProps = {};
+let multiplayerSeedLoaded = !multiplayer;
 
 let forceToBiome = null;
 
@@ -49,6 +50,9 @@ function locateBiome(biome) {
 }
 
 function loadCustomSeed(seed) {
+    specialWorldProps = {};
+    forceToBiome = null;
+
     // Set seed to lowercase
     seed = seed.toString().toLowerCase();
 
