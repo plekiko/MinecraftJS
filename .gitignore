@@ -10,3 +10,4 @@ Server/server.properties
 Server/banned-ips.json
 Server/usercache.json
 Server/world
+Server/server.log

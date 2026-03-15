@@ -8,6 +8,7 @@ import fs from "fs";
 const propertiesFile = "server.properties";
 const userCacheFile = "usercache.json";
 const bannedIPsFile = "banned-ips.json";
+const serverLogFile = "server.log";
 const iconPaths = [
     { path: "server-icon.png", mime: "image/png" },
     { path: "server-icon.gif", mime: "image/gif" },
@@ -276,8 +277,67 @@ function getSafeIp(ip) {
     return ip.replace(/[^0-9a-fA-F.]/g, "_");
 }
 
+function getPlayerIpFromSocket(ws) {
+    const remoteAddress = ws?._socket?.remoteAddress;
+    if (typeof remoteAddress !== "string" || remoteAddress.length === 0) {
+        return "127.0.0.1";
+    }
+
+    return remoteAddress.replace(/^::ffff:/, "");
+}
+
+function createEmptyInventoryGrid(rows = 4, columns = 9) {
+    return Array.from({ length: rows }, () =>
+        Array.from({ length: columns }, () => ({
+            blockId: null,
+            itemId: null,
+            count: 0,
+            props: {},
+        }))
+    );
+}
+
+function normalizeInventoryItem(item) {
+    return {
+        blockId: item?.blockId || null,
+        itemId: item?.itemId || null,
+        count: Number.isFinite(item?.count) ? item.count : 0,
+        props: item?.props && typeof item.props === "object" ? item.props : {},
+    };
+}
+
+function normalizeInventoryGrid(inventory, rows = 4, columns = 9) {
+    if (!Array.isArray(inventory)) {
+        return createEmptyInventoryGrid(rows, columns);
+    }
+
+    const normalized = inventory.map((row) =>
+        Array.isArray(row)
+            ? row.map((item) => normalizeInventoryItem(item))
+            : []
+    );
+
+    if (normalized.length === 0) {
+        return createEmptyInventoryGrid(rows, columns);
+    }
+
+    return normalized;
+}
+
+function getPlayerInventoryItems(player) {
+    if (Array.isArray(player?.inventory?.items)) {
+        return player.inventory.items;
+    }
+
+    if (Array.isArray(player?.inventory)) {
+        return player.inventory;
+    }
+
+    return createEmptyInventoryGrid();
+}
+
 function savePlayerData(player, ip) {
-    if (!player || !ip || !player.position || !player.inventory) {
+    if (!player || !ip || !player.position) {
         serverLog(`Cannot save player data: Invalid player object or IP`);
         return;
     }
@@ -285,6 +345,10 @@ function savePlayerData(player, ip) {
     const playerDir = `./${properties.levelName}/players`;
     const safeIp = getSafeIp(ip);
     const playerFile = `${playerDir}/${safeIp}.json`;
+    const inventoryItems = normalizeInventoryGrid(
+        getPlayerInventoryItems(player)
+    );
+
     try {
         fs.mkdirSync(playerDir, { recursive: true });
         const playerData = {
@@ -292,22 +356,15 @@ function savePlayerData(player, ip) {
                 x: player.position.x || 0,
                 y: player.position.y || 0,
             },
-            inventory: Array.isArray(player.inventory?.items)
-                ? player.inventory.items.map((row) =>
-                      Array.isArray(row)
-                          ? row.map((item) => ({
-                                blockId: item?.blockId || null,
-                                itemId: item?.itemId || null,
-                                count: item?.count || 0,
-                                props: item?.props || {},
-                            }))
-                          : []
-                  )
-                : [],
+            dimension:
+                typeof player.dimension === "number" ? player.dimension : 0,
+            inventory: inventoryItems,
             gamemode:
                 player.gamemode !== undefined
                     ? player.gamemode
                     : properties.gamemode,
+            health: Number.isFinite(player.health) ? player.health : 20,
+            food: Number.isFinite(player.food) ? player.food : 20,
         };
         fs.writeFileSync(playerFile, JSON.stringify(playerData, null, 2));
     } catch (error) {
@@ -357,30 +414,15 @@ function loadPlayerData(player, ip) {
             }
 
             // Load inventory
-            if (Array.isArray(playerData.inventory)) {
-                player.inventory = player.inventory || {};
-                player.inventory.items = playerData.inventory.map((row) =>
-                    Array.isArray(row)
-                        ? row.map((item) => ({
-                              blockId: item?.blockId || null,
-                              itemId: item?.itemId || null,
-                              count: item?.count || 0,
-                              props: item?.props || {},
-                          }))
-                        : []
-                );
+            player.inventory = player.inventory || {};
+            player.inventory.items = normalizeInventoryGrid(
+                playerData.inventory
+            );
+
+            if (typeof playerData.dimension === "number") {
+                player.dimension = playerData.dimension;
             } else {
-                player.inventory = player.inventory || {};
-                player.inventory.items = Array(4)
-                    .fill()
-                    .map(() =>
-                        Array(9).fill({
-                            blockId: null,
-                            itemId: null,
-                            count: 0,
-                            props: {},
-                        })
-                    );
+                player.dimension = 0;
             }
 
             // Load gamemode
@@ -390,40 +432,26 @@ function loadPlayerData(player, ip) {
                 player.gamemode = properties.gamemode;
             }
 
+            player.health =
+                typeof playerData.health === "number" ? playerData.health : 20;
+            player.food =
+                typeof playerData.food === "number" ? playerData.food : 20;
+
             serverLog(
                 `Loaded player data for ${player.name} from ${playerFile}`
             );
         } else {
             // Set default values for new players
             player.inventory = player.inventory || {};
-            player.inventory.items = Array(4)
-                .fill()
-                .map(() =>
-                    Array(9).fill({
-                        blockId: null,
-                        itemId: null,
-                        count: 0,
-                        props: {},
-                    })
-                );
+            player.inventory.items = createEmptyInventoryGrid();
+            player.dimension = 0;
             player.gamemode = properties.gamemode;
+            player.health = 20;
+            player.food = 20;
             serverLog(
                 `No player data found for ${player.name}, using defaults`
             );
         }
-
-        // Send player data to the player
-        sendToPlayer(player.UUID, {
-            type: "playerDataFromFile",
-            message: {
-                UUID: player.UUID,
-                position: player.position,
-                dimension: player.dimension,
-                inventory: player.inventory.items,
-                gamemode: player.gamemode,
-                health: 10,
-            },
-        });
     } catch (error) {
         console.error(
             `Error loading player data for ${player.name} from ${playerFile}: ${error.message}`
@@ -431,17 +459,11 @@ function loadPlayerData(player, ip) {
         // Fallback to defaults
         player.position = new Vector2(0, 0);
         player.inventory = player.inventory || {};
-        player.inventory.items = Array(4)
-            .fill()
-            .map(() =>
-                Array(9).fill({
-                    blockId: null,
-                    itemId: null,
-                    count: 0,
-                    props: {},
-                })
-            );
+        player.inventory.items = createEmptyInventoryGrid();
+        player.dimension = 0;
         player.gamemode = properties.gamemode;
+        player.health = 20;
+        player.food = 20;
         serverLog(`Using default player data for ${player.name}`);
     }
 }
@@ -455,7 +477,7 @@ function sendToPlayer(UUID, data) {
 }
 
 function playerJoined(ws, playerData) {
-    const ip = ws._socket.remoteAddress.replace(/^::ffff:/, "") || "127.0.0.1";
+    const ip = getPlayerIpFromSocket(ws);
     if (bannedIPs.includes(ip)) {
         ws.send(
             JSON.stringify({
@@ -475,10 +497,10 @@ function playerJoined(ws, playerData) {
         skin: playerData?.skin || null,
     });
 
+    players.push(newPlayer);
+
     // Load player data (position, inventory, gamemode)
     loadPlayerData(newPlayer, ip);
-
-    players.push(newPlayer);
 
     updateUserCache(newPlayer.name, ip);
 
@@ -488,6 +510,19 @@ function playerJoined(ws, playerData) {
             player: newPlayer,
             existingPlayers: players.filter((p) => p.UUID !== newPlayer.UUID),
             gamemode: newPlayer.gamemode || properties.gamemode,
+        },
+    });
+
+    sendToPlayer(newPlayer.UUID, {
+        type: "playerDataFromFile",
+        message: {
+            UUID: newPlayer.UUID,
+            position: newPlayer.position,
+            dimension: newPlayer.dimension,
+            inventory: getPlayerInventoryItems(newPlayer),
+            gamemode: newPlayer.gamemode,
+            health: newPlayer.health,
+            food: newPlayer.food,
         },
     });
 
@@ -508,8 +543,7 @@ function playerJoined(ws, playerData) {
 function playerLeft(player) {
     if (!player) return;
     // Save player data before removing
-    const ip =
-        player.ws._socket.remoteAddress.replace(/^::ffff:/, "") || "127.0.0.1";
+    const ip = getPlayerIpFromSocket(player.ws);
     savePlayerData(player, ip);
     players = players.filter((p) => p.UUID !== player.UUID);
     serverLog(player.name + " left the game!");
@@ -565,6 +599,34 @@ function processMessage(message, ws) {
 
     switch (data.type) {
         case "playerUpdate":
+            {
+                const player = getPlayerByUUID(data.sender);
+                const message = data.message || {};
+                if (player) {
+                    if (
+                        message.position &&
+                        typeof message.position.x === "number" &&
+                        typeof message.position.y === "number"
+                    ) {
+                        player.position = {
+                            x: message.position.x,
+                            y: message.position.y,
+                        };
+                    }
+
+                    if (typeof message.gamemode === "number") {
+                        player.gamemode = message.gamemode;
+                    }
+
+                    if (typeof message.health === "number") {
+                        player.health = message.health;
+                    }
+
+                    if (typeof message.food === "number") {
+                        player.food = message.food;
+                    }
+                }
+            }
             broadcast(data, [data.sender]);
             break;
 
@@ -583,6 +645,65 @@ function processMessage(message, ws) {
                     "127.0.0.1";
                 updateUserCache(player.name, ip);
             }
+            break;
+        }
+
+        case "playerInventory": {
+            const player = getPlayerByUUID(data.sender);
+            if (player) {
+                player.inventory = player.inventory || {};
+                player.inventory.items = normalizeInventoryGrid(
+                    data.message?.inventory
+                );
+            }
+            break;
+        }
+
+        case "playerSyncOnLeave": {
+            const player = getPlayerByUUID(data.sender);
+
+            if (!player) {
+                break;
+            }
+
+            const message = data.message || {};
+
+            if (
+                message.position &&
+                typeof message.position.x === "number" &&
+                typeof message.position.y === "number"
+            ) {
+                player.position = {
+                    x: message.position.x,
+                    y: message.position.y,
+                };
+            }
+
+            if (typeof message.dimension === "number") {
+                player.dimension = message.dimension;
+            }
+
+            if (typeof message.gamemode === "number") {
+                player.gamemode = message.gamemode;
+            }
+
+            if (typeof message.health === "number") {
+                player.health = message.health;
+            }
+
+            if (typeof message.food === "number") {
+                player.food = message.food;
+            }
+
+            if (Array.isArray(message.inventory)) {
+                player.inventory = player.inventory || {};
+                player.inventory.items = normalizeInventoryGrid(
+                    message.inventory
+                );
+            }
+
+            savePlayerData(player, getPlayerIpFromSocket(ws));
+
             break;
         }
 
@@ -719,6 +840,12 @@ function serverLog(log = "") {
     const formattedLog = `[${formattedDate}] ${log}`;
 
     console.log(formattedLog);
+
+    try {
+        fs.appendFileSync(serverLogFile, `${formattedLog}\n`, "utf8");
+    } catch (error) {
+        console.error(`Failed to write to ${serverLogFile}: ${error.message}`);
+    }
 }
 
 function saveWorldToDir() {
@@ -741,9 +868,7 @@ function saveWorldToDir() {
         // Save all player data during autosave
         if (Array.isArray(players)) {
             players.forEach((player) => {
-                const ip =
-                    player.ws._socket.remoteAddress.replace(/^::ffff:/, "") ||
-                    "127.0.0.1";
+                const ip = getPlayerIpFromSocket(player.ws);
                 savePlayerData(player, ip);
             });
         } else {

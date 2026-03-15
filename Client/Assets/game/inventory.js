@@ -70,9 +70,49 @@ class Inventory {
 
         this.wasItemInConverterOutput = false;
 
+        this.lastSyncedInventoryPayload = "";
+
         this.createItemArray();
 
         this.populateCreativeInventory();
+    }
+
+    serializeInventoryForMultiplayer() {
+        return Array.isArray(this.items)
+            ? this.items.map((row) =>
+                  Array.isArray(row)
+                      ? row.map((slot) => {
+                            const item = slot?.item ?? slot;
+                            return {
+                                blockId: item?.blockId || null,
+                                itemId: item?.itemId || null,
+                                count: item?.count || 0,
+                                props: item?.props || {},
+                            };
+                        })
+                      : []
+              )
+            : [];
+    }
+
+    syncInventoryMultiplayer() {
+        if (!multiplayer || !server || !player) return;
+        if (player.inventory !== this) return;
+
+        const inventoryPayload = this.serializeInventoryForMultiplayer();
+        const payloadString = JSON.stringify(inventoryPayload);
+
+        if (payloadString === this.lastSyncedInventoryPayload) return;
+
+        this.lastSyncedInventoryPayload = payloadString;
+
+        server.send({
+            type: "playerInventory",
+            sender: player.UUID,
+            message: {
+                inventory: inventoryPayload,
+            },
+        });
     }
 
     createItemArray() {
@@ -128,13 +168,13 @@ class Inventory {
                     Drop,
                     new Vector2(
                         position.x + randomRange(-BLOCK_SIZE, BLOCK_SIZE),
-                        position.y,
+                        position.y
                     ),
                     {
                         blockId: item.blockId,
                         itemId: item.itemId,
                         count: item.count,
-                    },
+                    }
                 );
             }
         }
@@ -147,7 +187,7 @@ class Inventory {
             this.inventoryUI.x + x + this.openUIOffset.x,
             this.inventoryUI.y + y + this.openUIOffset.y,
             16 * 3,
-            16 * 3,
+            16 * 3
         );
     }
 
@@ -185,7 +225,7 @@ class Inventory {
                                 blockId: item.blockId,
                                 itemId: item.itemId,
                                 count: leftOverCount,
-                            }),
+                            })
                         );
                     }
                 }
@@ -323,7 +363,7 @@ class Inventory {
                 for (let i = 0; i < this.storageSlots.length; i++) {
                     for (let j = 0; j < this.storageSlots[i].length; j++) {
                         this.storage[i][j] = this.cloneItem(
-                            this.storageSlots[i][j].item,
+                            this.storageSlots[i][j].item
                         );
                     }
                 }
@@ -334,7 +374,7 @@ class Inventory {
                 for (let i = 0; i < this.storageSlots.length; i++) {
                     for (let j = 0; j < this.storageSlots[i].length; j++) {
                         this.storage[i][j] = this.cloneItem(
-                            this.storageSlots[i][j].item,
+                            this.storageSlots[i][j].item
                         );
                     }
                 }
@@ -350,7 +390,7 @@ class Inventory {
         for (let i = 0; i < this.storageSlots.length; i++) {
             for (let j = 0; j < this.storageSlots[i].length; j++) {
                 this.storageSlots[i][j].item = this.cloneItem(
-                    this.storage[i][j],
+                    this.storage[i][j]
                 );
             }
         }
@@ -432,7 +472,7 @@ class Inventory {
                 new InventorySlot({
                     position: { x: 158 + x * 63, y: 189 },
                     item: this.storage[0][x],
-                }),
+                })
             );
         }
 
@@ -589,7 +629,7 @@ class Inventory {
         const startIndex = this.currentCreativePage * itemsPerPage;
         const endIndex = Math.min(
             startIndex + itemsPerPage,
-            this.creativeItems.length,
+            this.creativeItems.length
         );
 
         // Create a 6x9 grid
@@ -667,7 +707,7 @@ class Inventory {
         for (let i = 0; i < blocks.length; i++) {
             if (getBlock(blocks[i]).excludeFromCreativeInventory) continue;
             this.creativeItems.push(
-                new InventoryItem({ blockId: blocks[i], count: 1 }),
+                new InventoryItem({ blockId: blocks[i], count: 1 })
             );
         }
 
@@ -675,7 +715,7 @@ class Inventory {
         for (let i = 0; i < items.length; i++) {
             if (getItem(items[i]).excludeFromCreativeInventory) continue;
             this.creativeItems.push(
-                new InventoryItem({ itemId: items[i], count: 1 }),
+                new InventoryItem({ itemId: items[i], count: 1 })
             );
         }
 
@@ -768,7 +808,7 @@ class Inventory {
         for (let i = 0; i < this.storageSlots.length; i++) {
             for (let j = 0; j < this.storageSlots[i].length; j++) {
                 this.storage[i][j] = this.cloneItem(
-                    this.storageSlots[i][j].item,
+                    this.storageSlots[i][j].item
                 );
             }
         }
@@ -1021,6 +1061,8 @@ class Inventory {
 
         this.handleHotbarAssignment();
         this.handleButtonInteractions();
+
+        this.syncInventoryMultiplayer();
     }
 
     handleHotbarAssignment() {
@@ -1117,7 +1159,7 @@ class Inventory {
         if (
             this.isSlotHovered(
                 this.craftingOutputSlot.position.x,
-                this.craftingOutputSlot.position.y,
+                this.craftingOutputSlot.position.y
             )
         ) {
             this.mouseOverSlot(0, 0, null, this.craftingOutputSlot.item);
@@ -1189,7 +1231,7 @@ class Inventory {
 
         // Check if each recipe item has a matching slot item
         return recipeItems.every((recipeItem) =>
-            nonEmptySlots.some((slot) => this.isMatch(slot.item, recipeItem)),
+            nonEmptySlots.some((slot) => this.isMatch(slot.item, recipeItem))
         );
     }
 
@@ -1245,7 +1287,7 @@ class Inventory {
                         startRow,
                         startCol,
                         patternRows,
-                        patternCols,
+                        patternCols
                     )
                 ) {
                     return true;
@@ -1481,7 +1523,7 @@ class Inventory {
 
         const spriteUrl = getSpriteUrl(
             spritePath,
-            isEqualToOriginal(spritePath),
+            isEqualToOriginal(spritePath)
         );
 
         const drawParams = {
@@ -1533,7 +1575,7 @@ class Inventory {
             player.body.image,
             baseX,
             baseY,
-            INVENTORY_PLAYER_SCALE,
+            INVENTORY_PLAYER_SCALE
         );
     }
 
@@ -1567,7 +1609,7 @@ class Inventory {
             slot.position.x + this.inventoryUI.x - 4 + this.openUIOffset.x,
             slot.position.y + this.inventoryUI.y - 4 + this.openUIOffset.y,
             18.5 * 3,
-            18.5 * 3,
+            18.5 * 3
         );
         ctx.globalAlpha = 1;
     }
@@ -1722,7 +1764,7 @@ class Inventory {
     drawSlot(slot) {
         slot.draw(
             this.inventoryUI.x + this.openUIOffset.x,
-            this.inventoryUI.y + this.openUIOffset.y,
+            this.inventoryUI.y + this.openUIOffset.y
         );
     }
 }
