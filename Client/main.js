@@ -85,9 +85,21 @@ function SpawnPlayer(
 
     if (local) player = newPlayer;
 
-    setTimeout(() => {
-        if (setOnGround) newPlayer.setOnGround();
-    }, 1000);
+    if (setOnGround) {
+        const trySetOnGround = () => {
+            if (newPlayer.getCurrentChunk()) {
+                newPlayer.setOnGround();
+                return true;
+            }
+            return false;
+        };
+        if (!trySetOnGround()) {
+            const intervalId = setInterval(() => {
+                if (trySetOnGround()) clearInterval(intervalId);
+            }, 100);
+            setTimeout(() => clearInterval(intervalId), 10000);
+        }
+    }
 
     entities.push(newPlayer);
 
