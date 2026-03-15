@@ -1478,6 +1478,7 @@ class Player extends Entity {
         if (
             !this.abilities.mayBuild ||
             GetBlock(hover.blockType).hardness < 0
+            && this.gamemode != 1
         ) {
             this.resetBreaking();
             return;
@@ -1612,8 +1613,6 @@ class Player extends Entity {
     }
 
     movementLogic() {
-        // this.velocity.x = 0;
-
         if (this.windowOpen) return;
 
         this.handleSwimming();
@@ -1625,6 +1624,16 @@ class Player extends Entity {
         this.lookAtCursor();
 
         // this.applyDeltaTime();
+    }
+
+    voidLogic() {
+        if (this.position.y > CHUNK_HEIGHT * BLOCK_SIZE) {
+            if (this.gamemode === 1) {
+                this.die();
+            } else {
+                this.hit(2);
+            }
+        }
     }
 
     handleClimbing() {
