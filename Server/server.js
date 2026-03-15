@@ -436,10 +436,6 @@ function loadPlayerData(player, ip) {
                 typeof playerData.health === "number" ? playerData.health : 20;
             player.food =
                 typeof playerData.food === "number" ? playerData.food : 20;
-
-            serverLog(
-                `Loaded player data for ${player.name} from ${playerFile}`
-            );
         } else {
             // Set default values for new players
             player.inventory = player.inventory || {};
@@ -448,9 +444,6 @@ function loadPlayerData(player, ip) {
             player.gamemode = properties.gamemode;
             player.health = 20;
             player.food = 20;
-            serverLog(
-                `No player data found for ${player.name}, using defaults`
-            );
         }
     } catch (error) {
         console.error(
@@ -464,7 +457,6 @@ function loadPlayerData(player, ip) {
         player.gamemode = properties.gamemode;
         player.health = 20;
         player.food = 20;
-        serverLog(`Using default player data for ${player.name}`);
     }
 }
 
@@ -546,7 +538,7 @@ function playerLeft(player) {
     const ip = getPlayerIpFromSocket(player.ws);
     savePlayerData(player, ip);
     players = players.filter((p) => p.UUID !== player.UUID);
-    serverLog(player.name + " left the game!");
+    serverLog(player.name + " left the game!", ip);
     broadcast({
         type: "playerLeft",
         message: player.UUID,
@@ -638,12 +630,13 @@ function processMessage(message, ws) {
                 player.name = data.message.name;
                 broadcast(data, [data.sender]);
 
-                serverLog(`${player.name} joined the game!`);
-
                 const ip =
                     ws._socket.remoteAddress.replace(/^::ffff:/, "") ||
                     "127.0.0.1";
+
                 updateUserCache(player.name, ip);
+
+                serverLog(`${player.name} joined the game!`, ip);
             }
             break;
         }
@@ -709,7 +702,10 @@ function processMessage(message, ws) {
 
         case "chat": {
             const player = getPlayerByUUID(data.sender);
-            serverLog(player.name + ": " + data.message);
+            serverLog(
+                player.name + ": " + data.message,
+                getPlayerIpFromSocket(ws)
+            );
             broadcast(
                 {
                     type: "chat",
@@ -825,7 +821,7 @@ function loadWorldFromDir() {
     }
 }
 
-function serverLog(log = "") {
+function serverLog(log = "", ip = null) {
     if (!log) return;
 
     const date = new Date();
@@ -837,7 +833,7 @@ function serverLog(log = "") {
         .replace(/T/, " ")
         .replace(/\..+/, "");
 
-    const formattedLog = `[${formattedDate}] ${log}`;
+    const formattedLog = `[${formattedDate}] ${ip ? `[${ip}] ` : ""}${log}`;
 
     console.log(formattedLog);
 
