@@ -230,6 +230,11 @@ class Player extends Entity {
                     this.addFoodExhaustion(6);
                 } else {
                     this.forceDamage(1);
+                    PlayRandomSoundFromArray({
+                        array: Sounds.Player_Hurt,
+                        positional: true,
+                        origin: this.position,
+                    });
                 }
             }
 

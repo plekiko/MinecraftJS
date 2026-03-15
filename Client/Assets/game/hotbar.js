@@ -1,5 +1,6 @@
 const SHIMMER_SPEED = 30;
 const SHIMMER_DISTANCE = 1;
+const BAR_ICON_SCALE = 2.85;
 
 class Hotbar {
     constructor(inventory = null) {
@@ -34,7 +35,7 @@ class Hotbar {
             this.flashingHearts = true;
         }
 
-        const heartSize = 9 * 3;
+        const heartSize = 9 * BAR_ICON_SCALE;
         const isLowHealth = health <= 3;
         const heartTop = Math.round(hotbar.y - 32);
 
@@ -51,7 +52,7 @@ class Hotbar {
                 url: getSpriteUrl(`gui/icons`),
                 x: leftX + heartSize / 2,
                 y: heartTop + yOffset,
-                scale: 3,
+                scale: BAR_ICON_SCALE,
                 centerX: true,
                 crop: { x: cropX, y: 0, width: 9, height: 9 },
             });
@@ -86,7 +87,7 @@ class Hotbar {
             this.flashingFood = true;
         }
 
-        const foodSize = 8 * 3;
+        const foodSize = 9 * BAR_ICON_SCALE;
         const isLowFood = food <= 3;
         const foodTop = Math.round(hotbar.y - 32);
 
@@ -112,7 +113,7 @@ class Hotbar {
                 url: getSpriteUrl(`gui/icons`),
                 x: leftX + foodSize / 2,
                 y: foodTop + yOffset,
-                scale: 3,
+                scale: BAR_ICON_SCALE,
                 centerX: true,
                 crop: { x: cropX, y: 27, width: 9, height: 9 },
             });
