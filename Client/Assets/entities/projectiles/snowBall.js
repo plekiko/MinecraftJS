@@ -45,6 +45,6 @@ class Snowball extends Projectile {
             range: 10,
             origin: this.position,
         });
-        removeEntity(this);
+        world.removeEntity(this);
     }
 }

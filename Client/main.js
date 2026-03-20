@@ -167,7 +167,7 @@ async function gameLoop() {
 
 function updateGame() {
     updateEntities();
-    updateParticleEmitters();
+    world.updateParticleEmitters();
 
     if (world.player) cursorBlockLogic();
     if (hotbar) hotbar.update();

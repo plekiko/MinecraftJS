@@ -85,7 +85,7 @@ function createExplosion(
                     block.explode(true);
                 } else {
                     block.breakBlock(blockDef.dropWithoutTool);
-                    setBlockType(block, Blocks.Air);
+                    this.world.setBlockType(block, Blocks.Air);
                 }
             }
 

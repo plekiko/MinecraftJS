@@ -54,7 +54,7 @@ class Pig extends Mob {
     dieEvent() {
         this.dropLoot();
         playPositionalSound(this.position, "mobs/pig/death.ogg");
-        removeEntity(this);
+        world.removeEntity(this);
     }
 
     tickUpdate() {

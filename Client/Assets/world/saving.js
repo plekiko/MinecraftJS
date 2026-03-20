@@ -315,7 +315,7 @@ async function loadWorld(save) {
     }
 
     if (SPAWN_PLAYER) {
-        removeEntity(world.player);
+        world.removeEntity(world.player);
         world.player = null;
 
         setTimeout(() => {

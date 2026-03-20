@@ -518,7 +518,7 @@ class Player extends Entity {
             activeDimension,
         );
 
-        setBlockType(this.hoverBlock, Blocks.Fire);
+        this.world.setBlockType(this.hoverBlock, Blocks.Fire);
     }
 
     playerSwing() {
@@ -561,7 +561,7 @@ class Player extends Entity {
 
         this.reduceDurability();
 
-        setBlockType(this.hoverBlock, Blocks.Farmland);
+        this.world.setBlockType(this.hoverBlock, Blocks.Farmland);
     }
 
     throwProjectile(item) {
@@ -601,10 +601,12 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.Bucket, count: 1 }),
                 );
                 this.hoverBlock.setBlockType(Blocks.Water, true);
-                // setBlockType(this.hoverBlock, Blocks.Water);
+                //this.world.setBlockType(this.hoverBlock, Blocks.Water);
 
                 world.serverPlaceBlock(
-                    world.getChunkXForWorldX(this.hoverBlock.transform.position.x),
+                    world.getChunkXForWorldX(
+                        this.hoverBlock.transform.position.x,
+                    ),
                     this.hoverBlock.x,
                     this.hoverBlock.y,
                     Blocks.Water,
@@ -625,7 +627,9 @@ class Player extends Entity {
                 this.hoverBlock.setBlockType(Blocks.Lava, true);
 
                 world.serverPlaceBlock(
-                    world.getChunkXForWorldX(this.hoverBlock.transform.position.x),
+                    world.getChunkXForWorldX(
+                        this.hoverBlock.transform.position.x,
+                    ),
                     this.hoverBlock.x,
                     this.hoverBlock.y,
                     Blocks.Lava,
@@ -633,7 +637,7 @@ class Player extends Entity {
                     activeDimension,
                 );
 
-                // setBlockType(this.hoverBlock, Blocks.Lava);
+                //this.world.setBlockType(this.hoverBlock, Blocks.Lava);
 
                 this.hoverBlock.updateSprite();
                 return;
@@ -1036,7 +1040,7 @@ class Player extends Entity {
             return;
         }
 
-        removeEntity(drop, multiplayer);
+        world.removeEntity(drop, multiplayer);
     }
 
     climbingCollisingLogic() {

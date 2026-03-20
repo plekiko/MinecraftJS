@@ -542,7 +542,7 @@ class Entity {
 
         if (this.type === EntityTypes.Drop) {
             if (this.fireDamageTimer >= 9) {
-                if (GAMERULES.doFireTick) removeEntity(this);
+                if (GAMERULES.doFireTick) world.removeEntity(this);
                 return;
             }
         }

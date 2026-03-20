@@ -52,7 +52,7 @@ class TNT extends Entity {
         this.flashCounter--;
         if (this.fuse <= 0) {
             this.explode();
-            removeEntity(this);
+            world.removeEntity(this);
         }
     }
 
@@ -72,6 +72,6 @@ class TNT extends Entity {
     }
 
     dieEvent() {
-        removeEntity(this);
+        world.removeEntity(this);
     }
 }

@@ -35,7 +35,7 @@ class FallingBlock extends Entity {
         this.updateEntity();
 
         if (this.grounded) {
-            removeEntity(this);
+            world.removeEntity(this);
 
             const position = new Vector2(
                 Math.round(
@@ -65,7 +65,7 @@ class FallingBlock extends Entity {
 
             const myBlock = this.getBlockAtPosition(position.x, position.y);
 
-            setBlockType(myBlock, this.blockType);
+            this.world.setBlockType(myBlock, this.blockType);
         } else {
             if (
                 this.filterBlocksByProperty(

@@ -208,6 +208,11 @@ async function initializeTextures() {
 initializeTextures();
 
 function getSpriteUrl(path, useTexturePack = true) {
+    // If undefined is anywhere in the path, return a placeholder
+    if (path === undefined || path.includes("undefined")) {
+        return `Assets/sprites/blocks/missing_texture.png`;
+    }
+
     if (isBase64(path)) {
         const base64Index = path.indexOf("data:image/png;base64,");
         return path.substring(base64Index);

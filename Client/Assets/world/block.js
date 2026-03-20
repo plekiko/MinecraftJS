@@ -228,7 +228,7 @@ function checkDissipation(block, worldPos) {
         block.metaData.props.waterLevel += 0.25;
         block.cutoff = block.metaData.props.waterLevel;
         if (block.metaData.props.waterLevel >= 0.85) {
-            setBlockType(block, Blocks.Air);
+            world.setBlockType(block, Blocks.Air);
             return true;
         }
     }
@@ -236,7 +236,10 @@ function checkDissipation(block, worldPos) {
 }
 
 function flowDownward(block, worldPos) {
-    let below = world.getBlockAtWorldPosition(worldPos.x, worldPos.y + BLOCK_SIZE);
+    let below = world.getBlockAtWorldPosition(
+        worldPos.x,
+        worldPos.y + BLOCK_SIZE,
+    );
     if (
         (below && getBlock(below.blockType).air) ||
         (below && getBlock(below.blockType).breakByFluid)
@@ -253,21 +256,11 @@ function flowDownward(block, worldPos) {
     return below;
 }
 
-function setBlockType(block, type, updateAdjacent = true) {
-    const chunk = getDimensionChunks(activeDimension).get(block.chunkX);
-    if (!chunk) return;
-    chunk.setBlockTypeLocal(
-        block.x,
-        block.y,
-        type,
-        block.wall,
-        null,
-        updateAdjacent,
-    );
-}
-
 function verticalCheckAbove(block, worldPos) {
-    let above = world.getBlockAtWorldPosition(worldPos.x, worldPos.y - BLOCK_SIZE);
+    let above = world.getBlockAtWorldPosition(
+        worldPos.x,
+        worldPos.y - BLOCK_SIZE,
+    );
     if (above) {
         if (above.blockType === block.blockType) {
             block.metaData.props.waterLevel = 0;
@@ -718,7 +711,7 @@ class Block extends Square {
 
                             dropItem.count--;
                             if (dropItem.count <= 0) {
-                                removeEntity(drop);
+                                world.removeEntity(drop);
                             }
 
                             transferredFromDrop = true;
@@ -738,7 +731,7 @@ class Block extends Square {
                                 dropItem.count--;
 
                                 if (dropItem.count <= 0) {
-                                    removeEntity(drop);
+                                    world.removeEntity(drop);
                                 }
 
                                 transferredFromDrop = true;
@@ -1013,7 +1006,7 @@ class Block extends Square {
 
         // Clean up despawned or dead mobs from the tracking array
         props.spawnedMobs = props.spawnedMobs.filter(
-            (mob) => mob && getEntityByUUID(mob)?.health > 0,
+            (mob) => mob && world.getEntityByUUID(mob)?.health > 0,
         );
 
         // Check if we can spawn more entities
@@ -1100,11 +1093,9 @@ class Block extends Square {
         const randomVariant =
             treeType.variants[randomRange(0, treeType.variants.length)];
 
-        world.getChunkForX(this.chunkX).spawnTreeAt(
-            randomVariant,
-            this.x,
-            this.getUserLocalY(),
-        );
+        world
+            .getChunkForX(this.chunkX)
+            .spawnTreeAt(randomVariant, this.x, this.getUserLocalY());
     }
 
     getUserLocalY() {
@@ -1262,7 +1253,13 @@ class Block extends Square {
 
         const pitch = Math.pow(2, this.metaData.props.note / 12);
 
-        playPositionalSound(world.getBlockWorldPosition(this), sound, 13, 1, pitch);
+        playPositionalSound(
+            world.getBlockWorldPosition(this),
+            sound,
+            13,
+            1,
+            pitch,
+        );
     }
 
     getSoundBasedOfBlockBelow() {
@@ -1612,11 +1609,14 @@ class Block extends Square {
 
         if (this.linkedBlocks && this.linkedBlocks.length > 1) {
             for (let block of this.linkedBlocks) {
-                const blockAtPos = world.getBlockAtWorldPosition(block.x, block.y);
+                const blockAtPos = world.getBlockAtWorldPosition(
+                    block.x,
+                    block.y,
+                );
 
                 if (blockAtPos && blockAtPos !== this) {
                     if (blockAtPos.blockType === block.blockType)
-                        setBlockType(blockAtPos, Blocks.Air);
+                        this.world.setBlockType(blockAtPos, Blocks.Air);
                 }
             }
         }
@@ -1638,9 +1638,9 @@ class Block extends Square {
         }
 
         if (blockDef.changeToBlockWhenBroken) {
-            setBlockType(this, blockDef.changeToBlockWhenBroken);
+            this.world.setBlockType(this, blockDef.changeToBlockWhenBroken);
         } else {
-            setBlockType(this, Blocks.Air);
+            this.world.setBlockType(this, Blocks.Air);
         }
     }
 
@@ -1697,7 +1697,7 @@ class Block extends Square {
             blockType: this.blockType,
         });
 
-        setBlockType(this, Blocks.Air);
+        this.world.setBlockType(this, Blocks.Air);
     }
 
     playBreakSound() {

@@ -169,7 +169,7 @@ class Square {
         }
 
         const offset = this.blockType
-            ? getBlock(this.blockType).blockOffset
+            ? (getBlock(this.blockType).blockOffset ?? { x: 0, y: 0 })
             : { x: 0, y: 0 };
 
         // Determine drawing values (common for animated and non-animated)

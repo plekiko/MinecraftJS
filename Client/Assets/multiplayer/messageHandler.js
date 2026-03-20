@@ -44,7 +44,7 @@ function applyInventoryFromSave(targetPlayer, inventoryData) {
 }
 
 function applyPlayerDataFromFile(message) {
-    const playerFromFile = getEntityByUUID(message.UUID);
+    const playerFromFile = world.getEntityByUUID(message.UUID);
     if (!playerFromFile) {
         return false;
     }
@@ -105,7 +105,7 @@ function processMessage(data) {
             newPlayer.setSkin(message.player.skin);
             break;
         case "playerLeft":
-            removeEntity(getEntityByUUID(message));
+            world.removeEntity(world.getEntityByUUID(message));
             break;
 
         case "chat":
@@ -128,9 +128,9 @@ function processMessage(data) {
             break;
         case "removeEntity":
             console.log("Removing entity:", message);
-            const entity = getEntityByUUID(message.UUID);
+            const entity = world.getEntityByUUID(message.UUID);
             if (entity) {
-                removeEntity(entity);
+                world.removeEntity(entity);
             }
             break;
         case "summonEntity":
@@ -152,7 +152,7 @@ function processMessage(data) {
             break;
         case "playerData":
             console.log("Received player data:", message);
-            const player = getEntityByUUID(message.UUID);
+            const player = world.getEntityByUUID(message.UUID);
             if (player) {
                 player.setSkin(message.skin);
                 player.name = message.name;
@@ -216,7 +216,7 @@ function processMessage(data) {
 
             block.breakBlock(message.shouldDrop, message.isWall, true);
         case "playerDimension":
-            const otherPlayer = getEntityByUUID(message.player);
+            const otherPlayer = world.getEntityByUUID(message.player);
             if (otherPlayer) otherPlayer.dimension = message.dimension;
             break;
 
@@ -267,7 +267,7 @@ async function getChunk(x) {
 }
 
 function updatePlayerState(data) {
-    const player = getEntityByUUID(data.sender);
+    const player = world.getEntityByUUID(data.sender);
     if (player) {
         player.multiplayerReceivePlayerState(data.message);
     }

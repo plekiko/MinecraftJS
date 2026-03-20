@@ -80,13 +80,13 @@ class Drop extends Entity {
 
             if (combinedCount <= maxStackSize) {
                 this.count = combinedCount;
-                removeEntity(other);
+                world.removeEntity(other);
             } else {
                 const remainingSpace = maxStackSize - this.count;
                 this.count += remainingSpace;
                 other.count -= remainingSpace;
 
-                if (other.count <= 0) removeEntity(other);
+                if (other.count <= 0) world.removeEntity(other);
             }
         }
     }

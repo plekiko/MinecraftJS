@@ -86,7 +86,7 @@ class WitherSkeleton extends Mob {
     dieEvent() {
         this.dropLoot();
         playPositionalSound(this.position, "mobs/zombie/death.ogg");
-        removeEntity(this);
+        world.removeEntity(this);
     }
 
     tickUpdate() {
