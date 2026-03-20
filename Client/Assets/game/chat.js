@@ -59,7 +59,6 @@ class Chat {
             return;
         }
         if (key === "Tab") {
-            this.resetAutocomplete();
             this.autocomplete();
             return;
         }
