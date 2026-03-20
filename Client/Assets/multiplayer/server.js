@@ -87,34 +87,48 @@ let multiplayerLeaveSyncSent = false;
 window.suppressServerCloseWarning = false;
 
 function buildMultiplayerLeaveSnapshot() {
-    if (!player) return null;
+    if (!world.player) return null;
 
     const inventoryPayload =
-        player.inventory &&
-        typeof player.inventory.serializeInventoryForMultiplayer === "function"
-            ? player.inventory.serializeInventoryForMultiplayer()
+        world.player.inventory &&
+        typeof world.player.inventory.serializeInventoryForMultiplayer ===
+            "function"
+            ? world.player.inventory.serializeInventoryForMultiplayer()
             : [];
 
     return {
         position: {
-            x: typeof player.position?.x === "number" ? player.position.x : 0,
-            y: typeof player.position?.y === "number" ? player.position.y : 0,
+            x:
+                typeof world.player.position?.x === "number"
+                    ? world.player.position.x
+                    : 0,
+            y:
+                typeof world.player.position?.y === "number"
+                    ? world.player.position.y
+                    : 0,
         },
-        dimension: typeof player.dimension === "number" ? player.dimension : 0,
-        gamemode: typeof player.gamemode === "number" ? player.gamemode : 0,
-        health: typeof player.health === "number" ? player.health : 20,
+        dimension:
+            typeof world.player.dimension === "number"
+                ? world.player.dimension
+                : 0,
+        gamemode:
+            typeof world.player.gamemode === "number"
+                ? world.player.gamemode
+                : 0,
+        health:
+            typeof world.player.health === "number" ? world.player.health : 20,
         food:
-            typeof player.foodLevel === "number"
-                ? player.foodLevel
-                : typeof player.food === "number"
-                ? player.food
-                : 20,
+            typeof world.player.foodLevel === "number"
+                ? world.player.foodLevel
+                : typeof world.player.food === "number"
+                  ? world.player.food
+                  : 20,
         inventory: inventoryPayload,
     };
 }
 
 function sendMultiplayerLeaveSync(closeSocket = false) {
-    if (!multiplayer || !server || !server.ws || !player) return;
+    if (!multiplayer || !server || !server.ws || !world.player) return;
     if (multiplayerLeaveSyncSent) return;
 
     window.suppressServerCloseWarning = true;
@@ -132,7 +146,7 @@ function sendMultiplayerLeaveSync(closeSocket = false) {
 
     server.send({
         type: "playerUpdate",
-        sender: player.UUID,
+        sender: world.player.UUID,
         message: {
             position: snapshot.position,
             gamemode: snapshot.gamemode,
@@ -143,7 +157,7 @@ function sendMultiplayerLeaveSync(closeSocket = false) {
 
     server.send({
         type: "playerInventory",
-        sender: player.UUID,
+        sender: world.player.UUID,
         message: {
             inventory: snapshot.inventory,
         },
@@ -151,7 +165,7 @@ function sendMultiplayerLeaveSync(closeSocket = false) {
 
     server.send({
         type: "playerSyncOnLeave",
-        sender: player.UUID,
+        sender: world.player.UUID,
         message: snapshot,
     });
 

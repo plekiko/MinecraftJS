@@ -30,15 +30,15 @@ class PauseMenu {
             this.container.classList.add("visible");
             this.page = 1;
             this.root.style.setProperty("--drawMouse", "default");
-            if (player) {
-                player.canMove = false;
-                if (player.resetBreaking) player.resetBreaking();
+            if (world.player) {
+                world.player.canMove = false;
+                if (world.player.resetBreaking) world.player.resetBreaking();
             }
         } else {
             this.container.classList.remove("visible");
             this.page = 0;
             this.root.style.setProperty("--drawMouse", "none");
-            if (player) player.canMove = true;
+            if (world.player) world.player.canMove = true;
         }
     }
 
@@ -67,13 +67,13 @@ class PauseMenu {
             return;
         }
 
-        if (chat.inChat || (player && player.windowOpen)) return;
+        if (chat.inChat || (world.player && world.player.windowOpen)) return;
         if (input._pauseConsumedByUI) {
             input._pauseConsumedByUI = false;
             return;
         }
 
-        if (player && !loadingWorld) {
+        if (world.player && !world.generator.loadingWorld) {
             this.open();
         }
     }

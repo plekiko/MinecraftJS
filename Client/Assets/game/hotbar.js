@@ -19,7 +19,7 @@ class Hotbar {
     }
 
     drawHearts(health, maxHealth, hotbar) {
-        if (!player.abilities.hasHealth) return;
+        if (!world.player.abilities.hasHealth) return;
 
         this.shimmerTime += deltaTime;
 
@@ -30,8 +30,8 @@ class Hotbar {
             this.flashCounter = 0;
         }
 
-        if (this.previousHealth !== player.health) {
-            this.previousHealth = player.health;
+        if (this.previousHealth !== world.player.health) {
+            this.previousHealth = world.player.health;
             this.flashingHearts = true;
         }
 
@@ -73,7 +73,7 @@ class Hotbar {
     }
 
     drawFood(food, maxFood, hotbar) {
-        if (!player.abilities.hasHealth) return;
+        if (!world.player.abilities.hasHealth) return;
 
         if (this.flashingFood) this.foodFlashCounter += deltaTime;
 
@@ -82,8 +82,8 @@ class Hotbar {
             this.foodFlashCounter = 0;
         }
 
-        if (this.previousFood !== player.foodLevel) {
-            this.previousFood = player.foodLevel;
+        if (this.previousFood !== world.player.foodLevel) {
+            this.previousFood = world.player.foodLevel;
             this.flashingFood = true;
         }
 
@@ -153,8 +153,12 @@ class Hotbar {
         });
 
         this.drawItems();
-        this.drawHearts(player.health, player.maxHealth, hotbar);
-        this.drawFood(player.foodLevel, player.maxFoodLevel, hotbar);
+        this.drawHearts(world.player.health, world.player.maxHealth, hotbar);
+        this.drawFood(
+            world.player.foodLevel,
+            world.player.maxFoodLevel,
+            hotbar,
+        );
     }
 
     update() {
@@ -197,7 +201,7 @@ class Hotbar {
 
     handleSelecting() {
         if (chat.inChat) return;
-        if (player.windowOpen) return;
+        if (world.player.windowOpen) return;
 
         if (input.isActionPressed("hotbarUp")) this.currentSlot--;
         if (input.isActionPressed("hotbarDown")) this.currentSlot++;

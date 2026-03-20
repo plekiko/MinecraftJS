@@ -81,7 +81,7 @@ class ParticleEmitter {
     }
 
     getLightLevel() {
-        return getBlockAtWorldPosition(this.x, this.y)?.lightLevel;
+        return world.getBlockAtWorldPosition(this.x, this.y)?.lightLevel;
     }
 
     emitBurst() {
@@ -137,7 +137,7 @@ function createParticleEmitter({
     randomScale = false,
     range = 0,
     lighting = true,
-    scale = 1,
+    scale = 10,
 } = {}) {
     const newEmitter = new ParticleEmitter({
         x: x,
@@ -157,15 +157,15 @@ function createParticleEmitter({
         scale: scale,
     });
 
-    particleEmitters.push(newEmitter);
+    world.particleEmitters.push(newEmitter);
 
     return newEmitter;
 }
 
 function removeParticleEmitter(emitter) {
-    const index = particleEmitters.indexOf(emitter);
+    const index = world.particleEmitters.indexOf(emitter);
     if (index > -1) {
-        particleEmitters.splice(index, 1);
+        world.particleEmitters.splice(index, 1);
     }
 }
 
@@ -176,8 +176,8 @@ function createParticleEmitterAtPlayer(
     direction = 0,
 ) {
     const emitter = createParticleEmitter({
-        x: player.position.x,
-        y: player.position.y,
+        x: world.player.position.x,
+        y: world.player.position.y,
         radius: radius,
         type: type,
         maxParticles: maxParticles,

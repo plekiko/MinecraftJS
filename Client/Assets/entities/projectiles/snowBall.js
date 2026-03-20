@@ -1,9 +1,12 @@
 class Snowball extends Projectile {
-    constructor({
-        position = new Vector2(),
-        velocity = new Vector2(15 * BLOCK_SIZE, -15 * BLOCK_SIZE),
-    } = {}) {
-        super({
+    constructor(
+        world,
+        {
+            position = new Vector2(),
+            velocity = new Vector2(15 * BLOCK_SIZE, -15 * BLOCK_SIZE),
+        } = {},
+    ) {
+        super(world, {
             name: "Snowball",
             position: position,
             sprite: getSpriteUrl("items/snowball"),

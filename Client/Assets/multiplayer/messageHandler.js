@@ -38,7 +38,7 @@ function applyInventoryFromSave(targetPlayer, inventoryData) {
         "function"
     ) {
         targetPlayer.inventory.lastSyncedInventoryPayload = JSON.stringify(
-            targetPlayer.inventory.serializeInventoryForMultiplayer()
+            targetPlayer.inventory.serializeInventoryForMultiplayer(),
         );
     }
 }
@@ -54,7 +54,7 @@ function applyPlayerDataFromFile(message) {
             message.gamemode <= 3 &&
             message.gamemode >= 0
             ? message.gamemode
-            : 0
+            : 0,
     );
 
     playerFromFile.dimension =
@@ -62,7 +62,7 @@ function applyPlayerDataFromFile(message) {
 
     playerFromFile.position = new Vector2(
         typeof message.position?.x === "number" ? message.position.x : 0,
-        typeof message.position?.y === "number" ? message.position.y : 0
+        typeof message.position?.y === "number" ? message.position.y : 0,
     );
 
     playerFromFile.health =
@@ -74,7 +74,7 @@ function applyPlayerDataFromFile(message) {
     applyInventoryFromSave(playerFromFile, message.inventory);
 
     gotoDimension(
-        typeof message.dimension === "number" ? message.dimension : 0
+        typeof message.dimension === "number" ? message.dimension : 0,
     );
 
     return true;
@@ -100,7 +100,7 @@ function processMessage(data) {
                 false,
                 message.player.UUID,
                 message.player.name,
-                false
+                false,
             );
             newPlayer.setSkin(message.player.skin);
             break;
@@ -123,8 +123,8 @@ function processMessage(data) {
             break;
         case "seed":
             console.log("Received seed:", message);
-            loadCustomSeed(message);
-            multiplayerSeedLoaded = true;
+            world.generator.loadCustomSeed(message);
+            world.generator.multiplayerSeedLoaded = true;
             break;
         case "removeEntity":
             console.log("Removing entity:", message);
@@ -140,7 +140,7 @@ function processMessage(data) {
                 message.position,
                 message.props,
                 false,
-                message.UUID
+                message.UUID,
             );
             return;
 
@@ -175,7 +175,7 @@ function processMessage(data) {
                 console.log(
                     "Chunk not loaded:",
                     message.chunkX,
-                    message.dimensionIndex
+                    message.dimensionIndex,
                 );
                 return;
             }
@@ -190,7 +190,7 @@ function processMessage(data) {
                     message.blockType,
                     message.isWall,
                     null,
-                    true
+                    true,
                 );
             break;
         case "breakBlock":
@@ -200,7 +200,7 @@ function processMessage(data) {
                 console.log(
                     "Chunk not loaded:",
                     message.chunkX,
-                    message.dimensionIndex
+                    message.dimensionIndex,
                 );
                 return;
             }
@@ -222,7 +222,7 @@ function processMessage(data) {
 
         case "syncMetaData":
             const chunk = getDimensionChunks(message.dimensionIndex)?.get(
-                message.chunkX
+                message.chunkX,
             );
 
             if (!chunk) break;
@@ -241,7 +241,7 @@ function processMessage(data) {
                 message.position,
                 message.props,
                 false,
-                message.UUID
+                message.UUID,
             );
             break;
 
@@ -257,7 +257,7 @@ async function getChunk(x) {
         const chunk = await server.get({
             type: "getChunk",
             message: { x: x },
-            sender: player.UUID,
+            sender: world.player.UUID,
         });
 
         console.log("Received chunk:", chunk);
@@ -275,7 +275,7 @@ function updatePlayerState(data) {
 
 async function iJoined(player, existingPlayers, gamemode = 0) {
     // Wait until loadingWorld is false
-    while (loadingWorld) {
+    while (world.generator.loadingWorld) {
         await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
@@ -283,7 +283,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
         new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
         false,
         player.UUID,
-        settings.username
+        settings.username,
     );
 
     if (pendingPlayerDataFromFile.has(player.UUID)) {
@@ -328,7 +328,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
                 false,
                 p.UUID,
                 p.name,
-                false
+                false,
             );
 
             newPlayer.dimension = p.dimension;
@@ -344,7 +344,7 @@ function handleEntityRPC(data) {
         entity[data.message.method](...data.message.args);
     } else {
         console.warn(
-            `Entity ${data.UUID} does not have method ${data.message.method}`
+            `Entity ${data.UUID} does not have method ${data.message.method}`,
         );
     }
 }

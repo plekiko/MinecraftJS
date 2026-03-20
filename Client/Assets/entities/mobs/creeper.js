@@ -1,13 +1,16 @@
 class Creeper extends Mob {
-    constructor({
-        health = 20,
-        noAi = false,
-        position = new Vector2(),
-        invulnerable = false,
-        myChunkX = 0,
-        body = createCreeperBody(),
-    } = {}) {
-        super({
+    constructor(
+        world,
+        {
+            health = 20,
+            noAi = false,
+            position = new Vector2(),
+            invulnerable = false,
+            myChunkX = 0,
+            body = createCreeperBody(),
+        } = {},
+    ) {
+        super(world, {
             name: "Creeper",
             health: health,
             position: position,
@@ -46,9 +49,13 @@ class Creeper extends Mob {
     }
 
     checkPrime() {
-        if (!player || !player.abilities.hasHealth) return;
+        if (!this.world.player || !this.world.player.abilities.hasHealth)
+            return;
 
-        const distance = Vector2.Distance(this.position, player.position);
+        const distance = Vector2.Distance(
+            this.position,
+            this.world.player.position,
+        );
         if (distance <= 2.5 * BLOCK_SIZE) {
             this.primed = true;
             this.fuse = this.fuseMax;

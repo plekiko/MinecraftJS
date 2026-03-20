@@ -1,13 +1,16 @@
 class Pig extends Mob {
-    constructor({
-        health = 10,
-        noAi = false,
-        position = new Vector2(),
-        invulnerable = false,
-        myChunkX = 0,
-        body = createPigBody(),
-    } = {}) {
-        super({
+    constructor(
+        world,
+        {
+            health = 10,
+            noAi = false,
+            position = new Vector2(),
+            invulnerable = false,
+            myChunkX = 0,
+            body = createPigBody(),
+        } = {},
+    ) {
+        super(world, {
             name: "Pig",
             health: health,
             position: position,

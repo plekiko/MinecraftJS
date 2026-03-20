@@ -1,13 +1,16 @@
 class Zombie extends Mob {
-    constructor({
-        health = 20,
-        noAi = false,
-        position = new Vector2(),
-        invulnerable = false,
-        myChunkX = 0,
-        body = createZombieBody(),
-    } = {}) {
-        super({
+    constructor(
+        world,
+        {
+            health = 20,
+            noAi = false,
+            position = new Vector2(),
+            invulnerable = false,
+            myChunkX = 0,
+            body = createZombieBody(),
+        } = {},
+    ) {
+        super(world, {
             name: "Zombie",
             health: health,
             position: position,

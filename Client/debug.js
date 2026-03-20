@@ -11,7 +11,7 @@ function handleDebugging() {
 }
 
 function handleDebugInput() {
-    if (player && !player.canMove) return; // e.g. pause menu open
+    if (world.player && !world.player.canMove) return; // e.g. pause menu open
     if (input.isActionPressed("debugChunkBorders")) toggleChunkBorders();
     if (input.isActionPressed("debugCamera")) toggleCamera();
     if (input.isActionPressed("debugHitbox")) toggleHitbox();
@@ -74,7 +74,7 @@ function toggleCoordinates() {
 function printBlockLogic() {
     if (input.isActionDown("attack") || input.isActionDown("place")) {
         const mousePos = input.getMousePositionOnBlockGrid();
-        const block = getBlockAtWorldPosition(mousePos.x, mousePos.y);
+        const block = world.getBlockAtWorldPosition(mousePos.x, mousePos.y);
 
         chat.message(
             `${getBlock(block.blockType).name} at ${mousePos.x}, ${
@@ -94,7 +94,7 @@ function printBlockLogic() {
 }
 
 function cameraLogic() {
-    if (player) return;
+    if (world.player) return;
 
     const maxSpeed = 15;
     const acceleration = 1;

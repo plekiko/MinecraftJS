@@ -1,5 +1,8 @@
 class FallingBlock extends Entity {
-    constructor({ position = new Vector2(), blockType = Blocks.Sand } = {}) {
+    constructor(
+        world,
+        { position = new Vector2(), blockType = Blocks.Sand } = {},
+    ) {
         const spritePath = "blocks/" + getBlock(blockType).sprite;
         const sprite = getSpriteUrl(spritePath);
 
@@ -9,7 +12,7 @@ class FallingBlock extends Entity {
 
         const spriteScale = BLOCK_SIZE / Math.max(spriteWidth, spriteHeight);
 
-        super({
+        super(world, {
             name: "Falling Block",
             position: new Vector2(
                 position.x + BLOCK_SIZE / 20,

@@ -30,7 +30,7 @@ class Chat {
     openChat() {
         this.historyIndex = 0;
         this.inChat = true;
-        if (player) player.canMove = false;
+        if (world.player) world.player.canMove = false;
         document.addEventListener("keydown", this._boundKeyHandler, {
             capture: true,
         });
@@ -38,7 +38,7 @@ class Chat {
 
     closeChat() {
         this.inChat = false;
-        if (player) player.canMove = true;
+        if (world.player) world.player.canMove = true;
         document.removeEventListener("keydown", this._boundKeyHandler, {
             capture: true,
         });
@@ -159,13 +159,13 @@ class Chat {
             server.send({
                 type: "chat",
                 message: message,
-                sender: player.UUID,
+                sender: world.player.UUID,
                 color,
             });
         }
 
         if (message) {
-            this.message(message, player.name, color);
+            this.message(message, world.player.name, color);
         }
 
         this.closeChat();
@@ -291,9 +291,9 @@ class Chat {
                     return [
                         "~",
                         "0",
-                        player
+                        world.player
                             ? Math.floor(
-                                  player.position.x / BLOCK_SIZE,
+                                  world.player.position.x / BLOCK_SIZE,
                               ).toString()
                             : "0",
                     ];
@@ -405,7 +405,7 @@ class Chat {
         const biome = AllBiomes[biomeName];
 
         if (biome) {
-            const biomeChunkX = locateBiome(biome);
+            const biomeChunkX = world.generator.locateBiome(biome);
 
             if (!biomeChunkX) {
                 this.message("Biome not found.", "", Colors.Red);
@@ -456,8 +456,8 @@ class Chat {
                 this.summon(messageArray);
                 break;
             case "kill":
-                if (!player) break;
-                player.dieEvent();
+                if (!world.player) break;
+                world.player.dieEvent();
                 break;
             case "time":
                 this.setTime(messageArray);
@@ -472,7 +472,7 @@ class Chat {
                 this.locateBiome(messageArray);
                 break;
             case "seed":
-                this.message(`Seed: ${seed}`);
+                this.message(`Seed: ${world.seed}`);
 
                 if (!navigator?.clipboard) {
                     this.message(
@@ -481,12 +481,12 @@ class Chat {
                         Colors.Red,
                     );
                 } else {
-                    navigator.clipboard.writeText(seed);
+                    navigator.clipboard.writeText(world.seed);
                 }
                 this.message("Seed copied to clipboard.", "", Colors.Green);
                 break;
             case "hit":
-                if (!player) break;
+                if (!world.player) break;
                 this.hitPlayer(messageArray);
                 break;
             case "gamerule":
@@ -545,13 +545,19 @@ class Chat {
             return;
         }
 
-        fill(position1.x, position1.y, position2.x, position2.y, blockType);
+        world.generator.fill(
+            position1.x,
+            position1.y,
+            position2.x,
+            position2.y,
+            blockType,
+        );
 
         this.cheatMessage(
-            `Filled area from (${worldToBlocks(position1).x}, ${
-                worldToBlocks(position1).y
-            }) to (${worldToBlocks(position2).x}, ${
-                worldToBlocks(position2).y
+            `Filled area from (${world.worldToBlocks(position1).x}, ${
+                world.worldToBlocks(position1).y
+            }) to (${world.worldToBlocks(position2).x}, ${
+                world.worldToBlocks(position2).y
             }) with ${blockName}.`,
             "",
             Colors.Green,
@@ -580,10 +586,10 @@ class Chat {
         if (block) {
             const userBlockPos = new Vector2(
                 Math.floor(position.x / BLOCK_SIZE),
-                worldToUserBlockY(position.y),
+                world.worldToUserBlockY(position.y),
             );
 
-            const placed = setBlockTypeAtUserBlockPosition(
+            const placed = world.setBlockTypeAtUserBlockPosition(
                 userBlockPos.x,
                 userBlockPos.y,
                 block,
@@ -594,10 +600,10 @@ class Chat {
             );
 
             if (placed) {
-                serverPlaceBlock(
-                    getChunkXForWorldX(position.x),
-                    worldToLocal(position.x, position.y).x,
-                    worldToLocal(position.x, position.y).y,
+                world.serverPlaceBlock(
+                    world.getChunkXForWorldX(position.x),
+                    world.worldToLocal(position.x, position.y).x,
+                    world.worldToLocal(position.x, position.y).y,
                     block,
                 );
             }
@@ -666,7 +672,7 @@ class Chat {
     }
 
     hitPlayer(messageArray) {
-        if (!player) return;
+        if (!world.player) return;
 
         if (!messageArray[1]) {
             this.invalidCommand("/hit <damage>");
@@ -680,7 +686,7 @@ class Chat {
             return;
         }
 
-        player.hit(damage);
+        world.player.hit(damage);
     }
 
     setTime(messageArray) {
@@ -710,10 +716,10 @@ class Chat {
         const structureName = messageArray[1];
 
         if (Structures[structureName] !== undefined) {
-            const playerUserPos = worldToBlocks(player.position);
-            generateStructure(
+            const playerUserPos = world.worldToBlocks(world.player.position);
+            world.generator.generateStructure(
                 structureName,
-                player.position.x,
+                world.player.position.x,
                 playerUserPos.y * BLOCK_SIZE,
             );
 
@@ -753,7 +759,7 @@ class Chat {
 
         if (Entities[itemName] != null) {
             const entity = Entities[itemName];
-            const userPosition = worldToBlocks(position);
+            const userPosition = world.worldToBlocks(position);
 
             for (let i = 0; i < count; i++) {
                 summonEntity(entity, structuredClone(position));
@@ -768,16 +774,18 @@ class Chat {
     }
 
     getWorldPosition(position) {
-        if (position.x === "~") position.x = player.position.x / BLOCK_SIZE;
-        if (position.y === "~") position.y = worldToBlocks(player.position).y;
+        if (position.x === "~")
+            position.x = world.player.position.x / BLOCK_SIZE;
+        if (position.y === "~")
+            position.y = world.worldToBlocks(world.player.position).y;
 
         if (isNaN(position.x) || isNaN(position.y)) return null;
 
-        return userBlocksToWorldPosition(position.x, position.y);
+        return world.userBlocksToWorldPosition(position.x, position.y);
     }
 
     teleport(messageArray) {
-        if (!player) {
+        if (!world.player) {
             this.message("No player found.");
             return;
         }
@@ -798,7 +806,7 @@ class Chat {
             return;
         }
 
-        player.teleport(targetPosition);
+        world.player.teleport(targetPosition);
 
         this.cheatMessage(`Teleported player to x: ${x} y: ${y}`);
     }
@@ -809,7 +817,7 @@ class Chat {
             return;
         }
 
-        if (!player) {
+        if (!world.player) {
             this.message("No player found.");
             return;
         }
@@ -839,7 +847,7 @@ class Chat {
             return;
         }
 
-        player.setGamemode(gamemode);
+        world.player.setGamemode(gamemode);
 
         const gamemodeNames = [
             "Survival",
@@ -856,7 +864,7 @@ class Chat {
             server.send({
                 type: "chat",
                 message: message,
-                sender: player.UUID,
+                sender: world.player.UUID,
             });
         }
 
@@ -903,7 +911,7 @@ class Chat {
     }
 
     give(messageArray) {
-        if (!player) return;
+        if (!world.player) return;
 
         if (messageArray.length < 2) {
             this.invalidCommand("/give <Category.ItemName>");
@@ -936,7 +944,7 @@ class Chat {
 
             if (inventoryItem.air) return;
 
-            player.inventory.addItem(inventoryItem);
+            world.player.inventory.addItem(inventoryItem);
 
             this.cheatMessage(
                 `Gave ${count} ${
@@ -952,7 +960,7 @@ class Chat {
 
     clear() {
         this.cheatMessage("Cleared Inventory");
-        player.inventory.createItemArray();
+        world.player.inventory.createItemArray();
     }
 
     draw(ctx) {

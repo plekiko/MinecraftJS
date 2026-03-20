@@ -1,12 +1,15 @@
 class Drop extends Entity {
-    constructor({
-        UUID = null,
-        position,
-        blockId = null,
-        itemId = null,
-        count = 1,
-        props = {},
-    }) {
+    constructor(
+        world,
+        {
+            UUID = null,
+            position,
+            blockId = null,
+            itemId = null,
+            count = 1,
+            props = {},
+        } = {},
+    ) {
         const isItem = itemId !== null;
         const spritePath = isItem
             ? "items/" + getItem(itemId).sprite
@@ -19,7 +22,7 @@ class Drop extends Entity {
         const spriteScale = 16 / Math.max(spriteWidth, spriteWidth);
 
         // Set up the entity with dynamic scaling
-        super({
+        super(world, {
             UUID: UUID || uuidv4(),
             name: isItem ? "Item" : "Block",
             position: position,

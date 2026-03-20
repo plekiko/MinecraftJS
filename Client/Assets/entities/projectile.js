@@ -1,16 +1,19 @@
 class Projectile extends Entity {
-    constructor({
-        name = "Projectile",
-        position,
-        sprite,
-        scale = 1,
-        velocity = new Vector2(),
-        drag = 40,
-        damage = 1,
-        hitbox = new Vector2(BLOCK_SIZE, BLOCK_SIZE),
-        props = {},
-    }) {
-        super({
+    constructor(
+        world,
+        {
+            name = "Projectile",
+            position,
+            sprite,
+            scale = 1,
+            velocity = new Vector2(),
+            drag = 40,
+            damage = 1,
+            hitbox = new Vector2(BLOCK_SIZE, BLOCK_SIZE),
+            props = {},
+        } = {},
+    ) {
+        super(world, {
             name: "Projectile",
             position: position,
             hitbox: hitbox,

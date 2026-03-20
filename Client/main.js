@@ -1,6 +1,8 @@
 let lastFrameTime = performance.now();
 let fpsDisplay = 0;
 
+world = new World();
+
 let settings = {
     musicVolume: 100,
     sfxVolume: 100,
@@ -45,10 +47,14 @@ function summonEntity(entity, position, props, sync = false, uuid = null) {
     // console.log("Summoning entity:", entity, position, props, uuid);
     const UUID = uuid ? uuid : uuidv4();
 
-    const newEntity = new entity({ UUID: UUID, position: position, ...props });
+    const newEntity = new entity(world, {
+        UUID: UUID,
+        position: position,
+        ...props,
+    });
     newEntity.dimension = activeDimension;
 
-    entities.push(newEntity);
+    world.entities.push(newEntity);
 
     if (sync) {
         server.send({
@@ -72,7 +78,7 @@ function spawnDrop(position, props) {
         server.send({
             type: "summonDrop",
             message: { UUID: uuid, position: position, props: props },
-            sender: player?.UUID,
+            sender: world.player?.UUID,
         });
     }
     return drop;
@@ -83,16 +89,18 @@ function spawnPlayer(
     setOnGround = true,
     UUID = null,
     name = null,
-    local = true
+    local = true,
 ) {
-    const newPlayer = new Player({
+    const newPlayer = new Player(world, {
         position: position,
-        entities: entities,
+        entities: world.entities,
         UUID: UUID ? UUID : uuidv4(),
         name: name ? name : "Player",
     });
 
-    if (local) player = newPlayer;
+    if (local) {
+        world.player = newPlayer;
+    }
 
     if (setOnGround) {
         const trySetOnGround = () => {
@@ -109,7 +117,7 @@ function spawnPlayer(
         }
     }
 
-    entities.push(newPlayer);
+    world.entities.push(newPlayer);
 
     if (local) hotbar = new Hotbar(newPlayer.inventory);
 
@@ -141,13 +149,13 @@ async function gameLoop() {
     //     return;
     // }
 
-    await generateWorld();
+    await world.startGenerator();
     updateGame();
 
     draw(
         getDimensionChunks(activeDimension),
         calculateFPS(currentFrameTime),
-        deltaTime
+        deltaTime,
     );
 
     lastFrameTime = currentFrameTime;
@@ -161,7 +169,7 @@ function updateGame() {
     updateEntities();
     updateParticleEmitters();
 
-    if (player) cursorBlockLogic();
+    if (world.player) cursorBlockLogic();
     if (hotbar) hotbar.update();
     if (pauseMenu) pauseMenu.update();
     if (chat) chat.update();
@@ -170,7 +178,7 @@ function updateGame() {
 }
 
 async function initGame() {
-    loadingWorld = true;
+    world.generator.loadingWorld = true;
 
     console.log("Initializing game...");
 
@@ -183,12 +191,12 @@ async function initGame() {
     if (!multiplayer) {
         loadWorldFromLocalStorage();
     } else {
-        while (!multiplayerSeedLoaded) {
+        while (!world.generator.multiplayerSeedLoaded) {
             await new Promise((resolve) => setTimeout(resolve, 50));
         }
     }
 
-    loadingWorld = false;
+    world.generator.loadingWorld = false;
 }
 
 requestAnimationFrame(gameLoop);
@@ -218,9 +226,9 @@ function updateEntities(tick = false) {
     const cameraNearX =
         camera.getWorldX(camera.x) + ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
 
-    entities.forEach((entity) => {
-        if (entity === player) {
-            camera.update(player);
+    world.entities.forEach((entity) => {
+        if (entity === world.player) {
+            camera.update(world.player);
             if (tick) entity.tickUpdate();
             else entity.update();
             return;
@@ -245,38 +253,38 @@ function updateArray(array, deltaTime) {
 function cursorBlockLogic() {
     if (pauseMenu?.getActive()) {
         cursorInRange = false;
-        if (player) {
-            player.hoverBlock = null;
-            player.hoverWall = null;
+        if (world.player) {
+            world.player.hoverBlock = null;
+            world.player.hoverWall = null;
         }
         return;
     }
 
     const cursorDistance = Math.floor(
         Vector2.Distance(
-            player.position,
+            world.player.position,
             new Vector2(
                 input.getMousePositionOnBlockGrid().x,
-                input.getMousePositionOnBlockGrid().y
-            )
-        ) / BLOCK_SIZE
+                input.getMousePositionOnBlockGrid().y,
+            ),
+        ) / BLOCK_SIZE,
     );
 
-    cursorInRange = !player.abilities.instaBuild
+    cursorInRange = !world.player.abilities.instaBuild
         ? cursorDistance <= INTERACT_DISTANCE
         : true;
 
-    player.hoverBlock = cursorInRange
-        ? getBlockAtWorldPosition(
-              input.getMousePositionOnBlockGrid().x,
-              input.getMousePositionOnBlockGrid().y
-          )
-        : null;
-    player.hoverWall = cursorInRange
-        ? getBlockAtWorldPosition(
+    world.player.hoverBlock = cursorInRange
+        ? world.getBlockAtWorldPosition(
               input.getMousePositionOnBlockGrid().x,
               input.getMousePositionOnBlockGrid().y,
-              true
+          )
+        : null;
+    world.player.hoverWall = cursorInRange
+        ? world.getBlockAtWorldPosition(
+              input.getMousePositionOnBlockGrid().x,
+              input.getMousePositionOnBlockGrid().y,
+              true,
           )
         : null;
 }

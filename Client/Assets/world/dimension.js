@@ -159,21 +159,21 @@ let dimensions = [
 function gotoDimension(dimension) {
     if (dimension === activeDimension) return;
 
-    if (player) player.dimension = dimension;
+    if (world.player) world.player.dimension = dimension;
 
     if (multiplayer) {
         server.send({
             type: "playerDimension",
             message: {
-                player: player.UUID,
+                player: world.player.UUID,
                 dimension: dimension,
             },
         });
     }
 
-    chunks_in_render_distance = new Map();
+    world.chunks_in_render_distance = new Map();
 
-    entities = entities.filter((entity) => {
+    world.entities = world.entities.filter((entity) => {
         if (entity instanceof Player) {
             return true;
         }

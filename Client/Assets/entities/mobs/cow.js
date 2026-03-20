@@ -1,13 +1,16 @@
 class Cow extends Mob {
-    constructor({
-        health = 10,
-        noAi = false,
-        position = new Vector2(),
-        invulnerable = false,
-        myChunkX = 0,
-        body = createCowBody(),
-    } = {}) {
-        super({
+    constructor(
+        world,
+        {
+            health = 10,
+            noAi = false,
+            position = new Vector2(),
+            invulnerable = false,
+            myChunkX = 0,
+            body = createCowBody(),
+        } = {},
+    ) {
+        super(world, {
             name: "Cow",
             health: health,
             position: position,

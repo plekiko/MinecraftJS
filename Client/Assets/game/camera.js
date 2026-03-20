@@ -39,8 +39,8 @@ class Camera {
         );
     }
 
-    update(player) {
-        if (!player) {
+    update(target = world.player) {
+        if (!target) {
             const calculatedSpeed = input.isActionDown("sprint")
                 ? this.speed * 2
                 : this.speed;
@@ -49,7 +49,7 @@ class Camera {
             this.x += this.velocity.x * calculatedSpeed * deltaTime;
             this.y += this.velocity.y * calculatedSpeed * deltaTime;
         } else {
-            this.followPlayer();
+            this.followPlayer(target);
         }
 
         // Clamp the camera's y so that the bottom edge doesn't go below the world bottom.
@@ -61,11 +61,13 @@ class Camera {
         this.y = Math.max(this.y, 0);
     }
 
-    followPlayer() {
+    followPlayer(target = world.player) {
+        if (!target) return;
+
         const increment = deltaTime * this.lerpSpeed;
 
-        let targetX = player.position.x - CANVAS.width / 2;
-        let targetY = this.getWorldY(player.position.y);
+        let targetX = target.position.x - CANVAS.width / 2;
+        let targetY = this.getWorldY(target.position.y);
 
         // Define a maximum distance threshold
         const maxDistance = 500; // Adjust this value as needed

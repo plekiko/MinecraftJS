@@ -1,25 +1,28 @@
 class Mob extends Entity {
-    constructor({
-        name = "Mob",
-        health = 10,
-        noAi = false,
-        position = new Vector2(),
-        hitbox = new Vector2(1, 1),
-        invulnerable = false,
-        type = EntityTypes.Mob,
-        float = true,
-        ai,
-        speed = 2,
-        body = null,
-        stepSize = 1,
-        footstepSounds = null,
-        ambientSounds = null,
-        ambientSoundRange = { min: 5, max: 20 },
-        lootTable = null,
-        myChunkX = 0,
-        burnInSunlight = false,
-    } = {}) {
-        super({
+    constructor(
+        world,
+        {
+            name = "Mob",
+            health = 10,
+            noAi = false,
+            position = new Vector2(),
+            hitbox = new Vector2(1, 1),
+            invulnerable = false,
+            type = EntityTypes.Mob,
+            float = true,
+            ai,
+            speed = 2,
+            body = null,
+            stepSize = 1,
+            footstepSounds = null,
+            ambientSounds = null,
+            ambientSoundRange = { min: 5, max: 20 },
+            lootTable = null,
+            myChunkX = 0,
+            burnInSunlight = false,
+        } = {},
+    ) {
+        super(world, {
             name: name,
             position: position,
             hitbox: hitbox,
@@ -106,15 +109,16 @@ class Mob extends Entity {
     }
 
     agressionBehaviour() {
-        if (!player) return;
-        if (!player.abilities.hasHealth) {
+        if (!this.world.player) return;
+        if (!this.world.player.abilities.hasHealth) {
             this.state = aiState.Wander;
             return;
         }
 
         if (
-            Math.abs(Vector2.Distance(this.position, player.position)) <=
-            this.ai.agressionArea
+            Math.abs(
+                Vector2.Distance(this.position, this.world.player.position),
+            ) <= this.ai.agressionArea
         ) {
             this.state = aiState.Agression;
             return;
@@ -124,16 +128,21 @@ class Mob extends Entity {
     }
 
     agressionWalk() {
-        if (!player) return;
+        if (!this.world.player) return;
 
-        this.direction = caculateDirection(this.position, player.position);
+        this.direction = caculateDirection(
+            this.position,
+            this.world.player.position,
+        );
 
         if (this.velocity.x === 0) {
             this.jump();
         }
 
         if (
-            Math.abs(Vector2.XDistance(this.position, player.position)) <
+            Math.abs(
+                Vector2.XDistance(this.position, this.world.player.position),
+            ) <
             BLOCK_SIZE / 4
         ) {
             this.targetVelocity.x = 0;

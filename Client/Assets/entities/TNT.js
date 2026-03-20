@@ -1,5 +1,5 @@
 class TNT extends Entity {
-    constructor({ position } = {}) {
+    constructor(world, { position } = {}) {
         // Get the sprite URL for TNT side
         const spritePath = "blocks/tnt_side";
         const sprite = getSpriteUrl(spritePath);
@@ -13,7 +13,7 @@ class TNT extends Entity {
         const spriteScale = BLOCK_SIZE / Math.max(spriteWidth, spriteHeight);
 
         // Call the superclass constructor with dynamically calculated sprite scale
-        super({
+        super(world, {
             name: "TNT",
             position: new Vector2(
                 position.x + BLOCK_SIZE / 20,

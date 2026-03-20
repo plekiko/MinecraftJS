@@ -1,13 +1,16 @@
 class WitherSkeleton extends Mob {
-    constructor({
-        health = 20,
-        noAi = false,
-        position = new Vector2(),
-        invulnerable = false,
-        myChunkX = 0,
-        body = createWitherSkeletonBody(),
-    } = {}) {
-        super({
+    constructor(
+        world,
+        {
+            health = 20,
+            noAi = false,
+            position = new Vector2(),
+            invulnerable = false,
+            myChunkX = 0,
+            body = createWitherSkeletonBody(),
+        } = {},
+    ) {
+        super(world, {
             name: "Wither Skeleton",
             health: health,
             position: position,

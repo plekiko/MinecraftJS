@@ -90,14 +90,14 @@ class Inventory {
                                 props: item?.props || {},
                             };
                         })
-                      : []
+                      : [],
               )
             : [];
     }
 
     syncInventoryMultiplayer() {
-        if (!multiplayer || !server || !player) return;
-        if (player.inventory !== this) return;
+        if (!multiplayer || !server || !world.player) return;
+        if (world.player.inventory !== this) return;
 
         const inventoryPayload = this.serializeInventoryForMultiplayer();
         const payloadString = JSON.stringify(inventoryPayload);
@@ -108,7 +108,7 @@ class Inventory {
 
         server.send({
             type: "playerInventory",
-            sender: player.UUID,
+            sender: world.player.UUID,
             message: {
                 inventory: inventoryPayload,
             },
@@ -167,13 +167,13 @@ class Inventory {
                 spawnDrop(
                     new Vector2(
                         position.x + randomRange(-BLOCK_SIZE, BLOCK_SIZE),
-                        position.y
+                        position.y,
                     ),
                     {
                         blockId: item.blockId,
                         itemId: item.itemId,
                         count: item.count,
-                    }
+                    },
                 );
             }
         }
@@ -186,7 +186,7 @@ class Inventory {
             this.inventoryUI.x + x + this.openUIOffset.x,
             this.inventoryUI.y + y + this.openUIOffset.y,
             16 * 3,
-            16 * 3
+            16 * 3,
         );
     }
 
@@ -224,7 +224,7 @@ class Inventory {
                                 blockId: item.blockId,
                                 itemId: item.itemId,
                                 count: leftOverCount,
-                            })
+                            }),
                         );
                     }
                 }
@@ -362,7 +362,7 @@ class Inventory {
                 for (let i = 0; i < this.storageSlots.length; i++) {
                     for (let j = 0; j < this.storageSlots[i].length; j++) {
                         this.storage[i][j] = this.cloneItem(
-                            this.storageSlots[i][j].item
+                            this.storageSlots[i][j].item,
                         );
                     }
                 }
@@ -373,7 +373,7 @@ class Inventory {
                 for (let i = 0; i < this.storageSlots.length; i++) {
                     for (let j = 0; j < this.storageSlots[i].length; j++) {
                         this.storage[i][j] = this.cloneItem(
-                            this.storageSlots[i][j].item
+                            this.storageSlots[i][j].item,
                         );
                     }
                 }
@@ -389,7 +389,7 @@ class Inventory {
         for (let i = 0; i < this.storageSlots.length; i++) {
             for (let j = 0; j < this.storageSlots[i].length; j++) {
                 this.storageSlots[i][j].item = this.cloneItem(
-                    this.storage[i][j]
+                    this.storage[i][j],
                 );
             }
         }
@@ -471,7 +471,7 @@ class Inventory {
                 new InventorySlot({
                     position: { x: 158 + x * 63, y: 189 },
                     item: this.storage[0][x],
-                })
+                }),
             );
         }
 
@@ -519,7 +519,7 @@ class Inventory {
 
             this.reverseSync();
 
-            playPositionalSound(player.position, "blocks/anvil_use.ogg");
+            playPositionalSound(world.player.position, "blocks/anvil_use.ogg");
             return;
         }
 
@@ -628,7 +628,7 @@ class Inventory {
         const startIndex = this.currentCreativePage * itemsPerPage;
         const endIndex = Math.min(
             startIndex + itemsPerPage,
-            this.creativeItems.length
+            this.creativeItems.length,
         );
 
         // Create a 6x9 grid
@@ -706,7 +706,7 @@ class Inventory {
         for (let i = 0; i < blocks.length; i++) {
             if (getBlock(blocks[i]).excludeFromCreativeInventory) continue;
             this.creativeItems.push(
-                new InventoryItem({ blockId: blocks[i], count: 1 })
+                new InventoryItem({ blockId: blocks[i], count: 1 }),
             );
         }
 
@@ -714,7 +714,7 @@ class Inventory {
         for (let i = 0; i < items.length; i++) {
             if (getItem(items[i]).excludeFromCreativeInventory) continue;
             this.creativeItems.push(
-                new InventoryItem({ itemId: items[i], count: 1 })
+                new InventoryItem({ itemId: items[i], count: 1 }),
             );
         }
 
@@ -807,7 +807,7 @@ class Inventory {
         for (let i = 0; i < this.storageSlots.length; i++) {
             for (let j = 0; j < this.storageSlots[i].length; j++) {
                 this.storage[i][j] = this.cloneItem(
-                    this.storageSlots[i][j].item
+                    this.storageSlots[i][j].item,
                 );
             }
         }
@@ -1066,7 +1066,7 @@ class Inventory {
 
     handleHotbarAssignment() {
         // Only proceed if an item is hovered and the inventory UI is open
-        if (!this.hoverItem || !player.windowOpen) return;
+        if (!this.hoverItem || !world.player.windowOpen) return;
 
         // Map number keys to hotbar slots
         for (let i = 1; i <= 9; i++) {
@@ -1158,7 +1158,7 @@ class Inventory {
         if (
             this.isSlotHovered(
                 this.craftingOutputSlot.position.x,
-                this.craftingOutputSlot.position.y
+                this.craftingOutputSlot.position.y,
             )
         ) {
             this.mouseOverSlot(0, 0, null, this.craftingOutputSlot.item);
@@ -1230,7 +1230,7 @@ class Inventory {
 
         // Check if each recipe item has a matching slot item
         return recipeItems.every((recipeItem) =>
-            nonEmptySlots.some((slot) => this.isMatch(slot.item, recipeItem))
+            nonEmptySlots.some((slot) => this.isMatch(slot.item, recipeItem)),
         );
     }
 
@@ -1286,7 +1286,7 @@ class Inventory {
                         startRow,
                         startCol,
                         patternRows,
-                        patternCols
+                        patternCols,
                     )
                 ) {
                     return true;
@@ -1522,7 +1522,7 @@ class Inventory {
 
         const spriteUrl = getSpriteUrl(
             spritePath,
-            isEqualToOriginal(spritePath)
+            isEqualToOriginal(spritePath),
         );
 
         const drawParams = {
@@ -1553,7 +1553,7 @@ class Inventory {
 
     drawPlayerSkin(ctx) {
         if (
-            !player?.body?.image?.complete ||
+            !world.player?.body?.image?.complete ||
             typeof drawSkinPreview !== "function"
         )
             return;
@@ -1571,10 +1571,10 @@ class Inventory {
             this.openUIOffset.y;
         drawSkinPreview(
             ctx,
-            player.body.image,
+            world.player.body.image,
             baseX,
             baseY,
-            INVENTORY_PLAYER_SCALE
+            INVENTORY_PLAYER_SCALE,
         );
     }
 
@@ -1608,7 +1608,7 @@ class Inventory {
             slot.position.x + this.inventoryUI.x - 4 + this.openUIOffset.x,
             slot.position.y + this.inventoryUI.y - 4 + this.openUIOffset.y,
             18.5 * 3,
-            18.5 * 3
+            18.5 * 3,
         );
         ctx.globalAlpha = 1;
     }
@@ -1668,7 +1668,7 @@ class Inventory {
     }
 
     drawHoverTitle() {
-        if (!player.windowOpen) return;
+        if (!world.player.windowOpen) return;
         if (!this.hoverItem) return;
         if (!this.hoverItem.blockId && this.hoverItem.itemId == null) return;
 
@@ -1696,7 +1696,7 @@ class Inventory {
     }
 
     drawHoldItem() {
-        if (!player.windowOpen) return;
+        if (!world.player.windowOpen) return;
         const holdingItem = this.holdingItem;
         if (!holdingItem) return;
         const mousePos = input.getMousePosition();
@@ -1763,7 +1763,7 @@ class Inventory {
     drawSlot(slot) {
         slot.draw(
             this.inventoryUI.x + this.openUIOffset.x,
-            this.inventoryUI.y + this.openUIOffset.y
+            this.inventoryUI.y + this.openUIOffset.y,
         );
     }
 }

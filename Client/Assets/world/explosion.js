@@ -24,7 +24,7 @@ function createExplosion(
     });
 
     // Damage and knockback entities in range
-    for (const entity of entities) {
+    for (const entity of world.entities) {
         if (entity === excludeEntity || entity.invulnerable) continue;
 
         const distance = Vector2.Distance(position, entity.position);
@@ -70,7 +70,7 @@ function createExplosion(
         if (visited.has(key)) continue;
         visited.add(key);
 
-        const block = getBlockAtWorldPosition(worldX, worldY);
+        const block = world.getBlockAtWorldPosition(worldX, worldY);
         if (!block) continue;
 
         const blockDef = getBlock(block.blockType);
