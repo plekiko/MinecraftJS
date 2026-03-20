@@ -115,6 +115,7 @@ class Entity {
 
         this.portalCooldown = maxPortalCooldown;
         this.maxPortalCooldown = maxPortalCooldown;
+        this.cameThroughPortal = false;
 
         this.canBurn = canBurn;
         this.hasVisualFire = false;
@@ -471,6 +472,8 @@ class Entity {
             this.filterBlocksByProperty(this.collidingWithBlocks, "specialType")
                 .length > 0
         ) {
+            if (this.cameThroughPortal) return;
+
             for (let block of this.collidingWithBlocks) {
                 const blockData = getBlock(block.blockType);
 
@@ -497,6 +500,8 @@ class Entity {
 
                     gotoDimension(Dimensions.Nether);
 
+                    this.cameThroughPortal = true;
+
                     this.position.x = gotoPosition.x;
                     this.position.y = gotoPosition.y;
 
@@ -514,6 +519,8 @@ class Entity {
 
                     gotoDimension(Dimensions.Overworld);
 
+                    this.cameThroughPortal = true;
+
                     this.position.x = gotoPosition.x;
                     this.position.y = gotoPosition.y;
 
@@ -523,10 +530,13 @@ class Entity {
                 }
             }
 
-            if (!collidingWithPortal)
+            if (!collidingWithPortal) {
                 this.portalCooldown = this.maxPortalCooldown;
+                this.cameThroughPortal = false;
+            }
         } else {
             this.portalCooldown = this.maxPortalCooldown;
+            this.cameThroughPortal = false;
         }
     }
 
