@@ -1718,13 +1718,9 @@ class Chunk {
                 )
                     continue;
 
-                this.drawBlockAtPosition(ctx, block, worldX, worldY, camera);
+                block.draw(ctx, camera);
             }
         }
-    }
-
-    drawBlockAtPosition(ctx, block, x, y, camera) {
-        block.draw(ctx, camera);
     }
 
     //#endregion

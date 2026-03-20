@@ -1190,6 +1190,8 @@ class Entity {
             ctx.globalAlpha = 1; // Reset alpha
         }
 
+        if (drawHitboxes) this.drawHitbox(ctx);
+
         ctx.restore();
     }
 

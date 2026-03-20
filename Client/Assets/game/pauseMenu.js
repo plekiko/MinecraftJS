@@ -4,11 +4,48 @@ class PauseMenu {
         this.pages = Array.from(
             document.querySelectorAll(".pause-menu-page[data-page]"),
         );
+        this.zoomLabel = document.querySelector("#pause-zoom-label");
+        this.zoomSlider = document.querySelector("#pause-zoom-slider");
         this.root = document.querySelector(":root");
 
         this._page = 0; // 0 = closed, 1+ = current page number
         this.container.classList.remove("visible");
         this.pages.forEach((el) => el.classList.remove("active"));
+
+        if (this.zoomSlider) {
+            this.zoomSlider.addEventListener("input", () => {
+                const value = parseInt(this.zoomSlider.value, 10) / 100;
+                this.setZoom(value);
+            });
+        }
+    }
+
+    zoomPresets = [0.8, 1, 1.25, 1.5, 2];
+
+    cycleZoomPreset() {
+        const currentZoom = camera.zoom;
+        let closestIndex = 0;
+        let closestDistance = Infinity;
+        for (let i = 0; i < this.zoomPresets.length; i++) {
+            const distance = Math.abs(currentZoom - this.zoomPresets[i]);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestIndex = i;
+            }
+        }
+        const nextIndex = (closestIndex + 1) % this.zoomPresets.length;
+        const nextPreset = this.zoomPresets[nextIndex];
+
+        this.setZoom(nextPreset);
+    }
+
+    setZoom(value) {
+        camera.zoom = value;
+
+        if (typeof settings !== "undefined") {
+            settings.zoom = camera.zoom;
+            localStorage.setItem("settings", JSON.stringify(settings));
+        }
     }
 
     get page() {

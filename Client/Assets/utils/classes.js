@@ -131,7 +131,7 @@ class Square {
         const centerX = this.transform.position.x + this.transform.size.x / 2;
         const centerY = this.transform.position.y + this.transform.size.y / 2;
         ctx.save();
-        ctx.translate(centerX, centerY);
+        ctx.translate(Math.floor(centerX), Math.floor(centerY));
 
         if (!this.img) {
             if (this.lightLevel < 15) {
@@ -172,7 +172,7 @@ class Square {
             ? getBlock(this.blockType).blockOffset
             : { x: 0, y: 0 };
 
-        // Determine drawing values (common for animated and non-animated)
+        // Determine drawing values
         const drawX = Math.round(
             -this.transform.size.x / 2 +
                 this.drawOffset -
@@ -182,10 +182,10 @@ class Square {
         const drawY = Math.round(
             -this.transform.size.y / 2 - camera.y + offset.y * BLOCK_SIZE,
         );
-        const drawWidth = this.spriteSize * this.spriteScale;
-        const drawHeight = this.spriteSize * this.spriteScale;
+        const drawWidth = Math.round(this.transform.size.x);
+        const drawHeight = Math.round(this.transform.size.y);
 
-        // Non-animated drawing branch with cutoff support
+        // Non-animated drawing
         if (this.img && (!this.frameCount || this.frameCount === 0)) {
             if (this.cutoff > 0) {
                 // Calculate the visible fraction based on cutoff
@@ -196,7 +196,7 @@ class Square {
 
                 ctx.save();
                 ctx.beginPath();
-                // // Clip away the top part so that only the lower visibleHeight is drawn
+                // Clip away the top part so that only the lower visibleHeight is drawn
                 ctx.rect(
                     drawX,
                     drawY + (drawHeight - visibleHeight),
@@ -211,6 +211,7 @@ class Square {
                 // No cutoff, draw normally
                 ctx.drawImage(this.img, drawX, drawY, drawWidth, drawHeight);
             }
+            // Walls
             if (this.dark) {
                 ctx.globalAlpha = 0.5;
                 ctx.fillStyle = "black";
@@ -219,7 +220,6 @@ class Square {
             }
         }
 
-        // Animated drawing branch remains the same
         if (this.img && this.frameCount > 0) {
             this.drawAnimation(ctx, camera);
         }
@@ -228,7 +228,7 @@ class Square {
             this.drawBrightness(ctx, camera);
         }
 
-        ctx.restore(); // Restore the context to its original state
+        ctx.restore();
     }
 
     drawAnimation(ctx, camera) {
@@ -281,10 +281,10 @@ class Square {
             ctx.globalAlpha = 0.5;
             ctx.fillStyle = "black";
             ctx.fillRect(
-                drawX,
-                drawY + (drawHeight - visibleHeight),
-                drawWidth,
-                visibleHeight,
+                Math.round(drawX),
+                Math.round(drawY + (drawHeight - visibleHeight)),
+                Math.round(drawWidth),
+                Math.round(visibleHeight),
             );
             ctx.globalAlpha = this.alpha;
         }

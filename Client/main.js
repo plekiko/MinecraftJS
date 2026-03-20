@@ -8,6 +8,7 @@ let settings = {
     sfxVolume: 100,
     lighting: true,
     username: "Player",
+    zoom: 1,
 };
 
 chat = new Chat();
@@ -38,7 +39,10 @@ function loadSettings() {
             loaded.musicVolume ?? (loaded.music === false ? 0 : 100);
         settings.sfxVolume =
             loaded.sfxVolume ?? (loaded.sfx === false ? 0 : 100);
+        settings.zoom = loaded.zoom ?? 1;
     }
+
+    camera.zoom = settings.zoom;
 }
 
 loadSettings();
@@ -168,6 +172,10 @@ async function gameLoop() {
 function updateGame() {
     updateEntities();
     updateParticleEmitters();
+
+    if (pauseMenu && input.isActionPressed("zoomPreset")) {
+        pauseMenu.cycleZoomPreset();
+    }
 
     if (world.player) cursorBlockLogic();
     if (hotbar) hotbar.update();

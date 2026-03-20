@@ -1,5 +1,11 @@
 # Global Functions
 
+## Recent removals/changes:
+- Removed: double-scaling of block preview hover (camera.zoom applied twice).
+- Removed: manual pixel rounding for block preview hover; now uses camera.worldToScreen for position and BLOCK_SIZE/spriteSize for scale.
+- Removed: legacy overlay fillRect artifacts; now all overlays and block rendering use pixel-perfect rounding.
+- Updated: drawBreakAndPlaceCursor now uses camera.worldToScreen for both preview and outline, and BLOCK_SIZE/spriteSize for scale.
+
 Auto-generated list of top-level function declarations matching `^(async\s+)?function` at column 1.
 
 ## Assets/entities/mobs/cow.js

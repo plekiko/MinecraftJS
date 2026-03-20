@@ -209,17 +209,20 @@ class InputHandler {
 
     getMouseWorldPosition() {
         const pos = this.getMousePosition();
+        const centerX = CANVAS.width / 2;
+        const centerY = CANVAS.height / 2;
+
         return {
-            x: pos.x + camera.x,
-            y: pos.y + camera.y,
+            x: (pos.x - centerX) / camera.zoom + centerX + camera.x,
+            y: (pos.y - centerY) / camera.zoom + centerY + camera.y,
         };
     }
 
     getMousePositionOnBlockGrid() {
-        const pos = this.getMousePosition();
+        const worldPos = this.getMouseWorldPosition();
 
-        const gridX = Math.floor((pos.x + camera.x) / BLOCK_SIZE) * BLOCK_SIZE;
-        const gridY = Math.floor((pos.y + camera.y) / BLOCK_SIZE) * BLOCK_SIZE;
+        const gridX = Math.floor(worldPos.x / BLOCK_SIZE) * BLOCK_SIZE;
+        const gridY = Math.floor(worldPos.y / BLOCK_SIZE) * BLOCK_SIZE;
 
         return new Vector2(Math.floor(gridX), Math.floor(gridY));
     }

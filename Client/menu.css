@@ -44,6 +44,37 @@ body {
     align-items: center;
 }
 
+#options-main {
+    gap: 0.65rem;
+    overflow-y: auto;
+    padding: 0 0.5rem 0.75rem;
+    box-sizing: border-box;
+}
+
+#options-main .btn,
+#options-main .slider-container {
+    --btn-height: 40px;
+}
+
+#options-main .btn,
+#options-main .slider-label {
+    font-size: 115%;
+}
+
+#options-main .input-field {
+    height: 40px;
+    font-size: 20px;
+}
+
+#options-main .input-field-title,
+#options-main .input-field-footer {
+    font-size: 1.15rem;
+}
+
+#options-main .button-space {
+    height: 8px;
+}
+
 /* Controls panel: constrain height so content can scroll */
 #controls-panel {
     width: 100%;
@@ -573,7 +604,7 @@ body {
 .btn {
     --btn-img: url("Assets/sprites/menu/menu_button.png");
     --btn-width: 200px; /* img horizontal resolution */
-    --btn-height: 48px; /* change this to set button scale */
+    --btn-height: 40px; /* change this to set button scale */
     --btn-edge: calc(var(--btn-height) * 0.2);
     height: var(--btn-height);
     width: 100%;
@@ -595,7 +626,7 @@ body {
     text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
     font-family: "Pixel";
     text-decoration: none;
-    font-size: 130%;
+    font-size: 120%;
     user-select: none;
     cursor: pointer;
     margin: 0;

@@ -2,6 +2,7 @@ class Camera {
     constructor(x, y) {
         this.x = x;
         this.y = y;
+        this._zoom = 1;
         this.velocity = new Vector2();
         this.speed = 50;
 
@@ -10,8 +11,29 @@ class Camera {
         this.lerpSpeed = 10;
     }
 
+    get zoom() {
+        return this._zoom;
+    }
+
+    set zoom(value) {
+        const MIN_ZOOM = 0.25;
+        const MAX_ZOOM = 4;
+
+        const parsedZoom = Number(value);
+        if (!Number.isFinite(parsedZoom) || parsedZoom <= 0) return;
+
+        const clampedZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, parsedZoom));
+
+        const oldZoom = this._zoom;
+        if (oldZoom === clampedZoom) return;
+
+        this._zoom = clampedZoom;
+
+        this.clampY();
+    }
+
     getWorldX(x) {
-        return x + CANVAS.width / 2; // Calculate the world X position of the camera
+        return x + CANVAS.width / 2;
     }
 
     getWorldY(y) {
@@ -25,18 +47,46 @@ class Camera {
     }
 
     worldToScreen(worldPos) {
-        return new Vector2(worldPos.x - this.x, worldPos.y - this.y);
+        const centerX = CANVAS.width / 2;
+        const centerY = CANVAS.height / 2;
+
+        return new Vector2(
+            (worldPos.x - this.x - centerX) * this.zoom + centerX,
+            (worldPos.y - this.y - centerY) * this.zoom + centerY,
+        );
+    }
+
+    screenToWorld(screenPos) {
+        const centerX = CANVAS.width / 2;
+        const centerY = CANVAS.height / 2;
+
+        return new Vector2(
+            (screenPos.x - centerX) / this.zoom + centerX + this.x,
+            (screenPos.y - centerY) / this.zoom + centerY + this.y,
+        );
     }
 
     isInScreen(worldPos, worldSize) {
         const screenPos = this.worldToScreen(worldPos);
+        const scaledSizeX = worldSize.x * this.zoom;
+        const scaledSizeY = worldSize.y * this.zoom;
 
         return !(
-            screenPos.x + worldSize.x < 0 ||
+            screenPos.x + scaledSizeX < 0 ||
             screenPos.x > CANVAS.width ||
-            screenPos.y + worldSize.y < 0 ||
+            screenPos.y + scaledSizeY < 0 ||
             screenPos.y > CANVAS.height
         );
+    }
+
+    clampY() {
+        const halfScreen = CANVAS.height / 2;
+        const minY = halfScreen / this.zoom - halfScreen;
+        const maxY =
+            CHUNK_HEIGHT * BLOCK_SIZE - halfScreen - halfScreen / this.zoom;
+
+        this.y = Math.min(this.y, maxY);
+        this.y = Math.max(this.y, minY);
     }
 
     update(target = world.player) {
@@ -55,10 +105,7 @@ class Camera {
         // Clamp the camera's y so that the bottom edge doesn't go below the world bottom.
         // The bottom edge is at: this.y + CANVAS.height/2.
         // Therefore, ensure: this.y <= CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height/2.
-        this.y = Math.min(this.y, CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height);
-
-        // Same for top edge
-        this.y = Math.max(this.y, 0);
+        this.clampY();
     }
 
     followPlayer(target = world.player) {
@@ -90,12 +137,6 @@ class Camera {
         }
 
         // Clamp the camera's y after following the player as well.
-        this.y = Math.min(
-            this.y,
-            CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height / 2,
-        );
-
-        // Same for top edge
-        this.y = Math.max(this.y, 0);
+        this.clampY();
     }
 }

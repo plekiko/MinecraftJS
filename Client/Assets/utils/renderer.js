@@ -9,6 +9,13 @@ ctx.imageSmoothingEnabled = false;
 ctx.webkitImageSmoothingEnabled = false;
 ctx.mozImageSmoothingEnabled = false;
 
+const blackPixel = document.createElement("canvas");
+blackPixel.width = 1;
+blackPixel.height = 1;
+const bpCtx = blackPixel.getContext("2d");
+bpCtx.fillStyle = "black";
+bpCtx.fillRect(0, 0, 1, 1);
+
 let drawingChunkBorders = false;
 let drawCameraOverlay = false;
 let drawHeightOverlay = false;
@@ -113,6 +120,15 @@ function draw(chunks, frames) {
     fps = frames;
 
     drawBackground();
+
+    const centerX = CANVAS.width / 2;
+    const centerY = CANVAS.height / 2;
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.scale(camera.zoom, camera.zoom);
+    ctx.translate(-centerX, -centerY);
+
     drawChunks(chunks);
     if (world.player && !pauseMenu?.getActive()) {
         drawBreakAndPlaceCursor(cursorInRange);
@@ -123,6 +139,8 @@ function draw(chunks, frames) {
 
     drawEntities();
 
+    ctx.restore();
+
     afterDraw();
 
     drawLoadScreen();
@@ -130,25 +148,25 @@ function draw(chunks, frames) {
 
 function drawLoadScreen() {
     if (!isTexturePackLoaded || world.generator.loadingWorld) {
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 
-            ctx.fillStyle = "white";
-            ctx.font = "30px Pixel";
-            ctx.textAlign = "center";
+        ctx.fillStyle = "white";
+        ctx.font = "30px Pixel";
+        ctx.textAlign = "center";
 
-            if (!isTexturePackLoaded)
-                ctx.fillText(
-                    "Loading texture pack...",
-                    CANVAS.width / 2,
-                    CANVAS.height / 2,
-                );
-            else if (world.generator.loadingWorld)
-                ctx.fillText(
-                    "Loading world...",
-                    CANVAS.width / 2,
-                    CANVAS.height / 2,
-                );
+        if (!isTexturePackLoaded)
+            ctx.fillText(
+                "Loading texture pack...",
+                CANVAS.width / 2,
+                CANVAS.height / 2,
+            );
+        else if (world.generator.loadingWorld)
+            ctx.fillText(
+                "Loading world...",
+                CANVAS.width / 2,
+                CANVAS.height / 2,
+            );
     }
 }
 
@@ -176,40 +194,39 @@ function drawEntities() {
             }
         }
     });
-
-    if (drawHitbox) drawHitboxes();
 }
 
 function drawBreakAndPlaceCursor(inRange = false) {
-    const mouseX = input.getMousePositionOnBlockGrid().x;
-    const mouseY = input.getMousePositionOnBlockGrid().y;
+    // Use the same approach as drawDestroyStage: snapped grid position
+    const gridX = input.getMousePositionOnBlockGrid().x;
+    const gridY = input.getMousePositionOnBlockGrid().y;
 
     const selectedBlock = world.player.inventory.selectedBlock;
 
     if (selectedBlock) {
         const spritePath = "blocks/" + selectedBlock.sprite;
-
         const spriteSize = getSpriteSize(spritePath).width;
 
         drawImage({
             url: getSpriteUrl(spritePath),
-            x: mouseX - Math.floor(camera.x),
-            y: mouseY - Math.floor(camera.y),
+            x: gridX - Math.floor(camera.x),
+            y: gridY - Math.floor(camera.y),
             scale: BLOCK_SIZE / spriteSize,
             centerX: false,
             opacity: 0.5,
-            sizeY: spriteSize - selectedBlock.defaultCutoff * spriteSize,
+            sizeY: spriteSize - (selectedBlock.defaultCutoff || 0) * spriteSize,
         });
     }
 
     ctx.strokeStyle = inRange ? "black" : "red";
     ctx.lineWidth = 1;
+    const psize = BLOCK_SIZE;
 
     ctx.strokeRect(
-        mouseX - Math.floor(camera.x),
-        mouseY - Math.floor(camera.y),
-        BLOCK_SIZE,
-        BLOCK_SIZE,
+        gridX - Math.floor(camera.x),
+        gridY - Math.floor(camera.y),
+        psize,
+        psize,
     );
 }
 
@@ -539,12 +556,6 @@ function drawText({
     ctx.fillText(text, x, y);
 }
 
-function drawHitboxes() {
-    world.entities.forEach((entity) => {
-        entity.drawHitbox(ctx);
-    });
-}
-
 function drawSimpleImage({
     image,
     x = 0,
@@ -655,11 +666,16 @@ function drawImage({
             drawHeight = sourceHeight * scale;
         }
 
-        // Adjust position based on centering
-        const drawX = centerX ? x - drawWidth / 2 : x;
-        const drawY = centerY
-            ? y - drawHeight / 2
-            : y + (sizeY !== null ? (fullHeight - sourceHeight) * scale : 0); // Offset to align bottom
+        // Adjust position based on centering, rounded for pixel-perfect alignment
+        const drawX = Math.round(centerX ? x - drawWidth / 2 : x);
+        const drawY = Math.round(
+            centerY
+                ? y - drawHeight / 2
+                : y +
+                      (sizeY !== null
+                          ? (fullHeight - sourceHeight) * scale
+                          : 0),
+        ); // Offset to align bottom
 
         // Draw the image
         ctx.drawImage(
@@ -670,15 +686,21 @@ function drawImage({
             sourceHeight, // Source height
             drawX, // Canvas x
             drawY, // Canvas y
-            drawWidth, // Scaled width
-            drawHeight, // Scaled height
+            Math.round(drawWidth), // Scaled width
+            Math.round(drawHeight), // Scaled height
         );
 
         // Apply dark overlay if specified
         if (dark) {
             ctx.globalAlpha = 0.4;
             ctx.fillStyle = "black";
-            ctx.fillRect(drawX, drawY, drawWidth, drawHeight);
+            // Pixel-perfect overlay
+            ctx.fillRect(
+                Math.round(drawX),
+                Math.round(drawY),
+                Math.round(drawWidth),
+                Math.round(drawHeight),
+            );
         }
 
         ctx.globalAlpha = 1;

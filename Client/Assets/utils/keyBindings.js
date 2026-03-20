@@ -24,6 +24,7 @@ const DEFAULT_KEY_BINDINGS = {
     hotbar9: ["Digit9"],
     chatOpen: ["KeyT"],
     chatCommand: ["Slash"],
+    zoomPreset: ["KeyZ"],
     chatClose: ["Escape"],
     chatSubmit: ["Enter"],
     chatHistoryUp: ["ArrowUp"],
@@ -65,6 +66,7 @@ const ACTION_LABELS = {
     hotbar9: "Hotbar Slot 9",
     chatOpen: "Open Chat",
     chatCommand: "Open Command",
+    zoomPreset: "Cycle Zoom Preset",
     chatClose: "Close Chat",
     chatSubmit: "Send Message",
     chatHistoryUp: "Chat History Up",
@@ -106,6 +108,7 @@ const GAMEPLAY_ACTIONS = [
     "hotbar9",
     "chatOpen",
     "chatCommand",
+    "zoomPreset",
 ];
 
 const DEBUG_ACTIONS = [

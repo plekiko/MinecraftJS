@@ -9,7 +9,7 @@ const worldSelectContainer = document.querySelector("#world-select-container");
 const removeTexturePackButton = document.getElementById("remove-texture-btn");
 const gameModeButton = document.getElementById("game-mode-button");
 const texturePackSelectContainer = document.querySelector(
-    "#texture-pack-select-container"
+    "#texture-pack-select-container",
 );
 const texturePacksContainer =
     texturePackSelectContainer.querySelector(".world-select");
@@ -25,12 +25,12 @@ const panorama = document.querySelector(".panorama");
 
 // Server-related elements
 const serverSelectContainer = document.querySelector(
-    "#server-select-container"
+    "#server-select-container",
 );
 const serverListContainer = document.querySelector("#server-list");
 const addServerContainer = document.querySelector("#add-server-container");
 const quickConnectContainer = document.querySelector(
-    "#quick-connect-container"
+    "#quick-connect-container",
 );
 const serverNameInput = document.querySelector("#server-name-input");
 const serverIPInput = document.querySelector("#server-ip-input");
@@ -69,6 +69,7 @@ let currentSettings = {
     sfxVolume: 100,
     lighting: true,
     username: "",
+    zoom: 1,
 };
 
 const colorMap = {
@@ -183,6 +184,7 @@ function loadSettings() {
             settings.musicVolume ?? (settings.music === false ? 0 : 100);
         currentSettings.sfxVolume =
             settings.sfxVolume ?? (settings.sfx === false ? 0 : 100);
+        currentSettings.zoom = settings.zoom ?? 1;
     }
 
     if (musicVolumeSlider) {
@@ -279,7 +281,7 @@ function populateWorlds() {
     worldsContainer.innerHTML = "";
     if (worlds) {
         worlds.sort(
-            (a, b) => parseDate(b.lastPlayed) - parseDate(a.lastPlayed)
+            (a, b) => parseDate(b.lastPlayed) - parseDate(a.lastPlayed),
         );
         worlds.forEach((world) => {
             const worldElement = worldContainer.cloneNode(true);
@@ -327,7 +329,7 @@ function initializeDefaultTexturePack() {
         texturePackList.push(defaultPack);
         localStorage.setItem(
             "texturePackList",
-            JSON.stringify(texturePackList)
+            JSON.stringify(texturePackList),
         );
     }
 
@@ -430,7 +432,7 @@ function uploadTexturePack() {
                         texturePackData.startsWith("data:") &&
                         texturePackData.includes(",")
                             ? texturePackData.slice(
-                                  texturePackData.indexOf(",") + 1
+                                  texturePackData.indexOf(",") + 1,
                               )
                             : texturePackData;
                     const zip = await JSZip.loadAsync(base64Data, {
@@ -440,7 +442,7 @@ function uploadTexturePack() {
                     const iconFilePath = Object.keys(zip.files).find(
                         (fileName) =>
                             fileName.endsWith("icon.png") ||
-                            fileName.endsWith("pack.png")
+                            fileName.endsWith("pack.png"),
                     );
                     if (iconFilePath) {
                         const iconFile = zip.file(iconFilePath);
@@ -466,7 +468,7 @@ function uploadTexturePack() {
                 texturePackList.push(packInfo);
                 localStorage.setItem(
                     "texturePackList",
-                    JSON.stringify(texturePackList)
+                    JSON.stringify(texturePackList),
                 );
 
                 populateTexturePacks();
@@ -523,8 +525,8 @@ async function removeTexturePack() {
     localStorage.setItem(
         "texturePackList",
         JSON.stringify(
-            texturePackList.filter((pack) => pack.id !== selectedTexturePack)
-        )
+            texturePackList.filter((pack) => pack.id !== selectedTexturePack),
+        ),
     );
 
     localStorage.setItem("currentTexturePack", "default");
@@ -565,7 +567,7 @@ function createNewWorld() {
             name: worldName,
             seed: worldSeed,
             gameMode: selectedGameMode,
-        })
+        }),
     );
 
     window.location.href = "./game.html";
@@ -645,7 +647,7 @@ function removeWorld() {
     localStorage.removeItem(selectedWorld);
     localStorage.setItem(
         "worlds",
-        JSON.stringify(worlds.filter((world) => world.id !== selectedWorld))
+        JSON.stringify(worlds.filter((world) => world.id !== selectedWorld)),
     );
 
     removeWorldButton.disabled = true;
@@ -700,7 +702,7 @@ function playSelectedWorld() {
         JSON.stringify({
             id: selectedWorld,
             name: getSavedWorld(selectedWorld).name,
-        })
+        }),
     );
 
     setInterval(() => {
@@ -758,7 +760,7 @@ async function pingServer(server) {
                 JSON.stringify({
                     type: "status",
                     message: { requestId: Date.now() },
-                })
+                }),
             );
         };
 
@@ -812,7 +814,7 @@ async function pingServerAndUpdate(server, container) {
         if (!result || typeof result !== "object") {
             console.warn(
                 `Invalid ping result for server ${server.id}:`,
-                result
+                result,
             );
             updateServerStatus(
                 server,
@@ -821,7 +823,7 @@ async function pingServerAndUpdate(server, container) {
                     latency: null,
                     error: "Ping failed",
                 },
-                container
+                container,
             );
             return (
                 result || {
@@ -843,7 +845,7 @@ async function pingServerAndUpdate(server, container) {
                 latency: null,
                 error: "Connection failed",
             },
-            container
+            container,
         );
         return {
             server,
@@ -891,13 +893,13 @@ function updateServerStatus(server, result, container) {
                 latency < 100
                     ? "#55FF55"
                     : latency < 200
-                    ? "#FFFF55"
-                    : "#FF5555";
+                      ? "#FFFF55"
+                      : "#FF5555";
             statusText += ` - <span class="world-status" style="color: ${latencyColor}">${latency}ms</span>`;
         }
         console.log(
             `Server ${server.id} (${server.name}) pinged successfully:`,
-            status
+            status,
         );
         serverElement.style.opacity = "1";
         serverImageElement.src =
@@ -912,7 +914,7 @@ function updateServerStatus(server, result, container) {
 async function pingAllServers() {
     const servers = JSON.parse(localStorage.getItem("servers") || "[]");
     const results = await Promise.all(
-        servers.map((server) => pingServer(server))
+        servers.map((server) => pingServer(server)),
     );
     return results;
 }
@@ -945,7 +947,7 @@ async function displayServers() {
             status: null,
             latency: null,
             error: "Pinging...",
-        }))
+        })),
     );
 
     pingAndRenderServers();
@@ -964,7 +966,7 @@ async function pingAndRenderServers() {
     cachedServerStatuses = [];
 
     const pingPromises = servers.map((server) =>
-        pingServerAndUpdate(server, serverListContainer)
+        pingServerAndUpdate(server, serverListContainer),
     );
 
     try {
@@ -1052,8 +1054,8 @@ function renderServers(serverStatuses) {
                     latency < 100
                         ? "#55FF55"
                         : latency < 200
-                        ? "#FFFF55"
-                        : "#FF5555";
+                          ? "#FFFF55"
+                          : "#FF5555";
                 statusText += ` - <span class="world-status" style="color: ${latencyColor}">${latency}ms</span>`;
             }
             serverElement.style.opacity = "1";
@@ -1140,13 +1142,13 @@ function addServer() {
     // Validate server name and IP
     if (!isValidServerName(tempServerName)) {
         alert(
-            "Invalid server name. Use 1-20 characters (alphanumeric, spaces, or common punctuation)."
+            "Invalid server name. Use 1-20 characters (alphanumeric, spaces, or common punctuation).",
         );
         return;
     }
     if (!isValidServerIp(tempServerIP)) {
         alert(
-            "Invalid server IP. Use a valid IPv4 address, domain, or localhost with optional port."
+            "Invalid server IP. Use a valid IPv4 address, domain, or localhost with optional port.",
         );
         return;
     }
@@ -1171,7 +1173,7 @@ function removeServer() {
     if (!confirm("Are you sure you want to delete this server?")) return;
 
     const updatedServers = servers.filter(
-        (server) => server.id !== selectedServerId
+        (server) => server.id !== selectedServerId,
     );
     localStorage.setItem("servers", JSON.stringify(updatedServers));
 
@@ -1219,7 +1221,7 @@ function connectToServer() {
 
         if (!isValidServerIp(serverAddress)) {
             alert(
-                "Invalid server IP. Use a valid IPv4 address, domain, or localhost with optional port."
+                "Invalid server IP. Use a valid IPv4 address, domain, or localhost with optional port.",
             );
             return;
         }
@@ -1276,7 +1278,7 @@ function gotoOptions() {
         document.removeEventListener(
             "contextmenu",
             rebindDocumentContextmenuHandler,
-            true
+            true,
         );
         rebindDocumentContextmenuHandler = null;
     }
@@ -1291,7 +1293,7 @@ function gotoOptions() {
         document.removeEventListener(
             "contextmenu",
             rebindContextmenuHandler,
-            true
+            true,
         );
     if (controlsPanel) controlsPanel.style.pointerEvents = "";
     rebindKeydownHandler = null;
@@ -1391,7 +1393,7 @@ function startRebind(action) {
         document.removeEventListener(
             "contextmenu",
             rebindDocumentContextmenuHandler,
-            true
+            true,
         );
         rebindDocumentContextmenuHandler = null;
     }
@@ -1414,16 +1416,17 @@ function startRebind(action) {
         if (binding !== undefined) {
             const key = binding[0];
             const existingAction = REBINDABLE_ACTIONS.find(
-                (a) => a !== action && (controlsBindings[a] || []).includes(key)
+                (a) =>
+                    a !== action && (controlsBindings[a] || []).includes(key),
             );
             if (existingAction) {
                 if (
                     !confirm(
                         `"${getKeyDisplayName(
-                            key
+                            key,
                         )}" is already bound to "${getActionLabel(
-                            existingAction
-                        )}". Override and unbind it from that action?`
+                            existingAction,
+                        )}". Override and unbind it from that action?`,
                     )
                 ) {
                     renderControlsList();
@@ -1445,7 +1448,7 @@ function startRebind(action) {
         if (
             ["ControlLeft", "ControlRight"].includes(e.code) &&
             !confirm(
-                "Ctrl is not recommended as a binding because we can't prevent browser shortcuts (such as Ctrl+W to close the tab) from taking place.\n\nDo you want to use Ctrl anyway?"
+                "Ctrl is not recommended as a binding because we can't prevent browser shortcuts (such as Ctrl+W to close the tab) from taking place.\n\nDo you want to use Ctrl anyway?",
             )
         ) {
             finishRebind();
