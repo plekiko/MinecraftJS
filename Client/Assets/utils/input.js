@@ -29,27 +29,27 @@ class InputHandler {
 
     _initializeEventListeners() {
         document.addEventListener("keydown", (event) =>
-            this._handleKeyDown(event),
+            this._handleKeyDown(event)
         );
         document.addEventListener("keyup", (event) => this._handleKeyUp(event));
         document.addEventListener("mousedown", (event) =>
-            this._handleMouseDown(event),
+            this._handleMouseDown(event)
         );
         document.addEventListener("mouseup", (event) =>
-            this._handleMouseUp(event),
+            this._handleMouseUp(event)
         );
         document.addEventListener("mousemove", (event) =>
-            this._handleMouseMove(event),
+            this._handleMouseMove(event)
         );
         document.addEventListener("wheel", (event) =>
-            this._handleScroll(event),
+            this._handleScroll(event)
         );
     }
 
     _handleKeyDown(event) {
-        if (typeof chat !== "undefined" && chat.inChat) return;
+        if (game.chat.inChat) return;
         const key = event.code;
-        if (typeof pauseMenu !== "undefined" && pauseMenu.getActive()) {
+        if (game.pauseMenu.getActive()) {
             const pauseKeys = this.keyBindings.pause;
             if (!pauseKeys || !pauseKeys.includes(key)) return;
         }
@@ -64,19 +64,19 @@ class InputHandler {
                 this.keysDown[key] = true; // Set keysDown only on the first keydown
             }
             this.keys[key] = true; // Keep keys set to true as long as the key is held down
-            if (typeof chat !== "undefined" && !chat.inChat) {
+            if (!game.chat.inChat) {
                 if (
                     this.keyBindings.chatOpen &&
                     this.keyBindings.chatOpen.includes(key)
                 ) {
-                    chat.openChat();
+                    game.chat.openChat();
                 } else if (
                     this.keyBindings.chatCommand &&
                     this.keyBindings.chatCommand.includes(key)
                 ) {
-                    chat.currentMessage = "/";
-                    chat.cursorPosition = 1;
-                    chat.openChat();
+                    game.chat.currentMessage = "/";
+                    game.chat.cursorPosition = 1;
+                    game.chat.openChat();
                 }
             }
         }

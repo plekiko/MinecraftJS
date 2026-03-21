@@ -1,5 +1,3 @@
-let world = null;
-
 class World {
     constructor() {
         this.seed = 0;
@@ -24,13 +22,13 @@ class World {
 
     tick() {
         this.updateBlocks();
-        animateFrame();
+        game.animateFrame();
         updatePositionalAudioVolumes();
-        updateEntities(true);
+        game.updateEntities(true);
         this.chunks_in_render_distance.forEach((chunk) => {
             chunk.updateChunk();
         });
-        if (settings.lighting) {
+        if (game.settings.lighting) {
             this.globalUpdateSkyLight();
             this.globalRecalculateLight();
         }
@@ -39,14 +37,6 @@ class World {
 
     async startGenerator(dimensionIndex = activeDimension) {
         return this.generator.generateWorld(dimensionIndex);
-    }
-
-    get activeDimension() {
-        return activeDimension;
-    }
-
-    set activeDimension(value) {
-        activeDimension = value;
     }
 
     getDimension(index = activeDimension) {
@@ -59,7 +49,7 @@ class World {
 
     setBlockType(block, type, updateAdjacent = true) {
         const chunk = this.getDimensionChunks(activeDimension).get(
-            block.chunkX,
+            block.chunkX
         );
         if (!chunk) return;
         return chunk.setBlockTypeLocal(
@@ -68,7 +58,7 @@ class World {
             type,
             block.wall,
             null,
-            updateAdjacent,
+            updateAdjacent
         );
     }
 
@@ -80,7 +70,7 @@ class World {
         dimensionIndex = activeDimension,
         metaData = null,
         inputIsUserBlockY = true,
-        updateAdjacent = false,
+        updateAdjacent = false
     ) {
         if (inputIsUserBlockY)
             worldY = this.userBlockYToWorld(worldY / BLOCK_SIZE);
@@ -94,7 +84,7 @@ class World {
                 dimensionIndex,
                 metaData,
                 wall,
-                false,
+                false
             );
             return false;
         }
@@ -108,7 +98,7 @@ class World {
             blockType,
             wall,
             metaData,
-            updateAdjacent,
+            updateAdjacent
         );
     }
 
@@ -116,7 +106,7 @@ class World {
         worldX,
         worldY,
         wall = false,
-        dimensionIndex = activeDimension,
+        dimensionIndex = activeDimension
     ) {
         const targetChunk = this.getChunkForX(worldX, dimensionIndex);
         if (!targetChunk || worldY >= CHUNK_HEIGHT * BLOCK_SIZE) return null;
@@ -147,7 +137,7 @@ class World {
         dimensionIndex = activeDimension,
         metaData = null,
         wall = false,
-        inputIsUserBlockY = true,
+        inputIsUserBlockY = true
     ) {
         if (inputIsUserBlockY)
             worldY = this.userBlockYToWorld(worldY / BLOCK_SIZE);
@@ -191,14 +181,14 @@ class World {
         blockX,
         blockY,
         wall = false,
-        dimensionIndex = activeDimension,
+        dimensionIndex = activeDimension
     ) {
         const worldPos = this.userBlocksToWorldPosition(blockX, blockY);
         return this.getBlockAtWorldPosition(
             worldPos.x,
             worldPos.y,
             wall,
-            dimensionIndex,
+            dimensionIndex
         );
     }
 
@@ -209,7 +199,7 @@ class World {
         wall = false,
         dimensionIndex = activeDimension,
         metaData = null,
-        updateAdjacent = true,
+        updateAdjacent = true
     ) {
         const worldPos = this.userBlocksToWorldPosition(blockX, blockY);
         return this.setBlockTypeAtPosition(
@@ -220,7 +210,7 @@ class World {
             dimensionIndex,
             metaData,
             false,
-            updateAdjacent,
+            updateAdjacent
         );
     }
 
@@ -239,7 +229,7 @@ class World {
     getBlockWorldPosition(block) {
         return new Vector2(
             block.transform.position.x,
-            block.transform.position.y,
+            block.transform.position.y
         );
     }
 
@@ -254,12 +244,12 @@ class World {
         for (const dir of directions) {
             const adjacentPos = new Vector2(
                 position.x + dir.x,
-                position.y + dir.y,
+                position.y + dir.y
             );
             const block = this.getBlockAtWorldPosition(
                 adjacentPos.x,
                 adjacentPos.y,
-                wall,
+                wall
             );
             if (!block) continue;
 
@@ -278,7 +268,7 @@ class World {
         for (let x = -range; x <= range; x++) {
             const chunk = this.getChunkForX(
                 position.x + x * BLOCK_SIZE,
-                dimension,
+                dimension
             );
 
             if (chunk) {
@@ -297,7 +287,7 @@ class World {
                 false,
                 dimension,
                 null,
-                false,
+                false
             );
             this.setBlockTypeAtPosition(
                 position.x + i * BLOCK_SIZE,
@@ -306,7 +296,7 @@ class World {
                 false,
                 dimension,
                 null,
-                false,
+                false
             );
             this.setBlockTypeAtPosition(
                 position.x,
@@ -315,7 +305,7 @@ class World {
                 false,
                 dimension,
                 null,
-                false,
+                false
             );
             this.setBlockTypeAtPosition(
                 position.x + BLOCK_SIZE * 3,
@@ -324,7 +314,7 @@ class World {
                 false,
                 dimension,
                 null,
-                false,
+                false
             );
         }
 
@@ -336,7 +326,7 @@ class World {
                 false,
                 dimension,
                 null,
-                false,
+                false
             );
         }
 
@@ -349,15 +339,121 @@ class World {
                     false,
                     dimension,
                     null,
-                    false,
+                    false
                 );
             }
         }
 
         return new Vector2(
             position.x + BLOCK_SIZE * 1.5,
-            position.y + BLOCK_SIZE * 3,
+            position.y + BLOCK_SIZE * 3
         );
+    }
+
+    /**
+     * Creates an explosion at the given position.
+     * @param {Vector2} position - World position (x, y) of the explosion center
+     * @param {Object} options - Explosion parameters (default is TNT-size)
+     * @param {number} [options.radius=4*BLOCK_SIZE] - Explosion radius
+     * @param {number} [options.damage=15] - Max entity damage
+     * @param {number} [options.power=20] - Block destruction power (propagation)
+     * @param {Entity} [options.excludeEntity=null] - Entity to exclude from damage
+     */
+    createExplosion(
+        position,
+        {
+            radius = 4 * BLOCK_SIZE,
+            damage = 15,
+            power = 20,
+            excludeEntity = null,
+            destroyTerrain = true,
+        } = {}
+    ) {
+        playRandomSoundFromArray({
+            array: Sounds.Explosion,
+            positional: true,
+            origin: position,
+        });
+
+        // Damage and knockback entities in range
+        for (const entity of world.entities) {
+            if (entity === excludeEntity || entity.invulnerable) continue;
+
+            const distance = Vector2.Distance(position, entity.position);
+            if (distance > radius) continue;
+
+            const damageFactor = 1 - distance / radius;
+            const appliedDamage = Math.max(
+                0,
+                Math.round(damage * damageFactor)
+            );
+            if (typeof entity.hit === "function") entity.hit(appliedDamage);
+
+            if (entity.type === EntityTypes.Drop) {
+                this.removeEntity(entity);
+                continue;
+            }
+
+            const knockbackFactor = (1 - distance / radius) / 5;
+            const knockbackForce = Math.max(
+                0,
+                power * BLOCK_SIZE * knockbackFactor
+            );
+            entity.knockBack(position.x, knockbackForce);
+        }
+
+        if (!destroyTerrain) return;
+
+        // Destroy blocks in radius (flood-fill with power decay)
+        const startX = Math.floor(position.x / BLOCK_SIZE);
+        const startY = Math.floor(position.y / BLOCK_SIZE);
+        const visited = new Set();
+        const queue = [[startX, startY, power]];
+
+        while (queue.length > 0) {
+            const [x, y, remainingPower] = queue.shift();
+
+            const worldX = x * BLOCK_SIZE;
+            const worldY = y * BLOCK_SIZE;
+            const distance = Math.sqrt(
+                Math.pow(worldX - position.x, 2) +
+                    Math.pow(worldY - position.y, 2)
+            );
+
+            if (distance > radius || remainingPower <= 0) continue;
+
+            const key = `${x},${y}`;
+            if (visited.has(key)) continue;
+            visited.add(key);
+
+            const block = this.getBlockAtWorldPosition(worldX, worldY);
+            if (!block) continue;
+
+            const blockDef = getBlock(block.blockType);
+            if (!blockDef) continue;
+
+            const resistance = blockDef.hardness || 0;
+            const powerThreshold = resistance + 1;
+
+            if (remainingPower >= powerThreshold) {
+                if (blockDef.hardness >= 0) {
+                    if (blockDef.specialType === SpecialType.TNT) {
+                        block.explode(true);
+                    } else {
+                        block.breakBlock(blockDef.dropWithoutTool);
+                        this.setBlockType(block, Blocks.Air);
+                    }
+                }
+
+                const reducedPower = remainingPower - 1 - resistance * 0.3;
+                if (reducedPower > 0) {
+                    queue.push([x, y - 1, reducedPower]);
+                    queue.push([x, y + 1, reducedPower]);
+                    queue.push([x - 1, y, reducedPower]);
+                    queue.push([x + 1, y, reducedPower]);
+                }
+            }
+        }
     }
 
     async getChunkFromServer(x, dimensionIndex = activeDimension) {
@@ -379,7 +475,7 @@ class World {
         y,
         blockType,
         isWall = false,
-        dimensionIndex = activeDimension,
+        dimensionIndex = activeDimension
     ) {
         if (!multiplayer) return;
         server.send({
@@ -405,7 +501,7 @@ class World {
         blockType,
         isWall = false,
         shouldDrop = false,
-        dimensionIndex = activeDimension,
+        dimensionIndex = activeDimension
     ) {
         if (!multiplayer) return;
         server.send({
@@ -441,6 +537,46 @@ class World {
         console.log(`Uploaded chunk ${chunkX} to server`);
     }
 
+    spawnDrop(position, props) {
+        const uuid = uuidv4();
+        const drop = this.summonEntity(Drop, position, props, false, uuid);
+        if (multiplayer) {
+            server.send({
+                type: "summonDrop",
+                message: { UUID: uuid, position: position, props: props },
+                sender: this.player?.UUID,
+            });
+        }
+        return drop;
+    }
+
+    summonEntity(entity, position, props, sync = false, uuid = null) {
+        const UUID = uuid ? uuid : uuidv4();
+
+        const newEntity = new entity(this, {
+            UUID: UUID,
+            position: position,
+            ...props,
+        });
+        newEntity.dimension = activeDimension;
+
+        this.entities.push(newEntity);
+
+        if (sync) {
+            server.send({
+                type: "summonEntity",
+                message: {
+                    entity: newEntity.name,
+                    props: props,
+                    position: position,
+                    UUID: UUID,
+                },
+            });
+        }
+
+        return newEntity;
+    }
+
     removeEntity(entity, sync = false) {
         if (!entity) return;
         if (entity.myChunkX !== null) {
@@ -464,6 +600,7 @@ class World {
             });
         }
     }
+
     updateParticleEmitters() {
         for (const emitter of this.particleEmitters) {
             emitter.update();
@@ -557,7 +694,7 @@ class World {
                         const nb = this.getBlockAtWorldPosition(
                             globalX + off.dx,
                             globalY + off.dy,
-                            false,
+                            false
                         );
                         if (nb && nb.redstoneOutput > 0) {
                             powered = true;
@@ -612,7 +749,7 @@ class World {
                 const decayFactor = 0.8;
                 const newLight = Math.max(
                     1,
-                    Math.floor(currentLevel * decayFactor),
+                    Math.floor(currentLevel * decayFactor)
                 );
                 if (neighbor.lightLevel < newLight) {
                     neighbor.lightLevel = newLight;
@@ -627,6 +764,7 @@ class World {
             chunk.updateSkyLight();
         }
     }
+
     updateBlocks() {
         for (let i = updatingBlocks.length - 1; i >= 0; i--) {
             let block = updatingBlocks[i];
@@ -641,6 +779,7 @@ class World {
             }
         }
     }
+
     getEntityByUUID(uuid) {
         return this.entities.find((entity) => entity.UUID == uuid);
     }

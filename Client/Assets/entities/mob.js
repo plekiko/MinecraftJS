@@ -20,7 +20,7 @@ class Mob extends Entity {
             lootTable = null,
             myChunkX = 0,
             burnInSunlight = false,
-        } = {},
+        } = {}
     ) {
         super(world, {
             name: name,
@@ -50,7 +50,7 @@ class Mob extends Entity {
         this.ambientSoundRange = ambientSoundRange;
         this.ambientSoundTarget = randomRange(
             this.ambientSoundRange.min,
-            this.ambientSoundRange.max,
+            this.ambientSoundRange.max
         );
         this.randomMoveTime = randomRange(0, ai.moveTimeRange.max / 2);
         this.moving = false;
@@ -117,7 +117,7 @@ class Mob extends Entity {
 
         if (
             Math.abs(
-                Vector2.Distance(this.position, this.world.player.position),
+                Vector2.Distance(this.position, this.world.player.position)
             ) <= this.ai.agressionArea
         ) {
             this.state = aiState.Agression;
@@ -132,7 +132,7 @@ class Mob extends Entity {
 
         this.direction = caculateDirection(
             this.position,
-            this.world.player.position,
+            this.world.player.position
         );
 
         if (this.velocity.x === 0) {
@@ -141,7 +141,7 @@ class Mob extends Entity {
 
         if (
             Math.abs(
-                Vector2.XDistance(this.position, this.world.player.position),
+                Vector2.XDistance(this.position, this.world.player.position)
             ) <
             BLOCK_SIZE / 4
         ) {
@@ -160,7 +160,7 @@ class Mob extends Entity {
             this.ambientSoundCounter = 0;
             this.ambientSoundTarget = randomRange(
                 this.ambientSoundRange.min,
-                this.ambientSoundRange.max,
+                this.ambientSoundRange.max
             );
 
             playRandomSoundFromArray({
@@ -185,7 +185,7 @@ class Mob extends Entity {
             }
         }
 
-        // chat.message(`${this.timeLastMoved} - ${this.randomMoveTime}`);
+        //game.chat.message(`${this.timeLastMoved} - ${this.randomMoveTime}`);
 
         if (this.moving) {
             if (
@@ -208,18 +208,18 @@ class Mob extends Entity {
         const loot = this.lootTable.getRandomLoot();
 
         loot.forEach((item) => {
-            summonEntity(
+            this.world.summonEntity(
                 Drop,
                 new Vector2(
                     this.position.x +
                         randomRange(-this.hitbox.x, this.hitbox.x),
-                    this.position.y,
+                    this.position.y
                 ),
                 {
                     blockId: item.blockId,
                     itemId: item.itemId,
                     count: item.count,
-                },
+                }
             );
         });
     }
@@ -234,7 +234,7 @@ class Mob extends Entity {
         this.timeLastMoved = 0;
         this.randomMoveTime = randomRange(
             this.ai.moveTimeRange.min,
-            this.ai.moveTimeRange.max,
+            this.ai.moveTimeRange.max
         );
     }
 

@@ -52,8 +52,6 @@ const Blocks = Object.freeze({
     Furnace: 43,
     SmoothStone: 44,
     StoneBricks: 45,
-    JelteBlock: 46,
-    QuintenBlock: 47,
     CoalBlock: 48,
     IronBlock: 49,
     IceBlock: 50,
@@ -1072,32 +1070,6 @@ const blockTypes = [
     //#endregion
 
     //#region Special Blocks
-    new BlockType({
-        blockId: 46,
-        name: "Jelte Block",
-        sprite: "jelte",
-        fuelTime: 20,
-        hardness: 12,
-        breakSound: Sounds.Break_Stone,
-        breakingSound: Sounds.Breaking_Stone,
-        toolType: ToolType.Pickaxe,
-        dropWithoutTool: false,
-        excludeFromCreativeInventory: true,
-    }),
-    new BlockType({
-        blockId: 47,
-        name: "Quinten Block",
-        sprite: "quinten",
-        fluid: true,
-        updateSpeed: 0.2,
-        fuelTime: 20,
-        hardness: 12,
-        breakSound: Sounds.Break_Stone,
-        breakingSound: Sounds.Breaking_Stone,
-        toolType: ToolType.Pickaxe,
-        dropWithoutTool: false,
-        excludeFromCreativeInventory: true,
-    }),
     new BlockType({
         blockId: 50,
         name: "Ice Block",

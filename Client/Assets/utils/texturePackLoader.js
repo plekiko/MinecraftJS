@@ -108,7 +108,7 @@ async function loadVanillaTextures() {
                     averageColor: { r: 0, g: 0, b: 0 },
                 };
             }
-        }),
+        })
     );
 }
 
@@ -130,11 +130,11 @@ async function loadTexturePack() {
 
     try {
         const texturePackData = await getFromLdb(
-            `texturePack_${currentPackKey}`,
+            `texturePack_${currentPackKey}`
         );
         if (!texturePackData) {
             console.warn(
-                `No texture pack found for key: ${currentPackKey}, using default.`,
+                `No texture pack found for key: ${currentPackKey}, using default.`
             );
             texturePackZip = null;
             texturePackFiles = null;
@@ -187,7 +187,7 @@ async function loadTexturePack() {
                         resolve();
                     };
                 });
-            }),
+            })
         );
 
         isTexturePackLoaded = true;
@@ -292,18 +292,7 @@ function isEqualToOriginal(path) {
     );
 }
 
-function waitForTexturePack() {
-    return new Promise((resolve) => {
-        const checkLoaded = () => {
-            if (isTexturePackLoaded) {
-                resolve();
-            } else {
-                setTimeout(checkLoaded, 1);
-            }
-        };
-        checkLoaded();
-    });
-}
+// waitForTexturePack is now a method on the Game class
 
 function isBase64(str) {
     try {
@@ -329,7 +318,7 @@ async function getAverageColor(img) {
             0,
             0,
             bitmap.width,
-            bitmap.height,
+            bitmap.height
         ).data;
         let r = 0,
             g = 0,

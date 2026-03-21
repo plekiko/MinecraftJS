@@ -9,7 +9,7 @@ function autoSave() {
     if (multiplayer) return;
     saveWorld(false);
 
-    chat.message("World auto-saved successfully!", "", Colors.Green);
+    game.chat.message("World auto-saved successfully!", "", Colors.Green);
 }
 
 let currentSave = {
@@ -47,7 +47,7 @@ function saveWorld(message = true, toFile = false) {
 
         // Save dimension-specific pendingBlocks
         const savedPendingBlocks = Array.from(
-            dimension.pendingBlocks.entries(),
+            dimension.pendingBlocks.entries()
         ).map(([chunkX, entry]) => ({
             chunkX,
             dimensionIndex: index,
@@ -132,7 +132,8 @@ function saveWorld(message = true, toFile = false) {
         worlds = [worldData];
     }
 
-    if (message) chat.message("World saved successfully!", "", Colors.Green);
+    if (message)
+        game.chat.message("World saved successfully!", "", Colors.Green);
 
     localStorage.setItem("worlds", JSON.stringify(worlds));
     localStorage.setItem(id, saveData);
@@ -192,7 +193,7 @@ function loadWorldFromLocalStorage() {
     } else {
         if (SPAWN_PLAYER) {
             setTimeout(() => {
-                spawnPlayer();
+                game.spawnPlayer();
             }, 100);
         }
 
@@ -203,12 +204,12 @@ function loadWorldFromLocalStorage() {
 
     if (!selectedWorldData) {
         console.log("World not found in local storage", selectedWorld);
-        chat.welcomeMessage();
+        game.chat.welcomeMessage();
         if (selectedWorld.seed)
             world.generator.loadCustomSeed(selectedWorld.seed);
         if (SPAWN_PLAYER) {
             setTimeout(() => {
-                spawnPlayer();
+                game.spawnPlayer();
                 world.player.setGamemode(selectedWorld.gameMode);
                 setTimeout(() => {
                     saveWorld(false);
@@ -223,7 +224,7 @@ function loadWorldFromLocalStorage() {
 
 async function loadWorld(save) {
     if (!isTexturePackLoaded) {
-        await waitForTexturePack();
+        await game.waitForTexturePack();
     }
 
     try {
@@ -257,7 +258,7 @@ async function loadWorld(save) {
                     chunk.x,
                     chunk,
                     dimData.index,
-                    dimension.pendingBlocks,
+                    dimension.pendingBlocks
                 );
             });
 
@@ -270,9 +271,9 @@ async function loadWorld(save) {
                             blocks,
                         });
                         console.log(
-                            `Loaded pendingBlocks for chunkX: ${chunkX} in dimension ${dimensionIndex}`,
+                            `Loaded pendingBlocks for chunkX: ${chunkX} in dimension ${dimensionIndex}`
                         );
-                    },
+                    }
                 );
             }
         });
@@ -284,7 +285,7 @@ async function loadWorld(save) {
                 chunk.x,
                 chunk,
                 Dimensions.Overworld,
-                dimension.pendingBlocks,
+                dimension.pendingBlocks
             );
         });
 
@@ -292,7 +293,7 @@ async function loadWorld(save) {
             currentSave.pendingBlocks.forEach(
                 ({ chunkX, dimensionIndex, blocks }) => {
                     const targetDimension = getDimension(
-                        dimensionIndex || Dimensions.Overworld,
+                        dimensionIndex || Dimensions.Overworld
                     );
                     targetDimension.pendingBlocks.set(chunkX, {
                         dimensionIndex,
@@ -301,9 +302,9 @@ async function loadWorld(save) {
                     console.log(
                         `Loaded legacy pendingBlocks for chunkX: ${chunkX} in dimension ${
                             dimensionIndex || Dimensions.Overworld
-                        }`,
+                        }`
                     );
-                },
+                }
             );
         }
     }
@@ -320,7 +321,7 @@ async function loadWorld(save) {
 
         setTimeout(() => {
             const position = JSON.parse(currentSave.playerPosition);
-            spawnPlayer(new Vector2(position.x, position.y), false);
+            game.spawnPlayer(new Vector2(position.x, position.y), false);
 
             const playerInventory = JSON.parse(currentSave.inventoryItems);
             for (let i = 0; i < playerInventory.length; i++) {
@@ -331,7 +332,7 @@ async function loadWorld(save) {
                             itemId: playerInventory[i][j].itemId,
                             count: playerInventory[i][j].count,
                             props: playerInventory[i][j].props,
-                        },
+                        }
                     );
                 }
             }
@@ -378,7 +379,7 @@ async function loadChunk(
     x,
     chunk,
     dimensionIndex = Dimensions.Overworld,
-    pendingBlocks,
+    pendingBlocks
 ) {
     console.log("Loading chunk:", x, chunk, dimensionIndex);
 
@@ -397,7 +398,7 @@ async function loadChunk(
         CHUNK_WIDTH,
         biome,
         previousChunk,
-        true,
+        true
     );
 
     constructedChunk.generateArray();
@@ -426,7 +427,7 @@ async function loadChunk(
                 false,
                 metaData,
                 false, // Skip updateBlocks to do it in a second pass
-                false,
+                false
             );
 
             // Walls
@@ -441,7 +442,7 @@ async function loadChunk(
                 true,
                 wallMetaData,
                 false,
-                false,
+                false
             );
         }
     }
@@ -465,5 +466,20 @@ async function loadChunk(
         }
     }
 
+    // After loading, ensure all fluid blocks have correct cutoff
+    for (let y = 0; y < CHUNK_HEIGHT; y++) {
+        for (let x2 = 0; x2 < CHUNK_WIDTH; x2++) {
+            const block = constructedChunk.blocks[y][x2];
+            const blockDef = getBlock(block.blockType);
+            if (
+                blockDef.fluid &&
+                block.metaData &&
+                block.metaData.props &&
+                typeof block.metaData.props.waterLevel === "number"
+            ) {
+                block.cutoff = block.metaData.props.waterLevel;
+            }
+        }
+    }
     dimension.chunks.set(x, constructedChunk);
 }

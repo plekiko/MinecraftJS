@@ -2,7 +2,7 @@ class PauseMenu {
     constructor() {
         this.container = document.querySelector("#pause-menu");
         this.pages = Array.from(
-            document.querySelectorAll(".pause-menu-page[data-page]"),
+            document.querySelectorAll(".pause-menu-page[data-page]")
         );
         this.root = document.querySelector(":root");
 
@@ -67,7 +67,8 @@ class PauseMenu {
             return;
         }
 
-        if (chat.inChat || (world.player && world.player.windowOpen)) return;
+        if (game.chat.inChat || (world.player && world.player.windowOpen))
+            return;
         if (input._pauseConsumedByUI) {
             input._pauseConsumedByUI = false;
             return;

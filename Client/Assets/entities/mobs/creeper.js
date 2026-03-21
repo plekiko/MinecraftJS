@@ -8,7 +8,7 @@ class Creeper extends Mob {
             invulnerable = false,
             myChunkX = 0,
             body = createCreeperBody(),
-        } = {},
+        } = {}
     ) {
         super(world, {
             name: "Creeper",
@@ -54,7 +54,7 @@ class Creeper extends Mob {
 
         const distance = Vector2.Distance(
             this.position,
-            this.world.player.position,
+            this.world.player.position
         );
         if (distance <= 2.5 * BLOCK_SIZE) {
             this.primed = true;
@@ -86,7 +86,7 @@ class Creeper extends Mob {
     }
 
     explode() {
-        createExplosion(this.position, {
+        this.world.createExplosion(this.position, {
             radius: 3 * BLOCK_SIZE,
             damage: 12,
             power: 12,

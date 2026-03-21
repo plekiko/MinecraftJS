@@ -174,33 +174,7 @@ function setUsernameFooter(username) {
     usernameFooter.textContent = `Current Username: ${username}`;
 }
 
-function loadSettings() {
-    const settings = JSON.parse(localStorage.getItem("settings"));
-    if (settings) {
-        currentSettings.lighting = settings.lighting !== false;
-        currentSettings.username = settings.username || "";
-        currentSettings.musicVolume =
-            settings.musicVolume ?? (settings.music === false ? 0 : 100);
-        currentSettings.sfxVolume =
-            settings.sfxVolume ?? (settings.sfx === false ? 0 : 100);
-    }
-
-    if (musicVolumeSlider) {
-        musicVolumeSlider.value = currentSettings.musicVolume;
-        musicVolumeLabel.textContent =
-            "Music - " + currentSettings.musicVolume + "%";
-    }
-    if (sfxVolumeSlider) {
-        sfxVolumeSlider.value = currentSettings.sfxVolume;
-        sfxVolumeLabel.textContent = "SFX - " + currentSettings.sfxVolume + "%";
-    }
-    lightingToggleButton.textContent =
-        "Lighting - " + (currentSettings.lighting ? "On" : "Off");
-
-    setUsernameFooter(currentSettings.username);
-
-    usernameInput.value = "";
-}
+// Removed global loadSettings, now use game.loadSettings()
 
 if (musicVolumeSlider) {
     musicVolumeSlider.addEventListener("input", () => {
@@ -215,7 +189,7 @@ if (sfxVolumeSlider) {
     });
 }
 
-loadSettings();
+game.loadSettings();
 
 function showTexturePacks() {
     hideMenu();
@@ -1300,7 +1274,7 @@ function gotoOptions() {
     rebindContextmenuHandler = null;
     waitingForRebindAction = null;
 
-    loadSettings();
+    game.loadSettings();
 }
 
 let controlsBindings = null;

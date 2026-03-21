@@ -92,7 +92,7 @@ class Camera {
         // Clamp the camera's y after following the player as well.
         this.y = Math.min(
             this.y,
-            CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height / 2,
+            CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height / 2
         );
 
         // Same for top edge

@@ -41,11 +41,11 @@ class Hotbar {
 
         const drawHeartAt = (i, cropX) => {
             const leftX = Math.round(
-                hotbar.x + 12 + i * heartSize - heartSize / 2,
+                hotbar.x + 12 + i * heartSize - heartSize / 2
             );
             const yOffset = isLowHealth
                 ? Math.sign(
-                      Math.sin(this.shimmerTime * SHIMMER_SPEED + i * 2.399),
+                      Math.sin(this.shimmerTime * SHIMMER_SPEED + i * 2.399)
                   ) * SHIMMER_DISTANCE
                 : 0;
             drawImage({
@@ -98,15 +98,15 @@ class Hotbar {
                     (maxFood * foodSize) / 2 +
                     foodSize / 2 +
                     i * foodSize -
-                    foodSize / 2,
+                    foodSize / 2
             );
             const yOffset = isLowFood
                 ? Math.round(
                       Math.sign(
                           Math.sin(
-                              this.shimmerTime * SHIMMER_SPEED + i * 2.399 + 1,
-                          ),
-                      ) * SHIMMER_DISTANCE,
+                              this.shimmerTime * SHIMMER_SPEED + i * 2.399 + 1
+                          )
+                      ) * SHIMMER_DISTANCE
                   )
                 : 0;
             drawImage({
@@ -157,7 +157,7 @@ class Hotbar {
         this.drawFood(
             world.player.foodLevel,
             world.player.maxFoodLevel,
-            hotbar,
+            hotbar
         );
     }
 
@@ -169,14 +169,14 @@ class Hotbar {
     handleSelected() {
         if (this.inventory.items[3][this.currentSlot].item.blockId) {
             this.inventory.selectedBlock = getBlock(
-                this.inventory.items[3][this.currentSlot].item.blockId,
+                this.inventory.items[3][this.currentSlot].item.blockId
             );
         } else {
             this.inventory.selectedBlock = null;
         }
         if (this.inventory.items[3][this.currentSlot].item.itemId != null) {
             this.inventory.selectedItem = getItem(
-                this.inventory.items[3][this.currentSlot].item.itemId,
+                this.inventory.items[3][this.currentSlot].item.itemId
             );
         } else {
             this.inventory.selectedItem = null;
@@ -200,7 +200,7 @@ class Hotbar {
     }
 
     handleSelecting() {
-        if (chat.inChat) return;
+        if (game.chat.inChat) return;
         if (world.player.windowOpen) return;
 
         if (input.isActionPressed("hotbarUp")) this.currentSlot--;

@@ -216,7 +216,7 @@ function removeAudio(audio) {
 
 // Play a non-positional sound with error handling
 function playSound(sound, volume = 1, pitch = 1, loop = false) {
-    const sfxMultiplier = (settings.sfxVolume ?? 100) / 100;
+    const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
     volume = volume * sfxMultiplier;
 
     const url = `${AUDIO_BASE_URL}${sound}`;
@@ -268,9 +268,9 @@ function playPositionalSound(
     range = 10,
     maxVolume = 1,
     pitch = 1,
-    loop = false,
+    loop = false
 ) {
-    const sfxMultiplier = (settings.sfxVolume ?? 100) / 100;
+    const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
     maxVolume = maxVolume * sfxMultiplier;
 
     if (!world.player) {
@@ -333,9 +333,9 @@ function playMessySound(
     sound,
     range = 10,
     maxVolume = 1,
-    messyRange = new Vector2(1, 4),
+    messyRange = new Vector2(1, 4)
 ) {
-    const sfxMultiplier = (settings.sfxVolume ?? 100) / 100;
+    const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
     maxVolume = maxVolume * sfxMultiplier;
 
     // A positional sound that plays every messyRange seconds, only if the player is within range

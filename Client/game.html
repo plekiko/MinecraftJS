@@ -25,10 +25,10 @@
                     >
                         Game Menu
                     </h2>
-                    <button class="btn" onclick="pauseMenu.close()">
+                    <button class="btn" onclick="game.pauseMenu.close()">
                         Back to Game
                     </button>
-                    <button class="btn" onclick="pauseMenu.setPage(2)">
+                    <button class="btn" onclick="game.pauseMenu.setPage(2)">
                         Debug Menu
                     </button>
                     <!-- These will be uncommented when advancements are added -->
@@ -51,7 +51,7 @@
                     <h2 class="input-field-title pause-menu-title">
                         Debug Menu
                     </h2>
-                    <button class="btn" onclick="pauseMenu.setPage(1)">
+                    <button class="btn" onclick="game.pauseMenu.setPage(1)">
                         Back
                     </button>
                     <button
@@ -162,7 +162,6 @@
         <script src="Assets/world/saving.js"></script>
         <script src="Assets/game/body.js"></script>
         <script src="Assets/game/entity.js"></script>
-        <script src="Assets/world/explosion.js"></script>
         <script src="Assets/entities/drop.js"></script>
         <script src="Assets/entities/mob.js"></script>
         <script src="Assets/entities/projectile.js"></script>
@@ -183,6 +182,7 @@
         <script src="Assets/entities/player.js"></script>
         <script src="Assets/game/chat.js"></script>
         <script src="Assets/game/pauseMenu.js"></script>
+        <script src="Assets/game/game.js"></script>
         <script src="main.js"></script>
         <script src="debug.js"></script>
 

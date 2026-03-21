@@ -41,12 +41,12 @@ function drawBackground() {
     const topColor = interpolateColor(
         nightColor,
         dayColor,
-        Math.sin(time) * 0.5 + 0.5,
+        Math.sin(time) * 0.5 + 0.5
     );
     const bottomColor = interpolateColor(
         midnightColor,
         sunsetColor,
-        Math.sin(time) * 0.5 + 0.5,
+        Math.sin(time) * 0.5 + 0.5
     );
 
     const gradient = ctx.createLinearGradient(0, CANVAS.height, 0, 0);
@@ -114,7 +114,8 @@ function draw(chunks, frames) {
 
     drawBackground();
     drawChunks(chunks);
-    if (world.player && !pauseMenu?.getActive()) {
+
+    if (world.player && !game.pauseMenu?.getActive()) {
         drawBreakAndPlaceCursor(cursorInRange);
         drawDestroyStage();
     }
@@ -141,13 +142,13 @@ function drawLoadScreen() {
             ctx.fillText(
                 "Loading texture pack...",
                 CANVAS.width / 2,
-                CANVAS.height / 2,
+                CANVAS.height / 2
             );
         else if (world.generator.loadingWorld)
             ctx.fillText(
                 "Loading world...",
                 CANVAS.width / 2,
-                CANVAS.height / 2,
+                CANVAS.height / 2
             );
     }
 }
@@ -159,8 +160,8 @@ function drawEntities() {
             Math.abs(
                 Vector2.XDistance(
                     new Vector2(camera.getWorldX(camera.x), 0),
-                    entity.position,
-                ),
+                    entity.position
+                )
             ) <=
             RENDER_DISTANCE * 2 * BLOCK_SIZE * CHUNK_WIDTH
         ) {
@@ -168,7 +169,7 @@ function drawEntities() {
         } else {
             if (entity.despawn) {
                 const chunk = getDimensionChunks(activeDimension).get(
-                    entity.myChunkX,
+                    entity.myChunkX
                 );
                 if (chunk) chunk.removeEntityFromChunk(entity);
 
@@ -209,7 +210,7 @@ function drawBreakAndPlaceCursor(inRange = false) {
         mouseX - Math.floor(camera.x),
         mouseY - Math.floor(camera.y),
         BLOCK_SIZE,
-        BLOCK_SIZE,
+        BLOCK_SIZE
     );
 }
 
@@ -264,7 +265,7 @@ function drawLate(chunk) {
 function afterDraw() {
     if (world.player) {
         drawUI();
-        if (!window.pauseMenu?.getActive()) drawCursor();
+        if (!game.pauseMenu?.getActive()) drawCursor();
         if (drawCoordinatesOverlay) drawCoordinates();
     }
     if (drawCameraOverlay) drawCamera();
@@ -276,7 +277,7 @@ function afterDraw() {
 function drawUI() {
     drawHotbar();
     drawInventory();
-    chat.draw(ctx);
+    game.chat.draw(ctx);
 }
 
 function drawInventory() {
@@ -294,12 +295,12 @@ function drawDestroyStage() {
     const mouseY = input.getMousePositionOnBlockGrid().y;
 
     const spriteSize = getSpriteSize(
-        "blocks/destroy_stage_" + (world.player.breakingStage - 1),
+        "blocks/destroy_stage_" + (world.player.breakingStage - 1)
     ).width;
 
     drawImage({
         url: getSpriteUrl(
-            "blocks/destroy_stage_" + (world.player.breakingStage - 1),
+            "blocks/destroy_stage_" + (world.player.breakingStage - 1)
         ),
         x: mouseX - Math.floor(camera.x),
         y: mouseY - Math.floor(camera.y),
@@ -366,15 +367,12 @@ function drawChunkStats(chunk, chunkX) {
     let txt = `${index} - ${chunk.biome.name}\nTemp: ${Math.floor(
         getDimension(activeDimension).noiseMaps.temperature.getNoise(
             index,
-            20000,
-        ),
+            20000
+        )
     )}\nWetness: ${Math.floor(
-        getDimension(activeDimension).noiseMaps.wetness.getNoise(index, 10000),
+        getDimension(activeDimension).noiseMaps.wetness.getNoise(index, 10000)
     )}\nMountains: ${Math.floor(
-        getDimension(activeDimension).noiseMaps.mountains.getNoise(
-            index,
-            30000,
-        ),
+        getDimension(activeDimension).noiseMaps.mountains.getNoise(index, 30000)
     )}\nHeight: ${chunk.biome.heightNoise.scale * 1000} - ${
         chunk.biome.heightNoise.intensity
     }`;
@@ -410,7 +408,7 @@ function drawExpectedFileSize() {
             (getDimensionChunks(activeDimension).size * CHUNK_FILE_SIZE + 5) +
             "kB",
         10,
-        CANVAS.height - 10,
+        CANVAS.height - 10
     );
 }
 
@@ -433,14 +431,14 @@ function drawHeight() {
         const chunk = getDimensionChunks(activeDimension).get(
             Math.floor(worldX / (CHUNK_WIDTH * BLOCK_SIZE)) *
                 CHUNK_WIDTH *
-                BLOCK_SIZE,
+                BLOCK_SIZE
         );
 
         if (!chunk) continue; // Skip if no chunk exists at this position
 
         // Get the noise height for this block's position
         const noiseHeight = chunk.getHeight(
-            (worldX % (CHUNK_WIDTH * BLOCK_SIZE)) / BLOCK_SIZE,
+            (worldX % (CHUNK_WIDTH * BLOCK_SIZE)) / BLOCK_SIZE
         );
 
         // Calculate the screen Y position based on noise height
@@ -480,7 +478,7 @@ function drawDebugMouseBlock() {
         topLeftX - Math.floor(camera.x),
         topLeftY - Math.floor(camera.y),
         BLOCK_SIZE,
-        BLOCK_SIZE,
+        BLOCK_SIZE
     );
 
     ctx.lineWidth = 1;
@@ -584,7 +582,7 @@ function drawSimpleImage({
         drawX, // Canvas x
         drawY, // Canvas y
         drawWidth, // Scaled width
-        drawHeight, // Scaled height
+        drawHeight // Scaled height
     );
 }
 
@@ -671,7 +669,7 @@ function drawImage({
             drawX, // Canvas x
             drawY, // Canvas y
             drawWidth, // Scaled width
-            drawHeight, // Scaled height
+            drawHeight // Scaled height
         );
 
         // Apply dark overlay if specified
@@ -700,8 +698,8 @@ function drawImage({
         (sizeY !== null
             ? Math.min(sizeY, fullHeight)
             : shouldCrop
-              ? crop.height
-              : img.height) * scale;
+            ? crop.height
+            : img.height) * scale;
     return {
         x: centerX ? x - drawWidthFinal / 2 : x,
         y: centerY ? y - drawHeightFinal / 2 : y,

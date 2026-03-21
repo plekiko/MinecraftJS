@@ -29,7 +29,7 @@ class Player extends Entity {
 
             inventory = new Inventory(),
             entities,
-        },
+        }
     ) {
         super(world, {
             UUID: UUID,
@@ -110,11 +110,11 @@ class Player extends Entity {
     clampFoodStats() {
         this.foodLevel = Math.max(
             0,
-            Math.min(this.foodLevel, this.maxFoodLevel),
+            Math.min(this.foodLevel, this.maxFoodLevel)
         );
         this.foodSaturationLevel = Math.max(
             0,
-            Math.min(this.foodSaturationLevel, this.foodLevel),
+            Math.min(this.foodSaturationLevel, this.foodLevel)
         );
         this.foodExhaustionLevel = Math.max(0, this.foodExhaustionLevel);
         this.foodTickTimer = Math.max(0, this.foodTickTimer);
@@ -142,7 +142,7 @@ class Player extends Entity {
             if (this.foodSaturationLevel > 0) {
                 this.foodSaturationLevel = Math.max(
                     0,
-                    this.foodSaturationLevel - 1,
+                    this.foodSaturationLevel - 1
                 );
                 continue;
             }
@@ -158,11 +158,11 @@ class Player extends Entity {
     addFood(foodValue, saturationValue = 0) {
         this.foodLevel = Math.min(
             this.maxFoodLevel,
-            this.foodLevel + foodValue,
+            this.foodLevel + foodValue
         );
         this.foodSaturationLevel = Math.min(
             this.foodLevel,
-            this.foodSaturationLevel + saturationValue,
+            this.foodSaturationLevel + saturationValue
         );
         this.foodTickTimer = 0;
         this.clampFoodStats();
@@ -214,9 +214,11 @@ class Player extends Entity {
             this.foodTickTimer += 1;
 
             if (this.foodTickTimer >= 10) {
-                const healAmount = Math.min(2, this.foodSaturationLevel / 3);
+                const healAmount = Math.ceil(
+                    Math.min(2, this.foodSaturationLevel / 3)
+                );
                 this.addHealth(healAmount);
-                this.addFoodExhaustion(6 * (healAmount / 2));
+                this.addFoodExhaustion(Math.ceil(6 * (healAmount / 2)));
                 this.foodTickTimer = 0;
             }
 
@@ -282,7 +284,7 @@ class Player extends Entity {
         const nameTagOffset = 0.3 * BLOCK_SIZE;
         const nameTagPosition = new Vector2(
             this.position.x + this.hitbox.x / 2 - camera.x,
-            this.position.y - nameTagOffset - camera.y,
+            this.position.y - nameTagOffset - camera.y
         );
 
         drawText({
@@ -307,7 +309,7 @@ class Player extends Entity {
         this.portalSound.volume = lerp(
             this.portalSound.volume,
             0.5,
-            deltaTime / 3,
+            deltaTime / 3
         );
     }
 
@@ -515,7 +517,7 @@ class Player extends Entity {
             this.hoverBlock.y,
             Blocks.Fire,
             false,
-            activeDimension,
+            activeDimension
         );
 
         this.world.setBlockType(this.hoverBlock, Blocks.Fire);
@@ -537,7 +539,7 @@ class Player extends Entity {
 
         const blockAbove = world.getBlockAtWorldPosition(
             this.hoverBlock.transform.position.x,
-            this.hoverBlock.transform.position.y - BLOCK_SIZE,
+            this.hoverBlock.transform.position.y - BLOCK_SIZE
         );
 
         if (blockAbove && !getBlock(blockAbove.blockType).air) return;
@@ -556,7 +558,7 @@ class Player extends Entity {
             this.hoverBlock.y,
             Blocks.Farmland,
             false,
-            activeDimension,
+            activeDimension
         );
 
         this.reduceDurability();
@@ -575,10 +577,10 @@ class Player extends Entity {
 
         const direction = calculateDirection(this.position, mousePos);
 
-        summonEntity(projectile, structuredClone(this.position), {
+        this.world.summonEntity(projectile, structuredClone(this.position), {
             velocity: new Vector2(
                 direction.x * item.throwPower * BLOCK_SIZE,
-                direction.y * item.throwPower * BLOCK_SIZE,
+                direction.y * item.throwPower * BLOCK_SIZE
             ),
         });
 
@@ -598,20 +600,20 @@ class Player extends Entity {
 
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
-                    new InventoryItem({ itemId: Items.Bucket, count: 1 }),
+                    new InventoryItem({ itemId: Items.Bucket, count: 1 })
                 );
                 this.hoverBlock.setBlockType(Blocks.Water, true);
                 //this.world.setBlockType(this.hoverBlock, Blocks.Water);
 
                 world.serverPlaceBlock(
                     world.getChunkXForWorldX(
-                        this.hoverBlock.transform.position.x,
+                        this.hoverBlock.transform.position.x
                     ),
                     this.hoverBlock.x,
                     this.hoverBlock.y,
                     Blocks.Water,
                     false,
-                    activeDimension,
+                    activeDimension
                 );
 
                 this.hoverBlock.updateSprite();
@@ -622,19 +624,19 @@ class Player extends Entity {
 
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
-                    new InventoryItem({ itemId: Items.Bucket, count: 1 }),
+                    new InventoryItem({ itemId: Items.Bucket, count: 1 })
                 );
                 this.hoverBlock.setBlockType(Blocks.Lava, true);
 
                 world.serverPlaceBlock(
                     world.getChunkXForWorldX(
-                        this.hoverBlock.transform.position.x,
+                        this.hoverBlock.transform.position.x
                     ),
                     this.hoverBlock.x,
                     this.hoverBlock.y,
                     Blocks.Lava,
                     false,
-                    activeDimension,
+                    activeDimension
                 );
 
                 //this.world.setBlockType(this.hoverBlock, Blocks.Lava);
@@ -653,11 +655,11 @@ class Player extends Entity {
             ) {
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
-                    new InventoryItem({ itemId: Items.LavaBucket, count: 1 }),
+                    new InventoryItem({ itemId: Items.LavaBucket, count: 1 })
                 );
 
                 const chunk = getDimensionChunks(activeDimension).get(
-                    this.hoverBlock.chunkX,
+                    this.hoverBlock.chunkX
                 );
 
                 if (!chunk) return;
@@ -668,7 +670,7 @@ class Player extends Entity {
                     this.hoverBlock.y,
                     Blocks.Air,
                     false,
-                    activeDimension,
+                    activeDimension
                 );
 
                 chunk.setBlockTypeLocal(
@@ -676,7 +678,7 @@ class Player extends Entity {
                     this.hoverBlock.y,
                     Blocks.Air,
                     false,
-                    null,
+                    null
                 );
             }
 
@@ -687,11 +689,11 @@ class Player extends Entity {
             ) {
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
-                    new InventoryItem({ itemId: Items.WaterBucket, count: 1 }),
+                    new InventoryItem({ itemId: Items.WaterBucket, count: 1 })
                 );
 
                 const chunk = getDimensionChunks(activeDimension).get(
-                    this.hoverBlock.chunkX,
+                    this.hoverBlock.chunkX
                 );
 
                 if (!chunk) return;
@@ -702,7 +704,7 @@ class Player extends Entity {
                     this.hoverBlock.y,
                     Blocks.Air,
                     false,
-                    activeDimension,
+                    activeDimension
                 );
 
                 chunk.setBlockTypeLocal(
@@ -710,7 +712,7 @@ class Player extends Entity {
                     this.hoverBlock.y,
                     Blocks.Air,
                     false,
-                    null,
+                    null
                 );
             }
             // playPositionalSound(this.position, "items/bucket_fill.ogg");
@@ -789,7 +791,7 @@ class Player extends Entity {
     }
 
     dieEvent() {
-        chat.message("Player has died.");
+        game.chat.message("Player has died.");
 
         playRandomSoundFromArray({
             array: Sounds.Player_Hurt,
@@ -819,7 +821,7 @@ class Player extends Entity {
 
     interactLogic() {
         if (this.windowOpen) return;
-        if (pauseMenu?.getActive()) return;
+        if (game.pauseMenu?.getActive()) return;
 
         const usePressed = input.isActionPressed("place");
 
@@ -896,7 +898,7 @@ class Player extends Entity {
         const inventoryItems = this.inventory.getAllItems();
 
         const blockIndex = inventoryItems.findIndex(
-            (item) => item.blockId === block.blockId,
+            (item) => item.blockId === block.blockId
         );
 
         if (blockIndex === -1) {
@@ -905,7 +907,7 @@ class Player extends Entity {
                     new InventoryItem({
                         blockId: block.blockId,
                         count: 1,
-                    }),
+                    })
                 );
             }
             return;
@@ -951,7 +953,7 @@ class Player extends Entity {
     }
 
     toggleLogic() {
-        if (chat.inChat) return;
+        if (game.chat.inChat) return;
         if (this.windowOpen && input.isActionPressed("pause")) {
             this.closeInventory();
             input._pauseConsumedByUI = true;
@@ -993,7 +995,7 @@ class Player extends Entity {
                 case SpecialType.SingleChest:
                     playPositionalSound(
                         this.position,
-                        "blocks/chestclosed.ogg",
+                        "blocks/chestclosed.ogg"
                     );
                     break;
             }
@@ -1030,7 +1032,7 @@ class Player extends Entity {
                 itemId: drop.itemId,
                 count: drop.count,
                 props: drop.props,
-            }),
+            })
         );
 
         if (left != drop.count) playSound("misc/pop.ogg");
@@ -1049,7 +1051,7 @@ class Player extends Entity {
 
         const climableBlocks = this.filterBlocksByProperty(
             blockTypes,
-            "climable",
+            "climable"
         );
 
         // Add Sounds
@@ -1065,17 +1067,17 @@ class Player extends Entity {
     }
 
     drop(item, count = item.count) {
-        spawnDrop(
+        this.world.spawnDrop(
             new Vector2(
                 this.position.x + randomRange(0, BLOCK_SIZE / 3),
-                this.position.y,
+                this.position.y
             ),
             {
                 blockId: item.blockId,
                 itemId: item.itemId,
                 count: count,
                 props: item.props,
-            },
+            }
         );
     }
 
@@ -1108,7 +1110,7 @@ class Player extends Entity {
 
     breakingAndPlacingLogic() {
         if (this.windowOpen) return;
-        if (pauseMenu?.getActive()) return;
+        if (game.pauseMenu?.getActive()) return;
 
         if (input.isActionPressed("attack")) {
             this.playerSwing();
@@ -1143,7 +1145,7 @@ class Player extends Entity {
                     worldY,
                     entity.hitbox.x,
                     entity.hitbox.y,
-                    true,
+                    true
                 );
             }) ?? null
         );
@@ -1212,7 +1214,7 @@ class Player extends Entity {
 
     checkWallForPlacing() {
         const chunk = getDimensionChunks(activeDimension).get(
-            this.hoverBlock.chunkX,
+            this.hoverBlock.chunkX
         );
 
         if (!chunk) return;
@@ -1221,7 +1223,7 @@ class Player extends Entity {
 
         const mousePos = new Vector2(
             input.getMousePositionOnBlockGrid().x,
-            input.getMousePositionOnBlockGrid().y,
+            input.getMousePositionOnBlockGrid().y
         );
 
         let isAdjacentToBlock =
@@ -1268,7 +1270,7 @@ class Player extends Entity {
 
         // Get the target chunk
         const chunk = getDimensionChunks(activeDimension).get(
-            this.hoverBlock.chunkX,
+            this.hoverBlock.chunkX
         );
 
         // Place the block
@@ -1278,7 +1280,7 @@ class Player extends Entity {
             blockToPlace.blockId,
             isWall,
             null,
-            true,
+            true
         );
 
         if (!succeeded) return;
@@ -1289,7 +1291,7 @@ class Player extends Entity {
             this.hoverBlock.y,
             blockToPlace.blockId,
             isWall,
-            activeDimension,
+            activeDimension
         );
 
         // Play appropriate break sound
@@ -1347,11 +1349,13 @@ class Player extends Entity {
 
         const mousePos = new Vector2(
             input.getMousePositionOnBlockGrid().x,
-            input.getMousePositionOnBlockGrid().y,
+            input.getMousePositionOnBlockGrid().y
         );
 
         if (mousePos.y <= -1) {
-            chat.message("Can't place here! World height: " + CHUNK_HEIGHT);
+            game.chat.message(
+                "Can't place here! World height: " + CHUNK_HEIGHT
+            );
             return;
         }
 
@@ -1366,7 +1370,7 @@ class Player extends Entity {
                         new Vector2(entity.position.x, entity.position.y),
                         new Vector2(entity.hitbox.x, entity.hitbox.y),
                         new Vector2(mousePos.x, mousePos.y),
-                        new Vector2(BLOCK_SIZE, BLOCK_SIZE),
+                        new Vector2(BLOCK_SIZE, BLOCK_SIZE)
                     )
                 ) {
                     collidingWithEntity = true;
@@ -1379,7 +1383,7 @@ class Player extends Entity {
 
         const blockBeneath = world.getBlockAtWorldPosition(
             this.hoverBlock.transform.position.x,
-            this.hoverBlock.transform.position.y + BLOCK_SIZE,
+            this.hoverBlock.transform.position.y + BLOCK_SIZE
         );
 
         if (block.breakWithoutBlockUnderneath) {
@@ -1427,7 +1431,7 @@ class Player extends Entity {
                         this.inventory.hoverSlot.y,
                         this.inventory.hoverSlot.x,
                         1,
-                        this.inventory.hoverSlot.array,
+                        this.inventory.hoverSlot.array
                     );
                 }
             }
@@ -1443,13 +1447,13 @@ class Player extends Entity {
         if (input.isActionDown("sprint")) {
             this.drop(
                 this.getSelectedSlotItem(),
-                this.getSelectedSlotItem().count,
+                this.getSelectedSlotItem().count
             );
             this.inventory.removeItem(
                 3,
                 this.inventory.currentSlot,
                 this.getSelectedSlotItem().count,
-                this.inventory.items,
+                this.inventory.items
             );
             return;
         }
@@ -1460,7 +1464,7 @@ class Player extends Entity {
             3,
             this.inventory.currentSlot,
             1,
-            this.inventory.items,
+            this.inventory.items
         );
     }
 
@@ -1494,7 +1498,7 @@ class Player extends Entity {
                 Blocks.Air,
                 wall,
                 false,
-                activeDimension,
+                activeDimension
             );
             return;
         }
@@ -1544,7 +1548,7 @@ class Player extends Entity {
         }
 
         this.breakingStage = Math.floor(
-            Math.min(10, (this.breakingTime / currentBlockHardness) * 10),
+            Math.min(10, (this.breakingTime / currentBlockHardness) * 10)
         );
 
         // Check if block should be broken
@@ -1552,8 +1556,8 @@ class Player extends Entity {
             let shouldDrop = block.dropWithoutTool
                 ? true
                 : selectedTool
-                  ? selectedTool === block.toolType
-                  : false;
+                ? selectedTool === block.toolType
+                : false;
             if (
                 this.inventory.selectedItem &&
                 this.inventory.selectedItem.toolLevel < block.requiredToolLevel
@@ -1570,7 +1574,7 @@ class Player extends Entity {
                     Blocks.Air,
                     isWall,
                     shouldDrop,
-                    activeDimension,
+                    activeDimension
                 );
             }
 
@@ -1594,7 +1598,7 @@ class Player extends Entity {
         if (this.holdItem.hasProp("durability")) {
             this.holdItem.setProp(
                 "durability",
-                this.holdItem.getProp("durability") - amount,
+                this.holdItem.getProp("durability") - amount
             );
 
             if (this.holdItem.getProp("durability") <= 0) {
@@ -1605,7 +1609,7 @@ class Player extends Entity {
                     "items/break.ogg",
                     10,
                     1,
-                    randomRange(0.8, 1.2),
+                    randomRange(0.8, 1.2)
                 );
             }
         }

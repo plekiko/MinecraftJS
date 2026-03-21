@@ -17,12 +17,12 @@ class TNT extends Entity {
             name: "TNT",
             position: new Vector2(
                 position.x + BLOCK_SIZE / 20,
-                position.y + BLOCK_SIZE / 20,
+                position.y + BLOCK_SIZE / 20
             ),
             sprite: sprite,
             hitbox: new Vector2(
                 BLOCK_SIZE - BLOCK_SIZE / 16,
-                BLOCK_SIZE - BLOCK_SIZE / 16,
+                BLOCK_SIZE - BLOCK_SIZE / 16
             ),
             spriteScale: spriteScale, // Dynamically calculated sprite scale
             canSwim: false,
@@ -52,14 +52,14 @@ class TNT extends Entity {
         this.flashCounter--;
         if (this.fuse <= 0) {
             this.explode();
-            world.removeEntity(this);
+            this.world.removeEntity(this);
         }
     }
 
     hit() {}
 
     explode() {
-        createExplosion(this.position, {
+        this.world.createExplosion(this.position, {
             excludeEntity: this,
         });
     }
@@ -72,6 +72,6 @@ class TNT extends Entity {
     }
 
     dieEvent() {
-        world.removeEntity(this);
+        this.world.removeEntity(this);
     }
 }

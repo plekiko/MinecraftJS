@@ -47,8 +47,6 @@ const SPAWN_PLAYER = true;
 let globalFrame = 0;
 let updatingBlocks = []; //eg furnace
 
-let chat = null;
-
 let GAMERULES = {
     keepInventory: false,
     doDaylightCycle: true,

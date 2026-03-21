@@ -24,7 +24,7 @@ function playRandomSong() {
     let randomSongUrl = "Assets/audio/music/" + songs[randomSongIndex] + ".ogg";
 
     musicPlayer.src = randomSongUrl;
-    const musicVol = (settings.musicVolume ?? 100) / 100;
+    const musicVol = (game.settings.musicVolume ?? 100) / 100;
     musicPlayer.volume = musicVol * 0.3;
     musicPlayer.play();
 
