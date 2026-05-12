@@ -97,6 +97,7 @@ const Blocks = Object.freeze({
     StoneBrickSlab: 80,
     MossyCobblestoneSlab: 81,
     SmoothStoneSlab: 82,
+    CherrySlab: 303,
 
     Fire: 85,
 
@@ -1461,6 +1462,19 @@ const blockTypes = [
         dropWithoutTool: false,
         defaultCutoff: 0.5,
         noteBlockSound: "bd",
+    }),
+    new BlockType({
+        blockId: 303,
+        name: "Cherry Slab",
+        sprite: "cherry_planks",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        breakSound: Sounds.Break_Wood,
+        breakingSound: Sounds.Breaking_Wood,
+        category: BlockCategory.Planks,
+        fuelTime: 15,
+        defaultCutoff: 0.5,
+        noteBlockSound: "bass",
     }),
     //#endregion
 
