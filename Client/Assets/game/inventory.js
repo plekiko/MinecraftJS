@@ -96,8 +96,8 @@ class Inventory {
     }
 
     syncInventoryMultiplayer() {
-        if (!multiplayer || !server || !player) return;
-        if (player.inventory !== this) return;
+        if (!multiplayer || !server || !world.player) return;
+        if (world.player.inventory !== this) return;
 
         const inventoryPayload = this.serializeInventoryForMultiplayer();
         const payloadString = JSON.stringify(inventoryPayload);
@@ -108,7 +108,7 @@ class Inventory {
 
         server.send({
             type: "playerInventory",
-            sender: player.UUID,
+            sender: world.player.UUID,
             message: {
                 inventory: inventoryPayload,
             },
@@ -164,7 +164,7 @@ class Inventory {
                 if (!item.blockId && (!item.itemId || item.itemId === 0))
                     continue;
 
-                spawnDrop(
+                world.spawnDrop(
                     new Vector2(
                         position.x + randomRange(-BLOCK_SIZE, BLOCK_SIZE),
                         position.y
@@ -519,7 +519,7 @@ class Inventory {
 
             this.reverseSync();
 
-            playPositionalSound(player.position, "blocks/anvil_use.ogg");
+            playPositionalSound(world.player.position, "blocks/anvil_use.ogg");
             return;
         }
 
@@ -1066,7 +1066,7 @@ class Inventory {
 
     handleHotbarAssignment() {
         // Only proceed if an item is hovered and the inventory UI is open
-        if (!this.hoverItem || !player.windowOpen) return;
+        if (!this.hoverItem || !world.player.windowOpen) return;
 
         // Map number keys to hotbar slots
         for (let i = 1; i <= 9; i++) {
@@ -1553,7 +1553,7 @@ class Inventory {
 
     drawPlayerSkin(ctx) {
         if (
-            !player?.body?.image?.complete ||
+            !world.player?.body?.image?.complete ||
             typeof drawSkinPreview !== "function"
         )
             return;
@@ -1571,7 +1571,7 @@ class Inventory {
             this.openUIOffset.y;
         drawSkinPreview(
             ctx,
-            player.body.image,
+            world.player.body.image,
             baseX,
             baseY,
             INVENTORY_PLAYER_SCALE
@@ -1668,7 +1668,7 @@ class Inventory {
     }
 
     drawHoverTitle() {
-        if (!player.windowOpen) return;
+        if (!world.player.windowOpen) return;
         if (!this.hoverItem) return;
         if (!this.hoverItem.blockId && this.hoverItem.itemId == null) return;
 
@@ -1696,7 +1696,7 @@ class Inventory {
     }
 
     drawHoldItem() {
-        if (!player.windowOpen) return;
+        if (!world.player.windowOpen) return;
         const holdingItem = this.holdingItem;
         if (!holdingItem) return;
         const mousePos = input.getMousePosition();

@@ -17,6 +17,8 @@ const Blocks = Object.freeze({
     AcaciaLeaves: 15,
     BirchLog: 16,
     BirchLeaves: 17,
+    CherryLog: 299,
+    CherryLeaves: 301,
 
     Grass: 18,
     TallGrass: 19,
@@ -45,6 +47,7 @@ const Blocks = Object.freeze({
     AcaciaPlanks: 37,
     BirchPlanks: 38,
     JunglePlanks: 39,
+    CherryPlanks: 302,
     Cobblestone: 40,
     MossyCobblestone: 58,
     CoalOre: 41,
@@ -52,8 +55,6 @@ const Blocks = Object.freeze({
     Furnace: 43,
     SmoothStone: 44,
     StoneBricks: 45,
-    JelteBlock: 46,
-    QuintenBlock: 47,
     CoalBlock: 48,
     IronBlock: 49,
     IceBlock: 50,
@@ -106,6 +107,7 @@ const Blocks = Object.freeze({
     BirchSapling: 92,
     JungleSapling: 93,
     AcaciaSapling: 94,
+    CherrySapling: 95,
 
     Wheat: 100,
     Carrot: 101,
@@ -447,6 +449,37 @@ const blockTypes = [
             }),
         ]),
     }),
+    new BlockType({
+        blockId: 299,
+        sprite: "cherry_log",
+        name: "Cherry Log",
+        category: BlockCategory.Logs,
+        smeltOutput: { itemId: Items.Charcoal },
+        fuelTime: 15,
+        collision: false,
+        hardness: 3,
+        toolType: ToolType.Axe,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
+        blockId: 301,
+        sprite: "cherry_leaves",
+        name: "Cherry Leaves",
+        collision: false,
+        dropWithoutTool: false,
+        hardness: 0.5,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        toolType: ToolType.Shears,
+
+        dropTable: new LootTable([
+            new LootItem({
+                blockId: Blocks.CherrySapling,
+                subtract: 8,
+            }),
+        ]),
+    }),
+
     //#endregion
 
     //#region Vegetation
@@ -846,6 +879,16 @@ const blockTypes = [
         noteBlockSound: "bass",
     }),
     new BlockType({
+        blockId: 302,
+        sprite: "cherry_planks",
+        name: "Cherry Planks",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        category: BlockCategory.Planks,
+        fuelTime: 15,
+        noteBlockSound: "bass",
+    }),
+    new BlockType({
         blockId: 43,
         sprite: "furnace_front_off",
         states: ["furnace_front_off", "furnace_front_on"],
@@ -1072,32 +1115,6 @@ const blockTypes = [
     //#endregion
 
     //#region Special Blocks
-    new BlockType({
-        blockId: 46,
-        name: "Jelte Block",
-        sprite: "jelte",
-        fuelTime: 20,
-        hardness: 12,
-        breakSound: Sounds.Break_Stone,
-        breakingSound: Sounds.Breaking_Stone,
-        toolType: ToolType.Pickaxe,
-        dropWithoutTool: false,
-        excludeFromCreativeInventory: true,
-    }),
-    new BlockType({
-        blockId: 47,
-        name: "Quinten Block",
-        sprite: "quinten",
-        fluid: true,
-        updateSpeed: 0.2,
-        fuelTime: 20,
-        hardness: 12,
-        breakSound: Sounds.Break_Stone,
-        breakingSound: Sounds.Breaking_Stone,
-        toolType: ToolType.Pickaxe,
-        dropWithoutTool: false,
-        excludeFromCreativeInventory: true,
-    }),
     new BlockType({
         blockId: 50,
         name: "Ice Block",
@@ -1641,7 +1658,24 @@ const blockTypes = [
         saplingOutcome: "Acacia",
         updateSpeed: 1,
     }),
+    new BlockType({
+        blockId: 95,
+        name: "Cherry Sapling",
+        sprite: "cherry_sapling",
+        hardness: 0,
+        collision: false,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        breakByFluid: true,
+        breakWithoutBlockUnderneath: true,
+        cannotBeConverted: true,
+        transparent: true,
 
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
+        saplingOutcome: "Cherry",
+        updateSpeed: 1,
+    }),
     //#endregion
 
     //#region Crops

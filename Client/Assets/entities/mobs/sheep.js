@@ -1,13 +1,16 @@
 class Sheep extends Mob {
-    constructor({
-        health = 10,
-        noAi = false,
-        position = new Vector2(),
-        invulnerable = false,
-        myChunkX = 0,
-        body = createSheepBody(),
-    } = {}) {
-        super({
+    constructor(
+        world,
+        {
+            health = 10,
+            noAi = false,
+            position = new Vector2(),
+            invulnerable = false,
+            myChunkX = 0,
+            body = createSheepBody(),
+        } = {}
+    ) {
+        super(world, {
             name: "Sheep",
             health: health,
             position: position,
@@ -104,10 +107,14 @@ class Sheep extends Mob {
         if (item.itemId !== Items.Shears) return;
         if (!this.hasWool) return;
 
-        summonEntity(Drop, new Vector2(this.position.x, this.position.y), {
-            blockId: Blocks.WhiteWool,
-            count: randomRange(1, 3),
-        });
+        this.world.summonEntity(
+            Drop,
+            new Vector2(this.position.x, this.position.y),
+            {
+                blockId: Blocks.WhiteWool,
+                count: randomRange(1, 3),
+            }
+        );
 
         player.reduceDurability();
 
@@ -123,7 +130,7 @@ class Sheep extends Mob {
             positional: true,
             origin: this.position,
         });
-        removeEntity(this);
+        this.world.removeEntity(this);
     }
 }
 

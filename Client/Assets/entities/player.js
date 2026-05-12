@@ -1,34 +1,37 @@
 class Player extends Entity {
-    constructor({
-        name = "Player",
-        UUID = uuidv4(),
-        position = new Vector2(),
-        health = 20,
-        abilities = {
-            flying: false,
-            instaBuild: false,
-            mayBuild: true,
-            mayFly: false,
-            walkSpeed: 6,
-            jumpForce: 8.5,
-            hasHealth: true,
-        },
-        gamemode = 0,
-        foodExhaustionLevel = 0,
-        foodLevel = 20,
-        foodSaturationLevel = 5,
-        foodTickTimer = 0,
-        score = 0,
-        xpLevel = 0,
+    constructor(
+        world,
+        {
+            name = "Player",
+            UUID = uuidv4(),
+            position = new Vector2(),
+            health = 20,
+            abilities = {
+                flying: false,
+                instaBuild: false,
+                mayBuild: true,
+                mayFly: false,
+                walkSpeed: 6,
+                jumpForce: 8.5,
+                hasHealth: true,
+            },
+            gamemode = 0,
+            foodExhaustionLevel = 0,
+            foodLevel = 20,
+            foodSaturationLevel = 5,
+            foodTickTimer = 0,
+            score = 0,
+            xpLevel = 0,
 
-        eating = false,
-        eatTimer = 0,
-        eatTime = 1,
+            eating = false,
+            eatTimer = 0,
+            eatTime = 1,
 
-        inventory = new Inventory(),
-        entities,
-    }) {
-        super({
+            inventory = new Inventory(),
+            entities,
+        }
+    ) {
+        super(world, {
             UUID: UUID,
             name: name,
             position: position,
@@ -211,9 +214,11 @@ class Player extends Entity {
             this.foodTickTimer += 1;
 
             if (this.foodTickTimer >= 10) {
-                const healAmount = Math.min(2, this.foodSaturationLevel / 3);
+                const healAmount = Math.ceil(
+                    Math.min(2, this.foodSaturationLevel / 3)
+                );
                 this.addHealth(healAmount);
-                this.addFoodExhaustion(6 * (healAmount / 2));
+                this.addFoodExhaustion(Math.ceil(6 * (healAmount / 2)));
                 this.foodTickTimer = 0;
             }
 
@@ -365,7 +370,7 @@ class Player extends Entity {
     }
 
     isLocal() {
-        return player === this;
+        return this.world?.player === this;
     }
 
     setGamemode(mode = this.gamemode) {
@@ -506,8 +511,8 @@ class Player extends Entity {
 
         playPositionalSound(this.position, "items/ignite.ogg", 10);
 
-        serverPlaceBlock(
-            getChunkXForWorldX(this.hoverBlock.transform.position.x),
+        world.serverPlaceBlock(
+            world.getChunkXForWorldX(this.hoverBlock.transform.position.x),
             this.hoverBlock.x,
             this.hoverBlock.y,
             Blocks.Fire,
@@ -515,7 +520,7 @@ class Player extends Entity {
             activeDimension
         );
 
-        setBlockType(this.hoverBlock, Blocks.Fire);
+        this.world.setBlockType(this.hoverBlock, Blocks.Fire);
     }
 
     playerSwing() {
@@ -532,7 +537,7 @@ class Player extends Entity {
 
         if (!block.hoeAble) return;
 
-        const blockAbove = getBlockAtWorldPosition(
+        const blockAbove = world.getBlockAtWorldPosition(
             this.hoverBlock.transform.position.x,
             this.hoverBlock.transform.position.y - BLOCK_SIZE
         );
@@ -547,8 +552,8 @@ class Player extends Entity {
             origin: this.position,
         });
 
-        serverPlaceBlock(
-            getChunkXForWorldX(this.hoverBlock.transform.position.x),
+        world.serverPlaceBlock(
+            world.getChunkXForWorldX(this.hoverBlock.transform.position.x),
             this.hoverBlock.x,
             this.hoverBlock.y,
             Blocks.Farmland,
@@ -558,7 +563,7 @@ class Player extends Entity {
 
         this.reduceDurability();
 
-        setBlockType(this.hoverBlock, Blocks.Farmland);
+        this.world.setBlockType(this.hoverBlock, Blocks.Farmland);
     }
 
     throwProjectile(item) {
@@ -572,7 +577,7 @@ class Player extends Entity {
 
         const direction = calculateDirection(this.position, mousePos);
 
-        summonEntity(projectile, structuredClone(this.position), {
+        this.world.summonEntity(projectile, structuredClone(this.position), {
             velocity: new Vector2(
                 direction.x * item.throwPower * BLOCK_SIZE,
                 direction.y * item.throwPower * BLOCK_SIZE
@@ -598,10 +603,12 @@ class Player extends Entity {
                     new InventoryItem({ itemId: Items.Bucket, count: 1 })
                 );
                 this.hoverBlock.setBlockType(Blocks.Water, true);
-                // setBlockType(this.hoverBlock, Blocks.Water);
+                //this.world.setBlockType(this.hoverBlock, Blocks.Water);
 
-                serverPlaceBlock(
-                    getChunkXForWorldX(this.hoverBlock.transform.position.x),
+                world.serverPlaceBlock(
+                    world.getChunkXForWorldX(
+                        this.hoverBlock.transform.position.x
+                    ),
                     this.hoverBlock.x,
                     this.hoverBlock.y,
                     Blocks.Water,
@@ -621,8 +628,10 @@ class Player extends Entity {
                 );
                 this.hoverBlock.setBlockType(Blocks.Lava, true);
 
-                serverPlaceBlock(
-                    getChunkXForWorldX(this.hoverBlock.transform.position.x),
+                world.serverPlaceBlock(
+                    world.getChunkXForWorldX(
+                        this.hoverBlock.transform.position.x
+                    ),
                     this.hoverBlock.x,
                     this.hoverBlock.y,
                     Blocks.Lava,
@@ -630,7 +639,7 @@ class Player extends Entity {
                     activeDimension
                 );
 
-                // setBlockType(this.hoverBlock, Blocks.Lava);
+                //this.world.setBlockType(this.hoverBlock, Blocks.Lava);
 
                 this.hoverBlock.updateSprite();
                 return;
@@ -655,7 +664,7 @@ class Player extends Entity {
 
                 if (!chunk) return;
 
-                serverPlaceBlock(
+                world.serverPlaceBlock(
                     chunk.x,
                     this.hoverBlock.x,
                     this.hoverBlock.y,
@@ -689,7 +698,7 @@ class Player extends Entity {
 
                 if (!chunk) return;
 
-                serverPlaceBlock(
+                world.serverPlaceBlock(
                     chunk.x,
                     this.hoverBlock.x,
                     this.hoverBlock.y,
@@ -782,7 +791,7 @@ class Player extends Entity {
     }
 
     dieEvent() {
-        chat.message("Player has died.");
+        game.chat.message("Player has died.");
 
         playRandomSoundFromArray({
             array: Sounds.Player_Hurt,
@@ -812,7 +821,7 @@ class Player extends Entity {
 
     interactLogic() {
         if (this.windowOpen) return;
-        if (pauseMenu?.getActive()) return;
+        if (game.pauseMenu?.getActive()) return;
 
         const usePressed = input.isActionPressed("place");
 
@@ -944,7 +953,7 @@ class Player extends Entity {
     }
 
     toggleLogic() {
-        if (chat.inChat) return;
+        if (game.chat.inChat) return;
         if (this.windowOpen && input.isActionPressed("pause")) {
             this.closeInventory();
             input._pauseConsumedByUI = true;
@@ -1033,7 +1042,7 @@ class Player extends Entity {
             return;
         }
 
-        removeEntity(drop, multiplayer);
+        world.removeEntity(drop, multiplayer);
     }
 
     climbingCollisingLogic() {
@@ -1058,7 +1067,7 @@ class Player extends Entity {
     }
 
     drop(item, count = item.count) {
-        spawnDrop(
+        this.world.spawnDrop(
             new Vector2(
                 this.position.x + randomRange(0, BLOCK_SIZE / 3),
                 this.position.y
@@ -1101,7 +1110,7 @@ class Player extends Entity {
 
     breakingAndPlacingLogic() {
         if (this.windowOpen) return;
-        if (pauseMenu?.getActive()) return;
+        if (game.pauseMenu?.getActive()) return;
 
         if (input.isActionPressed("attack")) {
             this.playerSwing();
@@ -1218,8 +1227,8 @@ class Player extends Entity {
         );
 
         let isAdjacentToBlock =
-            checkAdjacentBlocks(mousePos, true) ||
-            checkAdjacentBlocks(mousePos);
+            world.checkAdjacentBlocks(mousePos, true) ||
+            world.checkAdjacentBlocks(mousePos);
 
         return isAdjacentToBlock;
     }
@@ -1276,7 +1285,7 @@ class Player extends Entity {
 
         if (!succeeded) return;
 
-        serverPlaceBlock(
+        world.serverPlaceBlock(
             chunk.x,
             this.hoverBlock.x,
             this.hoverBlock.y,
@@ -1344,7 +1353,9 @@ class Player extends Entity {
         );
 
         if (mousePos.y <= -1) {
-            chat.message("Can't place here! World height: " + CHUNK_HEIGHT);
+            game.chat.message(
+                "Can't place here! World height: " + CHUNK_HEIGHT
+            );
             return;
         }
 
@@ -1368,9 +1379,9 @@ class Player extends Entity {
             }
         }
 
-        const isAdjacentToBlock = checkAdjacentBlocks(mousePos);
+        const isAdjacentToBlock = world.checkAdjacentBlocks(mousePos);
 
-        const blockBeneath = getBlockAtWorldPosition(
+        const blockBeneath = world.getBlockAtWorldPosition(
             this.hoverBlock.transform.position.x,
             this.hoverBlock.transform.position.y + BLOCK_SIZE
         );
@@ -1480,7 +1491,7 @@ class Player extends Entity {
             hover.breakBlock(false, wall);
             this.playerSwing();
 
-            serverBreakBlock(
+            world.serverBreakBlock(
                 hover.chunkX,
                 hover.x,
                 hover.y,
@@ -1530,7 +1541,7 @@ class Player extends Entity {
                 array: block.breakingSound,
                 volume: 0.2,
                 positional: true,
-                origin: getBlockWorldPosition(this.hoverBlock),
+                origin: world.getBlockWorldPosition(this.hoverBlock),
             });
 
             this.playerSwing();
@@ -1556,7 +1567,7 @@ class Player extends Entity {
             hover.breakBlock(shouldDrop, isWall);
 
             if (multiplayer) {
-                serverBreakBlock(
+                world.serverBreakBlock(
                     hover.chunkX,
                     hover.x,
                     hover.y,

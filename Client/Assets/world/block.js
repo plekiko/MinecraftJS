@@ -210,7 +210,7 @@ function checkDissipation(block, worldPos) {
     ];
 
     neighborOffsets.forEach((offset) => {
-        const neighbor = getBlockAtWorldPosition(
+        const neighbor = world.getBlockAtWorldPosition(
             worldPos.x + offset.dx,
             worldPos.y + offset.dy
         );
@@ -228,7 +228,7 @@ function checkDissipation(block, worldPos) {
         block.metaData.props.waterLevel += 0.25;
         block.cutoff = block.metaData.props.waterLevel;
         if (block.metaData.props.waterLevel >= 0.85) {
-            setBlockType(block, Blocks.Air);
+            world.setBlockType(block, Blocks.Air);
             return true;
         }
     }
@@ -236,7 +236,10 @@ function checkDissipation(block, worldPos) {
 }
 
 function flowDownward(block, worldPos) {
-    let below = getBlockAtWorldPosition(worldPos.x, worldPos.y + BLOCK_SIZE);
+    let below = world.getBlockAtWorldPosition(
+        worldPos.x,
+        worldPos.y + BLOCK_SIZE
+    );
     if (
         (below && getBlock(below.blockType).air) ||
         (below && getBlock(below.blockType).breakByFluid)
@@ -253,21 +256,11 @@ function flowDownward(block, worldPos) {
     return below;
 }
 
-function setBlockType(block, type, updateAdjacent = true) {
-    const chunk = getDimensionChunks(activeDimension).get(block.chunkX);
-    if (!chunk) return;
-    chunk.setBlockTypeLocal(
-        block.x,
-        block.y,
-        type,
-        block.wall,
-        null,
-        updateAdjacent
-    );
-}
-
 function verticalCheckAbove(block, worldPos) {
-    let above = getBlockAtWorldPosition(worldPos.x, worldPos.y - BLOCK_SIZE);
+    let above = world.getBlockAtWorldPosition(
+        worldPos.x,
+        worldPos.y - BLOCK_SIZE
+    );
     if (above) {
         if (above.blockType === block.blockType) {
             block.metaData.props.waterLevel = 0;
@@ -283,7 +276,7 @@ function verticalCheckAbove(block, worldPos) {
 }
 
 function flowSideways(block, worldPos, direction) {
-    let target = getBlockAtWorldPosition(
+    let target = world.getBlockAtWorldPosition(
         worldPos.x + direction.dx,
         worldPos.y + direction.dy
     );
@@ -324,6 +317,7 @@ function flowSideways(block, worldPos, direction) {
 
 class Block extends Square {
     constructor(
+        world,
         x = 0,
         y = 0,
         blockType = Blocks.Air,
@@ -339,6 +333,7 @@ class Block extends Square {
             BLOCK_SIZE / 16,
             wall
         );
+        this.world = world;
         this.wall = wall;
         this.x = x;
         this.y = y;
@@ -377,7 +372,10 @@ class Block extends Square {
     }
 
     explode(shortFuse = false) {
-        const tntEntity = summonEntity(TNT, getBlockWorldPosition(this));
+        const tntEntity = this.world.summonEntity(
+            TNT,
+            this.world.getBlockWorldPosition(this)
+        );
         if (shortFuse) {
             tntEntity.fuse = 10;
         }
@@ -508,7 +506,7 @@ class Block extends Square {
 
         server.send({
             type: "syncMetaData",
-            sender: player.UUID,
+            sender: this.world.player.UUID,
             message: {
                 x: this.x,
                 y: this.y,
@@ -519,7 +517,7 @@ class Block extends Square {
             },
         });
 
-        uploadChunkToServer(this.chunkX);
+        this.world.uploadChunkToServer(this.chunkX);
     }
 
     recieveSyncMetaData(metaData) {
@@ -535,8 +533,8 @@ class Block extends Square {
             this.metaData.props.storage = storage;
         }
 
-        if (player?.inventory.interactedBlock === this) {
-            player.inventory.reloadStorageSlots();
+        if (this.world.player?.inventory.interactedBlock === this) {
+            this.world.player.inventory.reloadStorageSlots();
         }
     }
 
@@ -612,7 +610,7 @@ class Block extends Square {
 
         if (block.ambientSound) {
             this.ambientSound = playMessySound(
-                getBlockWorldPosition(this),
+                this.world.getBlockWorldPosition(this),
                 block.ambientSound + ".ogg",
                 10,
                 0.4
@@ -716,7 +714,7 @@ class Block extends Square {
 
                             dropItem.count--;
                             if (dropItem.count <= 0) {
-                                removeEntity(drop);
+                                this.world.removeEntity(drop);
                             }
 
                             transferredFromDrop = true;
@@ -736,7 +734,7 @@ class Block extends Square {
                                 dropItem.count--;
 
                                 if (dropItem.count <= 0) {
-                                    removeEntity(drop);
+                                    this.world.removeEntity(drop);
                                 }
 
                                 transferredFromDrop = true;
@@ -749,10 +747,10 @@ class Block extends Square {
                 if (transferredFromDrop) {
                     // Sync with player's inventory if this hopper's UI is open
                     if (
-                        player.windowOpen &&
-                        player.inventory.interactedBlock === this
+                        this.world.player.windowOpen &&
+                        this.world.player.inventory.interactedBlock === this
                     ) {
-                        player.inventory.syncStorageSlots();
+                        this.world.player.inventory.syncStorageSlots();
                     }
                     break; // Only process one drop per tick to avoid overloading
                 }
@@ -760,7 +758,7 @@ class Block extends Square {
         }
 
         // Check block above for storage (pulling items)
-        const above = getBlockAtWorldPosition(
+        const above = this.world.getBlockAtWorldPosition(
             this.transform.position.x,
             this.transform.position.y - BLOCK_SIZE
         );
@@ -839,10 +837,10 @@ class Block extends Square {
                     }
                     if (transferredFromAbove) {
                         if (
-                            player.windowOpen &&
-                            player.inventory.interactedBlock === this
+                            this.world.player.windowOpen &&
+                            this.world.player.inventory.interactedBlock === this
                         ) {
-                            player.inventory.syncStorageSlots();
+                            this.world.player.inventory.syncStorageSlots();
                         }
                         break;
                     }
@@ -852,7 +850,7 @@ class Block extends Square {
         }
 
         // Check block below for storage (pushing items)
-        const below = getBlockAtWorldPosition(
+        const below = this.world.getBlockAtWorldPosition(
             this.transform.position.x,
             this.transform.position.y + BLOCK_SIZE
         );
@@ -949,10 +947,10 @@ class Block extends Square {
                 }
                 if (transferredBelow) {
                     if (
-                        player.windowOpen &&
-                        player.inventory.interactedBlock === this
+                        this.world.player.windowOpen &&
+                        this.world.player.inventory.interactedBlock === this
                     ) {
-                        player.inventory.syncStorageSlots();
+                        this.world.player.inventory.syncStorageSlots();
                     }
                     break;
                 }
@@ -976,7 +974,7 @@ class Block extends Square {
     }
 
     checkCollisionWithEntity(offset = { x: 0, y: 0 }) {
-        const blockPos = getBlockWorldPosition(this);
+        const blockPos = this.world.getBlockWorldPosition(this);
         const blockRect = {
             x: blockPos.x + offset.x,
             y: blockPos.y + offset.y,
@@ -984,7 +982,7 @@ class Block extends Square {
             height: BLOCK_SIZE,
         };
 
-        const collidingEntities = entities.filter((entity) => {
+        const collidingEntities = this.world.entities.filter((entity) => {
             const entityRect = {
                 x: entity.position.x,
                 y: entity.position.y,
@@ -1011,7 +1009,7 @@ class Block extends Square {
 
         // Clean up despawned or dead mobs from the tracking array
         props.spawnedMobs = props.spawnedMobs.filter(
-            (mob) => mob && getEntityByUUID(mob)?.health > 0
+            (mob) => mob && this.world.getEntityByUUID(mob)?.health > 0
         );
 
         // Check if we can spawn more entities
@@ -1033,7 +1031,7 @@ class Block extends Square {
     }
 
     spawnEntity(entityTypeName) {
-        const spawnPos = getBlockWorldPosition(this);
+        const spawnPos = this.world.getBlockWorldPosition(this);
 
         // Add slight offset to prevent spawning directly inside the block
         const offsetX = randomRange(-BLOCK_SIZE / 2, BLOCK_SIZE / 2);
@@ -1042,7 +1040,7 @@ class Block extends Square {
 
         if (!entityType) return;
 
-        const entity = summonEntity(
+        const entity = this.world.summonEntity(
             entityType,
             new Vector2(spawnPos.x + offsetX, spawnPos.y)
         );
@@ -1098,15 +1096,13 @@ class Block extends Square {
         const randomVariant =
             treeType.variants[randomRange(0, treeType.variants.length)];
 
-        getChunkForX(this.chunkX).spawnTreeAt(
-            randomVariant,
-            this.x,
-            this.getUserLocalY()
-        );
+        this.world
+            .getChunkForX(this.chunkX)
+            .spawnTreeAt(randomVariant, this.x, this.getUserLocalY());
     }
 
     getUserLocalY() {
-        const chunk = getChunkForX(this.chunkX, this.dimensionIndex);
+        const chunk = this.world.getChunkForX(this.chunkX, this.dimensionIndex);
         if (!chunk) return CHUNK_HEIGHT - this.y - 1;
         return chunk.localYToUserY(this.y);
     }
@@ -1136,7 +1132,7 @@ class Block extends Square {
         this.redstoneOutput = 16;
 
         playPositionalSound(
-            getBlockWorldPosition(this),
+            this.world.getBlockWorldPosition(this),
             "blocks/wood_click.ogg",
             10,
             0.4
@@ -1260,11 +1256,17 @@ class Block extends Square {
 
         const pitch = Math.pow(2, this.metaData.props.note / 12);
 
-        playPositionalSound(getBlockWorldPosition(this), sound, 13, 1, pitch);
+        playPositionalSound(
+            this.world.getBlockWorldPosition(this),
+            sound,
+            13,
+            1,
+            pitch
+        );
     }
 
     getSoundBasedOfBlockBelow() {
-        const blockBelow = getBlockAtWorldPosition(
+        const blockBelow = this.world.getBlockAtWorldPosition(
             this.transform.position.x,
             this.transform.position.y + BLOCK_SIZE
         );
@@ -1306,7 +1308,7 @@ class Block extends Square {
         }
 
         playPositionalSound(
-            getBlockWorldPosition(this),
+            this.world.getBlockWorldPosition(this),
             "blocks/wood_click.ogg",
             10,
             0.4
@@ -1325,14 +1327,14 @@ class Block extends Square {
         const bx = pos.x;
         const by = pos.y;
 
-        const north = getBlockAtWorldPosition(bx, by - BLOCK_SIZE);
+        const north = this.world.getBlockAtWorldPosition(bx, by - BLOCK_SIZE);
 
         // For diagonal connections, we want to only consider them if the adjacent cardinal blocks are not blocking.
-        const northWest = getBlockAtWorldPosition(
+        const northWest = this.world.getBlockAtWorldPosition(
             bx - BLOCK_SIZE,
             by - BLOCK_SIZE
         );
-        const northEast = getBlockAtWorldPosition(
+        const northEast = this.world.getBlockAtWorldPosition(
             bx + BLOCK_SIZE,
             by - BLOCK_SIZE
         );
@@ -1376,7 +1378,7 @@ class Block extends Square {
         this.metaData.props.note++;
         if (this.metaData.props.note > 24) this.metaData.props.note = 0;
 
-        chat.message("Playing note: " + this.metaData.props.note);
+        game.chat.message("Playing note: " + this.metaData.props.note);
 
         this.playNote();
     }
@@ -1385,7 +1387,7 @@ class Block extends Square {
         if (!item || this.metaData.props.storage[0][0].itemId !== null) {
             // Remove disc from jukebox'
             if (this.metaData.props.storage[0][0].itemId !== null) {
-                spawnDrop(getBlockWorldPosition(this), {
+                this.world.spawnDrop(world.getBlockWorldPosition(this), {
                     itemId: this.metaData.props.storage[0][0].itemId,
                     blockId: null,
                     count: 1,
@@ -1407,7 +1409,7 @@ class Block extends Square {
             this.metaData.props.storage[0][0].count = 1;
 
             this.metaData.props.myAudio = playPositionalSound(
-                getBlockWorldPosition(this),
+                this.world.getBlockWorldPosition(this),
                 "../music/" + item.playMusicInJukebox,
                 20,
                 1
@@ -1422,10 +1424,22 @@ class Block extends Square {
     checkLavaWaterInteraction(pos) {
         // Check for lava-water interaction.
         // Check for blocks surrounding this block
-        const left = getBlockAtWorldPosition(pos.x - BLOCK_SIZE, pos.y);
-        const right = getBlockAtWorldPosition(pos.x + BLOCK_SIZE, pos.y);
-        const above = getBlockAtWorldPosition(pos.x, pos.y - BLOCK_SIZE);
-        const below = getBlockAtWorldPosition(pos.x, pos.y + BLOCK_SIZE);
+        const left = this.world.getBlockAtWorldPosition(
+            pos.x - BLOCK_SIZE,
+            pos.y
+        );
+        const right = this.world.getBlockAtWorldPosition(
+            pos.x + BLOCK_SIZE,
+            pos.y
+        );
+        const above = this.world.getBlockAtWorldPosition(
+            pos.x,
+            pos.y - BLOCK_SIZE
+        );
+        const below = this.world.getBlockAtWorldPosition(
+            pos.x,
+            pos.y + BLOCK_SIZE
+        );
 
         let lavaBlocksNear = [];
 
@@ -1449,7 +1463,7 @@ class Block extends Square {
         }
 
         playPositionalSound(
-            getBlockWorldPosition(this),
+            this.world.getBlockWorldPosition(this),
             "blocks/fizz.ogg",
             10,
             0.5
@@ -1483,7 +1497,7 @@ class Block extends Square {
             this.cutoff = this.metaData.props.waterLevel;
         }
 
-        const worldPos = getBlockWorldPosition(this);
+        const worldPos = this.world.getBlockWorldPosition(this);
 
         if (this.blockType === Blocks.Water)
             this.checkLavaWaterInteraction(worldPos);
@@ -1570,7 +1584,7 @@ class Block extends Square {
 
         // Check for blocks that should break if they don't have a solid block underneath
         if (blockDef.breakWithoutBlockUnderneath || blockDef.fall) {
-            const blockBelow = getBlockAtWorldPosition(
+            const blockBelow = this.world.getBlockAtWorldPosition(
                 this.transform.position.x,
                 this.transform.position.y + BLOCK_SIZE
             );
@@ -1610,11 +1624,14 @@ class Block extends Square {
 
         if (this.linkedBlocks && this.linkedBlocks.length > 1) {
             for (let block of this.linkedBlocks) {
-                const blockAtPos = getBlockAtWorldPosition(block.x, block.y);
+                const blockAtPos = this.world.getBlockAtWorldPosition(
+                    block.x,
+                    block.y
+                );
 
                 if (blockAtPos && blockAtPos !== this) {
                     if (blockAtPos.blockType === block.blockType)
-                        setBlockType(blockAtPos, Blocks.Air);
+                        this.world.setBlockType(blockAtPos, Blocks.Air);
                 }
             }
         }
@@ -1636,9 +1653,9 @@ class Block extends Square {
         }
 
         if (blockDef.changeToBlockWhenBroken) {
-            setBlockType(this, blockDef.changeToBlockWhenBroken);
+            this.world.setBlockType(this, blockDef.changeToBlockWhenBroken);
         } else {
-            setBlockType(this, Blocks.Air);
+            this.world.setBlockType(this, Blocks.Air);
         }
     }
 
@@ -1674,7 +1691,7 @@ class Block extends Square {
         const loot = blockDef.cropOutcome.getRandomLoot();
 
         loot.forEach((item) => {
-            spawnDrop(
+            this.world.spawnDrop(
                 new Vector2(
                     this.transform.position.x + randomRange(0, BLOCK_SIZE / 3),
                     this.transform.position.y + BLOCK_SIZE / 4
@@ -1691,11 +1708,15 @@ class Block extends Square {
     gravityBlock() {
         let fallEntity = Entities.Sand;
 
-        summonEntity(fallEntity, getBlockWorldPosition(this), {
-            blockType: this.blockType,
-        });
+        this.world.summonEntity(
+            fallEntity,
+            this.world.getBlockWorldPosition(this),
+            {
+                blockType: this.blockType,
+            }
+        );
 
-        setBlockType(this, Blocks.Air);
+        this.world.setBlockType(this, Blocks.Air);
     }
 
     playBreakSound() {
@@ -1706,7 +1727,7 @@ class Block extends Square {
         playRandomSoundFromArray({
             array: soundArray,
             positional: true,
-            origin: getBlockWorldPosition(this),
+            origin: this.world.getBlockWorldPosition(this),
         });
     }
 
@@ -1716,7 +1737,7 @@ class Block extends Square {
         const loot = block.dropTable.getRandomLoot();
 
         loot.forEach((item) => {
-            spawnDrop(
+            this.world.spawnDrop(
                 new Vector2(
                     this.transform.position.x + randomRange(0, BLOCK_SIZE / 3),
                     this.transform.position.y + BLOCK_SIZE / 4
@@ -1740,7 +1761,7 @@ class Block extends Square {
             props.wall = true;
         }
 
-        spawnDrop(
+        this.world.spawnDrop(
             new Vector2(
                 this.transform.position.x + randomRange(0, BLOCK_SIZE / 3),
                 this.transform.position.y + BLOCK_SIZE / 4
@@ -1760,7 +1781,7 @@ class Block extends Square {
             for (let x = 0; x < storage[y].length; x++) {
                 const item = storage[y][x];
                 if (!item.blockId && item.itemId === null) continue;
-                spawnDrop(
+                this.world.spawnDrop(
                     new Vector2(
                         this.transform.position.x +
                             randomRange(0, BLOCK_SIZE / 3),

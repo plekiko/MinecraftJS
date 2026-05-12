@@ -1,7 +1,7 @@
-setInterval(() => {
-    updateDebug();
-}, 1000 / 144);
 function updateDebug() {
+    if (!world) return;
+    if (!game) return;
+
     handleDebugging();
     cameraLogic();
 }
@@ -11,7 +11,7 @@ function handleDebugging() {
 }
 
 function handleDebugInput() {
-    if (player && !player.canMove) return; // e.g. pause menu open
+    if (world.player && !world.player.canMove) return; // e.g. pause menu open
     if (input.isActionPressed("debugChunkBorders")) toggleChunkBorders();
     if (input.isActionPressed("debugCamera")) toggleCamera();
     if (input.isActionPressed("debugHitbox")) toggleHitbox();
@@ -74,16 +74,16 @@ function toggleCoordinates() {
 function printBlockLogic() {
     if (input.isActionDown("attack") || input.isActionDown("place")) {
         const mousePos = input.getMousePositionOnBlockGrid();
-        const block = getBlockAtWorldPosition(mousePos.x, mousePos.y);
+        const block = world.getBlockAtWorldPosition(mousePos.x, mousePos.y);
 
-        chat.message(
+        game.chat.message(
             `${getBlock(block.blockType).name} at ${mousePos.x}, ${
                 mousePos.y
             } ${
                 block.metaData && block.metaData.props
                     ? "metadata: " + JSON.stringify(block.metaData.props)
                     : ""
-            }`,
+            }`
         );
 
         console.log(mousePos.x + " - " + mousePos.y);
@@ -94,7 +94,7 @@ function printBlockLogic() {
 }
 
 function cameraLogic() {
-    if (player) return;
+    if (world?.player) return;
 
     const maxSpeed = 15;
     const acceleration = 1;
@@ -104,24 +104,24 @@ function cameraLogic() {
     if (input.isActionDown("moveLeft"))
         camera.velocity.x = Math.max(
             camera.velocity.x - acceleration,
-            -maxSpeed,
+            -maxSpeed
         );
     if (input.isActionDown("moveRight"))
         camera.velocity.x = Math.min(
             camera.velocity.x + acceleration,
-            maxSpeed,
+            maxSpeed
         );
 
     // Vertical movement (W/S keys)
     if (input.isActionDown("moveUp"))
         camera.velocity.y = Math.max(
             camera.velocity.y - acceleration,
-            -maxSpeed,
+            -maxSpeed
         );
     if (input.isActionDown("moveDown"))
         camera.velocity.y = Math.min(
             camera.velocity.y + acceleration,
-            maxSpeed,
+            maxSpeed
         );
 
     // Decelerate smoothly when no input
