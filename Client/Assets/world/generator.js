@@ -26,14 +26,23 @@ class WorldGenerator {
     }
 
     locateBiome(biome) {
-        for (let i = 0; i < 10000; i++) {
-            let currentBiome = this.calculateChunkBiome(i);
+        // Start search from player/camera center so we find the closest matching biome.
+        const center =
+            typeof camera !== "undefined" &&
+            camera &&
+            camera.getCurrentChunkIndex
+                ? camera.getCurrentChunkIndex()
+                : world && world.player
+                  ? Math.floor(world.player.x / (CHUNK_WIDTH * BLOCK_SIZE))
+                  : 0;
 
-            if (currentBiome === biome) return i;
-
-            currentBiome = this.calculateChunkBiome(-i);
-
-            if (currentBiome === biome) return -i;
+        const maxRadius = 10000;
+        for (let r = 0; r < maxRadius; r++) {
+            const indices = r === 0 ? [center] : [center + r, center - r];
+            for (const idx of indices) {
+                const currentBiome = this.calculateChunkBiome(idx);
+                if (currentBiome === biome) return idx;
+            }
         }
 
         return false;
@@ -107,17 +116,34 @@ class WorldGenerator {
 
     biomesInChunkCount(count) {
         let biomeCount = {};
+        const displayNames = {};
+
         for (let i = 0; i < count; i++) {
             const biome = this.calculateChunkBiome(i);
-            if (!biomeCount[biome.name]) biomeCount[biome.name] = 1;
-            else biomeCount[biome.name]++;
-        }
-        console.log(biomeCount);
 
-        for (const biome in biomeCount) {
+            // Find canonical key in AllBiomes (e.g. SeasonalForest) that maps to this biome object.
+            const key =
+                Object.keys(AllBiomes).find((k) => AllBiomes[k] === biome) ||
+                // fallback: remove spaces from display name to match key format
+                biome.name.replace(/\s+/g, "");
+
+            displayNames[key] = biome.name;
+            biomeCount[key] = (biomeCount[key] || 0) + 1;
+        }
+
+        // Print found biomes using their display names
+        for (const key of Object.keys(biomeCount)) {
+            const name = displayNames[key] || key;
             console.log(
-                `${biome}: ${((biomeCount[biome] / count) * 100).toFixed(2)}%`,
+                `${name}: ${((biomeCount[key] / count) * 100).toFixed(2)}%`,
             );
+        }
+
+        // All biomes not in the count — print using the Biome.display name
+        for (const key in AllBiomes) {
+            if (!biomeCount[key]) {
+                console.log(`${AllBiomes[key].name}: 0%`);
+            }
         }
     }
 
@@ -523,19 +549,46 @@ class WorldGenerator {
     }
 
     getBiomeForNoise(temp, wetness, mountains, biomeSet) {
-        for (let biomeName in biomeSet) {
-            const biome = biomeSet[biomeName];
-            if (
-                temp >= biome.minTemp &&
-                temp <= biome.maxTemp &&
-                wetness >= biome.minWet &&
-                wetness <= biome.maxWet &&
-                mountains >= biome.minMount &&
-                mountains <= biome.maxMount
-            ) {
-                return biome;
+        // Score each biome by normalized distance from the biome's allowed ranges.
+        // This prefers biomes whose ranges are closest to the sampled noise,
+        // producing a more even distribution across biome keys.
+        let best = null;
+        let bestScore = Infinity;
+
+        for (const biomeName in biomeSet) {
+            const b = biomeSet[biomeName];
+
+            const tempMin = Number.isFinite(b.minTemp) ? b.minTemp : -1e6;
+            const tempMax = Number.isFinite(b.maxTemp) ? b.maxTemp : 1e6;
+            const tempSpan = Math.max(1, tempMax - tempMin);
+            let tempScore = 0;
+            if (temp < tempMin) tempScore = (tempMin - temp) / tempSpan;
+            else if (temp > tempMax) tempScore = (temp - tempMax) / tempSpan;
+
+            const wetMin = Number.isFinite(b.minWet) ? b.minWet : -1e6;
+            const wetMax = Number.isFinite(b.maxWet) ? b.maxWet : 1e6;
+            const wetSpan = Math.max(1, wetMax - wetMin);
+            let wetScore = 0;
+            if (wetness < wetMin) wetScore = (wetMin - wetness) / wetSpan;
+            else if (wetness > wetMax) wetScore = (wetness - wetMax) / wetSpan;
+
+            const mountMin = Number.isFinite(b.minMount) ? b.minMount : -1e6;
+            const mountMax = Number.isFinite(b.maxMount) ? b.maxMount : 1e6;
+            const mountSpan = Math.max(1, mountMax - mountMin);
+            let mountScore = 0;
+            if (mountains < mountMin)
+                mountScore = (mountMin - mountains) / mountSpan;
+            else if (mountains > mountMax)
+                mountScore = (mountains - mountMax) / mountSpan;
+
+            const score = tempScore + wetScore + mountScore;
+
+            if (score < bestScore) {
+                bestScore = score;
+                best = b;
             }
         }
-        return biomeSet.Plains || Object.values(biomeSet)[0];
+
+        return best || biomeSet.Plains || Object.values(biomeSet)[0];
     }
 }

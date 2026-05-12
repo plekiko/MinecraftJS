@@ -24,7 +24,7 @@ class World {
         this.updateBlocks();
         game.animateFrame();
         updatePositionalAudioVolumes();
-        game.updateEntities(true);
+        this.updateEntities(true);
         this.chunks_in_render_distance.forEach((chunk) => {
             chunk.updateChunk();
         });
@@ -33,6 +33,75 @@ class World {
             this.globalRecalculateLight();
         }
         this.globalRecalculateRedstone();
+        this.dayNightCycle();
+    }
+
+    dayNightCycle() {
+        if (time > 7.5) {
+            time = 1;
+        }
+        if (time > 3.5 && time < 6.5) day = false;
+        else day = true;
+        if (!GAMERULES.doDaylightCycle) return;
+        time += dayNightSpeed;
+    }
+
+    updateEntities(tick = false) {
+        const cameraFarX =
+            camera.getWorldX(camera.x) - ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
+        const cameraNearX =
+            camera.getWorldX(camera.x) + ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
+        this.entities.forEach((entity) => {
+            if (entity === world.player) {
+                camera.update(world.player);
+                if (tick) entity.tickUpdate();
+                else entity.update();
+                return;
+            }
+            if (
+                entity.position.x >= cameraFarX &&
+                entity.position.x <= cameraNearX
+            ) {
+                if (typeof entity.tickUpdate === "function" && tick)
+                    entity.tickUpdate();
+                else entity.update();
+            }
+        });
+    }
+
+    spawnPlayer(
+        position = new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
+        setOnGround = true,
+        UUID = null,
+        name = null,
+        local = true,
+    ) {
+        const newPlayer = new Player(world, {
+            position: position,
+            entities: world.entities,
+            UUID: UUID ? UUID : uuidv4(),
+            name: name ? name : "Player",
+        });
+        if (local) {
+            world.player = newPlayer;
+        }
+        if (setOnGround) {
+            const trySetOnGround = () => {
+                if (newPlayer.getCurrentChunk()) {
+                    return newPlayer.setOnGround() === true;
+                }
+                return false;
+            };
+            if (!trySetOnGround()) {
+                const intervalId = setInterval(() => {
+                    if (trySetOnGround()) clearInterval(intervalId);
+                }, 100);
+                setTimeout(() => clearInterval(intervalId), 10000);
+            }
+        }
+        world.entities.push(newPlayer);
+        if (local) hotbar = new Hotbar(newPlayer.inventory);
+        return newPlayer;
     }
 
     async startGenerator(dimensionIndex = activeDimension) {
@@ -49,7 +118,7 @@ class World {
 
     setBlockType(block, type, updateAdjacent = true) {
         const chunk = this.getDimensionChunks(activeDimension).get(
-            block.chunkX
+            block.chunkX,
         );
         if (!chunk) return;
         return chunk.setBlockTypeLocal(
@@ -58,7 +127,7 @@ class World {
             type,
             block.wall,
             null,
-            updateAdjacent
+            updateAdjacent,
         );
     }
 
@@ -70,7 +139,7 @@ class World {
         dimensionIndex = activeDimension,
         metaData = null,
         inputIsUserBlockY = true,
-        updateAdjacent = false
+        updateAdjacent = false,
     ) {
         if (inputIsUserBlockY)
             worldY = this.userBlockYToWorld(worldY / BLOCK_SIZE);
@@ -84,7 +153,7 @@ class World {
                 dimensionIndex,
                 metaData,
                 wall,
-                false
+                false,
             );
             return false;
         }
@@ -98,7 +167,7 @@ class World {
             blockType,
             wall,
             metaData,
-            updateAdjacent
+            updateAdjacent,
         );
     }
 
@@ -106,7 +175,7 @@ class World {
         worldX,
         worldY,
         wall = false,
-        dimensionIndex = activeDimension
+        dimensionIndex = activeDimension,
     ) {
         const targetChunk = this.getChunkForX(worldX, dimensionIndex);
         if (!targetChunk || worldY >= CHUNK_HEIGHT * BLOCK_SIZE) return null;
@@ -137,7 +206,7 @@ class World {
         dimensionIndex = activeDimension,
         metaData = null,
         wall = false,
-        inputIsUserBlockY = true
+        inputIsUserBlockY = true,
     ) {
         if (inputIsUserBlockY)
             worldY = this.userBlockYToWorld(worldY / BLOCK_SIZE);
@@ -181,14 +250,14 @@ class World {
         blockX,
         blockY,
         wall = false,
-        dimensionIndex = activeDimension
+        dimensionIndex = activeDimension,
     ) {
         const worldPos = this.userBlocksToWorldPosition(blockX, blockY);
         return this.getBlockAtWorldPosition(
             worldPos.x,
             worldPos.y,
             wall,
-            dimensionIndex
+            dimensionIndex,
         );
     }
 
@@ -199,7 +268,7 @@ class World {
         wall = false,
         dimensionIndex = activeDimension,
         metaData = null,
-        updateAdjacent = true
+        updateAdjacent = true,
     ) {
         const worldPos = this.userBlocksToWorldPosition(blockX, blockY);
         return this.setBlockTypeAtPosition(
@@ -210,7 +279,7 @@ class World {
             dimensionIndex,
             metaData,
             false,
-            updateAdjacent
+            updateAdjacent,
         );
     }
 
@@ -229,7 +298,7 @@ class World {
     getBlockWorldPosition(block) {
         return new Vector2(
             block.transform.position.x,
-            block.transform.position.y
+            block.transform.position.y,
         );
     }
 
@@ -244,12 +313,12 @@ class World {
         for (const dir of directions) {
             const adjacentPos = new Vector2(
                 position.x + dir.x,
-                position.y + dir.y
+                position.y + dir.y,
             );
             const block = this.getBlockAtWorldPosition(
                 adjacentPos.x,
                 adjacentPos.y,
-                wall
+                wall,
             );
             if (!block) continue;
 
@@ -268,7 +337,7 @@ class World {
         for (let x = -range; x <= range; x++) {
             const chunk = this.getChunkForX(
                 position.x + x * BLOCK_SIZE,
-                dimension
+                dimension,
             );
 
             if (chunk) {
@@ -287,7 +356,7 @@ class World {
                 false,
                 dimension,
                 null,
-                false
+                false,
             );
             this.setBlockTypeAtPosition(
                 position.x + i * BLOCK_SIZE,
@@ -296,7 +365,7 @@ class World {
                 false,
                 dimension,
                 null,
-                false
+                false,
             );
             this.setBlockTypeAtPosition(
                 position.x,
@@ -305,7 +374,7 @@ class World {
                 false,
                 dimension,
                 null,
-                false
+                false,
             );
             this.setBlockTypeAtPosition(
                 position.x + BLOCK_SIZE * 3,
@@ -314,7 +383,7 @@ class World {
                 false,
                 dimension,
                 null,
-                false
+                false,
             );
         }
 
@@ -326,7 +395,7 @@ class World {
                 false,
                 dimension,
                 null,
-                false
+                false,
             );
         }
 
@@ -339,14 +408,14 @@ class World {
                     false,
                     dimension,
                     null,
-                    false
+                    false,
                 );
             }
         }
 
         return new Vector2(
             position.x + BLOCK_SIZE * 1.5,
-            position.y + BLOCK_SIZE * 3
+            position.y + BLOCK_SIZE * 3,
         );
     }
 
@@ -367,7 +436,7 @@ class World {
             power = 20,
             excludeEntity = null,
             destroyTerrain = true,
-        } = {}
+        } = {},
     ) {
         playRandomSoundFromArray({
             array: Sounds.Explosion,
@@ -385,7 +454,7 @@ class World {
             const damageFactor = 1 - distance / radius;
             const appliedDamage = Math.max(
                 0,
-                Math.round(damage * damageFactor)
+                Math.round(damage * damageFactor),
             );
             if (typeof entity.hit === "function") entity.hit(appliedDamage);
 
@@ -397,7 +466,7 @@ class World {
             const knockbackFactor = (1 - distance / radius) / 5;
             const knockbackForce = Math.max(
                 0,
-                power * BLOCK_SIZE * knockbackFactor
+                power * BLOCK_SIZE * knockbackFactor,
             );
             entity.knockBack(position.x, knockbackForce);
         }
@@ -417,7 +486,7 @@ class World {
             const worldY = y * BLOCK_SIZE;
             const distance = Math.sqrt(
                 Math.pow(worldX - position.x, 2) +
-                    Math.pow(worldY - position.y, 2)
+                    Math.pow(worldY - position.y, 2),
             );
 
             if (distance > radius || remainingPower <= 0) continue;
@@ -475,7 +544,7 @@ class World {
         y,
         blockType,
         isWall = false,
-        dimensionIndex = activeDimension
+        dimensionIndex = activeDimension,
     ) {
         if (!multiplayer) return;
         server.send({
@@ -501,7 +570,7 @@ class World {
         blockType,
         isWall = false,
         shouldDrop = false,
-        dimensionIndex = activeDimension
+        dimensionIndex = activeDimension,
     ) {
         if (!multiplayer) return;
         server.send({
@@ -694,7 +763,7 @@ class World {
                         const nb = this.getBlockAtWorldPosition(
                             globalX + off.dx,
                             globalY + off.dy,
-                            false
+                            false,
                         );
                         if (nb && nb.redstoneOutput > 0) {
                             powered = true;
@@ -749,7 +818,7 @@ class World {
                 const decayFactor = 0.8;
                 const newLight = Math.max(
                     1,
-                    Math.floor(currentLevel * decayFactor)
+                    Math.floor(currentLevel * decayFactor),
                 );
                 if (neighbor.lightLevel < newLight) {
                     neighbor.lightLevel = newLight;

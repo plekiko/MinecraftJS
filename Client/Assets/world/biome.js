@@ -26,7 +26,6 @@ class Biome {
 
         waterSandType = Blocks.Sand,
 
-        // Nether specific
         fullChunk = false,
     } = {}) {
         this.name = name;
@@ -72,10 +71,10 @@ const OverworldBiomes = Object.freeze({
         treeType: [Trees.Oak, Trees.Birch],
         grassType: [Blocks.Grass, Blocks.TallGrass],
         treeThreshold: 7,
-        minTemp: 10,
-        maxTemp: 25,
+        minTemp: 8,
+        maxTemp: 28,
         minWet: 0,
-        maxWet: 10,
+        maxWet: 15,
         minMount: 0,
         maxMount: 50,
     }),
@@ -134,10 +133,11 @@ const OverworldBiomes = Object.freeze({
         treeType: [Trees.Oak, Trees.Birch],
         grassType: [Blocks.Grass, Blocks.TallGrass],
         treeThreshold: 7,
-        minTemp: 20,
-        maxTemp: 30,
-        minWet: 10,
-        maxWet: 20,
+        // Narrowed temperature/wetness to reduce overall frequency
+        minTemp: 24,
+        maxTemp: 28,
+        minWet: 12,
+        maxWet: 18,
         minMount: 0,
         maxMount: 50,
     }),
@@ -149,10 +149,11 @@ const OverworldBiomes = Object.freeze({
         treeType: [Trees.Acacia],
         grassType: [Blocks.Grass, Blocks.TallGrass, Blocks.DeadBush],
         treeThreshold: 7,
-        minTemp: 30,
+        // Raised minTemp and slightly increased wet threshold to make Savanna rarer
+        minTemp: 36,
         maxTemp: Infinity,
-        minWet: 10,
-        maxWet: 20,
+        minWet: 15,
+        maxWet: 22,
         minMount: 0,
         maxMount: 50,
     }),
@@ -254,6 +255,21 @@ const OverworldBiomes = Object.freeze({
         minMount: 50,
         maxMount: Infinity,
     }),
+    CherryBlossom: new Biome({
+        name: "Cherry Blossom",
+        heightNoise: NoisePresets.SmallHills,
+        topLayer: Blocks.GrassBlock,
+        secondLayer: Blocks.Dirt,
+        treeType: [Trees.Cherry],
+        grassType: [Blocks.Grass, Blocks.FlowerTulipPink],
+        treeThreshold: 7,
+        minTemp: 20,
+        maxTemp: 30,
+        minWet: 20,
+        maxWet: 30,
+        minMount: 0,
+        maxMount: 50,
+    }),
 });
 
 const NetherBiomes = Object.freeze({
@@ -283,20 +299,6 @@ const NetherBiomes = Object.freeze({
         fluidType: Blocks.Lava,
 
         waterSandType: Blocks.SoulSand,
-    }),
-});
-
-const YvanBiomes = Object.freeze({
-    Bob: new Biome({
-        name: "Bob",
-        heightNoise: NoisePresets.Mountains,
-        topLayer: Blocks.AcaciaLeaves,
-        secondLayer: Blocks.AcaciaLog,
-        baseBlock: Blocks.TNT,
-        waterLevel: 55,
-        maxMobs: 16,
-        waterSandType: Blocks.DiamondOre,
-        fluidType: Blocks.Stone,
     }),
 });
 

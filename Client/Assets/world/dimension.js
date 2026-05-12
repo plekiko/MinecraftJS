@@ -61,8 +61,8 @@ let dimensions = [
         noiseMaps: {
             grass: new Noise(550, 0.2, 1),
             structure: new Noise(500, 1, 10),
-            temperature: new Noise(30, 70, 32),
-            wetness: new Noise(30, 40, 21),
+            temperature: new Noise(30, 70, 30),
+            wetness: new Noise(30, 50, 18),
             tree: new Noise(50, 10, 5),
             cave: new Noise(55, 10, 5),
             mountains: new Noise(30, 60, 30),

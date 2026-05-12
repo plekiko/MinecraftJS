@@ -47,7 +47,7 @@ function saveWorld(message = true, toFile = false) {
 
         // Save dimension-specific pendingBlocks
         const savedPendingBlocks = Array.from(
-            dimension.pendingBlocks.entries()
+            dimension.pendingBlocks.entries(),
         ).map(([chunkX, entry]) => ({
             chunkX,
             dimensionIndex: index,
@@ -135,8 +135,18 @@ function saveWorld(message = true, toFile = false) {
     if (message)
         game.chat.message("World saved successfully!", "", Colors.Green);
 
-    localStorage.setItem("worlds", JSON.stringify(worlds));
-    localStorage.setItem(id, saveData);
+    try {
+        localStorage.setItem("worlds", JSON.stringify(worlds));
+        localStorage.setItem(id, saveData);
+    } catch (error) {
+        console.error("Failed to save world: ", error);
+        game.chat.message(
+            "Failed to save world! Your browser may be out of storage space.",
+            "",
+            Colors.Red,
+        );
+        return;
+    }
 }
 
 function saveChunk(chunk) {
@@ -193,7 +203,7 @@ function loadWorldFromLocalStorage() {
     } else {
         if (SPAWN_PLAYER) {
             setTimeout(() => {
-                game.spawnPlayer();
+                world.spawnPlayer();
             }, 100);
         }
 
@@ -209,7 +219,7 @@ function loadWorldFromLocalStorage() {
             world.generator.loadCustomSeed(selectedWorld.seed);
         if (SPAWN_PLAYER) {
             setTimeout(() => {
-                game.spawnPlayer();
+                world.spawnPlayer();
                 world.player.setGamemode(selectedWorld.gameMode);
                 setTimeout(() => {
                     saveWorld(false);
@@ -258,7 +268,7 @@ async function loadWorld(save) {
                     chunk.x,
                     chunk,
                     dimData.index,
-                    dimension.pendingBlocks
+                    dimension.pendingBlocks,
                 );
             });
 
@@ -271,9 +281,9 @@ async function loadWorld(save) {
                             blocks,
                         });
                         console.log(
-                            `Loaded pendingBlocks for chunkX: ${chunkX} in dimension ${dimensionIndex}`
+                            `Loaded pendingBlocks for chunkX: ${chunkX} in dimension ${dimensionIndex}`,
                         );
-                    }
+                    },
                 );
             }
         });
@@ -285,7 +295,7 @@ async function loadWorld(save) {
                 chunk.x,
                 chunk,
                 Dimensions.Overworld,
-                dimension.pendingBlocks
+                dimension.pendingBlocks,
             );
         });
 
@@ -293,7 +303,7 @@ async function loadWorld(save) {
             currentSave.pendingBlocks.forEach(
                 ({ chunkX, dimensionIndex, blocks }) => {
                     const targetDimension = getDimension(
-                        dimensionIndex || Dimensions.Overworld
+                        dimensionIndex || Dimensions.Overworld,
                     );
                     targetDimension.pendingBlocks.set(chunkX, {
                         dimensionIndex,
@@ -302,9 +312,9 @@ async function loadWorld(save) {
                     console.log(
                         `Loaded legacy pendingBlocks for chunkX: ${chunkX} in dimension ${
                             dimensionIndex || Dimensions.Overworld
-                        }`
+                        }`,
                     );
-                }
+                },
             );
         }
     }
@@ -321,7 +331,7 @@ async function loadWorld(save) {
 
         setTimeout(() => {
             const position = JSON.parse(currentSave.playerPosition);
-            game.spawnPlayer(new Vector2(position.x, position.y), false);
+            world.spawnPlayer(new Vector2(position.x, position.y), false);
 
             const playerInventory = JSON.parse(currentSave.inventoryItems);
             for (let i = 0; i < playerInventory.length; i++) {
@@ -332,7 +342,7 @@ async function loadWorld(save) {
                             itemId: playerInventory[i][j].itemId,
                             count: playerInventory[i][j].count,
                             props: playerInventory[i][j].props,
-                        }
+                        },
                     );
                 }
             }
@@ -379,7 +389,7 @@ async function loadChunk(
     x,
     chunk,
     dimensionIndex = Dimensions.Overworld,
-    pendingBlocks
+    pendingBlocks,
 ) {
     console.log("Loading chunk:", x, chunk, dimensionIndex);
 
@@ -398,7 +408,7 @@ async function loadChunk(
         CHUNK_WIDTH,
         biome,
         previousChunk,
-        true
+        true,
     );
 
     constructedChunk.generateArray();
@@ -427,7 +437,7 @@ async function loadChunk(
                 false,
                 metaData,
                 false, // Skip updateBlocks to do it in a second pass
-                false
+                false,
             );
 
             // Walls
@@ -442,7 +452,7 @@ async function loadChunk(
                 true,
                 wallMetaData,
                 false,
-                false
+                false,
             );
         }
     }

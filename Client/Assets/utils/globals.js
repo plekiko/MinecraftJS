@@ -25,7 +25,7 @@ let passedTime = 0;
 let lighting = true;
 
 let time = 1;
-const dayNightSpeed = 0.008;
+const dayNightSpeed = 0.001;
 let day = true;
 
 const ORE_THRESHOLDS = {
