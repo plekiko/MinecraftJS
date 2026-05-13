@@ -122,6 +122,7 @@ function createZombieBody() {
                 flipOrigin: { x: 1, y: 4 },
                 // mainArm: true,
                 holdOrigin: { x: 6, y: 35 },
+                rotation: 90,
             }),
             rightArm: new BodyPart({
                 spriteCrop: { x: 48, y: 20, width: 4, height: 12 },
