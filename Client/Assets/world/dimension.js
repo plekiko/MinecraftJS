@@ -18,11 +18,15 @@ class Dimension {
         noiseMaps = {
             grass: new Noise(550, 0.2, 1),
             structure: new Noise(500, 1, 10),
-            temperature: new Noise(30, 70, 32),
-            wetness: new Noise(30, 40, 21),
+            temperature: new Noise(60, 1, 0.5),
+            wetness: new Noise(60, 1, 0.5),
             tree: new Noise(50, 10, 5),
             cave: new Noise(55, 10, 5),
-            mountains: new Noise(30, 60, 30),
+            mountains: new Noise(20, 1, 0.5),
+            continentalness: new Noise(6, 18, 0),
+            erosion: new Noise(12, 12, 0),
+            peaks: new Noise(22, 20, 0),
+            heightDetail: new Noise(55, 6, 0),
             ores: {},
         },
 
@@ -61,11 +65,15 @@ let dimensions = [
         noiseMaps: {
             grass: new Noise(550, 0.2, 1),
             structure: new Noise(500, 1, 10),
-            temperature: new Noise(30, 70, 30),
-            wetness: new Noise(30, 50, 18),
+            temperature: new Noise(60, 1, 0.5),
+            wetness: new Noise(60, 1, 0.5),
             tree: new Noise(50, 10, 5),
             cave: new Noise(55, 10, 5),
-            mountains: new Noise(30, 60, 30),
+            mountains: new Noise(20, 1, 0.5),
+            continentalness: new Noise(6, 18, 0),
+            erosion: new Noise(12, 12, 0),
+            peaks: new Noise(22, 20, 0),
+            heightDetail: new Noise(55, 6, 0),
             ores: {
                 coal: {
                     block: Blocks.CoalOre,
@@ -126,11 +134,15 @@ let dimensions = [
         noiseMaps: {
             grass: new Noise(550, 0.2, 1),
             structure: new Noise(500, 1, 10),
-            temperature: new Noise(30, 70, 32),
-            wetness: new Noise(30, 40, 21),
+            temperature: new Noise(60, 1, 0.5),
+            wetness: new Noise(60, 1, 0.5),
             tree: new Noise(100, 10, 5),
-            mountains: new Noise(30, 60, 30),
+            mountains: new Noise(20, 1, 0.5),
             cave: new Noise(20, 80, 5),
+            continentalness: new Noise(6, 18, 0),
+            erosion: new Noise(12, 12, 0),
+            peaks: new Noise(22, 20, 0),
+            heightDetail: new Noise(55, 6, 0),
             ores: {
                 quartz: {
                     block: Blocks.QuartzOre,

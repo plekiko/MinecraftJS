@@ -358,24 +358,35 @@ function drawFps() {
 function drawChunkStats(chunk, chunkX) {
     ctx.textAlign = "left";
     const index = chunk.x / CHUNK_WIDTH / BLOCK_SIZE;
+    const dimension = getDimension(activeDimension);
+    const noiseMaps = dimension.noiseMaps;
+
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    const toUnit = (value, noise) => {
+        const min = noise.min - noise.intensity * 0.5;
+        const max = noise.min + noise.intensity * 0.5;
+        if (max === min) return 0.5;
+        return clamp((value - min) / (max - min), 0, 1);
+    };
+
+    const tempRaw = noiseMaps.temperature.getNoise(index, 20000);
+    const wetRaw = noiseMaps.wetness.getNoise(index, 10000);
+    const mountRaw = noiseMaps.mountains.getNoise(index, 30000);
+    const tempUnit = toUnit(tempRaw, noiseMaps.temperature);
+    const wetUnit = toUnit(wetRaw, noiseMaps.wetness);
+    const mountUnit = toUnit(mountRaw, noiseMaps.mountains);
 
     ctx.fillStyle = "black";
     ctx.font = "15px Pixel";
 
     // Base text with biome details
-    let txt = `${index} - ${chunk.biome.name}\nTemp: ${Math.floor(
-        getDimension(activeDimension).noiseMaps.temperature.getNoise(
-            index,
-            20000,
-        ),
-    )}\nWetness: ${Math.floor(
-        getDimension(activeDimension).noiseMaps.wetness.getNoise(index, 10000),
-    )}\nMountains: ${Math.floor(
-        getDimension(activeDimension).noiseMaps.mountains.getNoise(
-            index,
-            30000,
-        ),
-    )}\nHeight: ${chunk.biome.heightNoise.scale * 1000} - ${
+    let txt = `${index} - ${chunk.biome.name}\nTemp: ${tempUnit.toFixed(
+        2,
+    )} (${Math.floor(tempRaw)})\nWetness: ${wetUnit.toFixed(2)} (${Math.floor(
+        wetRaw,
+    )})\nMountains: ${mountUnit.toFixed(2)} (${Math.floor(
+        mountRaw,
+    )})\nHeight: ${chunk.biome.heightNoise.scale * 1000} - ${
         chunk.biome.heightNoise.intensity
     }`;
 

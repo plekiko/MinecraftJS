@@ -151,6 +151,83 @@ class WorldGenerator {
         }
     }
 
+    logClimateSamples(count = 200, dimensionIndex = activeDimension) {
+        const dimension = dimensions[dimensionIndex];
+        const { temperature, wetness, mountains } = dimension.noiseMaps;
+
+        const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+        const toUnit = (value, noise) => {
+            const min = noise.min - noise.intensity * 0.5;
+            const max = noise.min + noise.intensity * 0.5;
+            if (max === min) return 0.5;
+            return clamp((value - min) / (max - min), 0, 1);
+        };
+
+        const stats = {
+            temp: { min: Infinity, max: -Infinity, sum: 0 },
+            wet: { min: Infinity, max: -Infinity, sum: 0 },
+            mount: { min: Infinity, max: -Infinity, sum: 0 },
+            tempUnit: { min: Infinity, max: -Infinity, sum: 0 },
+            wetUnit: { min: Infinity, max: -Infinity, sum: 0 },
+            mountUnit: { min: Infinity, max: -Infinity, sum: 0 },
+        };
+
+        for (let i = 0; i < count; i++) {
+            const temp = temperature.getNoise(i, 20000);
+            const wet = wetness.getNoise(i, 10000);
+            const mount = mountains.getNoise(i, 30000);
+            const tempUnit = toUnit(temp, temperature);
+            const wetUnit = toUnit(wet, wetness);
+            const mountUnit = toUnit(mount, mountains);
+
+            stats.temp.min = Math.min(stats.temp.min, temp);
+            stats.temp.max = Math.max(stats.temp.max, temp);
+            stats.temp.sum += temp;
+
+            stats.wet.min = Math.min(stats.wet.min, wet);
+            stats.wet.max = Math.max(stats.wet.max, wet);
+            stats.wet.sum += wet;
+
+            stats.mount.min = Math.min(stats.mount.min, mount);
+            stats.mount.max = Math.max(stats.mount.max, mount);
+            stats.mount.sum += mount;
+
+            stats.tempUnit.min = Math.min(stats.tempUnit.min, tempUnit);
+            stats.tempUnit.max = Math.max(stats.tempUnit.max, tempUnit);
+            stats.tempUnit.sum += tempUnit;
+
+            stats.wetUnit.min = Math.min(stats.wetUnit.min, wetUnit);
+            stats.wetUnit.max = Math.max(stats.wetUnit.max, wetUnit);
+            stats.wetUnit.sum += wetUnit;
+
+            stats.mountUnit.min = Math.min(stats.mountUnit.min, mountUnit);
+            stats.mountUnit.max = Math.max(stats.mountUnit.max, mountUnit);
+            stats.mountUnit.sum += mountUnit;
+        }
+
+        const avg = (value) => value / count;
+
+        console.log("Climate sample stats:");
+        console.log(
+            `Temp raw min/max/avg: ${stats.temp.min.toFixed(2)} / ${stats.temp.max.toFixed(2)} / ${avg(stats.temp.sum).toFixed(2)}`,
+        );
+        console.log(
+            `Wet raw min/max/avg: ${stats.wet.min.toFixed(2)} / ${stats.wet.max.toFixed(2)} / ${avg(stats.wet.sum).toFixed(2)}`,
+        );
+        console.log(
+            `Mount raw min/max/avg: ${stats.mount.min.toFixed(2)} / ${stats.mount.max.toFixed(2)} / ${avg(stats.mount.sum).toFixed(2)}`,
+        );
+        console.log(
+            `Temp unit min/max/avg: ${stats.tempUnit.min.toFixed(2)} / ${stats.tempUnit.max.toFixed(2)} / ${avg(stats.tempUnit.sum).toFixed(2)}`,
+        );
+        console.log(
+            `Wet unit min/max/avg: ${stats.wetUnit.min.toFixed(2)} / ${stats.wetUnit.max.toFixed(2)} / ${avg(stats.wetUnit.sum).toFixed(2)}`,
+        );
+        console.log(
+            `Mount unit min/max/avg: ${stats.mountUnit.min.toFixed(2)} / ${stats.mountUnit.max.toFixed(2)} / ${avg(stats.mountUnit.sum).toFixed(2)}`,
+        );
+    }
+
     regenerateWorld() {
         const newSeed = Math.floor(Math.random() * 10000);
         tooloud.Perlin.setSeed(newSeed);
@@ -364,7 +441,13 @@ class WorldGenerator {
         const wet = wetness.getNoise(chunkIndex, 10000);
         const mount = mountains.getNoise(chunkIndex, 30000);
 
-        let biome = this.getBiomeForNoise(temp, wet, mount, dimension.biomeSet);
+        let biome = this.getBiomeForNoise(
+            temp,
+            wet,
+            mount,
+            dimension.biomeSet,
+            dimension.noiseMaps,
+        );
 
         if (this.specialWorldProps.flat)
             biome = dimension.biomeSet.Plains || biome;
@@ -502,12 +585,19 @@ class WorldGenerator {
                 const surfaceGroundY = surfaceAirY - 1;
 
                 if (structure.underground) {
+                    const structureHeight = structure.blocks.length;
+                    const shiftY = structure.shift?.y ?? 1;
                     const undergroundOffset = randomRange(
                         8,
                         CHUNK_HEIGHT / 2.5,
                     );
-                    structureY =
-                        (surfaceGroundY - undergroundOffset) * BLOCK_SIZE;
+                    const maxOriginY =
+                        surfaceGroundY - 2 - (structureHeight - 1);
+                    let originBlockY =
+                        surfaceGroundY - undergroundOffset + shiftY;
+                    originBlockY = Math.min(originBlockY, maxOriginY);
+                    const baseBlockY = Math.max(1, originBlockY - shiftY);
+                    structureY = baseBlockY * BLOCK_SIZE;
                 } else {
                     structureY = surfaceAirY * BLOCK_SIZE;
                 }
@@ -552,40 +642,88 @@ class WorldGenerator {
         }
     }
 
-    getBiomeForNoise(temp, wetness, mountains, biomeSet) {
-        // Score each biome by normalized distance from the biome's allowed ranges.
-        // This prefers biomes whose ranges are closest to the sampled noise,
-        // producing a more even distribution across biome keys.
+    getBiomeForNoise(temp, wetness, mountains, biomeSet, noiseMaps) {
+        const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+        const toUnit = (value, noise) => {
+            const min = noise.min - noise.intensity * 0.5;
+            const max = noise.min + noise.intensity * 0.5;
+            if (max === min) return 0.5;
+            return clamp((value - min) / (max - min), 0, 1);
+        };
+        const rangeToUnit = (value, noise, fallback) => {
+            if (!Number.isFinite(value)) return fallback;
+            return toUnit(value, noise);
+        };
+        const resolveRange = (minVal, maxVal, noise) => {
+            const finiteMin = Number.isFinite(minVal);
+            const finiteMax = Number.isFinite(maxVal);
+            const useNormalized =
+                finiteMin &&
+                finiteMax &&
+                minVal >= 0 &&
+                maxVal <= 1 &&
+                minVal <= maxVal;
+
+            if (useNormalized) {
+                return { min: minVal, max: maxVal };
+            }
+
+            return {
+                min: rangeToUnit(minVal, noise, 0),
+                max: rangeToUnit(maxVal, noise, 1),
+            };
+        };
+        const rangeScore = (value, min, max) => {
+            const center = (min + max) / 2;
+            const halfRange = Math.max(0.001, (max - min) / 2);
+            return Math.abs(value - center) / halfRange;
+        };
+        const rangeDistance = (value, min, max) => {
+            if (value < min) return min - value;
+            if (value > max) return value - max;
+            return 0;
+        };
+
+        const t = toUnit(temp, noiseMaps.temperature);
+        const w = toUnit(wetness, noiseMaps.wetness);
+        const m = toUnit(mountains, noiseMaps.mountains);
+
         let best = null;
         let bestScore = Infinity;
 
         for (const biomeName in biomeSet) {
             const b = biomeSet[biomeName];
 
-            const tempMin = Number.isFinite(b.minTemp) ? b.minTemp : -1e6;
-            const tempMax = Number.isFinite(b.maxTemp) ? b.maxTemp : 1e6;
-            const tempSpan = Math.max(1, tempMax - tempMin);
-            let tempScore = 0;
-            if (temp < tempMin) tempScore = (tempMin - temp) / tempSpan;
-            else if (temp > tempMax) tempScore = (temp - tempMax) / tempSpan;
+            const tempRange = resolveRange(
+                b.minTemp,
+                b.maxTemp,
+                noiseMaps.temperature,
+            );
+            const wetRange = resolveRange(
+                b.minWet,
+                b.maxWet,
+                noiseMaps.wetness,
+            );
+            const mountRange = resolveRange(
+                b.minMount,
+                b.maxMount,
+                noiseMaps.mountains,
+            );
 
-            const wetMin = Number.isFinite(b.minWet) ? b.minWet : -1e6;
-            const wetMax = Number.isFinite(b.maxWet) ? b.maxWet : 1e6;
-            const wetSpan = Math.max(1, wetMax - wetMin);
-            let wetScore = 0;
-            if (wetness < wetMin) wetScore = (wetMin - wetness) / wetSpan;
-            else if (wetness > wetMax) wetScore = (wetness - wetMax) / wetSpan;
+            const tempScore = rangeScore(t, tempRange.min, tempRange.max);
+            const wetScore = rangeScore(w, wetRange.min, wetRange.max);
+            const mountScore = rangeScore(m, mountRange.min, mountRange.max);
 
-            const mountMin = Number.isFinite(b.minMount) ? b.minMount : -1e6;
-            const mountMax = Number.isFinite(b.maxMount) ? b.maxMount : 1e6;
-            const mountSpan = Math.max(1, mountMax - mountMin);
-            let mountScore = 0;
-            if (mountains < mountMin)
-                mountScore = (mountMin - mountains) / mountSpan;
-            else if (mountains > mountMax)
-                mountScore = (mountains - mountMax) / mountSpan;
+            const tempOut = rangeDistance(t, tempRange.min, tempRange.max);
+            const wetOut = rangeDistance(w, wetRange.min, wetRange.max);
+            const mountOut = rangeDistance(m, mountRange.min, mountRange.max);
+            const outPenalty = tempOut + wetOut + mountOut;
 
-            const score = tempScore + wetScore + mountScore;
+            const score =
+                tempScore +
+                wetScore +
+                mountScore * 1.2 +
+                (outPenalty > 0 ? 5 + outPenalty * 10 : 0);
 
             if (score < bestScore) {
                 bestScore = score;
