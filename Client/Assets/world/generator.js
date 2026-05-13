@@ -111,6 +111,10 @@ class WorldGenerator {
             case "seasonal forest":
                 this.forceToBiome = OverworldBiomes.SeasonalForest;
                 break;
+            case "cherry":
+            case "cherry blossom":
+                this.forceToBiome = OverworldBiomes.CherryBlossom;
+                break;
         }
     }
 

@@ -25,15 +25,7 @@
         </div>
 
         <div class="footer">
-            <p>
-                Made by Plekiko<br />
-                <a
-                    class="footer-button"
-                    href="https://github.com/plekiko/MinecraftJS"
-                    target="_blank"
-                >
-                    View Source Code on GitHub
-                </a>
+                    
             </p>
         </div>
 
@@ -362,6 +354,13 @@
                     >
                         Game Mode: Survival
                     </div>
+                    <div
+                        class="btn"
+                        id="difficulty-button"
+                        onclick="switchDifficulty()"
+                    >
+                        Difficulty: Easy
+                    </div>
                 </div>
                 <div class="world-create-bottom-container">
                     <a onclick="createNewWorld()" class="btn"
@@ -411,6 +410,7 @@
                         onclick="toggleLighting()"
                         >Lighting - ON</a
                     >
+                    <a class="btn" id="difficulty-toggle-btn" onclick="toggleDifficultyOption()">Difficulty - Easy</a>
                     <a class="btn" onclick="showTexturePacks()"
                         >Texture Packs...</a
                     >

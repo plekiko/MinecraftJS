@@ -36,6 +36,10 @@ const Blocks = Object.freeze({
 
     FlowerSyringaTop: 600,
     FlowerSyringa: 601,
+    FlowerRoseTop: 602,
+    FlowerRose: 603,
+    FlowerPeonyTop: 604,
+    FlowerPeony: 605,
 
     Water: 31,
     JungleLog: 32,
@@ -773,6 +777,97 @@ const blockTypes = [
         extendedBlock: [
             {
                 blockId: Blocks.FlowerSyringaTop,
+                offset: { x: 0, y: 1 },
+            },
+        ],
+    }),
+    // Rose Top
+    new BlockType({
+        blockId: 602,
+        sprite: "double_plant_rose_top",
+        name: "Rose",
+        hardness: 0,
+        collision: false,
+        breakByFluid: true,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
+        dropBlock: Blocks.FlowerRose,
+
+        excludeFromCreativeInventory: true,
+
+        cannotBeConverted: true,
+        transparent: true,
+    }),
+
+    // Rose Bottom
+    new BlockType({
+        blockId: 603,
+        sprite: "double_plant_rose_bottom",
+        iconSprite: "double_plant_rose_top",
+        name: "Rose",
+        hardness: 0,
+        collision: false,
+        breakByFluid: true,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        breakWithoutBlockUnderneath: true,
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
+        cannotBeConverted: true,
+        transparent: true,
+
+        extendedBlock: [
+            {
+                blockId: Blocks.FlowerRoseTop,
+                offset: { x: 0, y: 1 },
+            },
+        ],
+    }),
+
+    // Peony Top
+    new BlockType({
+        blockId: 604,
+        sprite: "double_plant_paeonia_top",
+        name: "Peony",
+        hardness: 0,
+        collision: false,
+        breakByFluid: true,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
+        dropBlock: Blocks.FlowerPeony,
+
+        dropWithoutTool: false,
+
+        excludeFromCreativeInventory: true,
+
+        cannotBeConverted: true,
+        transparent: true,
+    }),
+
+    // Peony Bottom
+    new BlockType({
+        blockId: 605,
+        sprite: "double_plant_paeonia_bottom",
+        iconSprite: "double_plant_paeonia_top",
+        name: "Peony",
+        hardness: 0,
+        collision: false,
+        breakByFluid: true,
+        breakSound: Sounds.Break_Grass,
+        breakingSound: Sounds.Breaking_Grass,
+        breakWithoutBlockUnderneath: true,
+        onlyPlacableOn: [Blocks.GrassBlock, Blocks.Dirt, Blocks.Podzol],
+
+        cannotBeConverted: true,
+        transparent: true,
+
+        extendedBlock: [
+            {
+                blockId: Blocks.FlowerPeonyTop,
                 offset: { x: 0, y: 1 },
             },
         ],

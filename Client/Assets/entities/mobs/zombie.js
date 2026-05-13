@@ -25,6 +25,7 @@ class Zombie extends Mob {
             myChunkX: myChunkX,
             ambientSounds: Sounds.Zombie_Say,
             footstepSounds: Sounds.Zombie_Step,
+            isHostile: true,
             lootTable: new LootTable([
                 new LootItem({
                     itemId: Items.RottenFlesh,
@@ -121,7 +122,6 @@ function createZombieBody() {
                 flipOrigin: { x: 1, y: 4 },
                 // mainArm: true,
                 holdOrigin: { x: 6, y: 35 },
-
                 rotation: 90,
             }),
             rightArm: new BodyPart({
