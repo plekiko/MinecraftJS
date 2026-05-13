@@ -139,9 +139,19 @@ class Chunk {
     }
 
     getHeight(x) {
-        // Compute the world x coordinate for noise sampling.
         const worldX = this.x / BLOCK_SIZE + x;
-        let heightNoise = this.biome.heightNoise;
+        const heightNoise = this.biome.heightNoise;
+        const dimension = getDimension(this.dimension);
+        const noiseMaps = dimension.noiseMaps;
+
+        const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+        const lerp = (a, b, t) => a + (b - a) * t;
+        const normalizeNoise = (value, noise) => {
+            const min = noise.min - noise.intensity;
+            const max = noise.min + noise.intensity;
+            if (max === min) return 0.5;
+            return clamp((value - min) / (max - min), 0, 1);
+        };
 
         // Determine left and right neighbor chunks.
         // Only use leftChunk if its x is less than this.x.
@@ -179,8 +189,7 @@ class Chunk {
             rightBlend = x / CHUNK_WIDTH;
         }
 
-        // Helper function: blend a given noise layer with a neighbor if needed.
-        const blendLayer = (offset, scale) => {
+        const blendBiomeLayer = (offset, scale) => {
             const currentVal = heightNoise.getNoise(worldX, offset, scale);
             if (leftBlend > 0 && leftChunk) {
                 const leftVal = leftChunk.biome.heightNoise.getNoise(
@@ -201,12 +210,9 @@ class Chunk {
             return currentVal;
         };
 
-        // Blend each noise layer.
-        const layer1 = blendLayer(0, 1);
-        const layer2 = blendLayer(100000, 3);
-        const layer3 = blendLayer(500000, 5);
-        const layer4 = blendLayer(1000000, 7);
-        const noiseAverage = (layer1 + layer2 + layer3 + layer4) / 4;
+        const biomeLayer1 = blendBiomeLayer(0, 1);
+        const biomeLayer2 = blendBiomeLayer(200000, 2);
+        const biomeNoise = (biomeLayer1 + biomeLayer2) / 2;
 
         // Blend the biome's minimum height value.
         let currentMin = heightNoise.min;
@@ -225,7 +231,49 @@ class Chunk {
             );
         }
 
-        return Math.floor(blendedMin + noiseAverage);
+        const biomeBaseline = blendedMin;
+        const biomeDetail = biomeNoise - blendedMin;
+
+        const continentalness = normalizeNoise(
+            noiseMaps.continentalness.getNoise(worldX, 0),
+            noiseMaps.continentalness,
+        );
+        const erosion = normalizeNoise(
+            noiseMaps.erosion.getNoise(worldX, 10000),
+            noiseMaps.erosion,
+        );
+        const peaks = normalizeNoise(
+            noiseMaps.peaks.getNoise(worldX, 20000),
+            noiseMaps.peaks,
+        );
+        const heightDetail =
+            noiseMaps.heightDetail.getNoise(worldX, 30000) -
+            noiseMaps.heightDetail.min;
+
+        const continentHeight = lerp(-20, 30, continentalness);
+        const erosionScale = lerp(1, 0.25, erosion);
+        const peakBoost = Math.pow(peaks, 2) * 28;
+        const ridgeBoost = Math.pow(1 - Math.abs(peaks * 2 - 1), 2) * 16;
+
+        let height =
+            biomeBaseline +
+            continentHeight * 0.6 +
+            biomeDetail * 1.1 +
+            heightDetail * 0.4 +
+            (peakBoost + ridgeBoost) * erosionScale;
+
+        const caveNoise = noiseMaps.cave.getNoise(
+            worldX,
+            Math.max(1, Math.floor(height)),
+        );
+        const caveFactor = clamp(
+            (CAVES_THRESHOLD - caveNoise) / CAVES_THRESHOLD,
+            0,
+            1,
+        );
+        height -= caveFactor * 3;
+
+        return Math.floor(clamp(height, 1, this.height - 2));
     }
 
     getWorldX(x) {

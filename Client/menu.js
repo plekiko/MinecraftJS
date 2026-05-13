@@ -362,8 +362,7 @@ function initializeDefaultTexturePack() {
             name: "Default",
             dateAdded: new Date().toISOString(),
             icon: "Assets/sprites/menu/worldPreview.png",
-            description:
-                "Default Minecraft JS texture pack (1.8.9 packs are compatible)",
+            description: "Default Minecraft JS texture pack",
         };
         texturePackList.push(defaultPack);
         localStorage.setItem(
