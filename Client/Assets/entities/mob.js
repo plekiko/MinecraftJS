@@ -20,7 +20,8 @@ class Mob extends Entity {
             lootTable = null,
             myChunkX = 0,
             burnInSunlight = false,
-        } = {}
+            isHostile = false,
+        } = {},
     ) {
         super(world, {
             name: name,
@@ -50,7 +51,7 @@ class Mob extends Entity {
         this.ambientSoundRange = ambientSoundRange;
         this.ambientSoundTarget = randomRange(
             this.ambientSoundRange.min,
-            this.ambientSoundRange.max
+            this.ambientSoundRange.max,
         );
         this.randomMoveTime = randomRange(0, ai.moveTimeRange.max / 2);
         this.moving = false;
@@ -64,9 +65,15 @@ class Mob extends Entity {
         this.attackCooldownMax = 1;
 
         this.burnInSunlight = burnInSunlight;
+        this.isHostile = isHostile;
     }
 
     aiUpdate() {
+        if (this.isHostile && this.world.difficulty === "peaceful") {
+            this.world.removeEntity(this);
+            return;
+        }
+
         switch (this.state) {
             case aiState.Wander:
                 this.passiveWander();
@@ -117,7 +124,7 @@ class Mob extends Entity {
 
         if (
             Math.abs(
-                Vector2.Distance(this.position, this.world.player.position)
+                Vector2.Distance(this.position, this.world.player.position),
             ) <= this.ai.agressionArea
         ) {
             this.state = aiState.Agression;
@@ -132,7 +139,7 @@ class Mob extends Entity {
 
         this.direction = caculateDirection(
             this.position,
-            this.world.player.position
+            this.world.player.position,
         );
 
         if (this.velocity.x === 0) {
@@ -141,7 +148,7 @@ class Mob extends Entity {
 
         if (
             Math.abs(
-                Vector2.XDistance(this.position, this.world.player.position)
+                Vector2.XDistance(this.position, this.world.player.position),
             ) <
             BLOCK_SIZE / 4
         ) {
@@ -160,7 +167,7 @@ class Mob extends Entity {
             this.ambientSoundCounter = 0;
             this.ambientSoundTarget = randomRange(
                 this.ambientSoundRange.min,
-                this.ambientSoundRange.max
+                this.ambientSoundRange.max,
             );
 
             playRandomSoundFromArray({
@@ -213,13 +220,13 @@ class Mob extends Entity {
                 new Vector2(
                     this.position.x +
                         randomRange(-this.hitbox.x, this.hitbox.x),
-                    this.position.y
+                    this.position.y,
                 ),
                 {
                     blockId: item.blockId,
                     itemId: item.itemId,
                     count: item.count,
-                }
+                },
             );
         });
     }
@@ -234,7 +241,7 @@ class Mob extends Entity {
         this.timeLastMoved = 0;
         this.randomMoveTime = randomRange(
             this.ai.moveTimeRange.min,
-            this.ai.moveTimeRange.max
+            this.ai.moveTimeRange.max,
         );
     }
 

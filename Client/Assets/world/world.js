@@ -10,7 +10,19 @@ class World {
 
         this.generator = new WorldGenerator(this);
 
+        this.difficulty = "easy";
+
         this.startTickLoop();
+    }
+
+    setDifficulty(value) {
+        this.difficulty = value;
+    }
+
+    cycleDifficulty() {
+        const next = this.difficulty === "peaceful" ? "easy" : "peaceful";
+        this.setDifficulty(next);
+        return this.difficulty;
     }
 
     startTickLoop() {

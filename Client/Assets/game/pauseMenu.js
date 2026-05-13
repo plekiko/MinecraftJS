@@ -2,7 +2,7 @@ class PauseMenu {
     constructor() {
         this.container = document.querySelector("#pause-menu");
         this.pages = Array.from(
-            document.querySelectorAll(".pause-menu-page[data-page]")
+            document.querySelectorAll(".pause-menu-page[data-page]"),
         );
         this.root = document.querySelector(":root");
 
@@ -34,12 +34,24 @@ class PauseMenu {
                 world.player.canMove = false;
                 if (world.player.resetBreaking) world.player.resetBreaking();
             }
+            // update pause menu difficulty label if present
+            this.updateDifficultyLabel();
         } else {
             this.container.classList.remove("visible");
             this.page = 0;
             this.root.style.setProperty("--drawMouse", "none");
             if (world.player) world.player.canMove = true;
         }
+    }
+
+    updateDifficultyLabel() {
+        try {
+            const btn = document.getElementById("pause-difficulty-btn");
+            if (!btn) return;
+            const label =
+                world && world.difficulty === "peaceful" ? "Peaceful" : "Easy";
+            btn.textContent = "Difficulty: " + label;
+        } catch (e) {}
     }
 
     setPage(n) {
@@ -86,4 +98,22 @@ class PauseMenu {
     close() {
         this.setPaused(false);
     }
+}
+
+// Global helper for pause menu difficulty toggle
+function togglePauseDifficulty() {
+    try {
+        if (!world) return;
+        // cycle difficulty on the world
+        if (typeof world.cycleDifficulty === "function") {
+            const newDiff = world.cycleDifficulty();
+            // update any gamerule-dependent settings if needed
+        } else if (typeof world.setDifficulty === "function") {
+            const next = world.difficulty === "peaceful" ? "easy" : "peaceful";
+            world.setDifficulty(next);
+        }
+
+        // update label in pause menu
+        if (game && game.pauseMenu) game.pauseMenu.updateDifficultyLabel();
+    } catch (e) {}
 }

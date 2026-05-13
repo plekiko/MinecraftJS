@@ -50,6 +50,7 @@ const musicVolumeLabel = document.getElementById("music-volume-label");
 const sfxVolumeSlider = document.getElementById("sfx-volume-slider");
 const sfxVolumeLabel = document.getElementById("sfx-volume-label");
 const lightingToggleButton = document.getElementById("lighting-toggle-btn");
+const difficultyToggleButton = document.getElementById("difficulty-toggle-btn");
 const usernameInput = document.querySelector("#username-input");
 const usernameFooter = document.querySelector("#username-footer");
 
@@ -70,6 +71,8 @@ let currentSettings = {
     lighting: true,
     username: "",
 };
+
+let selectedDifficulty = "easy";
 
 const colorMap = {
     0: "#000000", // Black
@@ -156,6 +159,12 @@ function toggleLighting() {
 
     lightingToggleButton.textContent =
         "Lighting - " + (currentSettings.lighting ? "On" : "Off");
+
+    // set difficulty label in options
+    if (difficultyToggleButton)
+        difficultyToggleButton.textContent =
+            "Difficulty - " +
+            (selectedDifficulty === "peaceful" ? "Peaceful" : "Easy");
 }
 
 function saveSettings() {
@@ -216,6 +225,37 @@ if (sfxVolumeSlider) {
 }
 
 loadSettings();
+// initialize world-create difficulty button label
+const worldDifficultyButton = document.getElementById("difficulty-button");
+if (worldDifficultyButton)
+    worldDifficultyButton.textContent =
+        "Difficulty: " +
+        (selectedDifficulty === "peaceful" ? "Peaceful" : "Easy");
+
+function switchDifficulty() {
+    // used by world create difficulty button
+    selectedDifficulty =
+        selectedDifficulty === "peaceful" ? "easy" : "peaceful";
+    const label = selectedDifficulty === "peaceful" ? "Peaceful" : "Easy";
+    const btn = document.getElementById("difficulty-button");
+    if (btn) btn.textContent = "Difficulty: " + label;
+}
+
+function toggleDifficultyOption() {
+    // used by options modal
+    selectedDifficulty =
+        selectedDifficulty === "peaceful" ? "easy" : "peaceful";
+    const label = selectedDifficulty === "peaceful" ? "Peaceful" : "Easy";
+    if (difficultyToggleButton)
+        difficultyToggleButton.textContent = "Difficulty - " + label;
+
+    // Apply immediately to loaded world if present
+    try {
+        if (typeof world !== "undefined" && world)
+            world.setDifficulty(selectedDifficulty);
+    } catch (e) {}
+}
+// world-create difficulty button was moved to the in-game pause menu
 
 function showTexturePacks() {
     hideMenu();
@@ -565,6 +605,7 @@ function createNewWorld() {
             name: worldName,
             seed: worldSeed,
             gameMode: selectedGameMode,
+            difficulty: selectedDifficulty,
         }),
     );
 

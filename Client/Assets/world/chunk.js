@@ -348,6 +348,12 @@ class Chunk {
     spawnMobs(passive = true) {
         if (!GAMERULES.doMobSpawning) return;
 
+        // If peaceful, don't spawn hostile googlies, but allow passive mobs
+        if (this.world && this.world.difficulty === "peaceful" && !passive) {
+            this.setMobSpawnTime();
+            return;
+        }
+
         if (
             (this.biome.mobs.length == 0 && passive) ||
             (this.biome.googlies.length == 0 && !passive)

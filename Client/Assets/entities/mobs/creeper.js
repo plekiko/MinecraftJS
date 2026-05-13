@@ -8,7 +8,7 @@ class Creeper extends Mob {
             invulnerable = false,
             myChunkX = 0,
             body = createCreeperBody(),
-        } = {}
+        } = {},
     ) {
         super(world, {
             name: "Creeper",
@@ -25,6 +25,7 @@ class Creeper extends Mob {
             myChunkX: myChunkX,
             ambientSounds: null,
             footstepSounds: null,
+            isHostile: true,
             lootTable: new LootTable([
                 new LootItem({
                     itemId: Items.Gunpowder,
@@ -33,7 +34,6 @@ class Creeper extends Mob {
                 }),
             ]),
         });
-
         this.fuse = -1;
         this.fuseMax = 30;
         this.primed = false;
@@ -54,7 +54,7 @@ class Creeper extends Mob {
 
         const distance = Vector2.Distance(
             this.position,
-            this.world.player.position
+            this.world.player.position,
         );
         if (distance <= 2.5 * BLOCK_SIZE) {
             this.primed = true;

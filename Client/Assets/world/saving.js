@@ -71,6 +71,7 @@ function saveWorld(message = true, toFile = false) {
 
     currentSave.time = time;
     currentSave.gameRules = GAMERULES;
+    currentSave.difficulty = world.difficulty;
 
     if (world.player) {
         currentSave.playerPosition = JSON.stringify(world.player.position);
@@ -210,6 +211,14 @@ function loadWorldFromLocalStorage() {
         return;
     }
 
+    if (
+        selectedWorld.difficulty &&
+        world &&
+        typeof world.setDifficulty === "function"
+    ) {
+        world.setDifficulty(selectedWorld.difficulty);
+    }
+
     const selectedWorldData = localStorage.getItem(selectedWorld.id);
 
     if (!selectedWorldData) {
@@ -323,6 +332,10 @@ async function loadWorld(save) {
 
     if (currentSave.gameRules) {
         GAMERULES = currentSave.gameRules;
+    }
+
+    if (currentSave.difficulty) {
+        world.setDifficulty(currentSave.difficulty);
     }
 
     if (SPAWN_PLAYER) {

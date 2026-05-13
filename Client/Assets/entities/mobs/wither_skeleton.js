@@ -24,6 +24,7 @@ class WitherSkeleton extends Mob {
             myChunkX: myChunkX,
             ambientSounds: Sounds.Zombie_Say,
             footstepSounds: Sounds.Zombie_Step,
+            isHostile: true,
             lootTable: new LootTable([
                 new LootItem({
                     itemId: Items.RottenFlesh,
