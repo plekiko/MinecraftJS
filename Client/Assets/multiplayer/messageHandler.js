@@ -38,13 +38,13 @@ function applyInventoryFromSave(targetPlayer, inventoryData) {
         "function"
     ) {
         targetPlayer.inventory.lastSyncedInventoryPayload = JSON.stringify(
-            targetPlayer.inventory.serializeInventoryForMultiplayer()
+            targetPlayer.inventory.serializeInventoryForMultiplayer(),
         );
     }
 }
 
 function applyPlayerDataFromFile(message) {
-    const playerFromFile = getEntityByUUID(message.UUID);
+    const playerFromFile = world.getEntityByUUID(message.UUID);
     if (!playerFromFile) {
         return false;
     }
@@ -54,7 +54,7 @@ function applyPlayerDataFromFile(message) {
             message.gamemode <= 3 &&
             message.gamemode >= 0
             ? message.gamemode
-            : 0
+            : 0,
     );
 
     playerFromFile.dimension =
@@ -62,7 +62,7 @@ function applyPlayerDataFromFile(message) {
 
     playerFromFile.position = new Vector2(
         typeof message.position?.x === "number" ? message.position.x : 0,
-        typeof message.position?.y === "number" ? message.position.y : 0
+        typeof message.position?.y === "number" ? message.position.y : 0,
     );
 
     playerFromFile.health =
@@ -74,7 +74,7 @@ function applyPlayerDataFromFile(message) {
     applyInventoryFromSave(playerFromFile, message.inventory);
 
     gotoDimension(
-        typeof message.dimension === "number" ? message.dimension : 0
+        typeof message.dimension === "number" ? message.dimension : 0,
     );
 
     return true;
@@ -95,21 +95,21 @@ function processMessage(data) {
             break;
         case "playerJoined":
             console.log(data);
-            const newPlayer = spawnPlayer(
+            const newPlayer = world.spawnPlayer(
                 new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
                 false,
                 message.player.UUID,
                 message.player.name,
-                false
+                false,
             );
             newPlayer.setSkin(message.player.skin);
             break;
         case "playerLeft":
-            removeEntity(getEntityByUUID(message));
+            world.removeEntity(world.getEntityByUUID(message));
             break;
 
         case "chat":
-            chat.message(message, data.sender);
+            game.chat.message(message, data.sender);
             break;
         case "playerUpdate":
             updatePlayerState(data);
@@ -123,24 +123,24 @@ function processMessage(data) {
             break;
         case "seed":
             console.log("Received seed:", message);
-            loadCustomSeed(message);
-            multiplayerSeedLoaded = true;
+            world.generator.loadCustomSeed(message);
+            world.generator.multiplayerSeedLoaded = true;
             break;
         case "removeEntity":
             console.log("Removing entity:", message);
-            const entity = getEntityByUUID(message.UUID);
+            const entity = world.getEntityByUUID(message.UUID);
             if (entity) {
-                removeEntity(entity);
+                world.removeEntity(entity);
             }
             break;
         case "summonEntity":
             console.log("Summoning entity:", message);
-            const newEntity = summonEntity(
+            const newEntity = world.summonEntity(
                 message.entity,
                 message.position,
                 message.props,
                 false,
-                message.UUID
+                message.UUID,
             );
             return;
 
@@ -152,7 +152,7 @@ function processMessage(data) {
             break;
         case "playerData":
             console.log("Received player data:", message);
-            const player = getEntityByUUID(message.UUID);
+            const player = world.getEntityByUUID(message.UUID);
             if (player) {
                 player.setSkin(message.skin);
                 player.name = message.name;
@@ -175,7 +175,7 @@ function processMessage(data) {
                 console.log(
                     "Chunk not loaded:",
                     message.chunkX,
-                    message.dimensionIndex
+                    message.dimensionIndex,
                 );
                 return;
             }
@@ -190,7 +190,7 @@ function processMessage(data) {
                     message.blockType,
                     message.isWall,
                     null,
-                    true
+                    true,
                 );
             break;
         case "breakBlock":
@@ -200,7 +200,7 @@ function processMessage(data) {
                 console.log(
                     "Chunk not loaded:",
                     message.chunkX,
-                    message.dimensionIndex
+                    message.dimensionIndex,
                 );
                 return;
             }
@@ -216,13 +216,13 @@ function processMessage(data) {
 
             block.breakBlock(message.shouldDrop, message.isWall, true);
         case "playerDimension":
-            const otherPlayer = getEntityByUUID(message.player);
+            const otherPlayer = world.getEntityByUUID(message.player);
             if (otherPlayer) otherPlayer.dimension = message.dimension;
             break;
 
         case "syncMetaData":
             const chunk = getDimensionChunks(message.dimensionIndex)?.get(
-                message.chunkX
+                message.chunkX,
             );
 
             if (!chunk) break;
@@ -236,12 +236,12 @@ function processMessage(data) {
             break;
 
         case "summonDrop":
-            summonEntity(
+            world.summonEntity(
                 Drop,
                 message.position,
                 message.props,
                 false,
-                message.UUID
+                message.UUID,
             );
             break;
 
@@ -257,7 +257,7 @@ async function getChunk(x) {
         const chunk = await server.get({
             type: "getChunk",
             message: { x: x },
-            sender: player.UUID,
+            sender: world.player.UUID,
         });
 
         console.log("Received chunk:", chunk);
@@ -267,7 +267,7 @@ async function getChunk(x) {
 }
 
 function updatePlayerState(data) {
-    const player = getEntityByUUID(data.sender);
+    const player = world.getEntityByUUID(data.sender);
     if (player) {
         player.multiplayerReceivePlayerState(data.message);
     }
@@ -275,15 +275,15 @@ function updatePlayerState(data) {
 
 async function iJoined(player, existingPlayers, gamemode = 0) {
     // Wait until loadingWorld is false
-    while (loadingWorld) {
+    while (world.generator.loadingWorld) {
         await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    const myPlayer = spawnPlayer(
+    const myPlayer = world.spawnPlayer(
         new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
         false,
         player.UUID,
-        settings.username
+        game.settings.username,
     );
 
     if (pendingPlayerDataFromFile.has(player.UUID)) {
@@ -314,7 +314,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
         message: {
             UUID: player.UUID,
             skin: myPlayer.body.sprite,
-            name: settings.username,
+            name: game.settings.username,
         },
     });
 
@@ -323,12 +323,12 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
     // Spawn all existing players for the new player
     if (existingPlayers && existingPlayers.length > 0) {
         existingPlayers.forEach((p) => {
-            const newPlayer = spawnPlayer(
+            const newPlayer = world.spawnPlayer(
                 new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
                 false,
                 p.UUID,
                 p.name,
-                false
+                false,
             );
 
             newPlayer.dimension = p.dimension;
@@ -344,7 +344,7 @@ function handleEntityRPC(data) {
         entity[data.message.method](...data.message.args);
     } else {
         console.warn(
-            `Entity ${data.UUID} does not have method ${data.message.method}`
+            `Entity ${data.UUID} does not have method ${data.message.method}`,
         );
     }
 }

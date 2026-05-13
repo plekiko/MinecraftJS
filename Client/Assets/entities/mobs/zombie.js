@@ -1,13 +1,16 @@
 class Zombie extends Mob {
-    constructor({
-        health = 20,
-        noAi = false,
-        position = new Vector2(),
-        invulnerable = false,
-        myChunkX = 0,
-        body = createZombieBody(),
-    } = {}) {
-        super({
+    constructor(
+        world,
+        {
+            health = 20,
+            noAi = false,
+            position = new Vector2(),
+            invulnerable = false,
+            myChunkX = 0,
+            body = createZombieBody(),
+        } = {},
+    ) {
+        super(world, {
             name: "Zombie",
             health: health,
             position: position,
@@ -22,6 +25,7 @@ class Zombie extends Mob {
             myChunkX: myChunkX,
             ambientSounds: Sounds.Zombie_Say,
             footstepSounds: Sounds.Zombie_Step,
+            isHostile: true,
             lootTable: new LootTable([
                 new LootItem({
                     itemId: Items.RottenFlesh,
@@ -84,7 +88,7 @@ class Zombie extends Mob {
     dieEvent() {
         this.dropLoot();
         playPositionalSound(this.position, "mobs/zombie/death.ogg");
-        removeEntity(this);
+        world.removeEntity(this);
     }
 
     tickUpdate() {
@@ -118,7 +122,6 @@ function createZombieBody() {
                 flipOrigin: { x: 1, y: 4 },
                 // mainArm: true,
                 holdOrigin: { x: 6, y: 35 },
-
                 rotation: 90,
             }),
             rightArm: new BodyPart({

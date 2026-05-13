@@ -5,11 +5,11 @@ setInterval(() => {
 }, AUTOSAVE_INTERVAL);
 
 function autoSave() {
-    if (loadingWorld) return;
+    if (world.generator.loadingWorld) return;
     if (multiplayer) return;
     saveWorld(false);
 
-    chat.message("World auto-saved successfully!", "", Colors.Green);
+    game.chat.message("World auto-saved successfully!", "", Colors.Green);
 }
 
 let currentSave = {
@@ -62,31 +62,32 @@ function saveWorld(message = true, toFile = false) {
     });
 
     let playerInventory = [[]];
-    for (let i = 0; i < player.inventory.items.length; i++) {
+    for (let i = 0; i < world.player.inventory.items.length; i++) {
         playerInventory[i] = [];
-        for (let j = 0; j < player.inventory.items[i].length; j++) {
-            playerInventory[i][j] = player.inventory.items[i][j].item;
+        for (let j = 0; j < world.player.inventory.items[i].length; j++) {
+            playerInventory[i][j] = world.player.inventory.items[i][j].item;
         }
     }
 
     currentSave.time = time;
     currentSave.gameRules = GAMERULES;
+    currentSave.difficulty = world.difficulty;
 
-    if (player) {
-        currentSave.playerPosition = JSON.stringify(player.position);
+    if (world.player) {
+        currentSave.playerPosition = JSON.stringify(world.player.position);
         currentSave.inventoryItems = JSON.stringify(playerInventory);
-        currentSave.gamemode = player.gamemode;
-        currentSave.health = player.health;
-        currentSave.foodLevel = player.foodLevel;
-        currentSave.foodSaturationLevel = player.foodSaturationLevel;
-        currentSave.foodExhaustionLevel = player.foodExhaustionLevel;
-        currentSave.foodTickTimer = player.foodTickTimer;
+        currentSave.gamemode = world.player.gamemode;
+        currentSave.health = world.player.health;
+        currentSave.foodLevel = world.player.foodLevel;
+        currentSave.foodSaturationLevel = world.player.foodSaturationLevel;
+        currentSave.foodExhaustionLevel = world.player.foodExhaustionLevel;
+        currentSave.foodTickTimer = world.player.foodTickTimer;
         currentSave.currentSlot = hotbar.currentSlot;
         currentSave.activeDimension = activeDimension;
-        currentSave.flying = player.abilities.flying;
+        currentSave.flying = world.player.abilities.flying;
     }
 
-    currentSave.seed = seed;
+    currentSave.seed = world.seed;
     currentSave.dimensions = savedDimensions;
 
     const saveData = JSON.stringify(currentSave);
@@ -132,10 +133,21 @@ function saveWorld(message = true, toFile = false) {
         worlds = [worldData];
     }
 
-    if (message) chat.message("World saved successfully!", "", Colors.Green);
+    if (message)
+        game.chat.message("World saved successfully!", "", Colors.Green);
 
-    localStorage.setItem("worlds", JSON.stringify(worlds));
-    localStorage.setItem(id, saveData);
+    try {
+        localStorage.setItem("worlds", JSON.stringify(worlds));
+        localStorage.setItem(id, saveData);
+    } catch (error) {
+        console.error("Failed to save world: ", error);
+        game.chat.message(
+            "Failed to save world! Your browser may be out of storage space.",
+            "",
+            Colors.Red,
+        );
+        return;
+    }
 }
 
 function saveChunk(chunk) {
@@ -192,23 +204,32 @@ function loadWorldFromLocalStorage() {
     } else {
         if (SPAWN_PLAYER) {
             setTimeout(() => {
-                spawnPlayer();
+                world.spawnPlayer();
             }, 100);
         }
 
         return;
     }
 
+    if (
+        selectedWorld.difficulty &&
+        world &&
+        typeof world.setDifficulty === "function"
+    ) {
+        world.setDifficulty(selectedWorld.difficulty);
+    }
+
     const selectedWorldData = localStorage.getItem(selectedWorld.id);
 
     if (!selectedWorldData) {
         console.log("World not found in local storage", selectedWorld);
-        chat.welcomeMessage();
-        if (selectedWorld.seed) loadCustomSeed(selectedWorld.seed);
+        game.chat.welcomeMessage();
+        if (selectedWorld.seed)
+            world.generator.loadCustomSeed(selectedWorld.seed);
         if (SPAWN_PLAYER) {
             setTimeout(() => {
-                spawnPlayer();
-                player.setGamemode(selectedWorld.gameMode);
+                world.spawnPlayer();
+                world.player.setGamemode(selectedWorld.gameMode);
                 setTimeout(() => {
                     saveWorld(false);
                 }, 1500);
@@ -222,7 +243,7 @@ function loadWorldFromLocalStorage() {
 
 async function loadWorld(save) {
     if (!isTexturePackLoaded) {
-        await waitForTexturePack();
+        await game.waitForTexturePack();
     }
 
     try {
@@ -232,9 +253,9 @@ async function loadWorld(save) {
         return;
     }
 
-    loadingWorld = true;
+    world.generator.loadingWorld = true;
 
-    loadCustomSeed(currentSave.seed);
+    world.generator.loadCustomSeed(currentSave.seed);
 
     // Clear chunks and pendingBlocks for all dimensions
     dimensions.forEach((dimension) => {
@@ -242,7 +263,7 @@ async function loadWorld(save) {
         dimension.pendingBlocks = new Map(); // Initialize per-dimension pendingBlocks
     });
 
-    entities = [];
+    world.entities = [];
 
     // Load chunks and pendingBlocks for each dimension
     if (currentSave.dimensions) {
@@ -313,49 +334,57 @@ async function loadWorld(save) {
         GAMERULES = currentSave.gameRules;
     }
 
+    if (currentSave.difficulty) {
+        world.setDifficulty(currentSave.difficulty);
+    }
+
     if (SPAWN_PLAYER) {
-        removeEntity(player);
-        player = null;
+        world.removeEntity(world.player);
+        world.player = null;
 
         setTimeout(() => {
             const position = JSON.parse(currentSave.playerPosition);
-            spawnPlayer(new Vector2(position.x, position.y), false);
+            world.spawnPlayer(new Vector2(position.x, position.y), false);
 
             const playerInventory = JSON.parse(currentSave.inventoryItems);
             for (let i = 0; i < playerInventory.length; i++) {
                 for (let j = 0; j < playerInventory[i].length; j++) {
-                    player.inventory.items[i][j].item = new InventoryItem({
-                        blockId: playerInventory[i][j].blockId,
-                        itemId: playerInventory[i][j].itemId,
-                        count: playerInventory[i][j].count,
-                        props: playerInventory[i][j].props,
-                    });
+                    world.player.inventory.items[i][j].item = new InventoryItem(
+                        {
+                            blockId: playerInventory[i][j].blockId,
+                            itemId: playerInventory[i][j].itemId,
+                            count: playerInventory[i][j].count,
+                            props: playerInventory[i][j].props,
+                        },
+                    );
                 }
             }
 
             if (currentSave.currentSlot !== undefined)
                 hotbar.currentSlot = currentSave.currentSlot;
 
-            player.setGamemode(currentSave.gamemode);
+            world.player.setGamemode(currentSave.gamemode);
 
             if (currentSave.health !== undefined)
-                player.health = currentSave.health;
+                world.player.health = currentSave.health;
 
             if (currentSave.foodLevel !== undefined)
-                player.foodLevel = currentSave.foodLevel;
+                world.player.foodLevel = currentSave.foodLevel;
 
             if (currentSave.foodSaturationLevel !== undefined)
-                player.foodSaturationLevel = currentSave.foodSaturationLevel;
+                world.player.foodSaturationLevel =
+                    currentSave.foodSaturationLevel;
 
             if (currentSave.foodExhaustionLevel !== undefined)
-                player.foodExhaustionLevel = currentSave.foodExhaustionLevel;
+                world.player.foodExhaustionLevel =
+                    currentSave.foodExhaustionLevel;
 
             if (currentSave.foodTickTimer !== undefined)
-                player.foodTickTimer = currentSave.foodTickTimer;
+                world.player.foodTickTimer = currentSave.foodTickTimer;
 
-            player.clampFoodStats();
+            world.player.clampFoodStats();
 
-            if (currentSave.flying) player.abilities.flying = true;
+            if (currentSave.flying) world.player.abilities.flying = true;
 
             if (currentSave.activeDimension !== undefined)
                 gotoDimension(currentSave.activeDimension);
@@ -365,7 +394,7 @@ async function loadWorld(save) {
     }
 
     setTimeout(() => {
-        loadingWorld = false;
+        world.generator.loadingWorld = false;
     }, 500);
 }
 
@@ -387,6 +416,7 @@ async function loadChunk(
     const biome = AllBiomes[biomeName];
 
     const constructedChunk = new Chunk(
+        world,
         x,
         CHUNK_WIDTH,
         biome,
@@ -459,5 +489,20 @@ async function loadChunk(
         }
     }
 
+    // After loading, ensure all fluid blocks have correct cutoff
+    for (let y = 0; y < CHUNK_HEIGHT; y++) {
+        for (let x2 = 0; x2 < CHUNK_WIDTH; x2++) {
+            const block = constructedChunk.blocks[y][x2];
+            const blockDef = getBlock(block.blockType);
+            if (
+                blockDef.fluid &&
+                block.metaData &&
+                block.metaData.props &&
+                typeof block.metaData.props.waterLevel === "number"
+            ) {
+                block.cutoff = block.metaData.props.waterLevel;
+            }
+        }
+    }
     dimension.chunks.set(x, constructedChunk);
 }

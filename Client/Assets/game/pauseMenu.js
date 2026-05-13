@@ -30,16 +30,28 @@ class PauseMenu {
             this.container.classList.add("visible");
             this.page = 1;
             this.root.style.setProperty("--drawMouse", "default");
-            if (player) {
-                player.canMove = false;
-                if (player.resetBreaking) player.resetBreaking();
+            if (world.player) {
+                world.player.canMove = false;
+                if (world.player.resetBreaking) world.player.resetBreaking();
             }
+            // update pause menu difficulty label if present
+            this.updateDifficultyLabel();
         } else {
             this.container.classList.remove("visible");
             this.page = 0;
             this.root.style.setProperty("--drawMouse", "none");
-            if (player) player.canMove = true;
+            if (world.player) world.player.canMove = true;
         }
+    }
+
+    updateDifficultyLabel() {
+        try {
+            const btn = document.getElementById("pause-difficulty-btn");
+            if (!btn) return;
+            const label =
+                world && world.difficulty === "peaceful" ? "Peaceful" : "Easy";
+            btn.textContent = "Difficulty: " + label;
+        } catch (e) {}
     }
 
     setPage(n) {
@@ -67,13 +79,14 @@ class PauseMenu {
             return;
         }
 
-        if (chat.inChat || (player && player.windowOpen)) return;
+        if (game.chat.inChat || (world.player && world.player.windowOpen))
+            return;
         if (input._pauseConsumedByUI) {
             input._pauseConsumedByUI = false;
             return;
         }
 
-        if (player && !loadingWorld) {
+        if (world.player && !world.generator.loadingWorld) {
             this.open();
         }
     }
@@ -85,4 +98,22 @@ class PauseMenu {
     close() {
         this.setPaused(false);
     }
+}
+
+// Global helper for pause menu difficulty toggle
+function togglePauseDifficulty() {
+    try {
+        if (!world) return;
+        // cycle difficulty on the world
+        if (typeof world.cycleDifficulty === "function") {
+            const newDiff = world.cycleDifficulty();
+            // update any gamerule-dependent settings if needed
+        } else if (typeof world.setDifficulty === "function") {
+            const next = world.difficulty === "peaceful" ? "easy" : "peaceful";
+            world.setDifficulty(next);
+        }
+
+        // update label in pause menu
+        if (game && game.pauseMenu) game.pauseMenu.updateDifficultyLabel();
+    } catch (e) {}
 }

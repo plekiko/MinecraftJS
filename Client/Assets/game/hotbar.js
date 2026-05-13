@@ -19,7 +19,7 @@ class Hotbar {
     }
 
     drawHearts(health, maxHealth, hotbar) {
-        if (!player.abilities.hasHealth) return;
+        if (!world.player.abilities.hasHealth) return;
 
         this.shimmerTime += deltaTime;
 
@@ -30,8 +30,8 @@ class Hotbar {
             this.flashCounter = 0;
         }
 
-        if (this.previousHealth !== player.health) {
-            this.previousHealth = player.health;
+        if (this.previousHealth !== world.player.health) {
+            this.previousHealth = world.player.health;
             this.flashingHearts = true;
         }
 
@@ -41,11 +41,11 @@ class Hotbar {
 
         const drawHeartAt = (i, cropX) => {
             const leftX = Math.round(
-                hotbar.x + 12 + i * heartSize - heartSize / 2,
+                hotbar.x + 12 + i * heartSize - heartSize / 2
             );
             const yOffset = isLowHealth
                 ? Math.sign(
-                      Math.sin(this.shimmerTime * SHIMMER_SPEED + i * 2.399),
+                      Math.sin(this.shimmerTime * SHIMMER_SPEED + i * 2.399)
                   ) * SHIMMER_DISTANCE
                 : 0;
             drawImage({
@@ -73,7 +73,7 @@ class Hotbar {
     }
 
     drawFood(food, maxFood, hotbar) {
-        if (!player.abilities.hasHealth) return;
+        if (!world.player.abilities.hasHealth) return;
 
         if (this.flashingFood) this.foodFlashCounter += deltaTime;
 
@@ -82,8 +82,8 @@ class Hotbar {
             this.foodFlashCounter = 0;
         }
 
-        if (this.previousFood !== player.foodLevel) {
-            this.previousFood = player.foodLevel;
+        if (this.previousFood !== world.player.foodLevel) {
+            this.previousFood = world.player.foodLevel;
             this.flashingFood = true;
         }
 
@@ -98,15 +98,15 @@ class Hotbar {
                     (maxFood * foodSize) / 2 +
                     foodSize / 2 +
                     i * foodSize -
-                    foodSize / 2,
+                    foodSize / 2
             );
             const yOffset = isLowFood
                 ? Math.round(
                       Math.sign(
                           Math.sin(
-                              this.shimmerTime * SHIMMER_SPEED + i * 2.399 + 1,
-                          ),
-                      ) * SHIMMER_DISTANCE,
+                              this.shimmerTime * SHIMMER_SPEED + i * 2.399 + 1
+                          )
+                      ) * SHIMMER_DISTANCE
                   )
                 : 0;
             drawImage({
@@ -153,8 +153,12 @@ class Hotbar {
         });
 
         this.drawItems();
-        this.drawHearts(player.health, player.maxHealth, hotbar);
-        this.drawFood(player.foodLevel, player.maxFoodLevel, hotbar);
+        this.drawHearts(world.player.health, world.player.maxHealth, hotbar);
+        this.drawFood(
+            world.player.foodLevel,
+            world.player.maxFoodLevel,
+            hotbar
+        );
     }
 
     update() {
@@ -165,14 +169,14 @@ class Hotbar {
     handleSelected() {
         if (this.inventory.items[3][this.currentSlot].item.blockId) {
             this.inventory.selectedBlock = getBlock(
-                this.inventory.items[3][this.currentSlot].item.blockId,
+                this.inventory.items[3][this.currentSlot].item.blockId
             );
         } else {
             this.inventory.selectedBlock = null;
         }
         if (this.inventory.items[3][this.currentSlot].item.itemId != null) {
             this.inventory.selectedItem = getItem(
-                this.inventory.items[3][this.currentSlot].item.itemId,
+                this.inventory.items[3][this.currentSlot].item.itemId
             );
         } else {
             this.inventory.selectedItem = null;
@@ -196,8 +200,8 @@ class Hotbar {
     }
 
     handleSelecting() {
-        if (chat.inChat) return;
-        if (player.windowOpen) return;
+        if (game.chat.inChat) return;
+        if (world.player.windowOpen) return;
 
         if (input.isActionPressed("hotbarUp")) this.currentSlot--;
         if (input.isActionPressed("hotbarDown")) this.currentSlot++;

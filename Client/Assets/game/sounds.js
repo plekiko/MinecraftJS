@@ -216,7 +216,7 @@ function removeAudio(audio) {
 
 // Play a non-positional sound with error handling
 function playSound(sound, volume = 1, pitch = 1, loop = false) {
-    const sfxMultiplier = (settings.sfxVolume ?? 100) / 100;
+    const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
     volume = volume * sfxMultiplier;
 
     const url = `${AUDIO_BASE_URL}${sound}`;
@@ -268,12 +268,12 @@ function playPositionalSound(
     range = 10,
     maxVolume = 1,
     pitch = 1,
-    loop = false,
+    loop = false
 ) {
-    const sfxMultiplier = (settings.sfxVolume ?? 100) / 100;
+    const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
     maxVolume = maxVolume * sfxMultiplier;
 
-    if (!player) {
+    if (!world.player) {
         playSound(sound, maxVolume, pitch);
         return;
     }
@@ -300,14 +300,14 @@ function playPositionalSound(
     sourceNode.connect(panner);
     panner.connect(audioCtx.destination);
 
-    const distance = Vector2.Distance(player.position, origin);
+    const distance = Vector2.Distance(world.player.position, origin);
     const volume =
         distance <= range * BLOCK_SIZE
             ? maxVolume * (1 - distance / (range * BLOCK_SIZE))
             : 0;
     audioElem.volume = volume;
 
-    const panDiff = (origin.x - player.position.x) / (range * BLOCK_SIZE);
+    const panDiff = (origin.x - world.player.position.x) / (range * BLOCK_SIZE);
     const panValue = Math.max(-1, Math.min(1, panDiff));
     panner.pan.value = panValue;
 
@@ -333,9 +333,9 @@ function playMessySound(
     sound,
     range = 10,
     maxVolume = 1,
-    messyRange = new Vector2(1, 4),
+    messyRange = new Vector2(1, 4)
 ) {
-    const sfxMultiplier = (settings.sfxVolume ?? 100) / 100;
+    const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
     maxVolume = maxVolume * sfxMultiplier;
 
     // A positional sound that plays every messyRange seconds, only if the player is within range
@@ -353,8 +353,9 @@ function playMessySound(
     const playAndSchedule = () => {
         // Check if player is within range
         if (
-            player &&
-            Vector2.Distance(player.position, origin) <= range * BLOCK_SIZE
+            world.player &&
+            Vector2.Distance(world.player.position, origin) <=
+                range * BLOCK_SIZE
         ) {
             const pitch = randomRange(0.5, 1.5); // Randomize pitch for each play
             playPositionalSound(origin, sound, range, maxVolume, pitch, false);
@@ -407,9 +408,9 @@ function stopMessySound(soundId) {
 
 // Update positional audio in the game loop
 function updatePositionalAudioVolumes() {
-    if (!player) return;
+    if (!world.player) return;
     playingAudio.forEach((item) => {
-        const distance = Vector2.Distance(player.position, item.origin);
+        const distance = Vector2.Distance(world.player.position, item.origin);
         let volume =
             distance <= item.range * BLOCK_SIZE
                 ? item.maxVolume * (1 - distance / (item.range * BLOCK_SIZE))
@@ -417,7 +418,8 @@ function updatePositionalAudioVolumes() {
         item.audioElem.volume = volume;
 
         const panDiff =
-            (item.origin.x - player.position.x) / (item.range * BLOCK_SIZE);
+            (item.origin.x - world.player.position.x) /
+            (item.range * BLOCK_SIZE);
         const panValue = Math.max(-1, Math.min(1, panDiff));
         item.panner.pan.value = panValue;
 

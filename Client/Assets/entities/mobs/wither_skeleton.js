@@ -1,13 +1,16 @@
 class WitherSkeleton extends Mob {
-    constructor({
-        health = 20,
-        noAi = false,
-        position = new Vector2(),
-        invulnerable = false,
-        myChunkX = 0,
-        body = createWitherSkeletonBody(),
-    } = {}) {
-        super({
+    constructor(
+        world,
+        {
+            health = 20,
+            noAi = false,
+            position = new Vector2(),
+            invulnerable = false,
+            myChunkX = 0,
+            body = createWitherSkeletonBody(),
+        } = {},
+    ) {
+        super(world, {
             name: "Wither Skeleton",
             health: health,
             position: position,
@@ -21,6 +24,7 @@ class WitherSkeleton extends Mob {
             myChunkX: myChunkX,
             ambientSounds: Sounds.Zombie_Say,
             footstepSounds: Sounds.Zombie_Step,
+            isHostile: true,
             lootTable: new LootTable([
                 new LootItem({
                     itemId: Items.RottenFlesh,
@@ -83,7 +87,7 @@ class WitherSkeleton extends Mob {
     dieEvent() {
         this.dropLoot();
         playPositionalSound(this.position, "mobs/zombie/death.ogg");
-        removeEntity(this);
+        world.removeEntity(this);
     }
 
     tickUpdate() {

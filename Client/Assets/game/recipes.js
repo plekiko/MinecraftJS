@@ -30,6 +30,12 @@ const recipes = [
         input: new RecipeItem({ blockId: Blocks.JungleLog }),
         output: new InventoryItem({ blockId: Blocks.JunglePlanks, count: 4 }),
     }),
+    // Cherry Planks
+    new Recipe({
+        type: RecipeType.Shapeless,
+        input: new RecipeItem({ blockId: Blocks.CherryLog }),
+        output: new InventoryItem({ blockId: Blocks.CherryPlanks, count: 4 }),
+    }),
     //#endregion
 
     // Sticks
@@ -801,6 +807,18 @@ const recipes = [
             ],
         ],
         output: new InventoryItem({ blockId: Blocks.JungleSlab, count: 6 }),
+    }),
+    // Cherry Slab
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockId: Blocks.CherryPlanks }),
+                new RecipeItem({ blockId: Blocks.CherryPlanks }),
+                new RecipeItem({ blockId: Blocks.CherryPlanks }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.CherrySlab, count: 6 }),
     }),
     // Cobblestone Slab
     new Recipe({
