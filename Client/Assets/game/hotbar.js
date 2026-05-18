@@ -16,6 +16,14 @@ class Hotbar {
         this.previousFood = 0;
 
         this.shimmerTime = 0;
+
+        this.lastSelectedSlot = -1;
+        this.displayedItemName = "";
+        this.nameDisplayTimer = 0;
+        this.itemNameAlpha = 0;
+
+        this.NAME_DISPLAY_DURATION = 1000;
+        this.NAME_FADE_DURATION = 400;
     }
 
     drawHearts(health, maxHealth, hotbar) {
@@ -41,11 +49,11 @@ class Hotbar {
 
         const drawHeartAt = (i, cropX) => {
             const leftX = Math.round(
-                hotbar.x + 12 + i * heartSize - heartSize / 2
+                hotbar.x + 12 + i * heartSize - heartSize / 2,
             );
             const yOffset = isLowHealth
                 ? Math.sign(
-                      Math.sin(this.shimmerTime * SHIMMER_SPEED + i * 2.399)
+                      Math.sin(this.shimmerTime * SHIMMER_SPEED + i * 2.399),
                   ) * SHIMMER_DISTANCE
                 : 0;
             drawImage({
@@ -98,15 +106,15 @@ class Hotbar {
                     (maxFood * foodSize) / 2 +
                     foodSize / 2 +
                     i * foodSize -
-                    foodSize / 2
+                    foodSize / 2,
             );
             const yOffset = isLowFood
                 ? Math.round(
                       Math.sign(
                           Math.sin(
-                              this.shimmerTime * SHIMMER_SPEED + i * 2.399 + 1
-                          )
-                      ) * SHIMMER_DISTANCE
+                              this.shimmerTime * SHIMMER_SPEED + i * 2.399 + 1,
+                          ),
+                      ) * SHIMMER_DISTANCE,
                   )
                 : 0;
             drawImage({
@@ -157,26 +165,56 @@ class Hotbar {
         this.drawFood(
             world.player.foodLevel,
             world.player.maxFoodLevel,
-            hotbar
+            hotbar,
         );
+        this.drawSelectedItemName(ctx);
     }
 
     update() {
         this.handleSelecting();
         this.handleSelected();
+        this.updateSelectedItemName();
+    }
+
+    updateSelectedItemName() {
+        if (!this.inventory?.items?.[3]) return;
+
+        const slotIndex = this.currentSlot;
+
+        if (slotIndex === this.lastSelectedSlot) return;
+
+        this.lastSelectedSlot = slotIndex;
+
+        const slot = this.inventory.items[3][slotIndex];
+        if (!slot || slot.isEmpty()) {
+            this.displayedItemName = "";
+            this.itemNameAlpha = 0;
+            return;
+        }
+
+        const item = slot.item;
+
+        this.displayedItemName = item.blockId
+            ? getBlock(item.blockId).name
+            : item.itemId != null
+              ? getItem(item.itemId).name
+              : "";
+
+        this.itemNameAlpha = 1;
+        this.nameDisplayTimer = Date.now();
     }
 
     handleSelected() {
         if (this.inventory.items[3][this.currentSlot].item.blockId) {
             this.inventory.selectedBlock = getBlock(
-                this.inventory.items[3][this.currentSlot].item.blockId
+                this.inventory.items[3][this.currentSlot].item.blockId,
             );
         } else {
             this.inventory.selectedBlock = null;
         }
         if (this.inventory.items[3][this.currentSlot].item.itemId != null) {
             this.inventory.selectedItem = getItem(
-                this.inventory.items[3][this.currentSlot].item.itemId
+                this.inventory.items[3][this.currentSlot].item.itemId,
             );
         } else {
             this.inventory.selectedItem = null;
@@ -193,6 +231,43 @@ class Hotbar {
             };
             this.drawSlot(this.inventory.items[3][i], position);
         }
+    }
+
+    drawSelectedItemName(ctx) {
+        if (!this.displayedItemName || this.itemNameAlpha <= 0.01) return;
+
+        const elapsed = Date.now() - this.nameDisplayTimer;
+        let alpha = 1;
+
+        if (elapsed > this.NAME_DISPLAY_DURATION) {
+            const fadeProgress =
+                (elapsed - this.NAME_DISPLAY_DURATION) /
+                this.NAME_FADE_DURATION;
+            alpha = Math.max(0, 1 - fadeProgress);
+        }
+
+        if (alpha <= 0) {
+            this.displayedItemName = "";
+            return;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        const x = CANVAS.width / 2;
+        const y = CANVAS.height - 110; // Above the hotbar
+
+        drawText({
+            text: this.displayedItemName,
+            x: x,
+            y: y,
+            size: 26,
+            color: "white",
+            shadow: true,
+            textAlign: "center",
+        });
+
+        ctx.restore();
     }
 
     drawSlot(slot, position) {
