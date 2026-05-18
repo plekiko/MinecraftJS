@@ -31,7 +31,7 @@ const defaultProperties = {
     serverPort: 25565,
     allowNether: true,
     levelName: "world",
-    motd: "A Minecraft Server",
+    motd: "A Minecraft JS Server",
     maxPlayers: 20,
 };
 
@@ -48,7 +48,7 @@ function loadProperties() {
             propertiesFile,
             Object.entries(defaultProperties)
                 .map(([key, value]) => `${key}=${value}`)
-                .join("\n")
+                .join("\n"),
         );
     }
     const data = fs.readFileSync(propertiesFile, "utf8");
@@ -71,7 +71,7 @@ function loadProperties() {
     properties.levelSeed = properties.levelSeed.trim();
     if (properties.levelSeed === "") {
         properties.levelSeed = Math.floor(
-            RandomRange(-100000000, 100000000)
+            RandomRange(-100000000, 100000000),
         ).toString();
     }
 
@@ -89,7 +89,7 @@ function loadUserCache() {
             const stats = fs.statSync(userCacheFile);
             if (stats.isDirectory()) {
                 console.error(
-                    `Error: ${userCacheFile} is a directory, expected a file.`
+                    `Error: ${userCacheFile} is a directory, expected a file.`,
                 );
                 userCache = [];
                 return;
@@ -103,20 +103,17 @@ function loadUserCache() {
             userCache = JSON.parse(fileContent);
             if (!Array.isArray(userCache)) {
                 console.error(
-                    `Error: ${userCacheFile} contains invalid data, expected an array.`
+                    `Error: ${userCacheFile} contains invalid data, expected an array.`,
                 );
                 userCache = [];
             }
         } else {
-            serverLog(
-                `No user cache found at ${userCacheFile}. Initializing empty cache.`
-            );
             userCache = [];
             saveUserCache();
         }
     } catch (error) {
         console.error(
-            `Error loading user cache from ${userCacheFile}: ${error.message}`
+            `Error loading user cache from ${userCacheFile}: ${error.message}`,
         );
         userCache = [];
     }
@@ -127,7 +124,7 @@ function saveUserCache() {
         fs.writeFileSync(userCacheFile, JSON.stringify(userCache, null, 2));
     } catch (error) {
         console.error(
-            `Error saving user cache to ${userCacheFile}: ${error.message}`
+            `Error saving user cache to ${userCacheFile}: ${error.message}`,
         );
     }
 }
@@ -144,7 +141,7 @@ function loadBannedIPs() {
             const stats = fs.statSync(bannedIPsFile);
             if (stats.isDirectory()) {
                 console.error(
-                    `Error: ${bannedIPsFile} is a directory, expected a file.`
+                    `Error: ${bannedIPsFile} is a directory, expected a file.`,
                 );
                 bannedIPs = [];
                 return;
@@ -158,20 +155,17 @@ function loadBannedIPs() {
             bannedIPs = JSON.parse(fileContent);
             if (!Array.isArray(bannedIPs)) {
                 console.error(
-                    `Error: ${bannedIPsFile} contains invalid data, expected an array.`
+                    `Error: ${bannedIPsFile} contains invalid data, expected an array.`,
                 );
                 bannedIPs = [];
             }
         } else {
-            serverLog(
-                `No banned IPs found at ${bannedIPsFile}. Initializing empty list.`
-            );
             bannedIPs = [];
             fs.writeFileSync(bannedIPsFile, JSON.stringify(bannedIPs, null, 2));
         }
     } catch (error) {
         console.error(
-            `Error loading banned IPs from ${bannedIPsFile}: ${error.message}`
+            `Error loading banned IPs from ${bannedIPsFile}: ${error.message}`,
         );
         bannedIPs = [];
     }
@@ -188,7 +182,7 @@ function beforeInit() {
         serverLog("No world save found. Creating a new world!");
     }
     serverLog(
-        `Server started at "${properties.serverIp}:${properties.serverPort}". Press Ctrl+C to stop the server.`
+        `Server started at "${properties.serverIp}:${properties.serverPort}". Press Ctrl+C to stop the server.`,
     );
 
     setInterval(() => {
@@ -234,7 +228,7 @@ wss.on("connection", (ws) => {
                             icon: serverIcon,
                             requestId: data.message?.requestId || null,
                         },
-                    })
+                    }),
                 );
                 return;
             } else {
@@ -243,7 +237,7 @@ wss.on("connection", (ws) => {
                         JSON.stringify({
                             type: "serverFull",
                             message: "Server is full.",
-                        })
+                        }),
                     );
                     ws.close();
                     return;
@@ -295,7 +289,7 @@ function createEmptyInventoryGrid(rows = 4, columns = 9) {
             itemId: null,
             count: 0,
             props: {},
-        }))
+        })),
     );
 }
 
@@ -316,7 +310,7 @@ function normalizeInventoryGrid(inventory, rows = 4, columns = 9) {
     const normalized = inventory.map((row) =>
         Array.isArray(row)
             ? row.map((item) => normalizeInventoryItem(item))
-            : []
+            : [],
     );
 
     if (normalized.length === 0) {
@@ -352,7 +346,7 @@ function savePlayerData(player, ip) {
     const safeIp = getSafeIp(ip);
     const playerFile = `${playerDir}/${safeIp}.json`;
     const inventoryItems = normalizeInventoryGrid(
-        getPlayerInventoryItems(player)
+        getPlayerInventoryItems(player),
     );
 
     try {
@@ -375,7 +369,7 @@ function savePlayerData(player, ip) {
         fs.writeFileSync(playerFile, JSON.stringify(playerData, null, 2));
     } catch (error) {
         console.error(
-            `Error saving player data for ${player.name} to ${playerFile}: ${error.message}`
+            `Error saving player data for ${player.name} to ${playerFile}: ${error.message}`,
         );
     }
 }
@@ -394,7 +388,7 @@ function loadPlayerData(player, ip) {
             const stats = fs.statSync(playerFile);
             if (stats.isDirectory()) {
                 console.error(
-                    `Error: ${playerFile} is a directory, expected a file.`
+                    `Error: ${playerFile} is a directory, expected a file.`,
                 );
                 return;
             }
@@ -413,7 +407,7 @@ function loadPlayerData(player, ip) {
             ) {
                 player.position = new Vector2(
                     playerData.position.x,
-                    playerData.position.y
+                    playerData.position.y,
                 );
             } else {
                 player.position = getDefaultPlayerPosition();
@@ -422,7 +416,7 @@ function loadPlayerData(player, ip) {
             // Load inventory
             player.inventory = player.inventory || {};
             player.inventory.items = normalizeInventoryGrid(
-                playerData.inventory
+                playerData.inventory,
             );
 
             if (typeof playerData.dimension === "number") {
@@ -454,7 +448,7 @@ function loadPlayerData(player, ip) {
         }
     } catch (error) {
         console.error(
-            `Error loading player data for ${player.name} from ${playerFile}: ${error.message}`
+            `Error loading player data for ${player.name} from ${playerFile}: ${error.message}`,
         );
         // Fallback to defaults
         player.position = getDefaultPlayerPosition();
@@ -482,7 +476,7 @@ function playerJoined(ws, playerData) {
             JSON.stringify({
                 type: "disconnect",
                 message: "You are banned from this server.",
-            })
+            }),
         );
         serverLog(`Banned IP ${ip} attempted to join.`);
         ws.close();
@@ -535,7 +529,7 @@ function playerJoined(ws, playerData) {
             type: "playerJoined",
             message: { player: newPlayer },
         },
-        [newPlayer.UUID]
+        [newPlayer.UUID],
     );
 }
 
@@ -564,7 +558,7 @@ function loadServerIcon() {
                         } MB (actual size: ${(
                             stats.size /
                             (1024 * 1024)
-                        ).toFixed(2)} MB)`
+                        ).toFixed(2)} MB)`,
                     );
                     continue;
                 }
@@ -579,7 +573,7 @@ function loadServerIcon() {
             } catch (error) {
                 console.error(
                     `Error loading server icon ${path}:`,
-                    error.message
+                    error.message,
                 );
                 continue;
             }
@@ -653,7 +647,7 @@ function processMessage(message, ws) {
             if (player) {
                 player.inventory = player.inventory || {};
                 player.inventory.items = normalizeInventoryGrid(
-                    data.message?.inventory
+                    data.message?.inventory,
                 );
             }
             break;
@@ -698,7 +692,7 @@ function processMessage(message, ws) {
             if (Array.isArray(message.inventory)) {
                 player.inventory = player.inventory || {};
                 player.inventory.items = normalizeInventoryGrid(
-                    message.inventory
+                    message.inventory,
                 );
             }
 
@@ -711,7 +705,7 @@ function processMessage(message, ws) {
             const player = getPlayerByUUID(data.sender);
             serverLog(
                 player.name + ": " + data.message,
-                getPlayerIpFromSocket(ws)
+                getPlayerIpFromSocket(ws),
             );
             broadcast(
                 {
@@ -719,7 +713,7 @@ function processMessage(message, ws) {
                     message: data.message,
                     sender: player.name,
                 },
-                [data.sender]
+                [data.sender],
             );
             break;
         }
@@ -739,7 +733,7 @@ function processMessage(message, ws) {
                         chunk: chunk,
                         requestId: data.message.requestId,
                     },
-                })
+                }),
             );
             break;
 
@@ -751,7 +745,7 @@ function processMessage(message, ws) {
                         seed: world.seed,
                         requestId: data.message.requestId,
                     },
-                })
+                }),
             );
             break;
 
@@ -796,7 +790,7 @@ function loadWorldFromDir() {
             const stats = fs.statSync(worldFile);
             if (stats.isDirectory()) {
                 console.error(
-                    `Error: ${worldFile} is a directory, expected a file.`
+                    `Error: ${worldFile} is a directory, expected a file.`,
                 );
                 return false;
             }
@@ -822,7 +816,7 @@ function loadWorldFromDir() {
             "Error loading world from",
             worldFile,
             ":",
-            error.message
+            error.message,
         );
         return false;
     }
@@ -860,7 +854,7 @@ function saveWorldToDir() {
             const stats = fs.statSync(worldFile);
             if (stats.isDirectory()) {
                 console.error(
-                    `Error: ${worldFile} is a directory, cannot save world.`
+                    `Error: ${worldFile} is a directory, cannot save world.`,
                 );
                 return false;
             }
@@ -876,7 +870,7 @@ function saveWorldToDir() {
             });
         } else {
             serverLog(
-                "Warning: players array is not initialized, skipping player data save"
+                "Warning: players array is not initialized, skipping player data save",
             );
         }
 

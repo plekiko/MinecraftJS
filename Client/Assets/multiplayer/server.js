@@ -1,3 +1,23 @@
+function getMultiplayerUsername() {
+    const fallback = "Player";
+
+    if (typeof game !== "undefined" && game?.settings?.username) {
+        return game.settings.username;
+    }
+
+    try {
+        const stored = JSON.parse(localStorage.getItem("settings") || "{}");
+        if (stored && typeof stored.username === "string") {
+            const trimmed = stored.username.trim();
+            if (trimmed) return trimmed;
+        }
+    } catch (error) {
+        console.warn("Failed to load multiplayer username:", error);
+    }
+
+    return fallback;
+}
+
 class Server {
     constructor(ip, port) {
         this.suppressCloseWarning = false;
@@ -9,7 +29,7 @@ class Server {
             this.send({
                 type: "playerData",
                 message: {
-                    name: settings?.username || "Player",
+                    name: getMultiplayerUsername(),
                     skin: null,
                 },
             });
