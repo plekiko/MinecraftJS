@@ -339,7 +339,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
 }
 
 function handleEntityRPC(data) {
-    const entity = getEntityByUUID(data.sender);
+    const entity = world?.getEntityByUUID(data.sender);
     if (entity && typeof entity[data.message.method] === "function") {
         entity[data.message.method](...data.message.args);
     } else {

@@ -96,7 +96,7 @@ class Server {
     }
 
     entityRPC(data) {
-        const entity = getEntityByUUID(data.sender);
+        const entity = world?.getEntityByUUID(data.sender);
         if (entity && typeof entity[data.message.method] === "function") {
             entity[data.message.method](data.message);
         }
