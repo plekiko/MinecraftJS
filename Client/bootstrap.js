@@ -72,6 +72,8 @@
 
         "Assets/multiplayer/messageHandler.js",
         "Assets/multiplayer/server.js",
+
+        "Assets/utils/screenshotChunks.js",
     ];
 
     function loadScript(src) {

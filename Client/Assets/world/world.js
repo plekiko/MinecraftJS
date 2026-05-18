@@ -1,5 +1,6 @@
 class World {
     constructor() {
+        this.name = "New World";
         this.seed = 0;
         this.entities = [];
         this.particleEmitters = [];

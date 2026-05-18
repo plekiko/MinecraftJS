@@ -226,6 +226,7 @@ class Chat {
             { name: "setblock", args: ["block", "x", "y"] },
             { name: "fill", args: ["block", "x", "y", "x", "y"] },
             { name: "difficulty", args: ["difficulty"] },
+            { name: "screenshot", args: ["count", "lighting"] },
         ];
     }
 
@@ -529,12 +530,36 @@ class Chat {
             case "difficulty":
                 this.difficulty(messageArray);
                 break;
+            case "screenshot":
+                this.screenshot(messageArray);
+                break;
             default:
                 this.message("Invalid Command!", "", Colors.Red);
                 break;
         }
 
         this.closeChat();
+    }
+
+    screenshot(messageArray) {
+        const chunkCount = messageArray[1] ? parseInt(messageArray[1]) : 10;
+        // True or false (default true)
+        const lighting = messageArray[2]
+            ? messageArray[2].toLowerCase() === "true"
+            : false;
+
+        if (isNaN(chunkCount) || chunkCount <= 0) {
+            this.invalidCommand("/screenshot <chunkCount> <lighting>");
+            return;
+        }
+
+        const filename = `screenshot_${world.name}_${Date.now()}.png`;
+
+        this.cheatMessage(
+            `Capturing screenshot of nearest ${chunkCount} chunks...`,
+        );
+
+        screenshotNearestChunks(chunkCount, lighting, filename);
     }
 
     fill(messageArray) {

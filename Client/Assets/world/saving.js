@@ -90,31 +90,40 @@ function saveWorld(message = true, toFile = false) {
     currentSave.seed = world.seed;
     currentSave.dimensions = savedDimensions;
 
-    const saveData = JSON.stringify(currentSave);
-
-    let worldName = "New World";
+    // Determine world name and id before serializing so the name is included in the save
+    let worldName = world.name || "New World";
     let id = Date.now();
 
     let worlds = localStorage.getItem("worlds");
-    let selectedWorld = localStorage.getItem("selectedWorld");
+    let selectedWorldRaw = localStorage.getItem("selectedWorld");
+    let selectedWorld = null;
 
-    if (selectedWorld) {
-        selectedWorld = JSON.parse(selectedWorld);
-        worldName = selectedWorld.name;
-
-        if (toFile) {
-            downloadWorldSave(saveData, worldName ? worldName : "world");
-            return;
+    if (selectedWorldRaw) {
+        try {
+            selectedWorld = JSON.parse(selectedWorldRaw);
+            if (selectedWorld && selectedWorld.name)
+                worldName = selectedWorld.name;
+            if (selectedWorld && selectedWorld.id) id = selectedWorld.id;
+        } catch (e) {
+            selectedWorld = null;
         }
+    }
 
-        id = selectedWorld.id;
-    } else {
-        worldName = prompt("Enter world name: ", worldName);
+    // If there's no previously selected world, prompt for a name (even when exporting to file)
+    if (!selectedWorld) {
+        const prompted = prompt("Enter world name: ", worldName);
+        if (prompted !== null && prompted !== "") worldName = prompted;
+    }
 
-        if (toFile) {
-            downloadWorldSave(saveData, worldName ? worldName : "world");
-            return;
-        }
+    // Store name into the save object
+    currentSave.name = worldName;
+
+    const saveData = JSON.stringify(currentSave);
+
+    // If exporting to file, include the name inside saveData and download
+    if (toFile) {
+        downloadWorldSave(saveData, worldName ? worldName : "world");
+        return;
     }
 
     worldData = {
@@ -125,8 +134,8 @@ function saveWorld(message = true, toFile = false) {
 
     if (worlds) {
         worlds = JSON.parse(worlds);
-        if (worlds.find((world) => world.id === id)) {
-            worlds = worlds.filter((world) => world.id !== id);
+        if (worlds.find((w) => w.id === id)) {
+            worlds = worlds.filter((w) => w.id !== id);
         }
         worlds.push(worldData);
     } else {
@@ -211,11 +220,7 @@ function loadWorldFromLocalStorage() {
         return;
     }
 
-    if (
-        selectedWorld.difficulty &&
-        world &&
-        typeof world.setDifficulty === "function"
-    ) {
+    if (selectedWorld.difficulty && world) {
         world.setDifficulty(selectedWorld.difficulty);
     }
 
@@ -252,6 +257,8 @@ async function loadWorld(save) {
         console.error("Failed to load world: ", error);
         return;
     }
+
+    world.name = currentSave.name || "New World";
 
     world.generator.loadingWorld = true;
 

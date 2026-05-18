@@ -255,7 +255,7 @@ class Hotbar {
         ctx.globalAlpha = alpha;
 
         const x = CANVAS.width / 2;
-        const y = CANVAS.height - 110; // Above the hotbar
+        const y = CANVAS.height - 120;
 
         drawText({
             text: this.displayedItemName,
