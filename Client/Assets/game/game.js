@@ -92,6 +92,8 @@ class Game {
 
         world.generator.loadingWorld = true;
 
+        drawLoadScreen();
+
         console.log("Initializing game...");
 
         // Wait for texture pack
