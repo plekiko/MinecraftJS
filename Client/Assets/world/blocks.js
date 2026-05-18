@@ -153,6 +153,8 @@ const Blocks = Object.freeze({
 
     Gravel: 406,
     NetherBricks: 407,
+
+    Sign: 700,
 });
 
 const blockTypes = [
@@ -1039,6 +1041,21 @@ const blockTypes = [
         specialType: SpecialType.NoteBlock,
         noteBlockSound: "bass",
     }),
+    new BlockType({
+        blockId: 700,
+        sprite: "sign_stand",
+        wallSprite: "sign_hang",
+        iconSprite: "../items/sign",
+        name: "Sign",
+        hardness: 2.6,
+        toolType: ToolType.Axe,
+        specialType: SpecialType.Sign,
+        collision: false,
+        canBePlacedOnWall: true,
+        canBePlacedOnSelf: true,
+        breakWithoutBlockUnderneath: true,
+        transparent: true,
+    }),
     //#endregion
 
     //#region Stone and Ores
@@ -1287,6 +1304,7 @@ const blockTypes = [
         lightLevel: 16,
         breakWithoutBlockUnderneath: true,
         cannotBeConverted: true,
+        canBePlacedOnWall: true,
     }),
     new BlockType({
         blockId: 66,

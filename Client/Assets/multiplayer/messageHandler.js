@@ -102,7 +102,7 @@ function processMessage(data) {
                 message.player.name,
                 false,
             );
-            newPlayer.setSkin(message.player.skin);
+            newPlayer.setSkin(message.player.skin || "steve");
             break;
         case "playerLeft":
             world.removeEntity(world.getEntityByUUID(message));
@@ -309,7 +309,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
         sender: player.UUID,
         message: {
             UUID: player.UUID,
-            skin: myPlayer.body.sprite,
+            skin: myPlayer.body.sprite ?? "steve",
             name: game.settings.username,
         },
     });
@@ -329,7 +329,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
 
             newPlayer.dimension = p.dimension;
 
-            newPlayer.setSkin(p.skin);
+            newPlayer.setSkin(p.skin || "steve");
         });
     }
 }

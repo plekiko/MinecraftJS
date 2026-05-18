@@ -2,6 +2,7 @@ class BlockType {
     constructor({
         blockId,
         sprite = null,
+        wallSprite = null,
         iconSprite = null,
         states = [],
         name = "New block",
@@ -85,9 +86,13 @@ class BlockType {
 
         cropOutcome = null,
         cropSpeed = 20, // 20 ticks per second
+
+        canBePlacedOnWall = false,
+        canBePlacedOnSelf = false,
     } = {}) {
         this.blockId = blockId;
         this.sprite = sprite;
+        this.wallSprite = wallSprite;
         this.iconSprite = iconSprite ? iconSprite : sprite;
         this.states = states;
         this.name = name;
@@ -168,6 +173,9 @@ class BlockType {
 
         this.cropOutcome = cropOutcome;
         this.cropSpeed = cropSpeed;
+
+        this.canBePlacedOnWall = canBePlacedOnWall;
+        this.canBePlacedOnSelf = canBePlacedOnSelf;
     }
 }
 
@@ -185,6 +193,7 @@ const SpecialType = Object.freeze({
     Lever: 11,
     TNT: 12,
     NetherPortal: 13,
+    Sign: 14,
 });
 
 const BlockCategory = Object.freeze({
@@ -228,8 +237,6 @@ function checkDissipation(block, worldPos) {
             worldPos.x + offset.dx,
             worldPos.y + offset.dy,
         );
-        // Note: In your original code you check if neighbor.waterLevel < block.waterLevel.
-        // (This may be counterintuitive, but we keep it exactly as provided.)
         if (
             neighbor &&
             neighbor.blockType === block.blockType &&
@@ -352,6 +359,7 @@ class Block extends Square {
         this.redstoneOutput = 0;
         this.powered = false;
         this.linkedBlocks = [];
+        this.onAWall = false;
 
         this.ambientSound = null;
 
@@ -411,6 +419,7 @@ class Block extends Square {
         let props = {};
         let storage = [];
 
+        // Fluid
         if (block.fluid) {
             props.isSource = true;
             props.waterLevel = 0;
@@ -418,11 +427,13 @@ class Block extends Square {
             return;
         }
 
+        // Redstone output
         if (block.baseRedstoneOutput > 0) {
             props.power = block.baseRedstoneOutput;
             this.metaData = new Metadata(props);
         }
 
+        // Mob spawner
         if (block.spawnerType !== null) {
             props.spawnDelay = randomRange(100, 300);
             props.spawnTimer = 0;
@@ -441,6 +452,7 @@ class Block extends Square {
             return;
         }
 
+        // Sapling
         if (block.saplingOutcome) {
             props.growth = 0;
             this.metaData = new Metadata(props);
@@ -498,7 +510,9 @@ class Block extends Square {
                         new InventoryItem(),
                     ],
                 ];
-
+                break;
+            case SpecialType.Sign:
+                props.text = ["", "", "", ""];
                 break;
         }
 
@@ -591,6 +605,7 @@ class Block extends Square {
 
         this.metaData = undefined;
         this.setMetaData();
+
         if (block.updateSpeed > 0 && !block.chunkUpdate)
             updatingBlocks.push(this);
 
@@ -621,6 +636,15 @@ class Block extends Square {
                 10,
                 0.4,
             );
+        }
+
+        this.onAWall = false;
+        // Wall logic
+        if (block.canBePlacedOnWall) {
+            const wall = this.getWallBehind();
+            if (wall && !getBlock(wall.blockType).air) {
+                this.onAWall = true;
+            }
         }
 
         this.redstoneOutput = block.baseRedstoneOutput;
@@ -1143,7 +1167,7 @@ class Block extends Square {
 
         playPositionalSound(
             this.world.getBlockWorldPosition(this),
-            "blocks/wood_click.ogg",
+            Sounds.Wood_Click,
             10,
             0.4,
         );
@@ -1312,7 +1336,7 @@ class Block extends Square {
 
         playPositionalSound(
             this.world.getBlockWorldPosition(this),
-            "blocks/wood_click.ogg",
+            Sounds.Wood_Click,
             10,
             0.4,
         );
@@ -1467,16 +1491,13 @@ class Block extends Square {
 
         playPositionalSound(
             this.world.getBlockWorldPosition(this),
-            "blocks/fizz.ogg",
+            Sounds.Fizz,
             10,
             0.5,
         );
     }
 
     simulateWaterFlow() {
-        // Don't simulate fluid blocks that belong to an inactive dimension.
-        // Without this guard, nether lava in updatingBlocks would call
-        // GetBlockAtWorldPosition(activeDimension) and overwrite overworld blocks.
         if (this.dimensionIndex !== activeDimension) return;
 
         if (getDimension(activeDimension).fastLava) {
@@ -1594,6 +1615,13 @@ class Block extends Square {
 
             // No block below
             if (!blockBelow || getBlock(blockBelow.blockType).air) {
+                if (blockDef.canBePlacedOnWall && this.onAWall) {
+                    // If there is a wall behind this block, don't break it
+                    const wall = this.getWallBehind();
+
+                    if (!getBlock(wall.blockType).air) return;
+                }
+
                 if (blockDef.fall) {
                     this.gravityBlock();
                 } else {
@@ -1601,6 +1629,26 @@ class Block extends Square {
                 }
             }
         }
+    }
+
+    getWallBehind() {
+        const blockBehind = this.world.getBlockAtWorldPosition(
+            this.transform.position.x,
+            this.transform.position.y,
+            true,
+        );
+
+        return blockBehind;
+    }
+
+    getBlockFront() {
+        const blockFront = this.world.getBlockAtWorldPosition(
+            this.transform.position.x,
+            this.transform.position.y,
+            false,
+        );
+
+        return blockFront;
     }
 
     breakBlock(
@@ -1615,9 +1663,20 @@ class Block extends Square {
 
         if (!chunk) return;
 
-        // if (!wall) chunk.checkForBlockWithAirBeneath(this.x, this.y);
-
         const blockDef = getBlock(this.blockType);
+
+        if (wall) {
+            let blockFront = this.getBlockFront();
+
+            if (blockFront.onAWall) {
+                blockFront.breakBlock(
+                    getBlock(blockFront.blockType).dropWithoutTool,
+                    false,
+                    false,
+                    false,
+                );
+            }
+        }
 
         // Handle crop loot when fully grown
         if (!skipDrops) {
@@ -1808,6 +1867,43 @@ class Block extends Square {
         }
     }
 
+    draw(ctx, camera) {
+        super.draw(ctx, camera);
+
+        this.drawSignText(ctx, camera);
+    }
+
+    drawSignText(ctx, camera) {
+        if (getBlock(this.blockType).specialType !== SpecialType.Sign) return;
+        if (!this.metaData || !this.metaData.text) return;
+
+        const textLines = Array.isArray(this.metaData.text)
+            ? this.metaData.text
+            : [this.metaData.text];
+
+        const worldPos = this.world.getBlockWorldPosition(this);
+
+        // Center of the block
+        const centerX = worldPos.x + BLOCK_SIZE / 2 - camera.x;
+        const startY = worldPos.y + 8 - camera.y;
+        const lineHeight = 8;
+
+        ctx.save();
+        ctx.font = "9px pixel"; // match your UI font/size
+        ctx.fillStyle = "black"; // dark text color (classic sign look)
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        for (let i = 0; i < Math.min(4, textLines.length); i++) {
+            const line = textLines[i] || "";
+            if (line === "") continue;
+
+            ctx.fillText(line, centerX, startY + i * lineHeight);
+        }
+
+        ctx.restore();
+    }
+
     updateSprite() {
         const block = getBlock(this.blockType);
 
@@ -1821,9 +1917,15 @@ class Block extends Square {
 
         this.frameRate = block.animationSpeed;
 
-        const sprite = getSpriteUrl("blocks/" + block.sprite);
+        let blockSprite = block.sprite;
 
-        this.spriteSize = getSpriteSize("blocks/" + block.sprite).width;
+        if (this.onAWall) {
+            blockSprite = block.wallSprite ? block.wallSprite : block.sprite;
+        }
+
+        const sprite = getSpriteUrl("blocks/" + blockSprite);
+
+        this.spriteSize = getSpriteSize("blocks/" + blockSprite).width;
 
         this.spriteScale = BLOCK_SIZE / this.spriteSize;
 

@@ -882,22 +882,6 @@ class Player extends Entity {
         if (player === this) return;
     }
 
-    openConverter() {
-        const storage = this.hoverBlock.metaData.storage;
-
-        this.inventory.openConverter(storage);
-        this.inventory.interactedBlock = this.hoverBlock;
-        this.openInventory();
-    }
-
-    openHopper() {
-        const storage = this.hoverBlock.metaData.storage;
-
-        this.inventory.openHopper(storage);
-        this.inventory.interactedBlock = this.hoverBlock;
-        this.openInventory();
-    }
-
     handleQuickBlockSelect(block) {
         if (!block) return;
 
@@ -927,12 +911,29 @@ class Player extends Entity {
         // console.log(item);
     }
 
+    //#region Block Interaction UIs
     openSingleChest() {
         const chestStorage = this.hoverBlock.metaData.storage;
 
         playPositionalSound(this.position, "blocks/chestopen.ogg");
 
         this.inventory.openSingleChest(chestStorage);
+        this.inventory.interactedBlock = this.hoverBlock;
+        this.openInventory();
+    }
+
+    openConverter() {
+        const storage = this.hoverBlock.metaData.storage;
+
+        this.inventory.openConverter(storage);
+        this.inventory.interactedBlock = this.hoverBlock;
+        this.openInventory();
+    }
+
+    openHopper() {
+        const storage = this.hoverBlock.metaData.storage;
+
+        this.inventory.openHopper(storage);
         this.inventory.interactedBlock = this.hoverBlock;
         this.openInventory();
     }
@@ -951,6 +952,19 @@ class Player extends Entity {
         this.openInventory();
     }
 
+    openSign(sign) {
+        const signData = sign.metaData;
+
+        this.windowOpen = true;
+        this.canMove = false;
+
+        this.inventory.interactedBlock = sign;
+
+        this.inventory.openSign(signData.text ?? "");
+    }
+
+    //#endregion
+
     hoverBlockLogic() {
         if (this.oldHoverBlock !== this.hoverBlock) {
             this.oldHoverBlock = this.hoverBlock;
@@ -965,7 +979,7 @@ class Player extends Entity {
             input._pauseConsumedByUI = true;
             return;
         }
-        if (input.isActionPressed("use")) {
+        if (input.isActionPressed("use") && !this.inventory.isEditingSign) {
             if (this.windowOpen) this.closeInventory();
             else {
                 if (this.gamemode === 1) {
@@ -1280,7 +1294,7 @@ class Player extends Entity {
         );
 
         // Place the block
-        const succeeded = chunk.setBlockTypeLocal(
+        const newBlock = chunk.setBlockTypeLocal(
             this.hoverBlock.x,
             this.hoverBlock.y,
             blockToPlace.blockId,
@@ -1289,7 +1303,12 @@ class Player extends Entity {
             true,
         );
 
-        if (!succeeded) return;
+        if (!newBlock) return;
+
+        // Sign UI
+        if (blockToPlace.specialType === SpecialType.Sign) {
+            this.openSign(newBlock);
+        }
 
         world.serverPlaceBlock(
             chunk.x,
@@ -1315,24 +1334,6 @@ class Player extends Entity {
                 this.removeFromCurrentSlot();
             }
             return;
-        }
-
-        // Check block beneath for non-wall blocks
-        const blockBeneath = getDimensionChunks(activeDimension)
-            .get(this.hoverBlock.chunkX)
-            .getBlockTypeDataLocal(this.hoverBlock.x, this.hoverBlock.y + 1);
-
-        if (!blockBeneath || blockBeneath.air) {
-            if (
-                blockToPlace.breakWithoutBlockUnderneath &&
-                (!blockToPlace.onlyPlacableOn ||
-                    blockToPlace.onlyPlacableOn.length === 0)
-            ) {
-                this.hoverBlock.breakBlock(blockToPlace.dropWithoutTool);
-            }
-            if (blockToPlace.fall) {
-                this.hoverBlock.gravityBlock();
-            }
         }
 
         // Remove from inventory if not in insta-build mode
@@ -1361,6 +1362,8 @@ class Player extends Entity {
         if (mousePos.y <= -1) {
             game.chat.message(
                 "Can't place here! World height: " + CHUNK_HEIGHT,
+                "",
+                "red",
             );
             return;
         }
@@ -1392,26 +1395,51 @@ class Player extends Entity {
             this.hoverBlock.transform.position.y + BLOCK_SIZE,
         );
 
+        // Check if block can be placed without block underneath
         if (block.breakWithoutBlockUnderneath) {
             if (!blockBeneath) return false;
 
             const blockBeneathDef = getBlock(blockBeneath.blockType);
 
+            let wallCheck = false;
+
             if (
-                (!blockBeneathDef.collision &&
-                    block.onlyPlacableOn === null &&
-                    blockBeneathDef.transparent) ||
-                blockBeneathDef.fluid
+                block.canBePlacedOnSelf &&
+                blockBeneath.blockType === block.blockId &&
+                !blockBeneath.onAWall
             )
-                return false;
+                return true;
+
+            if (
+                !blockBeneathDef.collision &&
+                block.onlyPlacableOn === null &&
+                blockBeneathDef.transparent
+            )
+                wallCheck = true;
+
+            if (blockBeneathDef.fluid) wallCheck = true;
 
             if (
                 blockBeneathDef.defaultCutoff > 0 &&
                 block.onlyPlacableOn === null
             )
-                return false;
+                wallCheck = true;
+
+            if (wallCheck) {
+                // If block can be placed on wall, check for wall behind
+                if (block.canBePlacedOnWall) {
+                    let wallBehind = world.getBlockAtWorldPosition(
+                        this.hoverBlock.transform.position.x,
+                        this.hoverBlock.transform.position.y,
+                        true,
+                    );
+
+                    return !getBlock(wallBehind.blockType).air;
+                }
+            }
         }
 
+        // Check if block can only be placed on specific blocks
         if (block.onlyPlacableOn?.length > 0) {
             if (!blockBeneath) return false;
 

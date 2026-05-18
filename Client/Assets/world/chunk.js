@@ -958,7 +958,7 @@ class Chunk {
                     wall,
                 );
 
-                // Skip placing if the block is already the correct type (avoids duplicates during loading)
+                // Skip placing if the block is already the correct type
                 if (blockAtPos.blockType === extendedBlock.blockId) {
                     extendedBlockRefs.push(blockAtPos);
                     linkedBlocks.push({
@@ -1009,7 +1009,9 @@ class Chunk {
                 this.checkForPortalBreak(x, y);
             }
 
+            // Regular block placement without extended blocks
             block.setBlockType(blockType);
+
             linkedBlocks.push({
                 ...this.localToWorldInternal(x, y),
                 blockType,
@@ -1028,6 +1030,7 @@ class Chunk {
             }
         }
         if (updateBlocks) {
+            block.blockUpdate();
             this.updateAdjacentBlocksLocal(x, y, wall);
         }
 
@@ -1040,7 +1043,7 @@ class Chunk {
 
         if (metaData !== null) block.setBlockMetaData(metaData);
 
-        return true;
+        return block;
     }
 
     setBlockType(

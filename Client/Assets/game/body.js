@@ -240,6 +240,11 @@ class BodyPart {
     ) {
         const img = this.loadSprite(image);
 
+        if (img == null) {
+            console.warn("image is null for body part " + this.id, this);
+            return;
+        }
+
         ctx.save();
         ctx.filter = `brightness(${brightness})`;
 

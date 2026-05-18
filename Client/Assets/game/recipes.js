@@ -48,6 +48,29 @@ const recipes = [
         output: new InventoryItem({ itemId: Items.Stick, count: 4 }),
     }),
 
+    // Sign
+    new Recipe({
+        type: RecipeType.Shaped,
+        input: [
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+                new RecipeItem({ blockCategory: BlockCategory.Planks }),
+            ],
+            [
+                new RecipeItem({ count: 0 }),
+                new RecipeItem({ itemId: Items.Stick }),
+                new RecipeItem({ count: 0 }),
+            ],
+        ],
+        output: new InventoryItem({ blockId: Blocks.Sign, count: 3 }),
+    }),
+
     //#region Tools
     //#region Wooden Tools
     // Wooden Axe
@@ -1509,4 +1532,5 @@ const recipes = [
         ],
         output: new InventoryItem({ blockId: Blocks.QuartzBlock, count: 1 }),
     }),
+    //#endregion
 ];
