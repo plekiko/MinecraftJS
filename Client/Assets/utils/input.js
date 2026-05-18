@@ -195,7 +195,6 @@ class InputHandler {
         return false;
     }
 
-    // Getters for key state
     isKeyDown(keyCode) {
         return this.keys[keyCode] || false; // True as long as the key is held down
     }
