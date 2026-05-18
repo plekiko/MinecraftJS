@@ -180,8 +180,6 @@ function processMessage(data) {
                 return;
             }
 
-            console.log("Placing block:", message);
-
             getDimensionChunks(message.dimensionIndex)
                 .get(message.chunkX)
                 .setBlockTypeLocal(
@@ -204,8 +202,6 @@ function processMessage(data) {
                 );
                 return;
             }
-
-            console.log("Breaking block:", message);
 
             // get the block at the given coordinates
             const block = getDimensionChunks(message.dimensionIndex)

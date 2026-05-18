@@ -403,7 +403,7 @@ class WorldGenerator {
             x,
             y,
             Blocks.Chest,
-            new Metadata({ props: { storage: newStorage } }),
+            new Metadata({ storage: newStorage }),
         );
     }
 

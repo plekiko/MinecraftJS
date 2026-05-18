@@ -657,7 +657,7 @@ class Player extends Entity {
             // Water
             if (
                 this.hoverBlock.blockType === Blocks.Lava &&
-                this.hoverBlock.metaData.props.isSource
+                this.hoverBlock.metaData.isSource
             ) {
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
@@ -691,7 +691,7 @@ class Player extends Entity {
             // Lava
             if (
                 this.hoverBlock.blockType === Blocks.Water &&
-                this.hoverBlock.metaData.props.isSource
+                this.hoverBlock.metaData.isSource
             ) {
                 this.removeFromCurrentSlot();
                 this.inventory.addItem(
@@ -883,7 +883,7 @@ class Player extends Entity {
     }
 
     openConverter() {
-        const storage = this.hoverBlock.metaData.props.storage;
+        const storage = this.hoverBlock.metaData.storage;
 
         this.inventory.openConverter(storage);
         this.inventory.interactedBlock = this.hoverBlock;
@@ -891,7 +891,7 @@ class Player extends Entity {
     }
 
     openHopper() {
-        const storage = this.hoverBlock.metaData.props.storage;
+        const storage = this.hoverBlock.metaData.storage;
 
         this.inventory.openHopper(storage);
         this.inventory.interactedBlock = this.hoverBlock;
@@ -928,7 +928,7 @@ class Player extends Entity {
     }
 
     openSingleChest() {
-        const chestStorage = this.hoverBlock.metaData.props.storage;
+        const chestStorage = this.hoverBlock.metaData.storage;
 
         playPositionalSound(this.position, "blocks/chestopen.ogg");
 
@@ -938,7 +938,7 @@ class Player extends Entity {
     }
 
     openFurnace() {
-        const furnaceData = this.hoverBlock.metaData.props.storage;
+        const furnaceData = this.hoverBlock.metaData.storage;
 
         this.inventory.openFurnace(furnaceData);
         this.inventory.interactedBlock = this.hoverBlock;
@@ -1676,6 +1676,11 @@ class Player extends Entity {
 
         // Reduce speed if swimming
         if (this.swimming) {
+            speed /= 2;
+        }
+
+        // Reduce speed if eating
+        if (this.eating) {
             speed /= 2;
         }
 
