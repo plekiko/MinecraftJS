@@ -29,20 +29,20 @@ class InputHandler {
 
     _initializeEventListeners() {
         document.addEventListener("keydown", (event) =>
-            this._handleKeyDown(event)
+            this._handleKeyDown(event),
         );
         document.addEventListener("keyup", (event) => this._handleKeyUp(event));
         document.addEventListener("mousedown", (event) =>
-            this._handleMouseDown(event)
+            this._handleMouseDown(event),
         );
         document.addEventListener("mouseup", (event) =>
-            this._handleMouseUp(event)
+            this._handleMouseUp(event),
         );
         document.addEventListener("mousemove", (event) =>
-            this._handleMouseMove(event)
+            this._handleMouseMove(event),
         );
         document.addEventListener("wheel", (event) =>
-            this._handleScroll(event)
+            this._handleScroll(event),
         );
     }
 
@@ -64,7 +64,11 @@ class InputHandler {
                 this.keysDown[key] = true; // Set keysDown only on the first keydown
             }
             this.keys[key] = true; // Keep keys set to true as long as the key is held down
-            if (!game.chat.inChat) {
+            if (
+                !game.chat.inChat &&
+                world.player &&
+                !world.player.inventory.isEditingSign
+            ) {
                 if (
                     this.keyBindings.chatOpen &&
                     this.keyBindings.chatOpen.includes(key)
@@ -80,6 +84,37 @@ class InputHandler {
                 }
             }
         }
+    }
+
+    getLastPressedKey() {
+        for (const keyCode in this.keysDown) {
+            if (this.keysDown[keyCode]) {
+                this.keysDown[keyCode] = false;
+
+                if (keyCode === "Enter" || keyCode === "KeyEnter")
+                    return "Enter";
+                if (keyCode === "Backspace") return "Backspace";
+                if (keyCode === "Escape") return "Escape";
+
+                return this._getCharFromKey(keyCode);
+            }
+        }
+        return null;
+    }
+
+    _getCharFromKey(keyCode) {
+        if (keyCode.startsWith("Key")) {
+            let char = keyCode.slice(3).toLowerCase();
+            if (input.shiftPressed) char = char.toUpperCase();
+            return char;
+        }
+        if (keyCode.startsWith("Digit")) return keyCode.slice(5);
+        if (keyCode === "Space") return " ";
+        if (keyCode === "Period") return ".";
+        if (keyCode === "Comma") return ",";
+        if (keyCode === "Minus") return "-";
+
+        return null;
     }
 
     _handleKeyUp(event) {

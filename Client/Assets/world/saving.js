@@ -497,10 +497,9 @@ async function loadChunk(
             if (
                 blockDef.fluid &&
                 block.metaData &&
-                block.metaData.props &&
-                typeof block.metaData.props.waterLevel === "number"
+                typeof block.metaData.waterLevel === "number"
             ) {
-                block.cutoff = block.metaData.props.waterLevel;
+                block.cutoff = block.metaData.waterLevel;
             }
         }
     }

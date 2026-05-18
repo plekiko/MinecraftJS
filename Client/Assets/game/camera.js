@@ -52,13 +52,12 @@ class Camera {
             this.followPlayer(target);
         }
 
-        // Clamp the camera's y so that the bottom edge doesn't go below the world bottom.
-        // The bottom edge is at: this.y + CANVAS.height/2.
-        // Therefore, ensure: this.y <= CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height/2.
         this.y = Math.min(this.y, CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height);
 
         // Same for top edge
-        this.y = Math.max(this.y, 0);
+        if (getDimension(activeDimension).bedrockRoof) {
+            this.y = Math.max(this.y, 0);
+        }
     }
 
     followPlayer(target = world.player) {
@@ -92,10 +91,12 @@ class Camera {
         // Clamp the camera's y after following the player as well.
         this.y = Math.min(
             this.y,
-            CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height / 2
+            CHUNK_HEIGHT * BLOCK_SIZE - CANVAS.height / 2,
         );
 
         // Same for top edge
-        this.y = Math.max(this.y, 0);
+        if (getDimension(activeDimension).bedrockRoof) {
+            this.y = Math.max(this.y, 0);
+        }
     }
 }

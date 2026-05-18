@@ -2,6 +2,7 @@ class BlockType {
     constructor({
         blockId,
         sprite = null,
+        wallSprite = null,
         iconSprite = null,
         states = [],
         name = "New block",
@@ -85,9 +86,13 @@ class BlockType {
 
         cropOutcome = null,
         cropSpeed = 20, // 20 ticks per second
+
+        canBePlacedOnWall = false,
+        canBePlacedOnSelf = false,
     } = {}) {
         this.blockId = blockId;
         this.sprite = sprite;
+        this.wallSprite = wallSprite;
         this.iconSprite = iconSprite ? iconSprite : sprite;
         this.states = states;
         this.name = name;
@@ -168,6 +173,9 @@ class BlockType {
 
         this.cropOutcome = cropOutcome;
         this.cropSpeed = cropSpeed;
+
+        this.canBePlacedOnWall = canBePlacedOnWall;
+        this.canBePlacedOnSelf = canBePlacedOnSelf;
     }
 }
 
@@ -185,6 +193,7 @@ const SpecialType = Object.freeze({
     Lever: 11,
     TNT: 12,
     NetherPortal: 13,
+    Sign: 14,
 });
 
 const BlockCategory = Object.freeze({
@@ -193,9 +202,23 @@ const BlockCategory = Object.freeze({
     Wool: 3,
 });
 
+function normalizeMetaDataObject(metaData) {
+    if (!metaData || typeof metaData !== "object") return null;
+
+    if (metaData.props && typeof metaData.props === "object") {
+        const { props, ...rest } = metaData;
+        return { ...rest, ...props };
+    }
+
+    return metaData;
+}
+
 class Metadata {
-    constructor({ props = null } = {}) {
-        this.props = props;
+    constructor(metaData = null) {
+        const normalized = normalizeMetaDataObject(metaData);
+        if (normalized) {
+            Object.assign(this, structuredClone(normalized));
+        }
     }
 }
 
@@ -214,20 +237,18 @@ function checkDissipation(block, worldPos) {
             worldPos.x + offset.dx,
             worldPos.y + offset.dy,
         );
-        // Note: In your original code you check if neighbor.waterLevel < block.waterLevel.
-        // (This may be counterintuitive, but we keep it exactly as provided.)
         if (
             neighbor &&
             neighbor.blockType === block.blockType &&
-            neighbor.metaData.props.waterLevel < block.metaData.props.waterLevel
+            neighbor.metaData.waterLevel < block.metaData.waterLevel
         ) {
             neighborHasHigher = true;
         }
     });
     if (!neighborHasHigher) {
-        block.metaData.props.waterLevel += 0.25;
-        block.cutoff = block.metaData.props.waterLevel;
-        if (block.metaData.props.waterLevel >= 0.85) {
+        block.metaData.waterLevel += 0.25;
+        block.cutoff = block.metaData.waterLevel;
+        if (block.metaData.waterLevel >= 0.85) {
             world.setBlockType(block, Blocks.Air);
             return true;
         }
@@ -249,9 +270,9 @@ function flowDownward(block, worldPos) {
         }
         below.setBlockType(block.blockType);
 
-        below.metaData.props.isSource = false;
-        below.metaData.props.waterLevel = 0;
-        below.cutoff = below.metaData.props.waterLevel;
+        below.metaData.isSource = false;
+        below.metaData.waterLevel = 0;
+        below.cutoff = below.metaData.waterLevel;
     }
     return below;
 }
@@ -263,14 +284,11 @@ function verticalCheckAbove(block, worldPos) {
     );
     if (above) {
         if (above.blockType === block.blockType) {
-            block.metaData.props.waterLevel = 0;
-            block.cutoff = block.metaData.props.waterLevel;
-        } else if (
-            getBlock(above.blockType).air &&
-            block.metaData.props.isSource
-        ) {
-            block.metaData.props.waterLevel = 0; // As per original code.
-            block.cutoff = block.metaData.props.waterLevel + 0.1;
+            block.metaData.waterLevel = 0;
+            block.cutoff = block.metaData.waterLevel;
+        } else if (getBlock(above.blockType).air && block.metaData.isSource) {
+            block.metaData.waterLevel = 0; // As per original code.
+            block.cutoff = block.metaData.waterLevel + 0.1;
         }
     }
 }
@@ -293,22 +311,19 @@ function flowSideways(block, worldPos, direction) {
             target.blockType === Blocks.Lava &&
             block.blockType === Blocks.Water
         ) {
-            if (target.metaData.props.isSource)
-                target.setBlockType(Blocks.Obsidian);
+            if (target.metaData.isSource) target.setBlockType(Blocks.Obsidian);
             else target.setBlockType(Blocks.Cobblestone);
         }
         target.setBlockType(block.blockType);
-        target.metaData.props.isSource = false;
+        target.metaData.isSource = false;
         // sideLevel is determined below.
         return target;
     } else if (
         target &&
         target.blockType === block.blockType &&
-        target.metaData.props.waterLevel >
-            (block.metaData.props.isSource
-                ? 0.2
-                : block.metaData.props.waterLevel + 0.1) &&
-        !target.metaData.props.isSource
+        target.metaData.waterLevel >
+            (block.metaData.isSource ? 0.2 : block.metaData.waterLevel + 0.1) &&
+        !target.metaData.isSource
     ) {
         return target;
     }
@@ -344,6 +359,7 @@ class Block extends Square {
         this.redstoneOutput = 0;
         this.powered = false;
         this.linkedBlocks = [];
+        this.onAWall = false;
 
         this.ambientSound = null;
 
@@ -403,24 +419,27 @@ class Block extends Square {
         let props = {};
         let storage = [];
 
+        // Fluid
         if (block.fluid) {
             props.isSource = true;
             props.waterLevel = 0;
-            this.metaData = new Metadata({ props: props });
+            this.metaData = new Metadata(props);
             return;
         }
 
+        // Redstone output
         if (block.baseRedstoneOutput > 0) {
             props.power = block.baseRedstoneOutput;
-            this.metaData = new Metadata({ props: props });
+            this.metaData = new Metadata(props);
         }
 
+        // Mob spawner
         if (block.spawnerType !== null) {
             props.spawnDelay = randomRange(100, 300);
             props.spawnTimer = 0;
             props.spawnLimit = 3;
             props.spawnedMobs = [];
-            this.metaData = new Metadata({ props: props });
+            this.metaData = new Metadata(props);
 
             return;
         }
@@ -429,13 +448,14 @@ class Block extends Square {
         if (block.cropOutcome) {
             props.growth = 0;
             props.stage = 0; // Current growth stage
-            this.metaData = new Metadata({ props: props });
+            this.metaData = new Metadata(props);
             return;
         }
 
+        // Sapling
         if (block.saplingOutcome) {
             props.growth = 0;
-            this.metaData = new Metadata({ props: props });
+            this.metaData = new Metadata(props);
         }
 
         if (!block.specialType) return;
@@ -490,14 +510,16 @@ class Block extends Square {
                         new InventoryItem(),
                     ],
                 ];
-
+                break;
+            case SpecialType.Sign:
+                props.text = ["", "", "", ""];
                 break;
         }
 
         if (storage.length > 0) {
             props.storage = storage;
         }
-        this.metaData = new Metadata({ props: props });
+        this.metaData = new Metadata(props);
     }
 
     syncMetaData() {
@@ -513,7 +535,7 @@ class Block extends Square {
                 chunkX: this.chunkX,
                 dimensionIndex: activeDimension,
                 blockType: this.blockType,
-                metaData: this.metaData.props,
+                metaData: this.metaData,
             },
         });
 
@@ -521,16 +543,14 @@ class Block extends Square {
     }
 
     recieveSyncMetaData(metaData) {
-        if (!this.metaData?.props) return;
+        this.metaData = new Metadata(metaData);
 
-        this.metaData.props = structuredClone(metaData);
-
-        if (this.metaData.props.storage) {
-            const storage = this.metaData.props.storage.map((row) =>
+        if (this.metaData.storage) {
+            const storage = this.metaData.storage.map((row) =>
                 row.map((item) => new InventoryItem(item)),
             );
 
-            this.metaData.props.storage = storage;
+            this.metaData.storage = storage;
         }
 
         if (this.world.player?.inventory.interactedBlock === this) {
@@ -539,15 +559,15 @@ class Block extends Square {
     }
 
     setBlockMetaData(metaData) {
-        this.metaData = metaData;
+        this.metaData = new Metadata(metaData);
 
-        if (this.metaData.props.storage) {
+        if (this.metaData.storage) {
             // Create a deep copy of the storage array and create new InventoryItem instances with the copied data
-            const storage = this.metaData.props.storage.map((row) =>
+            const storage = this.metaData.storage.map((row) =>
                 row.map((item) => new InventoryItem(item)),
             );
 
-            this.metaData.props.storage = storage;
+            this.metaData.storage = storage;
         }
     }
 
@@ -585,6 +605,7 @@ class Block extends Square {
 
         this.metaData = undefined;
         this.setMetaData();
+
         if (block.updateSpeed > 0 && !block.chunkUpdate)
             updatingBlocks.push(this);
 
@@ -600,7 +621,7 @@ class Block extends Square {
         }
 
         if (block.fluid) {
-            this.cutoff = this.metaData.props.waterLevel;
+            this.cutoff = this.metaData.waterLevel;
         }
 
         if (this.ambientSound) {
@@ -615,6 +636,15 @@ class Block extends Square {
                 10,
                 0.4,
             );
+        }
+
+        this.onAWall = false;
+        // Wall logic
+        if (block.canBePlacedOnWall) {
+            const wall = this.getWallBehind();
+            if (wall && !getBlock(wall.blockType).air) {
+                this.onAWall = true;
+            }
         }
 
         this.redstoneOutput = block.baseRedstoneOutput;
@@ -641,7 +671,7 @@ class Block extends Square {
                 break;
         }
 
-        if (!this.metaData || !this.metaData.props) return;
+        if (!this.metaData) return;
 
         // Handle crop growth
         if (blockDef.cropOutcome) {
@@ -650,34 +680,31 @@ class Block extends Square {
         }
 
         // Existing sapling logic
-        if (
-            this.metaData.props.growth !== undefined &&
-            blockDef.saplingOutcome
-        ) {
-            this.metaData.props.growth++;
+        if (this.metaData.growth !== undefined && blockDef.saplingOutcome) {
+            this.metaData.growth++;
 
-            if (this.metaData.props.growth >= 2400) {
+            if (this.metaData.growth >= 2400) {
                 this.saplingGrow();
                 return;
             }
         }
 
         if (
-            this.metaData.props.isActive === undefined ||
-            this.metaData.props.progression === undefined
+            this.metaData.isActive === undefined ||
+            this.metaData.progression === undefined
         )
             return;
 
-        if (!this.metaData.props.isActive) {
+        if (!this.metaData.isActive) {
             this.resetProgression();
             return;
         }
 
-        this.metaData.props.progression += 1 / TICK_SPEED;
+        this.metaData.progression += 1 / TICK_SPEED;
     }
 
     hopperLogic() {
-        const props = this.metaData.props;
+        const props = this.metaData;
         if (!props.storage) return;
         if (this.powered) return;
 
@@ -767,11 +794,10 @@ class Block extends Square {
         if (
             above &&
             above.metaData &&
-            above.metaData.props &&
-            above.metaData.props.storage &&
+            above.metaData.storage &&
             getBlock(above.blockType).specialType !== SpecialType.Hopper // Skip if above is a hopper
         ) {
-            const aboveStorage = above.metaData.props.storage;
+            const aboveStorage = above.metaData.storage;
 
             for (let ay = 0; ay < aboveStorage.length; ay++) {
                 for (let ax = 0; ax < aboveStorage[ay].length; ax++) {
@@ -855,16 +881,11 @@ class Block extends Square {
             this.transform.position.y + BLOCK_SIZE,
         );
 
-        if (
-            !below ||
-            !below.metaData ||
-            !below.metaData.props ||
-            !below.metaData.props.storage
-        ) {
+        if (!below || !below.metaData || !below.metaData.storage) {
             return; // No valid container below
         }
 
-        const belowStorage = below.metaData.props.storage;
+        const belowStorage = below.metaData.storage;
 
         if (
             !props.lastScannedSlot ||
@@ -1004,7 +1025,7 @@ class Block extends Square {
     handleSpawner() {
         if (activeDimension !== this.dimensionIndex) return;
 
-        const props = this.metaData.props;
+        const props = this.metaData;
         const blockDef = getBlock(this.blockType);
 
         // Clean up despawned or dead mobs from the tracking array
@@ -1033,9 +1054,6 @@ class Block extends Square {
     spawnEntity(entityTypeName) {
         const spawnPos = this.world.getBlockWorldPosition(this);
 
-        // Add slight offset to prevent spawning directly inside the block
-        const offsetX = randomRange(-BLOCK_SIZE / 2, BLOCK_SIZE / 2);
-
         const entityType = Entities[entityTypeName];
 
         if (!entityType) return;
@@ -1045,7 +1063,7 @@ class Block extends Square {
 
         const entity = this.world.summonEntity(
             entityType,
-            new Vector2(spawnPos.x + offsetX, spawnPos.y),
+            new Vector2(spawnPos.x, spawnPos.y),
         );
 
         if (!entity) return;
@@ -1063,18 +1081,18 @@ class Block extends Square {
             return;
         }
 
-        this.metaData.props.spawnedMobs.push(entity.UUID);
+        this.metaData.spawnedMobs.push(entity.UUID);
     }
 
     handleCropGrowth(blockDef) {
         // Initialize crop growth properties if not set
-        if (this.metaData.props.growth === undefined) {
-            this.metaData.props.growth = 0;
-            this.metaData.props.stage = 0;
+        if (this.metaData.growth === undefined) {
+            this.metaData.growth = 0;
+            this.metaData.stage = 0;
         }
 
         // Increment growth every tick
-        if (this.lightLevel > 5) this.metaData.props.growth++;
+        if (this.lightLevel > 5) this.metaData.growth++;
 
         // Calculate total stages from states array
         const totalStages = blockDef.states.length;
@@ -1082,13 +1100,13 @@ class Block extends Square {
 
         // Calculate current stage based on growth progress
         const currentStage = Math.min(
-            Math.floor(this.metaData.props.growth / ticksPerStage),
+            Math.floor(this.metaData.growth / ticksPerStage),
             totalStages - 1,
         );
 
         // Update sprite if stage has changed
-        if (this.metaData.props.stage !== currentStage) {
-            this.metaData.props.stage = currentStage;
+        if (this.metaData.stage !== currentStage) {
+            this.metaData.stage = currentStage;
             this.setState(currentStage);
         }
 
@@ -1149,7 +1167,7 @@ class Block extends Square {
 
         playPositionalSound(
             this.world.getBlockWorldPosition(this),
-            "blocks/wood_click.ogg",
+            Sounds.Wood_Click,
             10,
             0.4,
         );
@@ -1167,9 +1185,9 @@ class Block extends Square {
     }
 
     furnaceLogic() {
-        if (!this.metaData.props.storage) return;
+        if (!this.metaData.storage) return;
 
-        const storage = this.metaData.props.storage;
+        const storage = this.metaData.storage;
         const input = this.getSlotItem(storage[0][0]);
         const fuel = this.getSlotItem(storage[0][1]);
         const output = this.getSlotItem(storage[1][0]);
@@ -1179,46 +1197,39 @@ class Block extends Square {
                 : null;
 
         // Determine if furnace should be visually "on" based on fuel availability
-        if (this.metaData.props.burningFuelTime > 0) {
+        if (this.metaData.burningFuelTime > 0) {
             this.setState(1);
-            this.metaData.props.isActive = true;
+            this.metaData.isActive = true;
             if (!input) this.resetProgression();
         } else {
             this.setState(0);
-            this.metaData.props.isActive = false;
+            this.metaData.isActive = false;
             this.resetProgression();
         }
 
         // Only start burning fuel if there's an input item with a smeltable output
-        if (
-            !this.metaData.props.burningFuelTime &&
-            input &&
-            input.smeltOutput
-        ) {
+        if (!this.metaData.burningFuelTime && input && input.smeltOutput) {
             if (fuel && fuel.fuelTime) {
-                this.metaData.props.burningFuelTime = fuel.fuelTime;
+                this.metaData.burningFuelTime = fuel.fuelTime;
                 this.removeOneFromStack(storage[0][1]);
             } else {
-                this.metaData.props.isActive = false;
+                this.metaData.isActive = false;
                 return;
             }
         }
 
         // If burning fuel time is active, increment fuel progression
-        if (this.metaData.props.burningFuelTime > 0) {
-            this.metaData.props.fuelProgression += deltaTime;
+        if (this.metaData.burningFuelTime > 0) {
+            this.metaData.fuelProgression += deltaTime;
         }
 
         // Reset burning fuel time if it has been used up
-        if (
-            this.metaData.props.fuelProgression >=
-            this.metaData.props.burningFuelTime
-        ) {
-            this.metaData.props.fuelProgression = 0;
-            this.metaData.props.burningFuelTime = 0;
+        if (this.metaData.fuelProgression >= this.metaData.burningFuelTime) {
+            this.metaData.fuelProgression = 0;
+            this.metaData.burningFuelTime = 0;
 
             if (fuel && input && fuel.fuelTime && input.smeltOutput) {
-                this.metaData.props.burningFuelTime = fuel.fuelTime;
+                this.metaData.burningFuelTime = fuel.fuelTime;
                 this.removeOneFromStack(storage[0][1]);
             }
         }
@@ -1240,7 +1251,7 @@ class Block extends Square {
         }
 
         // Complete smelting process if progression threshold is met
-        if (this.metaData.props.progression >= 10) {
+        if (this.metaData.progression >= 10) {
             this.removeOneFromStack(storage[0][0]);
 
             storage[1][0].itemId = outputItem
@@ -1270,7 +1281,7 @@ class Block extends Square {
     playNote() {
         const sound = `notes/${this.getSoundBasedOfBlockBelow()}.ogg`;
 
-        const pitch = Math.pow(2, this.metaData.props.note / 12);
+        const pitch = Math.pow(2, this.metaData.note / 12);
 
         playPositionalSound(
             this.world.getBlockWorldPosition(this),
@@ -1325,7 +1336,7 @@ class Block extends Square {
 
         playPositionalSound(
             this.world.getBlockWorldPosition(this),
-            "blocks/wood_click.ogg",
+            Sounds.Wood_Click,
             10,
             0.4,
         );
@@ -1391,27 +1402,27 @@ class Block extends Square {
     }
 
     noteBlockInteraction() {
-        this.metaData.props.note++;
-        if (this.metaData.props.note > 24) this.metaData.props.note = 0;
+        this.metaData.note++;
+        if (this.metaData.note > 24) this.metaData.note = 0;
 
-        game.chat.message("Playing note: " + this.metaData.props.note);
+        game.chat.message("Playing note: " + this.metaData.note);
 
         this.playNote();
     }
 
     jukeBoxInteraction(item, player) {
-        if (!item || this.metaData.props.storage[0][0].itemId !== null) {
+        if (!item || this.metaData.storage[0][0].itemId !== null) {
             // Remove disc from jukebox'
-            if (this.metaData.props.storage[0][0].itemId !== null) {
+            if (this.metaData.storage[0][0].itemId !== null) {
                 this.world.spawnDrop(world.getBlockWorldPosition(this), {
-                    itemId: this.metaData.props.storage[0][0].itemId,
+                    itemId: this.metaData.storage[0][0].itemId,
                     blockId: null,
                     count: 1,
                 });
 
-                removeAudio(this.metaData.props.myAudio);
+                removeAudio(this.metaData.myAudio);
 
-                this.metaData.props.storage[0][0] = new InventoryItem();
+                this.metaData.storage[0][0] = new InventoryItem();
             }
 
             this.syncMetaData();
@@ -1420,11 +1431,11 @@ class Block extends Square {
         }
 
         if (item.playMusicInJukebox) {
-            this.metaData.props.storage[0][0].itemId = item.itemId;
-            this.metaData.props.storage[0][0].blockId = null;
-            this.metaData.props.storage[0][0].count = 1;
+            this.metaData.storage[0][0].itemId = item.itemId;
+            this.metaData.storage[0][0].blockId = null;
+            this.metaData.storage[0][0].count = 1;
 
-            this.metaData.props.myAudio = playPositionalSound(
+            this.metaData.myAudio = playPositionalSound(
                 this.world.getBlockWorldPosition(this),
                 "../music/" + item.playMusicInJukebox,
                 20,
@@ -1470,7 +1481,7 @@ class Block extends Square {
 
         // Loop thru all lava blocks
         for (let lavaBlock of lavaBlocksNear) {
-            if (lavaBlock.metaData.props.isSource) {
+            if (lavaBlock.metaData.isSource) {
                 lavaBlock.setBlockType(Blocks.Obsidian);
                 return;
             }
@@ -1480,16 +1491,13 @@ class Block extends Square {
 
         playPositionalSound(
             this.world.getBlockWorldPosition(this),
-            "blocks/fizz.ogg",
+            Sounds.Fizz,
             10,
             0.5,
         );
     }
 
     simulateWaterFlow() {
-        // Don't simulate fluid blocks that belong to an inactive dimension.
-        // Without this guard, nether lava in updatingBlocks would call
-        // GetBlockAtWorldPosition(activeDimension) and overwrite overworld blocks.
         if (this.dimensionIndex !== activeDimension) return;
 
         if (getDimension(activeDimension).fastLava) {
@@ -1503,14 +1511,14 @@ class Block extends Square {
 
         // Initialize water properties if undefined.
         if (
-            this.metaData.props.waterLevel === undefined ||
-            this.metaData.props.isSource === undefined
+            this.metaData.waterLevel === undefined ||
+            this.metaData.isSource === undefined
         ) {
-            this.metaData.props.waterLevel = 0;
-            this.metaData.props.isSource = true;
-            this.cutoff = this.metaData.props.waterLevel;
+            this.metaData.waterLevel = 0;
+            this.metaData.isSource = true;
+            this.cutoff = this.metaData.waterLevel;
         } else {
-            this.cutoff = this.metaData.props.waterLevel;
+            this.cutoff = this.metaData.waterLevel;
         }
 
         const worldPos = this.world.getBlockWorldPosition(this);
@@ -1519,7 +1527,7 @@ class Block extends Square {
             this.checkLavaWaterInteraction(worldPos);
 
         // Dissipation (only for non-source blocks).
-        if (!this.metaData.props.isSource) {
+        if (!this.metaData.isSource) {
             if (checkDissipation(this, worldPos)) return;
         }
 
@@ -1530,48 +1538,48 @@ class Block extends Square {
         verticalCheckAbove(this, worldPos);
 
         // Sideways Flow.
-        if (this.metaData.props.waterLevel > 0.85) return;
-        const sideLevel = this.metaData.props.isSource
+        if (this.metaData.waterLevel > 0.85) return;
+        const sideLevel = this.metaData.isSource
             ? 0.2
-            : this.metaData.props.waterLevel + 0.1;
+            : this.metaData.waterLevel + 0.1;
         // Left Flow.
         if (
-            this.metaData.props.isSource ||
+            this.metaData.isSource ||
             (below && below.blockType !== this.blockType)
         ) {
             let left = flowSideways(this, worldPos, { dx: -BLOCK_SIZE, dy: 0 });
             if (left) {
                 if (
-                    left.metaData.props.blockType === this.blockType &&
-                    left.metaData.props.waterLevel > sideLevel &&
-                    !left.metaData.props.isSource
+                    left.blockType === this.blockType &&
+                    left.metaData.waterLevel > sideLevel &&
+                    !left.metaData.isSource
                 ) {
-                    left.metaData.props.waterLevel = sideLevel;
+                    left.metaData.waterLevel = sideLevel;
                     left.cutoff = sideLevel;
                 } else {
-                    left.metaData.props.isSource = false;
-                    left.metaData.props.waterLevel = sideLevel;
+                    left.metaData.isSource = false;
+                    left.metaData.waterLevel = sideLevel;
                     left.cutoff = sideLevel;
                 }
             }
         }
         // Right Flow.
         if (
-            this.metaData.props.isSource ||
+            this.metaData.isSource ||
             (below && below.blockType !== this.blockType)
         ) {
             let right = flowSideways(this, worldPos, { dx: BLOCK_SIZE, dy: 0 });
             if (right) {
                 if (
                     right.blockType === this.blockType &&
-                    right.metaData.props.waterLevel > sideLevel &&
-                    !right.metaData.props.isSource
+                    right.metaData.waterLevel > sideLevel &&
+                    !right.metaData.isSource
                 ) {
-                    right.metaData.props.waterLevel = sideLevel;
+                    right.metaData.waterLevel = sideLevel;
                     right.cutoff = sideLevel;
                 } else {
-                    right.metaData.props.isSource = false;
-                    right.metaData.props.waterLevel = sideLevel;
+                    right.metaData.isSource = false;
+                    right.metaData.waterLevel = sideLevel;
                     right.cutoff = sideLevel;
                 }
             }
@@ -1592,7 +1600,7 @@ class Block extends Square {
     }
 
     resetProgression() {
-        this.metaData.props.progression = 0;
+        this.metaData.progression = 0;
     }
 
     blockUpdate() {
@@ -1607,6 +1615,13 @@ class Block extends Square {
 
             // No block below
             if (!blockBelow || getBlock(blockBelow.blockType).air) {
+                if (blockDef.canBePlacedOnWall && this.onAWall) {
+                    // If there is a wall behind this block, don't break it
+                    const wall = this.getWallBehind();
+
+                    if (!getBlock(wall.blockType).air) return;
+                }
+
                 if (blockDef.fall) {
                     this.gravityBlock();
                 } else {
@@ -1614,6 +1629,26 @@ class Block extends Square {
                 }
             }
         }
+    }
+
+    getWallBehind() {
+        const blockBehind = this.world.getBlockAtWorldPosition(
+            this.transform.position.x,
+            this.transform.position.y,
+            true,
+        );
+
+        return blockBehind;
+    }
+
+    getBlockFront() {
+        const blockFront = this.world.getBlockAtWorldPosition(
+            this.transform.position.x,
+            this.transform.position.y,
+            false,
+        );
+
+        return blockFront;
     }
 
     breakBlock(
@@ -1628,9 +1663,20 @@ class Block extends Square {
 
         if (!chunk) return;
 
-        // if (!wall) chunk.checkForBlockWithAirBeneath(this.x, this.y);
-
         const blockDef = getBlock(this.blockType);
+
+        if (wall) {
+            let blockFront = this.getBlockFront();
+
+            if (blockFront.onAWall) {
+                blockFront.breakBlock(
+                    getBlock(blockFront.blockType).dropWithoutTool,
+                    false,
+                    false,
+                    false,
+                );
+            }
+        }
 
         // Handle crop loot when fully grown
         if (!skipDrops) {
@@ -1664,12 +1710,12 @@ class Block extends Square {
         this.playBreakParticles();
 
         if (this.metaData) {
-            if (!skipDrops && this.metaData.props.storage) {
+            if (!skipDrops && this.metaData.storage) {
                 this.dropStorage();
             }
 
-            if (this.metaData.props.myAudio) {
-                removeAudio(this.metaData.props.myAudio);
+            if (this.metaData.myAudio) {
+                removeAudio(this.metaData.myAudio);
             }
         }
 
@@ -1798,7 +1844,7 @@ class Block extends Square {
     }
 
     dropStorage() {
-        const storage = this.metaData.props.storage;
+        const storage = this.metaData.storage;
 
         for (let y = 0; y < storage.length; y++) {
             for (let x = 0; x < storage[y].length; x++) {
@@ -1821,6 +1867,43 @@ class Block extends Square {
         }
     }
 
+    draw(ctx, camera) {
+        super.draw(ctx, camera);
+
+        this.drawSignText(ctx, camera);
+    }
+
+    drawSignText(ctx, camera) {
+        if (getBlock(this.blockType).specialType !== SpecialType.Sign) return;
+        if (!this.metaData || !this.metaData.text) return;
+
+        const textLines = Array.isArray(this.metaData.text)
+            ? this.metaData.text
+            : [this.metaData.text];
+
+        const worldPos = this.world.getBlockWorldPosition(this);
+
+        // Center of the block
+        const centerX = worldPos.x + BLOCK_SIZE / 2 - camera.x;
+        const startY = worldPos.y + 8 - camera.y;
+        const lineHeight = 8;
+
+        ctx.save();
+        ctx.font = "9px pixel"; // match your UI font/size
+        ctx.fillStyle = "black"; // dark text color (classic sign look)
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        for (let i = 0; i < Math.min(4, textLines.length); i++) {
+            const line = textLines[i] || "";
+            if (line === "") continue;
+
+            ctx.fillText(line, centerX, startY + i * lineHeight);
+        }
+
+        ctx.restore();
+    }
+
     updateSprite() {
         const block = getBlock(this.blockType);
 
@@ -1834,9 +1917,15 @@ class Block extends Square {
 
         this.frameRate = block.animationSpeed;
 
-        const sprite = getSpriteUrl("blocks/" + block.sprite);
+        let blockSprite = block.sprite;
 
-        this.spriteSize = getSpriteSize("blocks/" + block.sprite).width;
+        if (this.onAWall) {
+            blockSprite = block.wallSprite ? block.wallSprite : block.sprite;
+        }
+
+        const sprite = getSpriteUrl("blocks/" + blockSprite);
+
+        this.spriteSize = getSpriteSize("blocks/" + blockSprite).width;
 
         this.spriteScale = BLOCK_SIZE / this.spriteSize;
 

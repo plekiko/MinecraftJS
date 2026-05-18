@@ -80,10 +80,10 @@ function printBlockLogic() {
             `${getBlock(block.blockType).name} at ${mousePos.x}, ${
                 mousePos.y
             } ${
-                block.metaData && block.metaData.props
-                    ? "metadata: " + JSON.stringify(block.metaData.props)
+                block.metaData
+                    ? "metadata: " + JSON.stringify(block.metaData)
                     : ""
-            }`
+            }`,
         );
 
         console.log(mousePos.x + " - " + mousePos.y);
@@ -104,24 +104,24 @@ function cameraLogic() {
     if (input.isActionDown("moveLeft"))
         camera.velocity.x = Math.max(
             camera.velocity.x - acceleration,
-            -maxSpeed
+            -maxSpeed,
         );
     if (input.isActionDown("moveRight"))
         camera.velocity.x = Math.min(
             camera.velocity.x + acceleration,
-            maxSpeed
+            maxSpeed,
         );
 
     // Vertical movement (W/S keys)
     if (input.isActionDown("moveUp"))
         camera.velocity.y = Math.max(
             camera.velocity.y - acceleration,
-            -maxSpeed
+            -maxSpeed,
         );
     if (input.isActionDown("moveDown"))
         camera.velocity.y = Math.min(
             camera.velocity.y + acceleration,
-            maxSpeed
+            maxSpeed,
         );
 
     // Decelerate smoothly when no input

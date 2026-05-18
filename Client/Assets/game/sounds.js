@@ -118,6 +118,10 @@ const Sounds = Object.freeze({
         "mobs/creeper/hurt3",
         "mobs/creeper/hurt4",
     ],
+
+    // Blocks
+    Wood_Click: ["blocks/wood_click"],
+    Fizz: ["blocks/fizz"],
 });
 
 // Base URL for audio files
@@ -268,7 +272,7 @@ function playPositionalSound(
     range = 10,
     maxVolume = 1,
     pitch = 1,
-    loop = false
+    loop = false,
 ) {
     const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
     maxVolume = maxVolume * sfxMultiplier;
@@ -333,7 +337,7 @@ function playMessySound(
     sound,
     range = 10,
     maxVolume = 1,
-    messyRange = new Vector2(1, 4)
+    messyRange = new Vector2(1, 4),
 ) {
     const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
     maxVolume = maxVolume * sfxMultiplier;

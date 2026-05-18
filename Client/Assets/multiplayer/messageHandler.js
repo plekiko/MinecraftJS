@@ -102,7 +102,7 @@ function processMessage(data) {
                 message.player.name,
                 false,
             );
-            newPlayer.setSkin(message.player.skin);
+            newPlayer.setSkin(message.player.skin || "steve");
             break;
         case "playerLeft":
             world.removeEntity(world.getEntityByUUID(message));
@@ -180,8 +180,6 @@ function processMessage(data) {
                 return;
             }
 
-            console.log("Placing block:", message);
-
             getDimensionChunks(message.dimensionIndex)
                 .get(message.chunkX)
                 .setBlockTypeLocal(
@@ -204,8 +202,6 @@ function processMessage(data) {
                 );
                 return;
             }
-
-            console.log("Breaking block:", message);
 
             // get the block at the given coordinates
             const block = getDimensionChunks(message.dimensionIndex)
@@ -313,7 +309,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
         sender: player.UUID,
         message: {
             UUID: player.UUID,
-            skin: myPlayer.body.sprite,
+            skin: myPlayer.body.sprite ?? "steve",
             name: game.settings.username,
         },
     });
@@ -333,7 +329,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
 
             newPlayer.dimension = p.dimension;
 
-            newPlayer.setSkin(p.skin);
+            newPlayer.setSkin(p.skin || "steve");
         });
     }
 }

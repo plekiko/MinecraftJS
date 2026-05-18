@@ -14,6 +14,8 @@ class Inventory {
         this.creativeMaxPages = 0;
         this.inventoryText = null;
 
+        this.showItems = true;
+
         this.craftingOutputPosition = {
             x: 508,
             y: 130,
@@ -29,6 +31,11 @@ class Inventory {
             x: 312,
             y: 95,
         };
+
+        this.signText = ["", "", "", ""];
+        this.signEditingLine = 0;
+        this.signCursorBlink = 0;
+        this.isEditingSign = false;
 
         this.selectedBlock = null;
         this.selectedItem = null;
@@ -90,7 +97,7 @@ class Inventory {
                                 props: item?.props || {},
                             };
                         })
-                      : []
+                      : [],
               )
             : [];
     }
@@ -167,13 +174,13 @@ class Inventory {
                 world.spawnDrop(
                     new Vector2(
                         position.x + randomRange(-BLOCK_SIZE, BLOCK_SIZE),
-                        position.y
+                        position.y,
                     ),
                     {
                         blockId: item.blockId,
                         itemId: item.itemId,
                         count: item.count,
-                    }
+                    },
                 );
             }
         }
@@ -186,7 +193,7 @@ class Inventory {
             this.inventoryUI.x + x + this.openUIOffset.x,
             this.inventoryUI.y + y + this.openUIOffset.y,
             16 * 3,
-            16 * 3
+            16 * 3,
         );
     }
 
@@ -207,8 +214,6 @@ class Inventory {
     }
 
     closeInventory() {
-        // console.log("hey dont close me!");
-
         let leftOver = [];
 
         for (let y = 0; y < this.craftingSlots.length; y++) {
@@ -224,12 +229,24 @@ class Inventory {
                                 blockId: item.blockId,
                                 itemId: item.itemId,
                                 count: leftOverCount,
-                            })
+                            }),
                         );
                     }
                 }
             }
         }
+
+        if (this.isEditingSign && this.interactedBlock) {
+            // Save sign text
+            if (!this.interactedBlock.metaData)
+                this.interactedBlock.metaData = {};
+            this.interactedBlock.metaData.text = [...this.signText];
+            this.interactedBlock.syncMetaData();
+        }
+
+        this.isEditingSign = false;
+        this.signText = ["", "", "", ""];
+        this.inventoryText = null;
 
         this.inventoryText = null;
 
@@ -255,6 +272,8 @@ class Inventory {
         this.storage = null;
 
         this.updateStorage = false;
+
+        this.showItems = true;
 
         return leftOver.length > 0 ? leftOver : null;
     }
@@ -362,7 +381,7 @@ class Inventory {
                 for (let i = 0; i < this.storageSlots.length; i++) {
                     for (let j = 0; j < this.storageSlots[i].length; j++) {
                         this.storage[i][j] = this.cloneItem(
-                            this.storageSlots[i][j].item
+                            this.storageSlots[i][j].item,
                         );
                     }
                 }
@@ -373,7 +392,7 @@ class Inventory {
                 for (let i = 0; i < this.storageSlots.length; i++) {
                     for (let j = 0; j < this.storageSlots[i].length; j++) {
                         this.storage[i][j] = this.cloneItem(
-                            this.storageSlots[i][j].item
+                            this.storageSlots[i][j].item,
                         );
                     }
                 }
@@ -389,7 +408,7 @@ class Inventory {
         for (let i = 0; i < this.storageSlots.length; i++) {
             for (let j = 0; j < this.storageSlots[i].length; j++) {
                 this.storageSlots[i][j].item = this.cloneItem(
-                    this.storage[i][j]
+                    this.storage[i][j],
                 );
             }
         }
@@ -430,7 +449,7 @@ class Inventory {
 
         if (this.interactedBlock) {
             this.storage =
-                this.interactedBlock.metaData?.props?.storage || this.storage;
+                this.interactedBlock.metaData?.storage || this.storage;
         }
 
         // Determine the type of storage (chest, hopper, furnace, converter) based on openUIImage.url
@@ -471,13 +490,75 @@ class Inventory {
                 new InventorySlot({
                     position: { x: 158 + x * 63, y: 189 },
                     item: this.storage[0][x],
-                })
+                }),
             );
         }
 
         this.openUIOffset.y = -115;
 
         this.storageSlots = slots;
+    }
+
+    openSign(signData) {
+        this.openUIImage = {
+            url: "sign",
+            crop: { x: 0, y: 0, width: 88, height: 55 },
+        };
+        this.openUIImageOffset.y = 100;
+        this.showItems = false;
+
+        this.isEditingSign = true;
+        this.signEditingLine = 0;
+
+        // Initialize text from block metadata or provided text
+        if (signData && signData.text) {
+            this.signText = [...signData.text];
+            while (this.signText.length < 4) this.signText.push("");
+        } else {
+            this.signText = ["", "", "", ""];
+        }
+
+        this.inventoryText = new TextElement({
+            position: { x: 300, y: -152 },
+            text: "Edit Sign",
+            size: 27,
+        });
+    }
+
+    handleSignTyping() {
+        if (!this.isEditingSign) return;
+
+        const pressedKey = input.getLastPressedKey();
+
+        if (!pressedKey) return;
+
+        if (pressedKey === "Escape") {
+            this.closeInventory();
+            return;
+        }
+
+        if (pressedKey === "Enter") {
+            this.signEditingLine = Math.min(this.signEditingLine + 1, 3);
+        } else if (pressedKey === "Backspace") {
+            const currentLine = this.signText[this.signEditingLine];
+            if (currentLine.length > 0) {
+                this.signText[this.signEditingLine] = currentLine.slice(0, -1);
+            } else if (this.signEditingLine > 0) {
+                this.signEditingLine--;
+            }
+        } else if (pressedKey.length === 1) {
+            if (this.signText[this.signEditingLine].length < 10) {
+                this.signText[this.signEditingLine] += pressedKey;
+            }
+        }
+
+        // Live sync to block
+        if (this.interactedBlock) {
+            if (!this.interactedBlock.metaData)
+                this.interactedBlock.metaData = {};
+            this.interactedBlock.metaData.text = [...this.signText];
+            this.interactedBlock.syncMetaData?.();
+        }
     }
 
     updateConverter() {
@@ -628,7 +709,7 @@ class Inventory {
         const startIndex = this.currentCreativePage * itemsPerPage;
         const endIndex = Math.min(
             startIndex + itemsPerPage,
-            this.creativeItems.length
+            this.creativeItems.length,
         );
 
         // Create a 6x9 grid
@@ -706,7 +787,7 @@ class Inventory {
         for (let i = 0; i < blocks.length; i++) {
             if (getBlock(blocks[i]).excludeFromCreativeInventory) continue;
             this.creativeItems.push(
-                new InventoryItem({ blockId: blocks[i], count: 1 })
+                new InventoryItem({ blockId: blocks[i], count: 1 }),
             );
         }
 
@@ -714,7 +795,7 @@ class Inventory {
         for (let i = 0; i < items.length; i++) {
             if (getItem(items[i]).excludeFromCreativeInventory) continue;
             this.creativeItems.push(
-                new InventoryItem({ itemId: items[i], count: 1 })
+                new InventoryItem({ itemId: items[i], count: 1 }),
             );
         }
 
@@ -807,7 +888,7 @@ class Inventory {
         for (let i = 0; i < this.storageSlots.length; i++) {
             for (let j = 0; j < this.storageSlots[i].length; j++) {
                 this.storage[i][j] = this.cloneItem(
-                    this.storageSlots[i][j].item
+                    this.storageSlots[i][j].item,
                 );
             }
         }
@@ -1046,21 +1127,26 @@ class Inventory {
     }
 
     update() {
-        this.mouseHoverOverSlotsLogic();
+        if (this.showItems) {
+            this.mouseHoverOverSlotsLogic();
 
-        if (!input.isRightMouseDown()) this.resetLastHoveredSlot();
+            if (!input.isRightMouseDown()) this.resetLastHoveredSlot();
 
-        this.craftingLogic();
+            this.craftingLogic();
 
-        if (this.openUIImage.url === "converter") {
-            this.updateConverter();
+            if (this.openUIImage.url === "converter") {
+                this.updateConverter();
+            }
+
+            if (this.updateStorage) this.syncStorageSlots();
+
+            this.handleHotbarAssignment();
+        } else if (this.isEditingSign) {
+            this.handleSignTyping();
+            this.signCursorBlink = (this.signCursorBlink + 1) % 50;
         }
 
-        if (this.updateStorage) this.syncStorageSlots();
-
-        this.handleHotbarAssignment();
         this.handleButtonInteractions();
-
         this.syncInventoryMultiplayer();
     }
 
@@ -1158,7 +1244,7 @@ class Inventory {
         if (
             this.isSlotHovered(
                 this.craftingOutputSlot.position.x,
-                this.craftingOutputSlot.position.y
+                this.craftingOutputSlot.position.y,
             )
         ) {
             this.mouseOverSlot(0, 0, null, this.craftingOutputSlot.item);
@@ -1230,7 +1316,7 @@ class Inventory {
 
         // Check if each recipe item has a matching slot item
         return recipeItems.every((recipeItem) =>
-            nonEmptySlots.some((slot) => this.isMatch(slot.item, recipeItem))
+            nonEmptySlots.some((slot) => this.isMatch(slot.item, recipeItem)),
         );
     }
 
@@ -1286,7 +1372,7 @@ class Inventory {
                         startRow,
                         startCol,
                         patternRows,
-                        patternCols
+                        patternCols,
                     )
                 ) {
                     return true;
@@ -1508,6 +1594,11 @@ class Inventory {
         ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
         ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 
+        if (this.isEditingSign) {
+            this.drawSign(ctx);
+            return;
+        }
+
         let path = "inventory";
         let crop = null;
 
@@ -1519,10 +1610,9 @@ class Inventory {
         }
 
         const spritePath = "gui/container/" + path;
-
         const spriteUrl = getSpriteUrl(
             spritePath,
-            isEqualToOriginal(spritePath)
+            isEqualToOriginal(spritePath),
         );
 
         const drawParams = {
@@ -1538,17 +1628,58 @@ class Inventory {
 
         this.inventoryUI = drawImage(drawParams);
 
-        this.drawItems();
-        if (this.openUIImage.url === "inventory") {
-            this.drawPlayerSkin(ctx);
+        if (this.showItems) {
+            this.drawItems();
+            if (this.openUIImage.url === "inventory") {
+                this.drawPlayerSkin(ctx);
+            }
+            this.drawHoldItem();
+            this.drawButtons(ctx);
+            this.drawHoverTitle();
         }
-        this.drawHoldItem();
-        this.drawButtons(ctx);
-        this.drawHoverTitle();
 
-        if (this.inventoryText) {
+        if (
+            this.inventoryText &&
+            typeof this.inventoryText.draw === "function"
+        ) {
             this.inventoryText.draw(this.inventoryUI, this.openUIOffset);
         }
+    }
+
+    drawSign(ctx) {
+        const drawParams = {
+            url: getSpriteUrl("gui/container/sign"),
+            x: CANVAS.width / 2 + this.openUIImageOffset.x,
+            y: CANVAS.height / 6 + this.openUIImageOffset.y,
+            scale: 3.5,
+        };
+
+        this.inventoryUI = drawImage(drawParams);
+
+        const signCenterX = this.inventoryUI.x + 154;
+        const baseY = this.inventoryUI.y + 48;
+        const lineHeight = 40;
+
+        ctx.save();
+        ctx.font = "42px pixel";
+        ctx.fillStyle = "black";
+        ctx.textAlign = "center";
+
+        for (let i = 0; i < 4; i++) {
+            let text = this.signText[i] || "";
+
+            if (
+                i === this.signEditingLine &&
+                Math.floor(this.signCursorBlink / 25) % 2 === 0
+            ) {
+                text += "|";
+            }
+
+            ctx.fillText(text, signCenterX, baseY + i * lineHeight);
+        }
+        ctx.restore();
+
+        this.signCursorBlink = (this.signCursorBlink + 1) % 50;
     }
 
     drawPlayerSkin(ctx) {
@@ -1574,7 +1705,7 @@ class Inventory {
             world.player.body.image,
             baseX,
             baseY,
-            INVENTORY_PLAYER_SCALE
+            INVENTORY_PLAYER_SCALE,
         );
     }
 
@@ -1608,14 +1739,14 @@ class Inventory {
             slot.position.x + this.inventoryUI.x - 4 + this.openUIOffset.x,
             slot.position.y + this.inventoryUI.y - 4 + this.openUIOffset.y,
             18.5 * 3,
-            18.5 * 3
+            18.5 * 3,
         );
         ctx.globalAlpha = 1;
     }
 
     drawFurnaceExtras() {
         if (!this.furnace) return;
-        const furnaceData = this.interactedBlock.metaData.props;
+        const furnaceData = this.interactedBlock.metaData;
         if (!furnaceData) return;
         if (!furnaceData.isActive) return;
 
@@ -1763,7 +1894,7 @@ class Inventory {
     drawSlot(slot) {
         slot.draw(
             this.inventoryUI.x + this.openUIOffset.x,
-            this.inventoryUI.y + this.openUIOffset.y
+            this.inventoryUI.y + this.openUIOffset.y,
         );
     }
 }
