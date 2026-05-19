@@ -53,6 +53,9 @@ class Entity {
             dimension = Dimensions.Overworld,
 
             fire = -20,
+            air = 300,
+            maxAir = 300,
+            canDrown = true,
         } = {},
     ) {
         this.world = world;
@@ -122,6 +125,10 @@ class Entity {
         this.fire = fire;
         this.fireMin = fire;
         this.fireDamageTimer = 0;
+
+        this.air = air;
+        this.maxAir = maxAir;
+        this.canDrown = canDrown;
 
         this.flashingColor = false;
 
@@ -378,6 +385,7 @@ class Entity {
     die() {
         this.health = 0;
         this.fire = this.fireMin;
+        this.air = this.maxAir;
         this.dieEvent();
     }
 
@@ -461,6 +469,41 @@ class Entity {
         this.voidLogic();
         this.portalLogic();
         this.footstepEmitterLogic();
+        this.airLogic();
+    }
+
+    airLogic() {
+        if (!this.canDrown) return;
+
+        let fluidBlocks = this.filterBlocksByProperty(
+            this.collidingWithBlocks,
+            "fluid",
+        );
+
+        // Check if head is in fluid
+        const headY = this.position.y + this.offset.y;
+        const headInFluid = fluidBlocks.some((block) => {
+            return (
+                headY >= block.transform.position.y &&
+                headY <= block.transform.position.y + BLOCK_SIZE
+            );
+        });
+
+        if (headInFluid) {
+            if (this.air >= -20) {
+                this.air--;
+            } else {
+                this.hit(1);
+            }
+        } else {
+            if (this.air < this.maxAir) {
+                this.air += 6;
+
+                if (this.air > this.maxAir) {
+                    this.air = this.maxAir;
+                }
+            }
+        }
     }
 
     portalLogic() {

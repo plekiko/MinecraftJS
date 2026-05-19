@@ -145,7 +145,7 @@ class InventorySlot {
         });
 
         // Draw durability bar
-        if (item.hasProp("durability")) {
+        if (item.hasProp?.("durability")) {
             const durability = item.getProp("durability");
             const itemDef = getItem(item.itemId);
 

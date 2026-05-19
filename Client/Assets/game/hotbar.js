@@ -15,6 +15,10 @@ class Hotbar {
         this.foodFlashCounter = 0;
         this.previousFood = 0;
 
+        this.flashingBubbles = false;
+        this.bubbleFlashCounter = 0;
+        this.previousAir = null;
+
         this.shimmerTime = 0;
 
         this.lastSelectedSlot = -1;
@@ -141,6 +145,52 @@ class Hotbar {
         }
     }
 
+    drawBubbles(air, maxAir, hotbar) {
+        if (!world.player.abilities.hasHealth) return;
+        if (air <= 0) return;
+        if (air >= maxAir) return;
+
+        const bubbleSize = 9 * BAR_ICON_SCALE;
+        const bubbleTop = Math.round(hotbar.y - 60);
+
+        const bubbleUnit = 30;
+        const totalBubbleSlots = Math.ceil(maxAir / bubbleUnit);
+        const bubbleCount = Math.ceil(air / bubbleUnit);
+        const startIndex = totalBubbleSlots - bubbleCount;
+
+        const timeIntoCurrentBubble = air % bubbleUnit;
+        const showPop = timeIntoCurrentBubble <= 5 && timeIntoCurrentBubble > 0;
+
+        const drawBubbleAt = (slotIndex, usePop) => {
+            const leftX = Math.round(
+                hotbar.x +
+                    hotbar.sizeX -
+                    totalBubbleSlots * bubbleSize +
+                    bubbleSize / 2 +
+                    slotIndex * bubbleSize -
+                    bubbleSize / 2,
+            );
+            drawImage({
+                url: getSpriteUrl(`gui/icons`),
+                x: leftX + bubbleSize / 2,
+                y: bubbleTop,
+                scale: BAR_ICON_SCALE,
+                centerX: true,
+                crop: {
+                    x: usePop ? 25 : 16,
+                    y: 18,
+                    width: 9,
+                    height: 9,
+                },
+            });
+        };
+
+        for (let i = startIndex; i < totalBubbleSlots; i++) {
+            const usePop = showPop && i === startIndex;
+            drawBubbleAt(i, usePop);
+        }
+    }
+
     draw(ctx) {
         // Draw hotbar
         const hotbar = drawImage({
@@ -167,6 +217,7 @@ class Hotbar {
             world.player.maxFoodLevel,
             hotbar,
         );
+        this.drawBubbles(world.player.air, world.player.maxAir, hotbar);
         this.drawSelectedItemName(ctx);
     }
 
