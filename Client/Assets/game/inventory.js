@@ -962,6 +962,11 @@ class Inventory {
 
         // Handle crafting output slot
         if (item === this.craftingOutputSlot.item) {
+            if (input.shiftPressed) {
+                this.handleCraftingOutputShiftClick();
+                return;
+            }
+
             const maxStackSize = this.getStackSize(item);
             const isSameType =
                 this.holdingItem &&
@@ -1046,6 +1051,39 @@ class Inventory {
 
     getStackSize(item) {
         return item.itemId ? getItem(item.itemId).stackSize : 64;
+    }
+
+    handleCraftingOutputShiftClick() {
+        if (
+            !this.craftingOutputSlot.item ||
+            this.craftingOutputSlot.item.count <= 0
+        )
+            return;
+
+        const outputTemplate = this.cloneItem(this.craftingOutputSlot.item);
+
+        while (this.craftingOutputSlot.item.count > 0) {
+            const transferItem = this.cloneItem(outputTemplate);
+            const remaining = this.addItemToArray(transferItem, this.items);
+            const moved = transferItem.count - remaining;
+
+            if (moved <= 0) {
+                // No inventory space for any of this craft output.
+                return;
+            }
+
+            this.craftingComplete();
+
+            if (remaining > 0) {
+                // If only part of the stack fit, keep the remainder in the output slot.
+                this.craftingOutputSlot.item.count = remaining;
+                return;
+            }
+
+            // Full output stack moved, recalculate output for additional crafts.
+            this.craftingLogic();
+            if (this.craftingOutputSlot.item.count <= 0) return;
+        }
     }
 
     craftingComplete() {
@@ -1710,9 +1748,7 @@ class Inventory {
                 const cursorPos = Math.min(this.signCursor, text.length);
                 if (Math.floor(this.signCursorBlink / 25) % 2 === 0) {
                     displayText =
-                        text.slice(0, cursorPos) +
-                        "|" +
-                        text.slice(cursorPos);
+                        text.slice(0, cursorPos) + "|" + text.slice(cursorPos);
                 }
             }
 
