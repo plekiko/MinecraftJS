@@ -34,6 +34,7 @@ class Inventory {
 
         this.signText = ["", "", "", ""];
         this.signEditingLine = 0;
+        this.signCursor = 0;
         this.signCursorBlink = 0;
         this.isEditingSign = false;
 
@@ -246,6 +247,7 @@ class Inventory {
 
         this.isEditingSign = false;
         this.signText = ["", "", "", ""];
+        this.signCursor = 0;
         this.inventoryText = null;
 
         this.inventoryText = null;
@@ -499,7 +501,7 @@ class Inventory {
         this.storageSlots = slots;
     }
 
-    openSign(signData) {
+    openSign(text) {
         this.openUIImage = {
             url: "sign",
             crop: { x: 0, y: 0, width: 88, height: 55 },
@@ -509,10 +511,11 @@ class Inventory {
 
         this.isEditingSign = true;
         this.signEditingLine = 0;
+        this.signCursor = 0;
 
         // Initialize text from block metadata or provided text
-        if (signData && signData.text) {
-            this.signText = [...signData.text];
+        if (text) {
+            this.signText = [...text];
             while (this.signText.length < 4) this.signText.push("");
         } else {
             this.signText = ["", "", "", ""];
@@ -528,27 +531,61 @@ class Inventory {
     handleSignTyping() {
         if (!this.isEditingSign) return;
 
+        const upPressed = input.isActionPressed("chatHistoryUp");
+        const downPressed = input.isActionPressed("chatHistoryDown");
+        const leftPressed = input.isActionPressed("signCursorLeft");
+        const rightPressed = input.isActionPressed("signCursorRight");
+        const submitPressed = input.isActionPressed("signSubmit");
+        const deletePressed = input.isActionPressed("signDelete");
         const pressedKey = input.getLastPressedKey();
 
-        if (!pressedKey) return;
-
-        if (pressedKey === "Escape") {
-            this.closeInventory();
-            return;
-        }
-
-        if (pressedKey === "Enter") {
+        if (upPressed) {
+            this.signEditingLine = Math.max(this.signEditingLine - 1, 0);
+            this.signCursor = Math.min(
+                this.signCursor,
+                this.signText[this.signEditingLine].length,
+            );
+        } else if (downPressed) {
             this.signEditingLine = Math.min(this.signEditingLine + 1, 3);
-        } else if (pressedKey === "Backspace") {
+            this.signCursor = Math.min(
+                this.signCursor,
+                this.signText[this.signEditingLine].length,
+            );
+        } else if (leftPressed) {
+            this.signCursor = Math.max(this.signCursor - 1, 0);
+        } else if (rightPressed) {
+            this.signCursor = Math.min(
+                this.signCursor + 1,
+                this.signText[this.signEditingLine].length,
+            );
+        } else if (submitPressed) {
+            this.signEditingLine = Math.min(this.signEditingLine + 1, 3);
+            this.signCursor = Math.min(
+                this.signCursor,
+                this.signText[this.signEditingLine].length,
+            );
+        } else if (deletePressed) {
             const currentLine = this.signText[this.signEditingLine];
-            if (currentLine.length > 0) {
-                this.signText[this.signEditingLine] = currentLine.slice(0, -1);
+            if (this.signCursor > 0) {
+                this.signText[this.signEditingLine] =
+                    currentLine.slice(0, this.signCursor - 1) +
+                    currentLine.slice(this.signCursor);
+                this.signCursor = Math.max(this.signCursor - 1, 0);
             } else if (this.signEditingLine > 0) {
                 this.signEditingLine--;
+                this.signCursor = this.signText[this.signEditingLine].length;
             }
-        } else if (pressedKey.length === 1) {
+        } else if (pressedKey && pressedKey.length === 1) {
             if (this.signText[this.signEditingLine].length < 10) {
-                this.signText[this.signEditingLine] += pressedKey;
+                const currentLine = this.signText[this.signEditingLine];
+                this.signText[this.signEditingLine] =
+                    currentLine.slice(0, this.signCursor) +
+                    pressedKey +
+                    currentLine.slice(this.signCursor);
+                this.signCursor = Math.min(
+                    this.signCursor + 1,
+                    this.signText[this.signEditingLine].length,
+                );
             }
         }
 
@@ -1667,15 +1704,19 @@ class Inventory {
 
         for (let i = 0; i < 4; i++) {
             let text = this.signText[i] || "";
+            let displayText = text;
 
-            if (
-                i === this.signEditingLine &&
-                Math.floor(this.signCursorBlink / 25) % 2 === 0
-            ) {
-                text += "|";
+            if (i === this.signEditingLine) {
+                const cursorPos = Math.min(this.signCursor, text.length);
+                if (Math.floor(this.signCursorBlink / 25) % 2 === 0) {
+                    displayText =
+                        text.slice(0, cursorPos) +
+                        "|" +
+                        text.slice(cursorPos);
+                }
             }
 
-            ctx.fillText(text, signCenterX, baseY + i * lineHeight);
+            ctx.fillText(displayText, signCenterX, baseY + i * lineHeight);
         }
         ctx.restore();
 

@@ -28,6 +28,10 @@ const DEFAULT_KEY_BINDINGS = {
     chatSubmit: ["Enter"],
     chatHistoryUp: ["ArrowUp"],
     chatHistoryDown: ["ArrowDown"],
+    signCursorLeft: ["ArrowLeft"],
+    signCursorRight: ["ArrowRight"],
+    signSubmit: ["Enter"],
+    signDelete: ["Backspace"],
     pause: ["Escape"],
     debugChunkBorders: ["KeyB"],
     debugCamera: ["KeyN"],
@@ -69,7 +73,11 @@ const ACTION_LABELS = {
     chatSubmit: "Send Message",
     chatHistoryUp: "Chat History Up",
     chatHistoryDown: "Chat History Down",
+    signCursorLeft: "Sign Cursor Left",
+    signCursorRight: "Sign Cursor Right",
     pause: "Pause / Back",
+    signSubmit: "Sign Submit",
+    signDelete: "Sign Delete",
     debugChunkBorders: "Chunk Borders",
     debugCamera: "Camera",
     debugHitbox: "Hitbox",
@@ -106,6 +114,10 @@ const GAMEPLAY_ACTIONS = [
     "hotbar9",
     "chatOpen",
     "chatCommand",
+    "signCursorLeft",
+    "signCursorRight",
+    "signSubmit",
+    "signDelete",
 ];
 
 const DEBUG_ACTIONS = [

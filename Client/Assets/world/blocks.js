@@ -1335,6 +1335,7 @@ const blockTypes = [
         breakByFluid: true,
         collision: false,
         hardness: 0,
+        transparent: true,
         breakWithoutBlockUnderneath: true,
         specialType: SpecialType.RedstoneDust,
         chunkUpdate: true,

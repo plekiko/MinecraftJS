@@ -1322,6 +1322,9 @@ class Block extends Square {
             case SpecialType.Lever:
                 this.leverInteraction();
                 break;
+            case SpecialType.Sign:
+                player.openSign(this);
+                break;
         }
     }
 

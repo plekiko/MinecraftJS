@@ -960,7 +960,7 @@ class Player extends Entity {
 
         this.inventory.interactedBlock = sign;
 
-        this.inventory.openSign(signData.text ?? "");
+        this.inventory.openSign(signData.text);
     }
 
     //#endregion
@@ -1435,6 +1435,8 @@ class Player extends Entity {
                     );
 
                     return !getBlock(wallBehind.blockType).air;
+                } else {
+                    return false;
                 }
             }
         }
