@@ -100,7 +100,6 @@ class PauseMenu {
     }
 }
 
-// Global helper for pause menu difficulty toggle
 function togglePauseDifficulty() {
     try {
         if (!world) return;

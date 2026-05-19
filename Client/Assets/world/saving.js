@@ -85,6 +85,9 @@ function saveWorld(message = true, toFile = false) {
         currentSave.currentSlot = hotbar.currentSlot;
         currentSave.activeDimension = activeDimension;
         currentSave.flying = world.player.abilities.flying;
+        if (world.player.spawnPoint) {
+            currentSave.spawnPoint = JSON.stringify(world.player.spawnPoint);
+        }
     }
 
     currentSave.seed = world.seed;
@@ -392,6 +395,15 @@ async function loadWorld(save) {
             world.player.clampFoodStats();
 
             if (currentSave.flying) world.player.abilities.flying = true;
+
+            if (currentSave.spawnPoint) {
+                const spawnPoint = JSON.parse(currentSave.spawnPoint);
+                if (spawnPoint)
+                    world.player.spawnPoint = new Vector2(
+                        spawnPoint.x,
+                        spawnPoint.y,
+                    );
+            }
 
             if (currentSave.activeDimension !== undefined)
                 gotoDimension(currentSave.activeDimension);

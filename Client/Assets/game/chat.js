@@ -212,6 +212,7 @@ class Chat {
             { name: "clearlog", args: [] },
             { name: "gamemode", args: ["mode"] },
             { name: "tp", args: ["x", "y"] },
+            { name: "spawnpoint", args: ["x", "y"] },
             { name: "summon", args: ["entity", "x", "y", "count"] },
             { name: "kill", args: [] },
             { name: "time", args: ["time"] },
@@ -514,6 +515,9 @@ class Chat {
             case "hit":
                 if (!world.player) break;
                 this.hitPlayer(messageArray);
+                break;
+            case "spawnpoint":
+                this.spawnpoint(messageArray);
                 break;
             case "gamerule":
                 this.gameRule(messageArray);
@@ -862,6 +866,44 @@ class Chat {
         world.player.teleport(targetPosition);
 
         this.cheatMessage(`Teleported player to x: ${x} y: ${y}`);
+    }
+
+    spawnpoint(messageArray) {
+        if (!world.player) return;
+
+        let targetPosition;
+        const hasX = typeof messageArray[1] !== "undefined";
+        const hasY = typeof messageArray[2] !== "undefined";
+
+        if (!hasX && !hasY) {
+            targetPosition = new Vector2(
+                world.player.position.x,
+                world.player.position.y,
+            );
+        } else if (hasX && hasY) {
+            const x = messageArray[1] !== "~" ? parseInt(messageArray[1]) : "~";
+            const y = messageArray[2] !== "~" ? parseInt(messageArray[2]) : "~";
+            targetPosition = this.getWorldPosition(new Vector2(x, y));
+            if (!targetPosition) {
+                this.invalidCommand("/spawnpoint [x] [y]");
+                return;
+            }
+        } else {
+            this.invalidCommand("/spawnpoint [x] [y]");
+            return;
+        }
+
+        world.player.spawnPoint = new Vector2(
+            targetPosition.x,
+            targetPosition.y,
+        );
+        currentSave.spawnPoint = JSON.stringify(world.player.spawnPoint);
+        saveWorld(false);
+
+        const spawnBlockPos = world.worldToBlocks(targetPosition);
+        this.cheatMessage(
+            `Spawnpoint set to x: ${spawnBlockPos.x} y: ${spawnBlockPos.y}`,
+        );
     }
 
     gamemode(messageArray) {

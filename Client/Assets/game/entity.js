@@ -493,7 +493,7 @@ class Entity {
             if (this.air >= -20) {
                 this.air--;
             } else {
-                this.hit(1);
+                this.hit(1, this.position.x, 0, "Drowned");
             }
         } else {
             if (this.air < this.maxAir) {
@@ -645,14 +645,15 @@ class Entity {
 
         this.fireDamageTimer++;
         if (this.fireDamageTimer >= 10) {
-            if (GAMERULES.doFireTick) this.hit(1);
+            if (GAMERULES.doFireTick)
+                this.hit(1, this.position.x, 0, "Burned to death");
             this.fireDamageTimer = 0;
         }
     }
 
     voidLogic() {
         if (this.position.y > CHUNK_HEIGHT * BLOCK_SIZE) {
-            this.hit(2);
+            this.hit(2, this.position.x, 0, "Fell out of the world");
         }
     }
 
@@ -905,7 +906,7 @@ class Entity {
         if (this.fallDistance < 4)
             playPositionalSound(this.position, "misc/fallsmall.ogg");
         else playPositionalSound(this.position, "misc/fallbig.ogg");
-        this.hit(damage);
+        this.hit(damage, this.position.x, 0, "Fell from a high place");
     }
 
     fluidLogic(collidingBlocks, deltaTime) {

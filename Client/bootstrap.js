@@ -63,6 +63,7 @@
         "Assets/entities/player.js",
         "Assets/game/chat.js",
         "Assets/game/pauseMenu.js",
+        "Assets/game/deathScreen.js",
         "Assets/game/game.js",
         "main.js",
         "debug.js",

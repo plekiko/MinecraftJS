@@ -84,6 +84,9 @@ class Player extends Entity {
         this.wasSwimming = false;
 
         this.canMove = true;
+        this.isDead = false;
+        this.deathCause = "";
+        this.spawnPoint = null;
 
         this.breakingStage = 0;
         this.breakingTime = 0;
@@ -259,6 +262,8 @@ class Player extends Entity {
     update() {
         if (!this.isLocal()) return;
 
+        if (this.isDead) return;
+
         this.interactLogic();
         this.climbingCollisingLogic();
         this.movementLogic();
@@ -433,13 +438,19 @@ class Player extends Entity {
         }
     }
 
-    hit(damage, hitfromX = 0, kb = 0) {
+    hit(damage, hitfromX = 0, kb = 0, cause = null) {
+        console.log(cause);
         if (!damage) return;
         if (!this.health) return;
         if (!this.abilities.hasHealth) return;
+        if (cause) this.deathCause = cause;
         if (!this.damage(damage)) return;
         if (this.invulnerable) return;
         this.knockBack(hitfromX, kb);
+
+        console.log(
+            `Player hit for ${damage} damage. Health is now ${this.health}. Cause: ${this.deathCause}`,
+        );
 
         playRandomSoundFromArray({
             array: Sounds.Player_Hurt,
@@ -452,8 +463,14 @@ class Player extends Entity {
         this.velocity = new Vector2();
         this.shouldAddForce = new Vector2();
         this.resetFoodStats();
+        this.canMove = true;
+        this.isDead = false;
+        this.deathCause = "";
+        const respawnPosition = this.spawnPoint
+            ? this.spawnPoint
+            : new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE);
         if (this.isLocal()) gotoDimension(0);
-        this.teleport(new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE));
+        this.teleport(respawnPosition);
         this.setOnGround();
         this.setGamemode();
     }
@@ -791,12 +808,16 @@ class Player extends Entity {
     }
 
     tickUpdate() {
-        this.entityTickUpdate();
+        super.entityTickUpdate();
 
         if (this.isLocal()) this.updateFoodTick();
     }
 
     dieEvent() {
+        if (!this.deathCause) {
+            this.deathCause = `${this.name || "Player"} was killed`;
+        }
+
         game.chat.message("Player has died.");
 
         playRandomSoundFromArray({
@@ -810,10 +831,11 @@ class Player extends Entity {
         this.abilities.instaBuild = false;
         this.abilities.mayBuild = false;
         this.canMove = false;
+        this.isDead = true;
 
         if (!GAMERULES.keepInventory) this.dropAllItems();
 
-        this.respawn();
+        if (typeof showDeathScreen === "function") showDeathScreen();
     }
 
     setHoldItem() {
@@ -1668,9 +1690,10 @@ class Player extends Entity {
     voidLogic() {
         if (this.position.y > CHUNK_HEIGHT * BLOCK_SIZE) {
             if (this.gamemode === 1) {
+                this.deathCause = "Fell out of the world";
                 this.die();
             } else {
-                this.hit(2);
+                this.hit(2, this.position.x, 0, "Fell out of the world");
             }
         }
     }

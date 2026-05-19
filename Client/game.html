@@ -121,6 +121,15 @@
                     </button>
                 </div>
             </div>
+            <div id="death-screen" class="death-screen">
+                <h2 class="death-screen-title">You Died!</h2>
+                <p id="death-cause" class="death-screen-cause">Steve was killed</p>
+                <p class="death-screen-subtitle">Score: <span id="death-score-value">0</span></p>
+                <div class="death-screen-buttons">
+                    <button class="btn" onclick="respawnFromDeathScreen()">Respawn</button>
+                    <button class="btn" onclick="leaveGameToTitle()">Title screen</button>
+                </div>
+            </div>
         </div>
 
         <script type="module" src="bootstrap.js"></script>

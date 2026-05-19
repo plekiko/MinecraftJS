@@ -114,7 +114,7 @@ function draw(chunks, frames) {
     drawBackground();
     drawChunks(chunks);
 
-    if (world.player && !game.pauseMenu?.getActive()) {
+    if (world.player && !game.pauseMenu?.getActive() && !world.player.isDead) {
         drawBreakAndPlaceCursor(cursorInRange);
         drawDestroyStage();
     }
@@ -262,7 +262,7 @@ function drawLate(chunk) {
 }
 
 function afterDraw() {
-    if (world.player) {
+    if (world.player && !world.player.isDead) {
         drawUI();
         if (!game.pauseMenu?.getActive()) drawCursor();
         if (drawCoordinatesOverlay) drawCoordinates();
