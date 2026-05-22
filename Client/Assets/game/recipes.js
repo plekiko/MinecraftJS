@@ -738,12 +738,12 @@ const recipes = [
         input: new RecipeItem({ itemId: Items.GoldIngot }),
         output: new InventoryItem({ itemId: Items.GoldNugget, count: 9 }),
     }),
-    // Iron Nugget
-    new Recipe({
-        type: RecipeType.Shapeless,
-        input: new RecipeItem({ itemId: Items.IronIngot }),
-        output: new InventoryItem({ itemId: Items.IronNugget, count: 9 }),
-    }),
+    // // Iron Nugget
+    // new Recipe({
+    //     type: RecipeType.Shapeless,
+    //     input: new RecipeItem({ itemId: Items.IronIngot }),
+    //     output: new InventoryItem({ itemId: Items.IronNugget, count: 9 }),
+    // }),
     // Gold Ingot from Gold Nuggets
     new Recipe({
         type: RecipeType.Filled,
@@ -751,11 +751,11 @@ const recipes = [
         output: new InventoryItem({ itemId: Items.GoldIngot, count: 1 }),
     }),
     // Iron Ingot from Iron Nuggets
-    new Recipe({
-        type: RecipeType.Filled,
-        input: new RecipeItem({ itemId: Items.IronNugget }),
-        output: new InventoryItem({ itemId: Items.IronIngot, count: 1 }),
-    }),
+    // new Recipe({
+    //     type: RecipeType.Filled,
+    //     input: new RecipeItem({ itemId: Items.IronNugget }),
+    //     output: new InventoryItem({ itemId: Items.IronIngot, count: 1 }),
+    // }),
     //#endregion
 
     //#region Slabs

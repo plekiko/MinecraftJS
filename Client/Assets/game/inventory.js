@@ -43,6 +43,9 @@ class Inventory {
         this.currentSlot = 0;
 
         this.craftingTable = false;
+        this.craftingGuideOpen = false;
+        this.craftingGuidePage = 0;
+        this.craftingGuideSelectedIndex = 0;
         this.craftingTableOutputPosition = {
             x: 437,
             y: 127,
@@ -906,6 +909,12 @@ class Inventory {
             return;
         }
 
+        if (!this.craftingTable) {
+            this.craftingGuideOpen = false;
+            this.craftingGuidePage = 0;
+            this.craftingGuideSelectedIndex = 0;
+        }
+
         this.craftingOutputSlot.position = this.craftingOutputPosition;
         if (this.craftingTable) {
             this.craftingOutputSlot.position = this.craftingTableOutputPosition;
@@ -1208,6 +1217,10 @@ class Inventory {
             if (!input.isRightMouseDown()) this.resetLastHoveredSlot();
 
             this.craftingLogic();
+
+            if (this.craftingTable) {
+                this.handleCraftingGuideInteractions();
+            }
 
             if (this.openUIImage.url === "converter") {
                 this.updateConverter();
@@ -1796,10 +1809,425 @@ class Inventory {
         this.drawHoverSlot();
         this.drawSlots(this.items);
 
+        if (this.craftingTable) {
+            this.drawCraftingGuide();
+        }
         this.drawCraftingSlots();
         this.drawSlots(this.creativeSlots);
         this.drawSlots(this.storageSlots);
         this.drawFurnaceExtras();
+    }
+
+    getCraftingGuideRecipes() {
+        return recipes;
+    }
+
+    getCraftingGuideLayout() {
+        const buttonScale = 3.5;
+        const buttonSize = { x: 20 * buttonScale, y: 18 * buttonScale };
+        const buttonPosition = {
+            x: this.craftingTablePosition.x - buttonSize.x - 18,
+            y: this.craftingTablePosition.y + 55,
+        };
+
+        const panelWidth = 168;
+        const panelHeight = 234;
+        const panelX = Math.max(
+            10,
+            this.inventoryUI.x +
+                this.openUIOffset.x +
+                buttonPosition.x -
+                panelWidth -
+                10,
+        );
+        const panelY =
+            this.inventoryUI.y + this.openUIOffset.y + buttonPosition.y;
+
+        return {
+            button: {
+                x: this.inventoryUI.x +
+                    this.openUIOffset.x +
+                    buttonPosition.x,
+                y: this.inventoryUI.y +
+                    this.openUIOffset.y +
+                    buttonPosition.y,
+                width: buttonSize.x,
+                height: buttonSize.y,
+                crop: { x: 0, y: 168, width: 20, height: 18 },
+                hoverCrop: { x: 0, y: 187, width: 20, height: 18 },
+                scale: buttonScale,
+            },
+            panel: {
+                x: panelX,
+                y: panelY,
+                width: panelWidth,
+                height: panelHeight,
+            },
+            grid: {
+                cols: 4,
+                rows: 5,
+                cellSize: 36,
+                padding: 10,
+                iconScale: 0.6,
+            },
+        };
+    }
+
+    getBlockIdForCategory(category) {
+        const blocks = Object.values(Blocks);
+        for (let i = 0; i < blocks.length; i++) {
+            const blockId = blocks[i];
+            const block = getBlock(blockId);
+            if (block && block.category === category) return blockId;
+        }
+        return null;
+    }
+
+    getRecipePreviewItem(recipeItem) {
+        if (!recipeItem || recipeItem.count === 0) return null;
+        if (recipeItem.blockId) {
+            return new InventoryItem({
+                blockId: recipeItem.blockId,
+                count: recipeItem.count || 1,
+            });
+        }
+        if (recipeItem.itemId !== null) {
+            return new InventoryItem({
+                itemId: recipeItem.itemId,
+                count: recipeItem.count || 1,
+            });
+        }
+        if (recipeItem.blockCategory) {
+            const blockId = this.getBlockIdForCategory(
+                recipeItem.blockCategory,
+            );
+            if (blockId !== null) {
+                return new InventoryItem({
+                    blockId: blockId,
+                    count: recipeItem.count || 1,
+                });
+            }
+        }
+        return null;
+    }
+
+    getRecipePreviewGrid(recipe) {
+        const grid = [
+            [null, null, null],
+            [null, null, null],
+            [null, null, null],
+        ];
+
+        if (!recipe) return grid;
+
+        if (recipe.type === RecipeType.Shaped) {
+            for (let y = 0; y < recipe.input.length; y++) {
+                for (let x = 0; x < recipe.input[y].length; x++) {
+                    const previewItem = this.getRecipePreviewItem(
+                        recipe.input[y][x],
+                    );
+                    if (previewItem) grid[y][x] = previewItem;
+                }
+            }
+            return grid;
+        }
+
+        if (recipe.type === RecipeType.Filled) {
+            const previewItem = this.getRecipePreviewItem(recipe.input);
+            for (let y = 0; y < 3; y++) {
+                for (let x = 0; x < 3; x++) {
+                    grid[y][x] = previewItem;
+                }
+            }
+            return grid;
+        }
+
+        const inputs = Array.isArray(recipe.input)
+            ? recipe.input
+            : [recipe.input];
+        let index = 0;
+        for (let y = 0; y < 3; y++) {
+            for (let x = 0; x < 3; x++) {
+                if (index >= inputs.length) return grid;
+                const previewItem = this.getRecipePreviewItem(inputs[index]);
+                if (previewItem) grid[y][x] = previewItem;
+                index++;
+            }
+        }
+        return grid;
+    }
+
+    handleCraftingGuideInteractions() {
+        const layout = this.getCraftingGuideLayout();
+
+        if (
+            mouseOverPosition(
+                layout.button.x,
+                layout.button.y,
+                layout.button.width,
+                layout.button.height,
+            ) &&
+            input.isLeftMouseButtonPressed()
+        ) {
+            this.craftingGuideOpen = !this.craftingGuideOpen;
+            return;
+        }
+
+        if (!this.craftingGuideOpen) return;
+
+        const recipesList = this.getCraftingGuideRecipes();
+        const perPage = layout.grid.cols * layout.grid.rows;
+        const maxPages = Math.max(1, Math.ceil(recipesList.length / perPage));
+        const panel = layout.panel;
+
+        const upButton = {
+            x: panel.x + panel.width - 28,
+            y: panel.y + 8,
+            width: 20,
+            height: 20,
+        };
+        const downButton = {
+            x: panel.x + panel.width - 28,
+            y: panel.y + panel.height - 28,
+            width: 20,
+            height: 20,
+        };
+
+        if (
+            mouseOverPosition(
+                upButton.x,
+                upButton.y,
+                upButton.width,
+                upButton.height,
+            ) &&
+            input.isLeftMouseButtonPressed()
+        ) {
+            this.craftingGuidePage =
+                (this.craftingGuidePage - 1 + maxPages) % maxPages;
+            return;
+        }
+
+        if (
+            mouseOverPosition(
+                downButton.x,
+                downButton.y,
+                downButton.width,
+                downButton.height,
+            ) &&
+            input.isLeftMouseButtonPressed()
+        ) {
+            this.craftingGuidePage =
+                (this.craftingGuidePage + 1) % maxPages;
+            return;
+        }
+
+        const gridStartX = panel.x + layout.grid.padding;
+        const gridStartY = panel.y + layout.grid.padding + 18;
+
+        for (let i = 0; i < perPage; i++) {
+            const recipeIndex = this.craftingGuidePage * perPage + i;
+            if (recipeIndex >= recipesList.length) break;
+            const col = i % layout.grid.cols;
+            const row = Math.floor(i / layout.grid.cols);
+            const cellX = gridStartX + col * layout.grid.cellSize;
+            const cellY = gridStartY + row * layout.grid.cellSize;
+            if (
+                mouseOverPosition(
+                    cellX,
+                    cellY,
+                    layout.grid.cellSize,
+                    layout.grid.cellSize,
+                ) &&
+                input.isLeftMouseButtonPressed()
+            ) {
+                this.craftingGuideSelectedIndex = recipeIndex;
+                return;
+            }
+        }
+    }
+
+    drawCraftingGuide() {
+        const layout = this.getCraftingGuideLayout();
+
+        const buttonHovered = mouseOverPosition(
+            layout.button.x,
+            layout.button.y,
+            layout.button.width,
+            layout.button.height,
+        );
+
+        drawImage({
+            url: getSpriteUrl("gui/container/crafting_table"),
+            x: layout.button.x,
+            y: layout.button.y,
+            centerX: false,
+            centerY: false,
+            scale: layout.button.scale,
+            crop: buttonHovered ? layout.button.hoverCrop : layout.button.crop,
+        });
+
+        if (!this.craftingGuideOpen) return;
+
+        const panel = layout.panel;
+
+        drawRect({
+            x: panel.x,
+            y: panel.y,
+            width: panel.width,
+            height: panel.height,
+            color: "rgba(60, 60, 60, 0.9)",
+        });
+        drawRect({
+            x: panel.x,
+            y: panel.y,
+            width: panel.width,
+            height: panel.height,
+            color: "rgba(20, 20, 20, 0.9)",
+            stroke: true,
+            lineWidth: 2,
+        });
+
+        const recipesList = this.getCraftingGuideRecipes();
+        const perPage = layout.grid.cols * layout.grid.rows;
+        const maxPages = Math.max(1, Math.ceil(recipesList.length / perPage));
+        this.craftingGuidePage = Math.min(
+            this.craftingGuidePage,
+            maxPages - 1,
+        );
+
+        const pageText = `${this.craftingGuidePage + 1}/${maxPages}`;
+        drawText({
+            text: pageText,
+            x: panel.x + panel.width / 2,
+            y: panel.y + 20,
+            size: 18,
+            textAlign: "center",
+        });
+
+        const gridStartX = panel.x + layout.grid.padding;
+        const gridStartY = panel.y + layout.grid.padding + 18;
+        const iconSize = layout.grid.iconScale;
+
+        for (let i = 0; i < perPage; i++) {
+            const recipeIndex = this.craftingGuidePage * perPage + i;
+            if (recipeIndex >= recipesList.length) break;
+            const col = i % layout.grid.cols;
+            const row = Math.floor(i / layout.grid.cols);
+            const cellX = gridStartX + col * layout.grid.cellSize;
+            const cellY = gridStartY + row * layout.grid.cellSize;
+
+            const isSelected =
+                recipeIndex === this.craftingGuideSelectedIndex;
+
+            if (isSelected) {
+                drawRect({
+                    x: cellX - 2,
+                    y: cellY - 2,
+                    width: layout.grid.cellSize,
+                    height: layout.grid.cellSize,
+                    color: "rgba(255, 255, 255, 0.15)",
+                });
+            }
+
+            const outputItem = this.cloneItem(recipesList[recipeIndex].output);
+            const slot = new InventorySlot({
+                position: { x: cellX, y: cellY },
+                item: outputItem,
+            });
+            slot.draw(0, 0, null, iconSize);
+        }
+
+        const upButton = {
+            x: panel.x + panel.width - 28,
+            y: panel.y + 8,
+            width: 20,
+            height: 20,
+        };
+        const downButton = {
+            x: panel.x + panel.width - 28,
+            y: panel.y + panel.height - 28,
+            width: 20,
+            height: 20,
+        };
+
+        drawText({
+            text: "^",
+            x: upButton.x + upButton.width / 2,
+            y: upButton.y + 16,
+            size: 20,
+            textAlign: "center",
+        });
+        drawText({
+            text: "v",
+            x: downButton.x + downButton.width / 2,
+            y: downButton.y + 16,
+            size: 20,
+            textAlign: "center",
+        });
+
+        const selectedRecipe = recipesList[this.craftingGuideSelectedIndex];
+        if (!selectedRecipe) return;
+
+        const previewGrid = this.getRecipePreviewGrid(selectedRecipe);
+        const baseX =
+            this.inventoryUI.x +
+            this.openUIOffset.x +
+            this.craftingTablePosition.x;
+        const baseY =
+            this.inventoryUI.y +
+            this.openUIOffset.y +
+            this.craftingTablePosition.y;
+
+        ctx.save();
+        const ghostAlpha = 0.35;
+        const ghostTint = "rgba(150, 150, 150, 0.35)";
+        const ghostSize = 48;
+        ctx.globalAlpha = ghostAlpha;
+        for (let y = 0; y < 3; y++) {
+            for (let x = 0; x < 3; x++) {
+                const previewItem = previewGrid[y][x];
+                if (!previewItem) continue;
+                const slot = new InventorySlot({
+                    position: {
+                        x: baseX + x * 63,
+                        y: baseY + y * 63,
+                    },
+                    item: previewItem,
+                });
+                slot.draw(0, 0, null, 1);
+                drawRect({
+                    x: slot.position.x,
+                    y: slot.position.y,
+                    width: ghostSize,
+                    height: ghostSize,
+                    color: ghostTint,
+                });
+            }
+        }
+        if (this.craftingOutputSlot.item.count <= 0) {
+            const outputSlot = new InventorySlot({
+                position: {
+                    x:
+                        this.inventoryUI.x +
+                        this.openUIOffset.x +
+                        this.craftingTableOutputPosition.x,
+                    y:
+                        this.inventoryUI.y +
+                        this.openUIOffset.y +
+                        this.craftingTableOutputPosition.y,
+                },
+                item: this.cloneItem(selectedRecipe.output),
+            });
+            outputSlot.draw(0, 0, null, 1);
+            drawRect({
+                x: outputSlot.position.x,
+                y: outputSlot.position.y,
+                width: ghostSize,
+                height: ghostSize,
+                color: ghostTint,
+            });
+        }
+        ctx.restore();
     }
 
     drawHoverSlot() {
