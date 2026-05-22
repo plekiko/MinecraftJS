@@ -168,15 +168,26 @@ function toggleLighting() {
 }
 
 function saveSettings() {
-    if (!usernameInput.value) {
+    const submittedUsername = usernameInput.value?.trim();
+
+    if (!submittedUsername) {
         if (!currentSettings.username) currentSettings.username = "Player";
     } else {
-        currentSettings.username = usernameInput.value;
+        currentSettings.username = submittedUsername;
     }
 
     setUsernameFooter(currentSettings.username);
 
     localStorage.setItem("settings", JSON.stringify(currentSettings));
+
+    if (submittedUsername) {
+        const shouldDownload = confirm(
+            "Download and apply the skin for this username?",
+        );
+        if (shouldDownload) {
+            downloadSkinFromUsername();
+        }
+    }
 }
 
 function setUsernameFooter(username) {
@@ -541,6 +552,61 @@ function uploadSkin() {
     };
 
     input.click();
+}
+
+function readBlobAsDataUrl(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () =>
+            reject(reader.error || new Error("Failed to read skin data."));
+        reader.readAsDataURL(blob);
+    });
+}
+
+async function downloadSkinFromUsername() {
+    const inputName = usernameInput?.value?.trim();
+    const name = inputName || currentSettings.username?.trim();
+
+    if (!name) {
+        alert("Enter a username first.");
+        return;
+    }
+
+    const encodedName = encodeURIComponent(name);
+    const urls = [
+        `https://mineskin.eu/skin/${encodedName}`,
+        `https://mineskin.eu/download/${encodedName}`,
+    ];
+
+    let lastError = null;
+    for (const url of urls) {
+        try {
+            const response = await fetch(url, { cache: "no-store" });
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            if (!blob || blob.size === 0) {
+                throw new Error("Empty skin response.");
+            }
+
+            const skinData = await readBlobAsDataUrl(blob);
+            localStorage.setItem("playerSkin", skinData);
+            alert("Skin downloaded successfully!");
+            return;
+        } catch (err) {
+            lastError = err;
+        }
+    }
+
+    alert(
+        "Failed to download skin. Check the username and try again later.",
+    );
+    if (lastError) {
+        console.warn("Skin download failed:", lastError);
+    }
 }
 
 function clearSkin() {
