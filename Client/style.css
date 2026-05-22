@@ -38,6 +38,17 @@ body {
     user-select: none;
 }
 
+#loading {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-family: "Pixel";
+    font-size: 2rem;
+    z-index: -1;
+}
+
 #pause-menu {
     position: fixed;
     top: 0;

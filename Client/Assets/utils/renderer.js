@@ -129,7 +129,7 @@ function draw(chunks, frames) {
 }
 
 function drawLoadScreen() {
-    if (!isTexturePackLoaded || world.generator.loadingWorld) {
+    if (!isTexturePackLoaded || world?.generator?.loadingWorld) {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 
@@ -143,7 +143,7 @@ function drawLoadScreen() {
                 CANVAS.width / 2,
                 CANVAS.height / 2,
             );
-        else if (world.generator.loadingWorld)
+        else if (world?.generator?.loadingWorld)
             ctx.fillText(
                 "Loading world...",
                 CANVAS.width / 2,

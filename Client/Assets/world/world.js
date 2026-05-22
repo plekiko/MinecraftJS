@@ -34,6 +34,8 @@ class World {
     }
 
     tick() {
+        if(world.generator.loadingWorld) return;
+
         this.updateBlocks();
         game.animateFrame();
         updatePositionalAudioVolumes();

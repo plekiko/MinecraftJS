@@ -1,4 +1,3 @@
-// Lightweight bootstrap loader to sequentially load existing non-module scripts
 (function () {
     const scripts = [
         "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
