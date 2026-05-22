@@ -185,12 +185,28 @@ class Entity {
         );
 
         const checkBlockWithCutoff = (block, x, y) => {
-            if (!block || !this.isSolid(block.blockType)) return null;
-            const def = getBlock(block.blockType);
-            if (!def.collision) return null;
+            if (!block || !this.canStandOn(block.blockType)) return null;
+            const blockDef = getBlock(block.blockType);
             const effectiveHeight = BLOCK_SIZE * (1 - block.cutoff);
             const blockTopY =
                 block.transform.position.y + (BLOCK_SIZE - effectiveHeight);
+            if (!blockDef.collision) {
+                if (this.velocity.y < 0) return null;
+                const currentBottomY = this.position.y + this.hitbox.y;
+                if (currentBottomY > blockTopY) return null;
+                const blockAbove = world.getBlockAtWorldPosition(
+                    block.transform.position.x,
+                    block.transform.position.y - BLOCK_SIZE,
+                );
+                if (blockAbove) {
+                    const aboveDef = getBlock(blockAbove.blockType);
+                    if (aboveDef && !aboveDef.air) {
+                        if (aboveDef.collision || !aboveDef.transparent) {
+                            return null;
+                        }
+                    }
+                }
+            }
             if (
                 y >= blockTopY &&
                 y <= block.transform.position.y + BLOCK_SIZE
@@ -431,6 +447,14 @@ class Entity {
     isSolid(blockType) {
         if (getBlock(blockType).fluid) return false;
         return getBlock(blockType).collision;
+    }
+
+    canStandOn(blockType) {
+        const block = getBlock(blockType);
+        if (!block) return false;
+        if (block.air || block.fluid) return false;
+        if (block.collision) return true;
+        return !block.transparent;
     }
 
     updateEntity() {

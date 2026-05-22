@@ -326,7 +326,7 @@ const blockTypes = [
                 subtract: 8,
             }),
         ]),
-        transparent: true,
+        // transparent: true,
     }),
     new BlockType({
         blockId: 12,
@@ -360,7 +360,7 @@ const blockTypes = [
                 subtract: 8,
             }),
         ]),
-        transparent: true,
+        // transparent: true,
     }),
     new BlockType({
         blockId: 14,
@@ -384,13 +384,14 @@ const blockTypes = [
         breakSound: Sounds.Break_Grass,
         breakingSound: Sounds.Breaking_Grass,
         toolType: ToolType.Shears,
-        transparent: true,
         dropTable: new LootTable([
             new LootItem({
                 blockId: Blocks.AcaciaSapling,
                 subtract: 8,
             }),
         ]),
+
+        // transparent: true,
     }),
     new BlockType({
         blockId: 16,
@@ -424,7 +425,7 @@ const blockTypes = [
                 subtract: 8,
             }),
         ]),
-        transparent: true,
+        // transparent: true,
     }),
     new BlockType({
         blockId: 32,
@@ -455,6 +456,8 @@ const blockTypes = [
                 subtract: 8,
             }),
         ]),
+
+        // transparent: true,
     }),
     new BlockType({
         blockId: 299,
@@ -485,6 +488,8 @@ const blockTypes = [
                 subtract: 8,
             }),
         ]),
+
+        // transparent: true,   
     }),
 
     //#endregion
