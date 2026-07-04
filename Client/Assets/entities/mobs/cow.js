@@ -63,7 +63,7 @@ class Cow extends Mob {
             positional: true,
             origin: this.position,
         });
-        removeEntity(this);
+        this.world.removeEntity(this);
     }
 
     tickUpdate() {
