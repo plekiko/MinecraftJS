@@ -74,7 +74,7 @@ class Creeper extends Mob {
             this.fuse--;
             if (this.fuse <= 0) {
                 this.explode();
-                removeEntity(this);
+                this.world.removeEntity(this);
             } else if (this.body) {
                 // Pulse white: 50% of each cycle show flash
                 const phase =
@@ -116,7 +116,7 @@ class Creeper extends Mob {
     dieEvent() {
         this.dropLoot();
         playPositionalSound(this.position, "mobs/creeper/death.ogg");
-        removeEntity(this);
+        this.world.removeEntity(this);
     }
 
     interact(player, item) {}
