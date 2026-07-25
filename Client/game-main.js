@@ -11,11 +11,6 @@ const boot = createBootLoader();
 await loadMediaBundle({ onProgress: (p) => boot.setProgress(p) });
 applyPackedMediaStyles();
 
-const { initializeTextures } = await import(
-    "./Assets/utils/texturePackLoader.js"
-);
-await initializeTextures();
-
 await Promise.all([
     import("./Assets/entities/entities.js"),
     import("./Assets/entities/TNT.js"),
@@ -26,6 +21,11 @@ await Promise.all([
     import("./Assets/multiplayer/server.js"),
     import("./Assets/utils/screenshotChunks.js"),
 ]);
+
+const { initializeTextures } = await import(
+    "./Assets/utils/texturePackLoader.js"
+);
+await initializeTextures();
 
 const { initButtonCenterImages } = await import("./buttonUtils.js");
 initButtonCenterImages();
