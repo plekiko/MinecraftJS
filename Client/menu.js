@@ -1,84 +1,91 @@
-const randomTextElement = document.querySelector(".splash");
-const menuContainer = document.querySelector(".menu-container");
-const worldsContainer = document.querySelector(".world-select");
-const worldContainer = document.querySelector(".world-container");
-const worldCreateContainer = document.querySelector("#world-create-container");
-const worldSeedInput = document.querySelector("#world-seed-input");
-const savedInText = document.querySelector("#saved-in-text");
-const worldSelectContainer = document.querySelector("#world-select-container");
-const removeTexturePackButton = document.getElementById("remove-texture-btn");
-const gameModeButton = document.getElementById("game-mode-button");
-const texturePackSelectContainer = document.querySelector(
+import { runtime } from "./Assets/utils/runtime.js";
+import JSZip from "jszip";
+import { SKIN_PREVIEW_PARTS, detectSkinModel, drawSkinPreview } from "./Assets/game/skinPreview.js";
+import { deleteFromLdb, getFromLdb, ldb } from "./Assets/utils/indexDB.js";
+import { DEBUG_ACTIONS, DEFAULT_KEY_BINDINGS, GAMEPLAY_ACTIONS, REBINDABLE_ACTIONS, getActionLabel, getKeyDisplayName, loadKeyBindings, saveKeyBindings } from "./Assets/utils/keyBindings.js";
+import { downloadWorldSave } from "./buttonUtils.js";
+
+export const randomTextElement = document.querySelector(".splash");
+export const menuContainer = document.querySelector(".menu-container");
+export const worldsContainer = document.querySelector(".world-select");
+export const worldContainer = document.querySelector(".world-container");
+export const worldCreateContainer = document.querySelector("#world-create-container");
+export const worldSeedInput = document.querySelector("#world-seed-input");
+export const savedInText = document.querySelector("#saved-in-text");
+export const worldSelectContainer = document.querySelector("#world-select-container");
+export const removeTexturePackButton = document.getElementById("remove-texture-btn");
+export const gameModeButton = document.getElementById("game-mode-button");
+export const texturePackSelectContainer = document.querySelector(
     "#texture-pack-select-container"
 );
-const texturePacksContainer =
+export const texturePacksContainer =
     texturePackSelectContainer.querySelector(".world-select");
 
-const worldNameInput = document.querySelector("#world-name-input");
+export const worldNameInput = document.querySelector("#world-name-input");
 
-const worldPlayButton = document.getElementById("play-selected-btn");
-const removeWorldButton = document.getElementById("remove-world-btn");
-const downloadWorldButton = document.getElementById("download-world-btn");
-const uploadWorldButton = document.getElementById("upload-world-btn");
-const footer = document.querySelector(".footer");
-const panorama = document.querySelector(".panorama");
+export const worldPlayButton = document.getElementById("play-selected-btn");
+export const removeWorldButton = document.getElementById("remove-world-btn");
+export const downloadWorldButton = document.getElementById("download-world-btn");
+export const uploadWorldButton = document.getElementById("upload-world-btn");
+export const footer = document.querySelector(".footer");
+export const panorama = document.querySelector(".panorama");
 
 // Server-related elements
-const serverSelectContainer = document.querySelector(
+export const serverSelectContainer = document.querySelector(
     "#server-select-container"
 );
-const serverListContainer = document.querySelector("#server-list");
-const addServerContainer = document.querySelector("#add-server-container");
-const quickConnectContainer = document.querySelector(
+export const serverListContainer = document.querySelector("#server-list");
+export const addServerContainer = document.querySelector("#add-server-container");
+export const quickConnectContainer = document.querySelector(
     "#quick-connect-container"
 );
-const serverNameInput = document.querySelector("#server-name-input");
-const serverIPInput = document.querySelector("#server-ip-input");
-const quickConnectIPInput = document.querySelector("#quick-connect-ip-input");
-const removeServerButton = document.getElementById("remove-server-btn");
-const quickConnectButton = document.getElementById("quick-connect-btn");
-const connectButton = document.getElementById("connect-btn");
+export const serverNameInput = document.querySelector("#server-name-input");
+export const serverIPInput = document.querySelector("#server-ip-input");
+export const quickConnectIPInput = document.querySelector("#quick-connect-ip-input");
+export const removeServerButton = document.getElementById("remove-server-btn");
+export const quickConnectButton = document.getElementById("quick-connect-btn");
+export const connectButton = document.getElementById("connect-btn");
 
-const optionsContainer = document.querySelector("#options-container");
-const optionsMain = document.getElementById("options-main");
-const controlsPanel = document.getElementById("controls-panel");
-const controls = document.getElementById("controls-list");
-const optionsPanelTitle = document.getElementById("options-panel-title");
-const skinsSelectContainer = document.querySelector("#skins-select-container");
-const skinsCarousel = document.getElementById("skins-carousel");
-const applySkinBtn = document.getElementById("apply-skin-btn");
-let customSkinActions = null;
+export const optionsContainer = document.querySelector("#options-container");
+export const optionsMain = document.getElementById("options-main");
+export const controlsPanel = document.getElementById("controls-panel");
+export const controls = document.getElementById("controls-list");
+export const optionsPanelTitle = document.getElementById("options-panel-title");
+export const skinsSelectContainer = document.querySelector("#skins-select-container");
+export const skinsCarousel = document.getElementById("skins-carousel");
+export const applySkinBtn = document.getElementById("apply-skin-btn");
+export let customSkinActions = null;
 
-const musicVolumeSlider = document.getElementById("music-volume-slider");
-const musicVolumeLabel = document.getElementById("music-volume-label");
-const sfxVolumeSlider = document.getElementById("sfx-volume-slider");
-const sfxVolumeLabel = document.getElementById("sfx-volume-label");
-const lightingToggleButton = document.getElementById("lighting-toggle-btn");
-const difficultyToggleButton = document.getElementById("difficulty-toggle-btn");
-const usernameInput = document.querySelector("#username-input");
-const usernameFooter = document.querySelector("#username-footer");
+export const musicVolumeSlider = document.getElementById("music-volume-slider");
+export const musicVolumeLabel = document.getElementById("music-volume-label");
+export const sfxVolumeSlider = document.getElementById("sfx-volume-slider");
+export const sfxVolumeLabel = document.getElementById("sfx-volume-label");
+export const lightingToggleButton = document.getElementById("lighting-toggle-btn");
+export const difficultyToggleButton = document.getElementById("difficulty-toggle-btn");
+export const usernameInput = document.querySelector("#username-input");
+export const usernameFooter = document.querySelector("#username-footer");
 
-let selectedWorld = null;
-let selectedTexturePack = "default";
-let selectedServerId = null;
-let tempServerName = "New Server";
-let tempServerIP = "";
-let tempQuickConnectIP = "";
-let randomTexts = [];
+export let selectedWorld = null;
+export let selectedTexturePack = "default";
+export let selectedServerId = null;
+export let tempServerName = "New Server";
+export let tempServerIP = "";
+export let tempQuickConnectIP = "";
+export let randomTexts = [];
 
-let lastPingTime = 0;
-let cachedServerStatuses = [];
+export let lastPingTime = 0;
+export let cachedServerStatuses = [];
 
-let currentSettings = {
+export let currentSettings = {
     musicVolume: 100,
     sfxVolume: 100,
     lighting: true,
     username: "",
 };
 
-let selectedDifficulty = "easy";
+export let selectedDifficulty = "easy";
 
-const colorMap = {
+export const colorMap = {
     0: "#000000", // Black
     1: "#0000AA", // Dark Blue
     2: "#00AA00", // Dark Green
@@ -97,7 +104,7 @@ const colorMap = {
     f: "#FFFFFF", // White
 };
 
-const formatMap = {
+export const formatMap = {
     l: "font-weight: bold;",
     o: "font-style: italic;",
     n: "text-decoration: underline;",
@@ -113,26 +120,26 @@ fetch("menu_text.json")
     })
     .catch((error) => {});
 
-function setRandomText() {
+export function setRandomText() {
     const randomPick =
         randomTexts[Math.floor(Math.random() * randomTexts.length)];
     randomTextElement.textContent = randomPick;
 }
 
-const musicTracks = [
+export const musicTracks = [
     "Mutation",
     "Beginning 2",
     "Floating Trees",
     "Moog City 2",
 ];
 
-function multiplayerButton() {
+export function multiplayerButton() {
     hideMenu();
 
     showServers();
 }
 
-function downloadServer() {
+export function downloadServer() {
     const link = document.createElement("a");
     link.href = "server.zip";
     link.download = "server.zip";
@@ -143,7 +150,7 @@ function downloadServer() {
     document.body.removeChild(link);
 }
 
-function updateMusicVolume(value) {
+export function updateMusicVolume(value) {
     currentSettings.musicVolume = value;
     musicVolumeLabel.textContent = "Music - " + value + "%";
     if (music) {
@@ -152,13 +159,13 @@ function updateMusicVolume(value) {
     localStorage.setItem("settings", JSON.stringify(currentSettings));
 }
 
-function updateSFXVolume(value) {
+export function updateSFXVolume(value) {
     currentSettings.sfxVolume = value;
     sfxVolumeLabel.textContent = "SFX - " + value + "%";
     localStorage.setItem("settings", JSON.stringify(currentSettings));
 }
 
-function toggleLighting() {
+export function toggleLighting() {
     currentSettings.lighting = !currentSettings.lighting;
 
     lightingToggleButton.textContent =
@@ -171,7 +178,7 @@ function toggleLighting() {
             (selectedDifficulty === "peaceful" ? "Peaceful" : "Easy");
 }
 
-function saveSettings() {
+export function saveSettings() {
     const submittedUsername = usernameInput.value?.trim();
 
     if (!submittedUsername) {
@@ -185,11 +192,11 @@ function saveSettings() {
     localStorage.setItem("settings", JSON.stringify(currentSettings));
 }
 
-function setUsernameFooter(username) {
+export function setUsernameFooter(username) {
     usernameFooter.textContent = `Current Username: ${username}`;
 }
 
-function loadSettings() {
+export function loadSettings() {
     const settings = JSON.parse(localStorage.getItem("settings"));
     if (settings) {
         currentSettings.lighting = settings.lighting !== false;
@@ -232,13 +239,13 @@ if (sfxVolumeSlider) {
 
 loadSettings();
 // initialize world-create difficulty button label
-const worldDifficultyButton = document.getElementById("difficulty-button");
+export const worldDifficultyButton = document.getElementById("difficulty-button");
 if (worldDifficultyButton)
     worldDifficultyButton.textContent =
         "Difficulty: " +
         (selectedDifficulty === "peaceful" ? "Peaceful" : "Easy");
 
-function switchDifficulty() {
+export function switchDifficulty() {
     // used by world create difficulty button
     selectedDifficulty =
         selectedDifficulty === "peaceful" ? "easy" : "peaceful";
@@ -247,7 +254,7 @@ function switchDifficulty() {
     if (btn) btn.textContent = "Difficulty: " + label;
 }
 
-function showTexturePacks() {
+export function showTexturePacks() {
     hideMenu();
 
     texturePackSelectContainer.style.display = "flex";
@@ -258,14 +265,14 @@ function showTexturePacks() {
     }
 }
 
-function playGame() {
+export function playGame() {
     menuContainer.style.display = "none";
     worldSelectContainer.style.display = "flex";
     footer.style.display = "none";
     populateWorlds();
 }
 
-function playRandomMusic() {
+export function playRandomMusic() {
     if (currentSettings.musicVolume === 0) return;
 
     const randomTrack =
@@ -273,9 +280,9 @@ function playRandomMusic() {
     playMusic(randomTrack);
 }
 
-let music = null;
+export let music = null;
 
-function playMusic(track) {
+export function playMusic(track) {
     music = new Audio(`Assets/audio/music/menu/${track}.mp3`);
     music.volume = (currentSettings.musicVolume / 100) * 0.3;
     music.play();
@@ -286,7 +293,7 @@ function playMusic(track) {
     });
 }
 
-function startMusicOnFirstInteraction() {
+export function startMusicOnFirstInteraction() {
     if (currentSettings.musicVolume === 0) return;
     const start = () => {
         playRandomMusic();
@@ -299,12 +306,12 @@ function startMusicOnFirstInteraction() {
     document.addEventListener("touchstart", start, { once: true });
 }
 
-function parseDate(dateStr) {
+export function parseDate(dateStr) {
     const ms = new Date(dateStr).getTime();
     return isNaN(ms) ? 0 : ms;
 }
 
-function populateWorlds() {
+export function populateWorlds() {
     const worlds = JSON.parse(localStorage.getItem("worlds"));
     worldsContainer.innerHTML = "";
     if (worlds) {
@@ -341,7 +348,7 @@ function populateWorlds() {
     }
 }
 
-function initializeDefaultTexturePack() {
+export function initializeDefaultTexturePack() {
     const texturePackList =
         JSON.parse(localStorage.getItem("texturePackList")) || [];
     const defaultPackId = "default";
@@ -367,7 +374,7 @@ function initializeDefaultTexturePack() {
     localStorage.setItem("currentTexturePack", currentPack);
 }
 
-async function populateTexturePacks() {
+export async function populateTexturePacks() {
     initializeDefaultTexturePack();
 
     const texturePackList =
@@ -400,7 +407,7 @@ async function populateTexturePacks() {
     }
 }
 
-function selectTexturePack(id, selectedElement) {
+export function selectTexturePack(id, selectedElement) {
     const allPackContainers =
         texturePacksContainer.querySelectorAll(".world-container");
     allPackContainers.forEach((container) => {
@@ -417,7 +424,7 @@ function selectTexturePack(id, selectedElement) {
     localStorage.setItem("currentTexturePack", id);
 }
 
-async function getTexturePackIcon(packId) {
+export async function getTexturePackIcon(packId) {
     if (packId === "default") {
         return "Assets/sprites/menu/worldPreview.png";
     }
@@ -430,7 +437,7 @@ async function getTexturePackIcon(packId) {
         : "Assets/sprites/menu/worldPreview.png";
 }
 
-function uploadTexturePack() {
+export function uploadTexturePack() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".zip, .7z, .rar";
@@ -510,27 +517,27 @@ function uploadTexturePack() {
     input.click();
 }
 
-const PLAYER_SKINS_CONFIG_URL = "Assets/sprites/entity/player/skins.json";
-const PLAYER_SKINS_DIR = "Assets/sprites/entity/player";
+export const PLAYER_SKINS_CONFIG_URL = "Assets/sprites/entity/player/skins.json";
+export const PLAYER_SKINS_DIR = "Assets/sprites/entity/player";
 
-const SKIN_PREVIEW_SCALE = 8;
-const SKIN_PREVIEW_WIDTH = 16 * SKIN_PREVIEW_SCALE;
-const SKIN_PREVIEW_HEIGHT = 32 * SKIN_PREVIEW_SCALE;
-const skinImageCache = new Map();
-const skinDataUrlCache = new Map();
+export const SKIN_PREVIEW_SCALE = 8;
+export const SKIN_PREVIEW_WIDTH = 16 * SKIN_PREVIEW_SCALE;
+export const SKIN_PREVIEW_HEIGHT = 32 * SKIN_PREVIEW_SCALE;
+export const skinImageCache = new Map();
+export const skinDataUrlCache = new Map();
 
-let DEFAULT_SKINS = [{ id: "custom", name: "Custom Skin", type: "custom" }];
-let selectedSkinId = "steve";
-let customSkinData = null;
-let customSkinModel = "steve";
-let playerSkinsLoaded = false;
-let skinCarouselScrollFrame = null;
-let skinCarouselScrollTarget = 0;
-let skinCarouselScrollTime = null;
-let skinCarouselScrollMode = "snap"; // "snap" | "inertia"
-let skinCarouselVelocity = 0;
-let skinCarouselDidDrag = false;
-const skinCarouselDrag = {
+export let DEFAULT_SKINS = [{ id: "custom", name: "Custom Skin", type: "custom" }];
+export let selectedSkinId = "steve";
+export let customSkinData = null;
+export let customSkinModel = "steve";
+export let playerSkinsLoaded = false;
+export let skinCarouselScrollFrame = null;
+export let skinCarouselScrollTarget = 0;
+export let skinCarouselScrollTime = null;
+export let skinCarouselScrollMode = "snap"; // "snap" | "inertia"
+export let skinCarouselVelocity = 0;
+export let skinCarouselDidDrag = false;
+export const skinCarouselDrag = {
     active: false,
     pointerId: null,
     startX: 0,
@@ -541,7 +548,7 @@ const skinCarouselDrag = {
     skinId: null,
 };
 
-function buildBuiltinSkin(entry) {
+export function buildBuiltinSkin(entry) {
     const file = typeof entry === "string" ? entry : entry?.file;
     if (typeof file !== "string" || !file.toLowerCase().endsWith(".png")) {
         return null;
@@ -564,7 +571,7 @@ function buildBuiltinSkin(entry) {
     };
 }
 
-function buildDefaultSkins(config) {
+export function buildDefaultSkins(config) {
     const entries = Array.isArray(config) ? config : [];
     const builtins = entries.map(buildBuiltinSkin).filter(Boolean);
 
@@ -582,7 +589,7 @@ function buildDefaultSkins(config) {
     ];
 }
 
-async function loadPlayerSkins() {
+export async function loadPlayerSkins() {
     if (playerSkinsLoaded) return DEFAULT_SKINS;
 
     try {
@@ -614,7 +621,7 @@ async function loadPlayerSkins() {
     return DEFAULT_SKINS;
 }
 
-function applyPlayerSkin(skinData, skinId, model = "steve") {
+export function applyPlayerSkin(skinData, skinId, model = "steve") {
     if (skinData) {
         localStorage.setItem("playerSkin", skinData);
     } else {
@@ -627,7 +634,7 @@ function applyPlayerSkin(skinData, skinId, model = "steve") {
     );
 }
 
-function saveCustomSkin(skinData, model = "steve") {
+export function saveCustomSkin(skinData, model = "steve") {
     customSkinData = skinData;
     customSkinModel = model === "alex" ? "alex" : "steve";
     if (skinData) {
@@ -639,7 +646,7 @@ function saveCustomSkin(skinData, model = "steve") {
     }
 }
 
-function loadCustomSkin() {
+export function loadCustomSkin() {
     customSkinData = localStorage.getItem("customPlayerSkin");
     customSkinModel =
         localStorage.getItem("customPlayerSkinModel") === "alex"
@@ -648,7 +655,7 @@ function loadCustomSkin() {
     return customSkinData;
 }
 
-function migrateSkinStorage() {
+export function migrateSkinStorage() {
     const activeSkin = localStorage.getItem("playerSkin");
     const skinId = localStorage.getItem("playerSkinId");
     const savedCustom = localStorage.getItem("customPlayerSkin");
@@ -668,7 +675,7 @@ function migrateSkinStorage() {
     }
 }
 
-function ensureActiveSkinExists() {
+export function ensureActiveSkinExists() {
     const skinId = localStorage.getItem("playerSkinId") || "steve";
     const activeSkin = localStorage.getItem("playerSkin");
 
@@ -704,7 +711,7 @@ function ensureActiveSkinExists() {
     }
 }
 
-function loadImage(src) {
+export function loadImage(src) {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -714,7 +721,7 @@ function loadImage(src) {
     });
 }
 
-async function getCachedSkinImage(key, loader) {
+export async function getCachedSkinImage(key, loader) {
     if (skinImageCache.has(key)) {
         return skinImageCache.get(key);
     }
@@ -723,7 +730,7 @@ async function getCachedSkinImage(key, loader) {
     return image;
 }
 
-function drawBlackPlayerIcon(ctx, baseX, baseY, scale) {
+export function drawBlackPlayerIcon(ctx, baseX, baseY, scale) {
     ctx.fillStyle = "#000000";
     for (const part of SKIN_PREVIEW_PARTS) {
         ctx.fillRect(
@@ -735,7 +742,7 @@ function drawBlackPlayerIcon(ctx, baseX, baseY, scale) {
     }
 }
 
-async function renderSkinCardPreview(canvas, skin) {
+export async function renderSkinCardPreview(canvas, skin) {
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.imageSmoothingEnabled = false;
@@ -768,7 +775,7 @@ async function renderSkinCardPreview(canvas, skin) {
     }
 }
 
-function createSkinCard(skin) {
+export function createSkinCard(skin) {
     const card = document.createElement("div");
     card.className = "skin-card";
     card.dataset.skinId = skin.id;
@@ -827,7 +834,7 @@ function createSkinCard(skin) {
     return group;
 }
 
-function updateSkinCardSelection() {
+export function updateSkinCardSelection() {
     if (!skinsCarousel) return;
     for (const card of skinsCarousel.querySelectorAll(".skin-card")) {
         card.classList.toggle(
@@ -838,7 +845,7 @@ function updateSkinCardSelection() {
     updateSkinsFooter();
 }
 
-function updateSkinsFooter() {
+export function updateSkinsFooter() {
     const isCustom = selectedSkinId === "custom";
     if (customSkinActions) {
         customSkinActions.style.visibility = isCustom ? "visible" : "hidden";
@@ -849,7 +856,7 @@ function updateSkinsFooter() {
     }
 }
 
-function stopSkinCarouselAnimation() {
+export function stopSkinCarouselAnimation() {
     if (skinCarouselScrollFrame !== null) {
         cancelAnimationFrame(skinCarouselScrollFrame);
         skinCarouselScrollFrame = null;
@@ -858,13 +865,13 @@ function stopSkinCarouselAnimation() {
     skinCarouselVelocity = 0;
 }
 
-function selectSkin(skinId, behavior = "smooth") {
+export function selectSkin(skinId, behavior = "smooth") {
     selectedSkinId = skinId;
     updateSkinCardSelection();
     centerSelectedCard(behavior);
 }
 
-function centerSelectedCard(behavior = "smooth") {
+export function centerSelectedCard(behavior = "smooth") {
     if (!skinsCarousel) return;
     const card = skinsCarousel.querySelector(".skin-card.selected");
     if (!card) return;
@@ -886,7 +893,7 @@ function centerSelectedCard(behavior = "smooth") {
     }
 }
 
-function animateSkinCarousel(timestamp) {
+export function animateSkinCarousel(timestamp) {
     if (!skinsCarousel) {
         stopSkinCarouselAnimation();
         return;
@@ -935,7 +942,7 @@ function animateSkinCarousel(timestamp) {
     skinCarouselScrollFrame = requestAnimationFrame(animateSkinCarousel);
 }
 
-function getSkinCarouselDragVelocity() {
+export function getSkinCarouselDragVelocity() {
     const now = performance.now();
     const samples = skinCarouselDrag.samples.filter(
         (sample) => now - sample.time < 100
@@ -949,7 +956,7 @@ function getSkinCarouselDragVelocity() {
     return (last.x - first.x) / dt;
 }
 
-function onSkinCarouselPointerDown(e) {
+export function onSkinCarouselPointerDown(e) {
     if (!skinsCarousel || e.button !== 0) return;
     if (e.target.closest("button, a, input, textarea, select, label")) return;
 
@@ -972,7 +979,7 @@ function onSkinCarouselPointerDown(e) {
     e.preventDefault();
 }
 
-function onSkinCarouselPointerMove(e) {
+export function onSkinCarouselPointerMove(e) {
     if (
         !skinCarouselDrag.active ||
         e.pointerId !== skinCarouselDrag.pointerId
@@ -994,7 +1001,7 @@ function onSkinCarouselPointerMove(e) {
     skinCarouselDrag.lastTime = now;
 }
 
-function onSkinCarouselPointerUp(e) {
+export function onSkinCarouselPointerUp(e) {
     if (
         !skinCarouselDrag.active ||
         e.pointerId !== skinCarouselDrag.pointerId
@@ -1031,7 +1038,7 @@ function onSkinCarouselPointerUp(e) {
     }
 }
 
-function setupSkinsCarouselDrag() {
+export function setupSkinsCarouselDrag() {
     if (!skinsCarousel || skinsCarousel.dataset.dragReady === "1") return;
     skinsCarousel.dataset.dragReady = "1";
 
@@ -1044,14 +1051,14 @@ function setupSkinsCarouselDrag() {
     });
 }
 
-function moveSkinSelection(direction) {
+export function moveSkinSelection(direction) {
     const index = DEFAULT_SKINS.findIndex((skin) => skin.id === selectedSkinId);
     const next = index + direction;
     if (next < 0 || next >= DEFAULT_SKINS.length) return;
     selectSkin(DEFAULT_SKINS[next].id);
 }
 
-function refreshCustomSkinCard() {
+export function refreshCustomSkinCard() {
     if (!skinsCarousel) return;
     const card = skinsCarousel.querySelector(
         '.skin-card[data-skin-id="custom"]'
@@ -1064,7 +1071,7 @@ function refreshCustomSkinCard() {
     );
 }
 
-function populateSkinsCarousel() {
+export function populateSkinsCarousel() {
     if (!skinsCarousel) return;
     skinsCarousel.innerHTML = "";
     for (const skin of DEFAULT_SKINS) {
@@ -1073,7 +1080,7 @@ function populateSkinsCarousel() {
     updateSkinCardSelection();
 }
 
-async function showSkins() {
+export async function showSkins() {
     hideMenu();
 
     await loadPlayerSkins();
@@ -1119,7 +1126,7 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
-async function applySelectedSkin() {
+export async function applySelectedSkin() {
     const skin = DEFAULT_SKINS.find((entry) => entry.id === selectedSkinId);
     if (!skin) return;
 
@@ -1148,7 +1155,7 @@ async function applySelectedSkin() {
     gotoOptions();
 }
 
-function uploadCustomSkin() {
+export function uploadCustomSkin() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".png,image/png";
@@ -1181,7 +1188,7 @@ function uploadCustomSkin() {
     input.click();
 }
 
-async function customSkinFromUsername() {
+export async function customSkinFromUsername() {
     const name = prompt("Enter a Minecraft username to download a skin:");
     if (name === null) return;
 
@@ -1211,7 +1218,7 @@ async function customSkinFromUsername() {
     }
 }
 
-function readBlobAsDataUrl(blob) {
+export function readBlobAsDataUrl(blob) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
@@ -1221,7 +1228,7 @@ function readBlobAsDataUrl(blob) {
     });
 }
 
-async function fetchSkinDataUrl(username) {
+export async function fetchSkinDataUrl(username) {
     if (skinDataUrlCache.has(username)) {
         return skinDataUrlCache.get(username);
     }
@@ -1256,7 +1263,7 @@ async function fetchSkinDataUrl(username) {
     throw lastError || new Error("Failed to download skin.");
 }
 
-async function removeTexturePack() {
+export async function removeTexturePack() {
     if (!selectedTexturePack || selectedTexturePack === "default") return;
 
     const oldSelectedPack = selectedTexturePack;
@@ -1282,7 +1289,7 @@ async function removeTexturePack() {
     await deleteFromLdb(`texturePack_${oldSelectedPack}`);
 }
 
-async function getTexturePackData(id) {
+export async function getTexturePackData(id) {
     if (id === "default") return null;
 
     try {
@@ -1293,14 +1300,14 @@ async function getTexturePackData(id) {
     }
 }
 
-function gotoWorldCreate() {
+export function gotoWorldCreate() {
     worldCreateContainer.style.display = "flex";
     menuContainer.style.display = "none";
     worldSelectContainer.style.display = "none";
     footer.style.display = "none";
 }
 
-function createNewWorld() {
+export function createNewWorld() {
     if (!worldSeed) worldSeed = Math.floor(Math.random() * 100000000);
     if (!worldName) worldName = "New World";
 
@@ -1318,7 +1325,7 @@ function createNewWorld() {
     window.location.href = "./game.html";
 }
 
-function getSavedWorld(id) {
+export function getSavedWorld(id) {
     const worlds = JSON.parse(localStorage.getItem("worlds"));
     return worlds.find((world) => world.id === id);
 }
@@ -1326,7 +1333,7 @@ function getSavedWorld(id) {
 removeWorldButton.disabled = true;
 downloadWorldButton.disabled = true;
 
-function downloadSelectedWorld() {
+export function downloadSelectedWorld() {
     if (!selectedWorld) return;
     const saveData = localStorage.getItem(selectedWorld);
     if (!saveData) return;
@@ -1335,7 +1342,7 @@ function downloadSelectedWorld() {
     downloadWorldSave(saveData, filename);
 }
 
-function uploadWorld() {
+export function uploadWorld() {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".save,application/json";
@@ -1383,7 +1390,7 @@ function uploadWorld() {
     input.click();
 }
 
-function removeWorld() {
+export function removeWorld() {
     if (!selectedWorld) return;
     const worlds = JSON.parse(localStorage.getItem("worlds"));
     if (!worlds) return;
@@ -1401,37 +1408,37 @@ function removeWorld() {
     populateWorlds();
 }
 
-function backToMenu() {
+export function backToMenu() {
     showMenu();
 }
 
-function backToWorldSelection() {
+export function backToWorldSelection() {
     worldCreateContainer.style.display = "none";
     worldSelectContainer.style.display = "flex";
 }
 
-let selectedGameMode = 0;
-function switchGameMode() {
+export let selectedGameMode = 0;
+export function switchGameMode() {
     selectedGameMode = (selectedGameMode + 1) % 4;
     setGameMode(selectedGameMode);
 }
 
-function setGameMode(gamemode) {
+export function setGameMode(gamemode) {
     const gameModes = ["Survival", "Creative", "Adventure", "Spectator"];
     selectedGameMode = gamemode;
     gameModeButton.textContent = "Game Mode: " + gameModes[gamemode];
 }
 
-let worldSeed = "";
-function updateWorldSeed(value) {
+export let worldSeed = "";
+export function updateWorldSeed(value) {
     if (value === "") {
         value = Math.floor(Math.random() * 100000000);
     }
     worldSeed = value;
 }
 
-let worldName = "New World";
-function updateWorldName(value) {
+export let worldName = "New World";
+export function updateWorldName(value) {
     if (value === "") {
         value = "World";
     }
@@ -1439,7 +1446,7 @@ function updateWorldName(value) {
     worldName = value;
 }
 
-function playSelectedWorld() {
+export function playSelectedWorld() {
     if (!selectedWorld) return;
 
     localStorage.setItem(
@@ -1455,7 +1462,7 @@ function playSelectedWorld() {
     }, 500);
 }
 
-function selectWorld(id, selectedElement) {
+export function selectWorld(id, selectedElement) {
     const allWorldContainers = document.querySelectorAll(".world-container");
     allWorldContainers.forEach((container) => {
         container.classList.remove("selected");
@@ -1468,7 +1475,7 @@ function selectWorld(id, selectedElement) {
     selectedWorld = id;
 }
 
-async function pingServer(server) {
+export async function pingServer(server) {
     return new Promise((resolve) => {
         const [ip, port = "25565"] = server.ip.split(":");
 
@@ -1553,7 +1560,7 @@ async function pingServer(server) {
     });
 }
 
-async function pingServerAndUpdate(server, container) {
+export async function pingServerAndUpdate(server, container) {
     try {
         const result = await pingServer(server);
         if (!result || typeof result !== "object") {
@@ -1601,7 +1608,7 @@ async function pingServerAndUpdate(server, container) {
     }
 }
 
-function updateServerStatus(server, result, container) {
+export function updateServerStatus(server, result, container) {
     const { status, latency, error } = result || {
         status: null,
         latency: null,
@@ -1656,7 +1663,7 @@ function updateServerStatus(server, result, container) {
     serverIPElement.innerHTML = statusText;
 }
 
-async function pingAllServers() {
+export async function pingAllServers() {
     const servers = JSON.parse(localStorage.getItem("servers") || "[]");
     const results = await Promise.all(
         servers.map((server) => pingServer(server))
@@ -1665,7 +1672,7 @@ async function pingAllServers() {
 }
 
 // Server Management Functions
-function showServers() {
+export function showServers() {
     worldSelectContainer.style.display = "none";
     texturePackSelectContainer.style.display = "none";
     serverSelectContainer.style.display = "flex";
@@ -1674,7 +1681,7 @@ function showServers() {
     displayServers();
 }
 
-async function displayServers() {
+export async function displayServers() {
     const servers = JSON.parse(localStorage.getItem("servers") || "[]");
 
     serverListContainer.innerHTML = "";
@@ -1698,7 +1705,7 @@ async function displayServers() {
     pingAndRenderServers();
 }
 
-async function pingAndRenderServers() {
+export async function pingAndRenderServers() {
     if (serverSelectContainer.style.display !== "flex") return;
 
     const now = Date.now();
@@ -1729,12 +1736,12 @@ async function pingAndRenderServers() {
     }
 }
 
-function forceRefreshServers() {
+export function forceRefreshServers() {
     lastPingTime = 0;
     displayServers();
 }
 
-function sanitizeHtml(str) {
+export function sanitizeHtml(str) {
     return str
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -1743,20 +1750,20 @@ function sanitizeHtml(str) {
         .replace(/'/g, "&#39;");
 }
 
-function isValidServerName(name) {
+export function isValidServerName(name) {
     // Allow alphanumeric, spaces, and common punctuation; max length 20
     const nameRegex = /^[a-zA-Z0-9\s!@#$%^&*()-_=+[\]{}|;:,.<>?]{1,20}$/;
     return nameRegex.test(name);
 }
 
-function isValidServerIp(ip) {
+export function isValidServerIp(ip) {
     // Allow IPv4, domain names, localhost, with optional port
     const ipRegex =
         /^(?:(?:[0-9]{1,3}\.){3}[0-9]{1,3}|localhost|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?::[0-9]{1,5})?$/;
     return ipRegex.test(ip);
 }
 
-function renderServers(serverStatuses) {
+export function renderServers(serverStatuses) {
     serverListContainer.innerHTML = "";
     const servers = JSON.parse(localStorage.getItem("servers") || "[]");
 
@@ -1772,14 +1779,14 @@ function renderServers(serverStatuses) {
         const serverIPElement = serverElement.querySelector(".world-date");
         const serverImageElement = serverElement.querySelector(".world-image");
 
-        const safeName = sanitizeHtml(server.name);
-        const safeIp = sanitizeHtml(server.ip);
+        const safeName = sanitizeHtml(runtime.server.name);
+        const safeIp = sanitizeHtml(runtime.server.ip);
 
         serverNameElement.innerHTML = `${safeName} <span class="ip">(${safeIp})</span>`;
 
-        serverElement.setAttribute("data-id", server.id);
+        serverElement.setAttribute("data-id", runtime.server.id);
 
-        if (server.id === selectedServerId) {
+        if (runtime.server.id === selectedServerId) {
             serverElement.classList.add("selected");
         }
 
@@ -1811,13 +1818,13 @@ function renderServers(serverStatuses) {
         serverElement.style.display = "flex";
 
         serverElement.addEventListener("click", () => {
-            selectServer(server.id, serverElement);
+            selectServer(runtime.server.id, serverElement);
         });
         serverListContainer.appendChild(serverElement);
     });
 }
 
-function parseMotdToHtml(motd) {
+export function parseMotdToHtml(motd) {
     let html = "";
     let currentColor = "";
     let currentStyles = [];
@@ -1848,7 +1855,7 @@ function parseMotdToHtml(motd) {
     return html;
 }
 
-function selectServer(id, selectedElement) {
+export function selectServer(id, selectedElement) {
     const allServerContainers =
         serverListContainer.querySelectorAll(".world-container");
     allServerContainers.forEach((container) => {
@@ -1861,7 +1868,7 @@ function selectServer(id, selectedElement) {
     connectButton.disabled = false;
 }
 
-function gotoAddServer() {
+export function gotoAddServer() {
     serverSelectContainer.style.display = "none";
     addServerContainer.style.display = "flex";
     tempServerName = "New Server";
@@ -1870,15 +1877,15 @@ function gotoAddServer() {
     serverIPInput.value = tempServerIP;
 }
 
-function updateServerName(value) {
+export function updateServerName(value) {
     tempServerName = value || "New Server";
 }
 
-function updateServerIP(value) {
+export function updateServerIP(value) {
     tempServerIP = value || "";
 }
 
-function addServer() {
+export function addServer() {
     if (!tempServerIP) {
         alert("Please enter a server IP.");
         return;
@@ -1911,7 +1918,7 @@ function addServer() {
     displayServers();
 }
 
-function removeServer() {
+export function removeServer() {
     if (!selectedServerId) return;
 
     const servers = JSON.parse(localStorage.getItem("servers") || "[]");
@@ -1928,7 +1935,7 @@ function removeServer() {
     displayServers();
 }
 
-function gotoQuickConnect() {
+export function gotoQuickConnect() {
     serverSelectContainer.style.display = "none";
     quickConnectContainer.style.display = "flex";
     tempQuickConnectIP = "";
@@ -1945,11 +1952,11 @@ function gotoQuickConnect() {
     }
 }
 
-function updateQuickConnectIP(value) {
+export function updateQuickConnectIP(value) {
     tempQuickConnectIP = value || "";
 }
 
-function connectToServer() {
+export function connectToServer() {
     let serverAddress = "";
 
     if (quickConnectContainer.style.display === "flex") {
@@ -1995,13 +2002,13 @@ function connectToServer() {
     }, 500);
 }
 
-function cancelQuickConnect() {
+export function cancelQuickConnect() {
     quickConnectContainer.style.display = "none";
     serverSelectContainer.style.display = "flex";
     displayServers();
 }
 
-function backToServerSelection() {
+export function backToServerSelection() {
     addServerContainer.style.display = "none";
     serverSelectContainer.style.display = "flex";
 
@@ -2012,7 +2019,7 @@ function backToServerSelection() {
     displayServers();
 }
 
-function gotoOptions() {
+export function gotoOptions() {
     hideMenu();
 
     optionsContainer.style.display = "flex";
@@ -2051,16 +2058,16 @@ function gotoOptions() {
     loadSettings();
 }
 
-let controlsBindings = null;
-let waitingForRebindAction = null;
-let rebindKeydownHandler = null;
-let rebindMousedownHandler = null;
-let rebindWheelHandler = null;
-let rebindContextmenuHandler = null;
-let rebindDocumentContextmenuHandler = null;
-let rebindSuppressContextMenuUntil = 0;
+export let controlsBindings = null;
+export let waitingForRebindAction = null;
+export let rebindKeydownHandler = null;
+export let rebindMousedownHandler = null;
+export let rebindWheelHandler = null;
+export let rebindContextmenuHandler = null;
+export let rebindDocumentContextmenuHandler = null;
+export let rebindSuppressContextMenuUntil = 0;
 
-function gotoControls() {
+export function gotoControls() {
     if (!optionsMain || !controlsPanel || !controls) return;
     optionsMain.style.display = "none";
     controlsPanel.style.display = "flex";
@@ -2069,7 +2076,7 @@ function gotoControls() {
     renderControlsList();
 }
 
-function isBindingDefault(action) {
+export function isBindingDefault(action) {
     const current = controlsBindings[action];
     const defaultKeys = DEFAULT_KEY_BINDINGS[action];
     if (!defaultKeys) return true;
@@ -2077,7 +2084,7 @@ function isBindingDefault(action) {
     return defaultKeys.every((k, i) => k === current[i]);
 }
 
-function renderControlRow(action) {
+export function renderControlRow(action) {
     const row = document.createElement("div");
     row.className = "controls-row";
     const label = document.createElement("span");
@@ -2112,7 +2119,7 @@ function renderControlRow(action) {
     return row;
 }
 
-function renderControlsList() {
+export function renderControlsList() {
     if (!controls || !controlsBindings) return;
     controls.innerHTML = "";
 
@@ -2133,7 +2140,7 @@ function renderControlsList() {
     }
 }
 
-function startRebind(action) {
+export function startRebind(action) {
     if (waitingForRebindAction) return;
     if (rebindDocumentContextmenuHandler) {
         document.removeEventListener(
@@ -2233,7 +2240,7 @@ function startRebind(action) {
     document.addEventListener("contextmenu", documentContextmenuHandler, true);
 }
 
-function cancelRebind(keyHandler, mouseHandler, wheelHandler) {
+export function cancelRebind(keyHandler, mouseHandler, wheelHandler) {
     if (keyHandler) document.removeEventListener("keydown", keyHandler, true);
     if (mouseHandler)
         document.removeEventListener("mousedown", mouseHandler, true);
@@ -2245,7 +2252,7 @@ function cancelRebind(keyHandler, mouseHandler, wheelHandler) {
     waitingForRebindAction = null;
 }
 
-function resetControlsToDefault() {
+export function resetControlsToDefault() {
     if (!controlsBindings) return;
     for (const action of REBINDABLE_ACTIONS) {
         if (DEFAULT_KEY_BINDINGS[action]) {
@@ -2256,7 +2263,7 @@ function resetControlsToDefault() {
     renderControlsList();
 }
 
-function showMenu() {
+export function showMenu() {
     menuContainer.style.display = "flex";
     panorama.style.display = "block";
     worldSelectContainer.style.display = "none";
@@ -2282,7 +2289,7 @@ function showMenu() {
     connectButton.disabled = true;
 }
 
-function hideMenu() {
+export function hideMenu() {
     menuContainer.style.display = "none";
     worldSelectContainer.style.display = "none";
     footer.style.display = "none";
@@ -2307,7 +2314,7 @@ function hideMenu() {
 }
 
 // Initialize everything after texture pack loading
-async function initialize() {
+export async function initialize() {
     migrateSkinStorage();
     await loadPlayerSkins();
     ensureActiveSkinExists();

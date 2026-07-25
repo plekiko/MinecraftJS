@@ -1,11 +1,28 @@
-const Dimensions = Object.freeze({
-    Overworld: 0,
-    Nether: 1,
-});
+import { runtime } from "../utils/runtime.js";
+import { entityRegistry } from "../entities/entityRegistry.js";
+import { ORE_THRESHOLDS, multiplayer } from "../utils/globals.js";
+import { Noise } from "../utils/noise.js";
+import { NetherBiomes, OverworldBiomes } from "./biome.js";
+import { Blocks } from "./blocks.js";
+import {
+    Dimensions,
+    activeDimension,
+    dimensions,
+    getDimension,
+    getDimensionChunks,
+    setActiveDimension,
+    setDimensions,
+} from "./dimensionState.js";
 
-let activeDimension = Dimensions.Overworld;
+export {
+    Dimensions,
+    activeDimension,
+    dimensions,
+    getDimension,
+    getDimensionChunks,
+};
 
-class Dimension {
+export class Dimension {
     constructor({
         name,
         biomeSet,
@@ -58,7 +75,7 @@ class Dimension {
     }
 }
 
-let dimensions = [
+setDimensions([
     new Dimension({
         name: "Overworld",
         biomeSet: OverworldBiomes,
@@ -166,39 +183,28 @@ let dimensions = [
         fastLava: true,
         noWater: true,
     }),
-];
+]);
 
-function gotoDimension(dimension) {
+export function gotoDimension(dimension) {
     if (dimension === activeDimension) return;
 
-    if (world.player) world.player.dimension = dimension;
+    if (runtime.world.player) runtime.world.player.dimension = dimension;
 
     if (multiplayer) {
-        server.send({
+        runtime.server.send({
             type: "playerDimension",
             message: {
-                player: world.player.UUID,
+                player: runtime.world.player.UUID,
                 dimension: dimension,
             },
         });
     }
 
-    world.chunks_in_render_distance = new Map();
+    runtime.world.chunks_in_render_distance = new Map();
 
-    world.entities = world.entities.filter((entity) => {
-        if (entity instanceof Player) {
-            return true;
-        }
-        return false;
+    runtime.world.entities = runtime.world.entities.filter((entity) => {
+        return entity.type === entityRegistry.EntityTypes?.Player;
     });
 
-    activeDimension = dimension;
-}
-
-function getDimension(index = activeDimension) {
-    return dimensions[index];
-}
-
-function getDimensionChunks(index = activeDimension) {
-    return dimensions[index].chunks;
+    setActiveDimension(dimension);
 }

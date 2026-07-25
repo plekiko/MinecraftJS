@@ -1,8 +1,16 @@
-// This object will store callbacks keyed by requestId
-const callbacks = {};
-const pendingPlayerDataFromFile = new Map();
+import { runtime } from "../utils/runtime.js";
+import { Drop } from "../entities/drop.js";
+import { InventoryItem } from "../game/inventoryItem.js";
+import { Vector2 } from "../utils/classes.js";
+import { BLOCK_SIZE, CHUNK_HEIGHT } from "../utils/globals.js";
+import { getDimensionChunks, gotoDimension } from "../world/dimension.js";
+import { loadChunk } from "../world/saving.js";
 
-function applyInventoryFromSave(targetPlayer, inventoryData) {
+// This object will store callbacks keyed by requestId
+export const callbacks = {};
+export const pendingPlayerDataFromFile = new Map();
+
+export function applyInventoryFromSave(targetPlayer, inventoryData) {
     if (!targetPlayer?.inventory?.items) return;
     if (!Array.isArray(inventoryData)) return;
 
@@ -43,8 +51,8 @@ function applyInventoryFromSave(targetPlayer, inventoryData) {
     }
 }
 
-function applyPlayerDataFromFile(message) {
-    const playerFromFile = world.getEntityByUUID(message.UUID);
+export function applyPlayerDataFromFile(message) {
+    const playerFromFile = runtime.world.getEntityByUUID(message.UUID);
     if (!playerFromFile) {
         return false;
     }
@@ -80,7 +88,7 @@ function applyPlayerDataFromFile(message) {
     return true;
 }
 
-function processMessage(data) {
+export function processMessage(data) {
     const message = data.message;
     const type = data.type;
 
@@ -95,7 +103,7 @@ function processMessage(data) {
             break;
         case "playerJoined":
             console.log(data);
-            const newPlayer = world.spawnPlayer(
+            const newPlayer = runtime.world.spawnPlayer(
                 new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
                 false,
                 message.player.UUID,
@@ -108,11 +116,11 @@ function processMessage(data) {
             );
             break;
         case "playerLeft":
-            world.removeEntity(world.getEntityByUUID(message));
+            runtime.world.removeEntity(runtime.world.getEntityByUUID(message));
             break;
 
         case "chat":
-            game.chat.message(message, data.sender);
+            runtime.game.chat.message(message, data.sender);
             break;
         case "playerUpdate":
             updatePlayerState(data);
@@ -126,19 +134,19 @@ function processMessage(data) {
             break;
         case "seed":
             console.log("Received seed:", message);
-            world.generator.loadCustomSeed(message);
-            world.generator.multiplayerSeedLoaded = true;
+            runtime.world.generator.loadCustomSeed(message);
+            runtime.world.generator.multiplayerSeedLoaded = true;
             break;
         case "removeEntity":
             console.log("Removing entity:", message);
-            const entity = world.getEntityByUUID(message.UUID);
+            const entity = runtime.world.getEntityByUUID(message.UUID);
             if (entity) {
-                world.removeEntity(entity);
+                runtime.world.removeEntity(entity);
             }
             break;
         case "summonEntity":
             console.log("Summoning entity:", message);
-            const newEntity = world.summonEntity(
+            const newEntity = runtime.world.summonEntity(
                 message.entity,
                 message.position,
                 message.props,
@@ -155,7 +163,7 @@ function processMessage(data) {
             break;
         case "playerData":
             console.log("Received player data:", message);
-            const player = world.getEntityByUUID(message.UUID);
+            const player = runtime.world.getEntityByUUID(message.UUID);
             if (player) {
                 player.setSkin(message.skin, message.model);
                 player.name = message.name;
@@ -215,7 +223,7 @@ function processMessage(data) {
 
             block.breakBlock(message.shouldDrop, message.isWall, true);
         case "playerDimension":
-            const otherPlayer = world.getEntityByUUID(message.player);
+            const otherPlayer = runtime.world.getEntityByUUID(message.player);
             if (otherPlayer) otherPlayer.dimension = message.dimension;
             break;
 
@@ -235,7 +243,7 @@ function processMessage(data) {
             break;
 
         case "summonDrop":
-            world.summonEntity(
+            runtime.world.summonEntity(
                 Drop,
                 message.position,
                 message.props,
@@ -251,12 +259,12 @@ function processMessage(data) {
 }
 
 // Store callback for async get request
-async function getChunk(x) {
+export async function getChunk(x) {
     try {
-        const chunk = await server.get({
+        const chunk = await runtime.server.get({
             type: "getChunk",
             message: { x: x },
-            sender: world.player.UUID,
+            sender: runtime.world.player.UUID,
         });
 
         console.log("Received chunk:", chunk);
@@ -265,24 +273,24 @@ async function getChunk(x) {
     }
 }
 
-function updatePlayerState(data) {
-    const player = world.getEntityByUUID(data.sender);
+export function updatePlayerState(data) {
+    const player = runtime.world.getEntityByUUID(data.sender);
     if (player) {
         player.multiplayerReceivePlayerState(data.message);
     }
 }
 
-async function iJoined(player, existingPlayers, gamemode = 0) {
+export async function iJoined(player, existingPlayers, gamemode = 0) {
     // Wait until loadingWorld is false
-    while (world.generator.loadingWorld) {
+    while (runtime.world.generator.loadingWorld) {
         await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
-    const myPlayer = world.spawnPlayer(
+    const myPlayer = runtime.world.spawnPlayer(
         new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
         false,
         player.UUID,
-        game.settings.username,
+        runtime.game.settings.username,
     );
 
     if (pendingPlayerDataFromFile.has(player.UUID)) {
@@ -307,14 +315,14 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
     myPlayer.setGamemode(gamemode);
 
     // Upload skin to server
-    server.send({
+    runtime.server.send({
         type: "playerData",
         sender: player.UUID,
         message: {
             UUID: player.UUID,
             skin: myPlayer.body.sprite ?? "player/steve",
             model: myPlayer.skinModel || "steve",
-            name: game.settings.username,
+            name: runtime.game.settings.username,
         },
     });
 
@@ -323,7 +331,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
     // Spawn all existing players for the new player
     if (existingPlayers && existingPlayers.length > 0) {
         existingPlayers.forEach((p) => {
-            const newPlayer = world.spawnPlayer(
+            const newPlayer = runtime.world.spawnPlayer(
                 new Vector2(0, (CHUNK_HEIGHT / 2) * BLOCK_SIZE),
                 false,
                 p.UUID,
@@ -338,8 +346,8 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
     }
 }
 
-function handleEntityRPC(data) {
-    const entity = world?.getEntityByUUID(data.sender);
+export function handleEntityRPC(data) {
+    const entity = runtime.world?.getEntityByUUID(data.sender);
     if (entity && typeof entity[data.message.method] === "function") {
         entity[data.message.method](...data.message.args);
     } else {

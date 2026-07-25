@@ -1,4 +1,6 @@
-class Item {
+import { ToolType } from "../utils/globals.js";
+
+export class Item {
     constructor({
         itemId = 0,
         name = "New Item",
@@ -51,6 +53,12 @@ class Item {
     }
 }
 
-function getItem(itemId) {
-    return itemMap.has(itemId) ? itemMap.get(itemId) : null;
+let itemMapRef = null;
+
+export function bindItemMap(map) {
+    itemMapRef = map;
+}
+
+export function getItem(itemId) {
+    return itemMapRef?.has(itemId) ? itemMapRef.get(itemId) : null;
 }

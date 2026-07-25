@@ -1,4 +1,12 @@
-class FallingBlock extends Entity {
+import { runtime } from "../utils/runtime.js";
+import { Entity } from "../game/entity.js";
+import { Vector2 } from "../utils/classes.js";
+import { BLOCK_SIZE } from "../utils/globals.js";
+import { getSpriteSize, getSpriteUrl } from "../utils/texturePackLoader.js";
+import { getBlock } from "../world/block.js";
+import { Blocks } from "../world/blocks.js";
+
+export class FallingBlock extends Entity {
     constructor(
         world,
         { position = new Vector2(), blockType = Blocks.Sand } = {}
@@ -35,7 +43,7 @@ class FallingBlock extends Entity {
         this.updateEntity();
 
         if (this.grounded) {
-            world.removeEntity(this);
+            runtime.world.removeEntity(this);
 
             const position = new Vector2(
                 Math.round(

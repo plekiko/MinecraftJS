@@ -1,12 +1,16 @@
-const game = new Game();
-let world = null;
+import { runtime } from "./Assets/utils/runtime.js";
+import { Game } from "./Assets/game/game.js";
+import { drawLoadScreen } from "./Assets/utils/renderer.js";
+
+runtime.game = new Game();
+runtime.world = null;
 
 drawLoadScreen();
 
 window.onload = async function () {
-    await game.initGame().catch((error) => {
+    await runtime.game.initGame().catch((error) => {
         console.error("Failed to initialize game:", error);
     });
 
-    requestAnimationFrame(() => game.gameLoop());
+    requestAnimationFrame(() => runtime.game.gameLoop());
 };

@@ -1,17 +1,23 @@
-function updateDebug() {
-    if (!world) return;
-    if (!game) return;
+import { runtime } from "./Assets/utils/runtime.js";
+import { input } from "./Assets/utils/input.js";
+import { camera } from "./Assets/utils/renderer.js";
+import { getBlock } from "./Assets/world/block.js";
+import { saveWorld } from "./Assets/world/saving.js";
+
+export function updateDebug() {
+    if (!runtime.world) return;
+    if (!runtime.game) return;
 
     handleDebugging();
     cameraLogic();
 }
 
-function handleDebugging() {
-    if (drawDebugMouseBlockOverlay) printBlockLogic();
+export function handleDebugging() {
+    if (runtime.drawDebugMouseBlockOverlay) printBlockLogic();
 }
 
-function handleDebugInput() {
-    if (world.player && !world.player.canMove) return; // e.g. pause menu open
+export function handleDebugInput() {
+    if (runtime.world.player && !runtime.world.player.canMove) return; // e.g. pause menu open
     if (input.isActionPressed("debugChunkBorders")) toggleChunkBorders();
     if (input.isActionPressed("debugCamera")) toggleCamera();
     if (input.isActionPressed("debugHitbox")) toggleHitbox();
@@ -28,55 +34,55 @@ function handleDebugInput() {
         saveWorld(false, true);
 }
 
-function updateDebugButtonLabels() {
+export function updateDebugButtonLabels() {
     const set = (id, label, on) => {
         const el = document.getElementById(id);
         if (el) el.textContent = `${label} - ${on ? "ON" : "OFF"}`;
     };
-    set("debug-chunk-borders", "Chunk Borders", drawingChunkBorders);
-    set("debug-camera", "Camera", drawCameraOverlay);
-    set("debug-hitbox", "Hitbox", drawHitbox);
-    set("debug-print-block", "Print Block", drawDebugMouseBlockOverlay);
-    set("debug-file-size", "File Size", drawFileSizeOverlay);
-    set("debug-fps", "FPS", drawFpsOverlay);
-    set("debug-coords", "Coords", drawCoordinatesOverlay);
+    set("debug-chunk-borders", "Chunk Borders", runtime.drawingChunkBorders);
+    set("debug-camera", "Camera", runtime.drawCameraOverlay);
+    set("debug-hitbox", "Hitbox", runtime.drawHitbox);
+    set("debug-print-block", "Print Block", runtime.drawDebugMouseBlockOverlay);
+    set("debug-file-size", "File Size", runtime.drawFileSizeOverlay);
+    set("debug-fps", "FPS", runtime.drawFpsOverlay);
+    set("debug-coords", "Coords", runtime.drawCoordinatesOverlay);
 }
 
-function toggleChunkBorders() {
-    drawingChunkBorders = !drawingChunkBorders;
+export function toggleChunkBorders() {
+    runtime.drawingChunkBorders = !runtime.drawingChunkBorders;
     updateDebugButtonLabels();
 }
-function toggleCamera() {
-    drawCameraOverlay = !drawCameraOverlay;
+export function toggleCamera() {
+    runtime.drawCameraOverlay = !runtime.drawCameraOverlay;
     updateDebugButtonLabels();
 }
-function toggleHitbox() {
-    drawHitbox = !drawHitbox;
+export function toggleHitbox() {
+    runtime.drawHitbox = !runtime.drawHitbox;
     updateDebugButtonLabels();
 }
-function togglePrintBlock() {
-    drawDebugMouseBlockOverlay = !drawDebugMouseBlockOverlay;
+export function togglePrintBlock() {
+    runtime.drawDebugMouseBlockOverlay = !runtime.drawDebugMouseBlockOverlay;
     updateDebugButtonLabels();
 }
-function toggleFileSize() {
-    drawFileSizeOverlay = !drawFileSizeOverlay;
+export function toggleFileSize() {
+    runtime.drawFileSizeOverlay = !runtime.drawFileSizeOverlay;
     updateDebugButtonLabels();
 }
-function toggleFps() {
-    drawFpsOverlay = !drawFpsOverlay;
+export function toggleFps() {
+    runtime.drawFpsOverlay = !runtime.drawFpsOverlay;
     updateDebugButtonLabels();
 }
-function toggleCoordinates() {
-    drawCoordinatesOverlay = !drawCoordinatesOverlay;
+export function toggleCoordinates() {
+    runtime.drawCoordinatesOverlay = !runtime.drawCoordinatesOverlay;
     updateDebugButtonLabels();
 }
 
-function printBlockLogic() {
+export function printBlockLogic() {
     if (input.isActionDown("attack") || input.isActionDown("place")) {
         const mousePos = input.getMousePositionOnBlockGrid();
-        const block = world.getBlockAtWorldPosition(mousePos.x, mousePos.y);
+        const block = runtime.world.getBlockAtWorldPosition(mousePos.x, mousePos.y);
 
-        game.chat.message(
+        runtime.game.chat.message(
             `${getBlock(block.blockType).name} at ${mousePos.x}, ${
                 mousePos.y
             } ${
@@ -93,8 +99,8 @@ function printBlockLogic() {
     }
 }
 
-function cameraLogic() {
-    if (world?.player) return;
+export function cameraLogic() {
+    if (runtime.world?.player) return;
 
     const maxSpeed = 15;
     const acceleration = 1;

@@ -4,6 +4,9 @@ Server/server.properties
 .vscode/settings.json
 Server/node_modules
 Client/node_modules
+Client/dist
+
+.DS_Store
 
 # Files that get created when you run the server
 Server/server.properties

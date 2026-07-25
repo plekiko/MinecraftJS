@@ -1,4 +1,7 @@
-const Items = Object.freeze({
+import { Item, bindItemMap } from "./item.js";
+import { ToolType } from "../utils/globals.js";
+
+export const Items = Object.freeze({
     Stick: 0,
 
     WoodAxe: 1,
@@ -112,7 +115,7 @@ const Items = Object.freeze({
     Flint: 2001,
 });
 
-const items = [
+export const items = [
     new Item({ itemId: 0, name: "Stick", sprite: "stick", fuelTime: 5 }),
 
     //#region Wooden Tools
@@ -917,4 +920,5 @@ const items = [
     //#endregion
 ];
 
-const itemMap = new Map(items.map((item) => [item.itemId, item]));
+export const itemMap = new Map(items.map((item) => [item.itemId, item]));
+bindItemMap(itemMap);

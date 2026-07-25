@@ -1,4 +1,19 @@
-class WorldGenerator {
+import { runtime } from "../utils/runtime.js";
+import tooloud from "tooloud/dist/tooloud.min.js";
+import { InventoryItem } from "../game/inventoryItem.js";
+import { LootTable } from "../game/lootTable.js";
+import { randomRange } from "../utils/classes.js";
+import { BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, RENDER_DISTANCE, multiplayer } from "../utils/globals.js";
+import { camera } from "../utils/renderer.js";
+import { AllBiomes, OverworldBiomes } from "./biome.js";
+import { Metadata } from "./block.js";
+import { Blocks } from "./blocks.js";
+import { Chunk } from "./chunk.js";
+import { activeDimension, dimensions } from "./dimension.js";
+import { loadChunk } from "./saving.js";
+import { Structures } from "./structures.js";
+
+export class WorldGenerator {
     constructor(world) {
         this.world = world;
         this.specialWorldProps = {};
@@ -32,8 +47,8 @@ class WorldGenerator {
             camera &&
             camera.getCurrentChunkIndex
                 ? camera.getCurrentChunkIndex()
-                : world && world.player
-                  ? Math.floor(world.player.x / (CHUNK_WIDTH * BLOCK_SIZE))
+                : runtime.world && runtime.world.player
+                  ? Math.floor(runtime.world.player.x / (CHUNK_WIDTH * BLOCK_SIZE))
                   : 0;
 
         const maxRadius = 10000;
@@ -242,7 +257,7 @@ class WorldGenerator {
 
     async getChunkFromServer(x, dimensionIndex = activeDimension) {
         try {
-            const chunkData = await server.get({
+            const chunkData = await runtime.server.get({
                 type: "getChunk",
                 message: { x: x, dimensionIndex: dimensionIndex },
             });
@@ -300,8 +315,8 @@ class WorldGenerator {
                 this.generateChunk(i, chunkX, oldChunkData, dimensionIndex);
             } else {
                 const chunk = dimension.chunks.get(chunkX);
-                if (chunk.spawnTime && chunk.spawnTime <= passedTime) {
-                    chunk.spawnMobs(day);
+                if (chunk.spawnTime && chunk.spawnTime <= runtime.passedTime) {
+                    chunk.spawnMobs(runtime.day);
                     chunk.spawnTime = 0;
                 }
             }
@@ -487,7 +502,7 @@ class WorldGenerator {
         const biome = this.calculateChunkBiome(chunkIndex, dimensionIndex);
 
         const newChunk = new Chunk(
-            world,
+            runtime.world,
             chunkX,
             CHUNK_WIDTH,
             biome,
@@ -521,7 +536,7 @@ class WorldGenerator {
             chunk.applyBufferedBlocks();
             chunk.generateWater();
 
-            if (!this.specialWorldProps.noMobs) chunk.spawnMobs(day);
+            if (!this.specialWorldProps.noMobs) chunk.spawnMobs(runtime.day);
 
             if (!this.specialWorldProps.flat) {
                 chunk.generateTrees();

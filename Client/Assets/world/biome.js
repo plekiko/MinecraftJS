@@ -1,4 +1,9 @@
-class Biome {
+import { WATER_LEVEL } from "../utils/globals.js";
+import { Noise, NoisePresets } from "../utils/noise.js";
+import { Blocks } from "./blocks.js";
+import { Trees } from "./trees.js";
+
+export class Biome {
     constructor({
         name,
         heightNoise = new Noise(),
@@ -57,12 +62,12 @@ class Biome {
     }
 }
 
-const BiomeMobs = Object.freeze({
+export const BiomeMobs = Object.freeze({
     CommonMobs: ["Pig", "Cow", "Sheep"],
     Googlies: ["Zombie", "Creeper"],
 });
 
-const OverworldBiomes = Object.freeze({
+export const OverworldBiomes = Object.freeze({
     Plains: new Biome({
         name: "Plains",
         heightNoise: NoisePresets.Flat,
@@ -283,7 +288,7 @@ const OverworldBiomes = Object.freeze({
     }),
 });
 
-const NetherBiomes = Object.freeze({
+export const NetherBiomes = Object.freeze({
     NetherWastes: new Biome({
         name: "Nether Wastes",
         topLayer: Blocks.Netherrack,
@@ -313,7 +318,7 @@ const NetherBiomes = Object.freeze({
     }),
 });
 
-const AllBiomes = Object.freeze({
+export const AllBiomes = Object.freeze({
     ...OverworldBiomes,
     ...NetherBiomes,
 });

@@ -1,4 +1,25 @@
-class Player extends Entity {
+import { runtime } from "../utils/runtime.js";
+import { Entities } from "./entities.js";
+import { Body, BodyPart } from "../game/body.js";
+import { Colors } from "../game/chat.js";
+import { showDeathScreen } from "../game/deathScreen.js";
+import { Entity, EntityTypes } from "../game/entity.js";
+import { Inventory } from "../game/inventory.js";
+import { InventoryItem } from "../game/inventoryItem.js";
+import { getItem } from "../game/item.js";
+import { Items } from "../game/items.js";
+import { isLegacySkin } from "../game/skinPreview.js";
+import { Sounds, playPositionalSound, playRandomSoundFromArray, playSound } from "../game/sounds.js";
+import { Vector2, calculateDirection, lerp, randomRange, uuidv4 } from "../utils/classes.js";
+import { BLOCK_SIZE, CHUNK_HEIGHT, INTERACT_DISTANCE, ToolType, multiplayer } from "../utils/globals.js";
+import { input } from "../utils/input.js";
+import { camera, drawText, isColliding, mouseOverPosition } from "../utils/renderer.js";
+import { SpecialType, getBlock } from "../world/block.js";
+import { Blocks } from "../world/blocks.js";
+import { activeDimension, getDimensionChunks, gotoDimension } from "../world/dimension.js";
+import { createParticleEmitter } from "../world/particleEmitter.js";
+
+export class Player extends Entity {
     constructor(
         world,
         {
@@ -327,7 +348,7 @@ class Player extends Entity {
         this.portalSound.volume = lerp(
             this.portalSound.volume,
             0.5,
-            deltaTime / 3,
+            runtime.deltaTime / 3,
         );
     }
 
@@ -424,7 +445,7 @@ class Player extends Entity {
             data.lookDirection = this.lookDirection;
         }
 
-        server.send({
+        runtime.server.send({
             type: "playerUpdate",
             sender: this.UUID,
             message: data,
@@ -585,8 +606,8 @@ class Player extends Entity {
 
         playPositionalSound(this.position, "items/ignite.ogg", 10);
 
-        world.serverPlaceBlock(
-            world.getChunkXForWorldX(this.hoverBlock.transform.position.x),
+        runtime.world.serverPlaceBlock(
+            runtime.world.getChunkXForWorldX(this.hoverBlock.transform.position.x),
             this.hoverBlock.x,
             this.hoverBlock.y,
             Blocks.Fire,
@@ -601,7 +622,7 @@ class Player extends Entity {
         this.swing();
 
         if (this.isLocal() && multiplayer)
-            server.entityRPC(this.UUID, "playerSwing");
+            runtime.server.entityRPC(this.UUID, "playerSwing");
     }
 
     useHoe() {
@@ -611,7 +632,7 @@ class Player extends Entity {
 
         if (!block.hoeAble) return;
 
-        const blockAbove = world.getBlockAtWorldPosition(
+        const blockAbove = runtime.world.getBlockAtWorldPosition(
             this.hoverBlock.transform.position.x,
             this.hoverBlock.transform.position.y - BLOCK_SIZE,
         );
@@ -626,8 +647,8 @@ class Player extends Entity {
             origin: this.position,
         });
 
-        world.serverPlaceBlock(
-            world.getChunkXForWorldX(this.hoverBlock.transform.position.x),
+        runtime.world.serverPlaceBlock(
+            runtime.world.getChunkXForWorldX(this.hoverBlock.transform.position.x),
             this.hoverBlock.x,
             this.hoverBlock.y,
             Blocks.Farmland,
@@ -679,8 +700,8 @@ class Player extends Entity {
                 this.hoverBlock.setBlockType(Blocks.Water, true);
                 //this.world.setBlockType(this.hoverBlock, Blocks.Water);
 
-                world.serverPlaceBlock(
-                    world.getChunkXForWorldX(
+                runtime.world.serverPlaceBlock(
+                    runtime.world.getChunkXForWorldX(
                         this.hoverBlock.transform.position.x,
                     ),
                     this.hoverBlock.x,
@@ -702,8 +723,8 @@ class Player extends Entity {
                 );
                 this.hoverBlock.setBlockType(Blocks.Lava, true);
 
-                world.serverPlaceBlock(
-                    world.getChunkXForWorldX(
+                runtime.world.serverPlaceBlock(
+                    runtime.world.getChunkXForWorldX(
                         this.hoverBlock.transform.position.x,
                     ),
                     this.hoverBlock.x,
@@ -738,7 +759,7 @@ class Player extends Entity {
 
                 if (!chunk) return;
 
-                world.serverPlaceBlock(
+                runtime.world.serverPlaceBlock(
                     chunk.x,
                     this.hoverBlock.x,
                     this.hoverBlock.y,
@@ -772,7 +793,7 @@ class Player extends Entity {
 
                 if (!chunk) return;
 
-                world.serverPlaceBlock(
+                runtime.world.serverPlaceBlock(
                     chunk.x,
                     this.hoverBlock.x,
                     this.hoverBlock.y,
@@ -809,9 +830,9 @@ class Player extends Entity {
             return;
         }
 
-        this.eatTimer += deltaTime;
+        this.eatTimer += runtime.deltaTime;
 
-        if (this.eatTimer % 0.2 < deltaTime) {
+        if (this.eatTimer % 0.2 < runtime.deltaTime) {
             playRandomSoundFromArray({
                 array: Sounds.Player_Eat,
                 positional: true,
@@ -869,7 +890,7 @@ class Player extends Entity {
             this.deathCause = `${this.name || "Player"} was killed`;
         }
 
-        game.chat.message("Player has died.");
+        runtime.game.chat.message("Player has died.");
 
         playRandomSoundFromArray({
             array: Sounds.Player_Hurt,
@@ -884,7 +905,7 @@ class Player extends Entity {
         this.canMove = false;
         this.isDead = true;
 
-        if (!GAMERULES.keepInventory) this.dropAllItems();
+        if (!runtime.GAMERULES.keepInventory) this.dropAllItems();
 
         if (typeof showDeathScreen === "function") showDeathScreen();
     }
@@ -900,7 +921,7 @@ class Player extends Entity {
 
     interactLogic() {
         if (this.windowOpen) return;
-        if (game.pauseMenu?.getActive()) return;
+        if (runtime.game.pauseMenu?.getActive()) return;
 
         const usePressed = input.isActionPressed("place");
 
@@ -1046,7 +1067,7 @@ class Player extends Entity {
     }
 
     toggleLogic() {
-        if (game.chat.inChat) return;
+        if (runtime.game.chat.inChat) return;
         if (this.windowOpen && input.isActionPressed("pause")) {
             this.closeInventory();
             input._pauseConsumedByUI = true;
@@ -1135,7 +1156,7 @@ class Player extends Entity {
             return;
         }
 
-        world.removeEntity(drop, multiplayer);
+        runtime.world.removeEntity(drop, multiplayer);
     }
 
     climbingCollisingLogic() {
@@ -1203,7 +1224,7 @@ class Player extends Entity {
 
     breakingAndPlacingLogic() {
         if (this.windowOpen) return;
-        if (game.pauseMenu?.getActive()) return;
+        if (runtime.game.pauseMenu?.getActive()) return;
 
         if (input.isActionPressed("attack")) {
             this.playerSwing();
@@ -1249,11 +1270,11 @@ class Player extends Entity {
         const cursorDistance =
             Vector2.Distance(this.position, mouseWorld) / BLOCK_SIZE;
 
-        cursorInRange = !this.abilities.instaBuild
+        runtime.cursorInRange = !this.abilities.instaBuild
             ? cursorDistance <= INTERACT_DISTANCE
             : true;
 
-        if (!cursorInRange) return;
+        if (!runtime.cursorInRange) return;
 
         const entity = this.checkForEntityOnMouse();
         this.hitEntity(entity);
@@ -1320,8 +1341,8 @@ class Player extends Entity {
         );
 
         let isAdjacentToBlock =
-            world.checkAdjacentBlocks(mousePos, true) ||
-            world.checkAdjacentBlocks(mousePos);
+            runtime.world.checkAdjacentBlocks(mousePos, true) ||
+            runtime.world.checkAdjacentBlocks(mousePos);
 
         return isAdjacentToBlock;
     }
@@ -1383,7 +1404,7 @@ class Player extends Entity {
             this.openSign(newBlock);
         }
 
-        world.serverPlaceBlock(
+        runtime.world.serverPlaceBlock(
             chunk.x,
             this.hoverBlock.x,
             this.hoverBlock.y,
@@ -1433,7 +1454,7 @@ class Player extends Entity {
         );
 
         if (mousePos.y <= -1) {
-            game.chat.message(
+            runtime.game.chat.message(
                 "Can't place here! World height: " + CHUNK_HEIGHT,
                 "",
                 "red",
@@ -1461,9 +1482,9 @@ class Player extends Entity {
             }
         }
 
-        const isAdjacentToBlock = world.checkAdjacentBlocks(mousePos);
+        const isAdjacentToBlock = runtime.world.checkAdjacentBlocks(mousePos);
 
-        const blockBeneath = world.getBlockAtWorldPosition(
+        const blockBeneath = runtime.world.getBlockAtWorldPosition(
             this.hoverBlock.transform.position.x,
             this.hoverBlock.transform.position.y + BLOCK_SIZE,
         );
@@ -1501,7 +1522,7 @@ class Player extends Entity {
             if (wallCheck) {
                 // If block can be placed on wall, check for wall behind
                 if (block.canBePlacedOnWall) {
-                    let wallBehind = world.getBlockAtWorldPosition(
+                    let wallBehind = runtime.world.getBlockAtWorldPosition(
                         this.hoverBlock.transform.position.x,
                         this.hoverBlock.transform.position.y,
                         true,
@@ -1600,7 +1621,7 @@ class Player extends Entity {
             hover.breakBlock(false, wall);
             this.playerSwing();
 
-            world.serverBreakBlock(
+            runtime.world.serverBreakBlock(
                 hover.chunkX,
                 hover.x,
                 hover.y,
@@ -1642,7 +1663,7 @@ class Player extends Entity {
         }
 
         const soundInterval = 0.2;
-        this.breakingTime += this.grounded ? deltaTime : deltaTime / 3;
+        this.breakingTime += this.grounded ? runtime.deltaTime : runtime.deltaTime / 3;
 
         if (this.breakingTime >= this.lastBreakSoundTime + soundInterval) {
             this.lastBreakSoundTime = this.breakingTime;
@@ -1650,7 +1671,7 @@ class Player extends Entity {
                 array: block.breakingSound,
                 volume: 0.2,
                 positional: true,
-                origin: world.getBlockWorldPosition(this.hoverBlock),
+                origin: runtime.world.getBlockWorldPosition(this.hoverBlock),
             });
 
             this.playerSwing();
@@ -1676,7 +1697,7 @@ class Player extends Entity {
             hover.breakBlock(shouldDrop, isWall);
 
             if (multiplayer) {
-                world.serverBreakBlock(
+                runtime.world.serverBreakBlock(
                     hover.chunkX,
                     hover.x,
                     hover.y,
@@ -1869,19 +1890,19 @@ class Player extends Entity {
     }
 
     applyDeltaTime() {
-        this.velocity.x *= deltaTime;
-        this.velocity.y *= deltaTime;
+        this.velocity.x *= runtime.deltaTime;
+        this.velocity.y *= runtime.deltaTime;
     }
 }
 
-const skinData = localStorage.getItem("playerSkin");
-const skinModel =
+export const skinData = localStorage.getItem("playerSkin");
+export const skinModel =
     localStorage.getItem("playerSkinModel") === "alex" ? "alex" : "steve";
 
 // Foreground limb = OUTER face of the camera-facing side
 // Background limb = INNER face of the far side
 // Note: on the left limbs, west=inner and east=outer (mirrored vs the right limbs)
-function getPlayerLimbCrops(model, facingLeft = false, legacy = false) {
+export function getPlayerLimbCrops(model, facingLeft = false, legacy = false) {
     const slim = model === "alex" && !legacy;
 
     const rightArmOuter = { x: 40, y: 20, width: 4, height: 12 };
@@ -1931,12 +1952,12 @@ function getPlayerLimbCrops(model, facingLeft = false, legacy = false) {
     };
 }
 
-function getPlayerArmCrops(model) {
+export function getPlayerArmCrops(model) {
     const crops = getPlayerLimbCrops(model, false, false);
     return { leftArm: crops.leftArm, rightArm: crops.rightArm };
 }
 
-function createPlayerBody() {
+export function createPlayerBody() {
     const limbs = getPlayerLimbCrops(skinModel);
     return new Body({
         sprite: skinData || "player/steve",

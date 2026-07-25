@@ -1,4 +1,11 @@
-const Blocks = Object.freeze({
+import { Items } from "../game/items.js";
+import { LootItem, LootTable } from "../game/lootTable.js";
+import { Sounds } from "../game/sounds.js";
+import { ToolType } from "../utils/globals.js";
+import { BlockCategory, BlockType, SpecialType } from "./block.js";
+import { blockRegistry } from "./blockRegistry.js";
+
+export const Blocks = Object.freeze({
     Air: 0,
     GrassBlock: 1,
     Dirt: 2,
@@ -157,7 +164,7 @@ const Blocks = Object.freeze({
     Sign: 700,
 });
 
-const blockTypes = [
+export const blockTypes = [
     //#region Basic Blocks
     new BlockType({
         blockId: 0,
@@ -2228,4 +2235,6 @@ const blockTypes = [
     //#endregion
 ];
 
-const blockMap = new Map(blockTypes.map((block) => [block.blockId, block]));
+export const blockMap = new Map(blockTypes.map((block) => [block.blockId, block]));
+blockRegistry.Blocks = Blocks;
+blockRegistry.blockMap = blockMap;

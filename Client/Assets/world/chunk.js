@@ -1,4 +1,17 @@
-class Chunk {
+import { runtime } from "../utils/runtime.js";
+import { Entities } from "../entities/entities.js";
+import { Items } from "../game/items.js";
+import { LootItem, LootTable } from "../game/lootTable.js";
+import { playPositionalSound } from "../game/sounds.js";
+import { Vector2, lerpEaseInOut, randomRange } from "../utils/classes.js";
+import { BLOCK_SIZE, CAVES_THRESHOLD, CHUNK_HEIGHT, CHUNK_WIDTH, TERRAIN_HEIGHT, mobSpawnDelay } from "../utils/globals.js";
+import { OverworldBiomes } from "./biome.js";
+import { Block, getBlock } from "./block.js";
+import { Blocks } from "./blocks.js";
+import { Dimensions, activeDimension, getDimension, getDimensionChunks } from "./dimension.js";
+import { Trees } from "./trees.js";
+
+export class Chunk {
     constructor(
         world,
         x = 0,
@@ -394,7 +407,7 @@ class Chunk {
     }
 
     spawnMobs(passive = true) {
-        if (!GAMERULES.doMobSpawning) return;
+        if (!runtime.GAMERULES.doMobSpawning) return;
 
         // If peaceful, don't spawn hostile googlies, but allow passive mobs
         if (this.world && this.world.difficulty === "peaceful" && !passive) {
@@ -1641,18 +1654,18 @@ class Chunk {
         // Calculate dayNightFactor (1 = full day, 0 = full night)
         let dayNightFactor;
 
-        if (time <= duskStart) {
+        if (runtime.time <= duskStart) {
             // Full day (1 to 3)
             dayNightFactor = 1;
-        } else if (time < nightStart) {
+        } else if (runtime.time < nightStart) {
             // Dusk transition (3 to 3.5)
-            dayNightFactor = 1 - (time - duskStart) / (nightStart - duskStart);
-        } else if (time <= nightEnd) {
+            dayNightFactor = 1 - (runtime.time - duskStart) / (nightStart - duskStart);
+        } else if (runtime.time <= nightEnd) {
             // Full night (3.5 to 6.5)
             dayNightFactor = 0;
-        } else if (time < dawnStart) {
+        } else if (runtime.time < dawnStart) {
             // Dawn transition (6.5 to 6.7)
-            dayNightFactor = (time - nightEnd) / (dawnStart - nightEnd);
+            dayNightFactor = (runtime.time - nightEnd) / (dawnStart - nightEnd);
         } else {
             // Full day (6.7 to 7.3)
             dayNightFactor = 1;

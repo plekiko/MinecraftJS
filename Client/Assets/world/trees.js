@@ -1,10 +1,13 @@
-class Tree {
+import { Blocks } from "./blocks.js";
+import { treesRegistry } from "./treesRegistry.js";
+
+export class Tree {
     constructor(variants = []) {
         this.variants = variants;
     }
 }
 
-const Trees = Object.freeze({
+export const Trees = Object.freeze({
     Cactus: new Tree([
         {
             blocks: [[Blocks.Cactus], [Blocks.Cactus], [Blocks.Cactus]],
@@ -3569,3 +3572,5 @@ const Trees = Object.freeze({
         },
     ]),
 });
+
+treesRegistry.Trees = Trees;

@@ -1,4 +1,6 @@
-class Structure {
+import { Dimensions } from "./dimension.js";
+
+export class Structure {
     constructor({
         blocks = [[]],
         walls = null,

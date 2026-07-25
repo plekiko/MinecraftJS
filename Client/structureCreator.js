@@ -1,3 +1,7 @@
+import { Blocks, blockTypes } from "./Assets/world/blocks.js";
+import { getBlock } from "./Assets/world/block.js";
+import { ChestLoot } from "./Assets/world/chestLoot.js";
+
 // ----- CONFIGURATION -----
 const canvas = document.getElementById("gridCanvas");
 const ctx = canvas.getContext("2d");

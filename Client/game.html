@@ -62,7 +62,7 @@
                     <button
                         class="btn"
                         onclick="
-                            if (typeof SaveWorld === 'function') SaveWorld();
+                            if (typeof saveWorld === 'function') saveWorld();
                         "
                     >
                         Save World
@@ -70,8 +70,8 @@
                     <button
                         class="btn"
                         onclick="
-                            if (typeof SaveWorld === 'function')
-                                SaveWorld(false, true);
+                            if (typeof saveWorld === 'function')
+                                saveWorld(false, true);
                         "
                     >
                         Save World File
@@ -134,6 +134,6 @@
             </div>
         </div>
 
-        <script type="module" src="bootstrap.js"></script>
+        <script type="module" src="/game-main.js"></script>
     </body>
 </html>

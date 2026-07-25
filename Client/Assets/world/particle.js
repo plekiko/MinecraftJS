@@ -1,4 +1,7 @@
-class Particle extends SimpleSprite {
+import { runtime } from "../utils/runtime.js";
+import { SimpleSprite, Transform, Vector2 } from "../utils/classes.js";
+
+export class Particle extends SimpleSprite {
     constructor(x, y, type, scale = 1) {
         super({
             sprite: type ? "particle/particles" : null,
@@ -25,11 +28,11 @@ class Particle extends SimpleSprite {
         const elapsedTime = Date.now() - this.startTime;
 
         // Update position based on speed
-        this.transform.position.x += this.speedX * deltaTime;
-        this.transform.position.y += this.speedY * deltaTime;
+        this.transform.position.x += this.speedX * runtime.deltaTime;
+        this.transform.position.y += this.speedY * runtime.deltaTime;
 
         // Apply gravity
-        this.speedY += this.gravity * deltaTime;
+        this.speedY += this.gravity * runtime.deltaTime;
 
         // Fade out effect
         if (this.fadeOutTime > 0) {
@@ -39,7 +42,7 @@ class Particle extends SimpleSprite {
     }
 }
 
-class ParticleType {
+export class ParticleType {
     constructor(x, y, frameCount, animationSpeed = 1, width = 8, height = 8) {
         this.x = x;
         this.y = y;
@@ -51,7 +54,7 @@ class ParticleType {
     }
 }
 
-const PARTICLE = Object.freeze({
+export const PARTICLE = Object.freeze({
     Heart: new ParticleType(0, 5, 1),
     Smoke: new ParticleType(5, 0, 1),
 });

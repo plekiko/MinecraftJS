@@ -1,4 +1,7 @@
-class LootItem {
+import { inventoryRegistry } from "./inventoryRegistry.js";
+import { randomRange } from "../utils/mathUtils.js";
+
+export class LootItem {
     constructor({
         blockId = null,
         itemId = null,
@@ -12,7 +15,7 @@ class LootItem {
     }
 }
 
-class LootTable {
+export class LootTable {
     constructor(items = []) {
         this.items = items;
     }
@@ -20,6 +23,7 @@ class LootTable {
     getRandomLoot() {
         const loot = [];
         if (this.items.length === 0) return loot;
+        const InventoryItem = inventoryRegistry.InventoryItem;
         this.items.forEach((item) => {
             const count = randomRange(
                 item.maxCount - item.subtract,

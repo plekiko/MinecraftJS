@@ -1,4 +1,20 @@
-class World {
+import { runtime } from "../utils/runtime.js";
+import { Drop } from "../entities/drop.js";
+import { Player } from "../entities/player.js";
+import { EntityTypes } from "../game/entity.js";
+import { Hotbar } from "../game/hotbar.js";
+import { Sounds, playRandomSoundFromArray, updatePositionalAudioVolumes } from "../game/sounds.js";
+import { Vector2, uuidv4 } from "../utils/classes.js";
+import { BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, ENTITY_UPDATE_DISTANCE, TICK_SPEED, dayNightSpeed, multiplayer, updatingBlocks } from "../utils/globals.js";
+import { camera } from "../utils/renderer.js";
+import { SpecialType, getBlock } from "./block.js";
+import { Blocks } from "./blocks.js";
+import { activeDimension, dimensions } from "./dimension.js";
+import { WorldGenerator } from "./generator.js";
+import { removeParticleEmitter } from "./particleEmitter.js";
+import { saveChunk } from "./saving.js";
+
+export class World {
     constructor() {
         this.name = "New World";
         this.seed = 0;
@@ -34,16 +50,16 @@ class World {
     }
 
     tick() {
-        if(world.generator.loadingWorld) return;
+        if(runtime.world.generator.loadingWorld) return;
 
         this.updateBlocks();
-        game.animateFrame();
+        runtime.game.animateFrame();
         updatePositionalAudioVolumes();
         this.updateEntities(true);
         this.chunks_in_render_distance.forEach((chunk) => {
             chunk.updateChunk();
         });
-        if (game.settings.lighting) {
+        if (runtime.game.settings.lighting) {
             this.globalUpdateSkyLight();
             this.globalRecalculateLight();
         }
@@ -52,13 +68,13 @@ class World {
     }
 
     dayNightCycle() {
-        if (time > 7.5) {
-            time = 1;
+        if (runtime.time > 7.5) {
+            runtime.time = 1;
         }
-        if (time > 3.5 && time < 6.5) day = false;
-        else day = true;
-        if (!GAMERULES.doDaylightCycle) return;
-        time += dayNightSpeed;
+        if (runtime.time > 3.5 && runtime.time < 6.5) runtime.day = false;
+        else runtime.day = true;
+        if (!runtime.GAMERULES.doDaylightCycle) return;
+        runtime.time += dayNightSpeed;
     }
 
     updateEntities(tick = false) {
@@ -67,8 +83,8 @@ class World {
         const cameraNearX =
             camera.getWorldX(camera.x) + ENTITY_UPDATE_DISTANCE * BLOCK_SIZE;
         this.entities.forEach((entity) => {
-            if (entity === world.player) {
-                camera.update(world.player);
+            if (entity === runtime.world.player) {
+                camera.update(runtime.world.player);
                 if (tick) entity.tickUpdate();
                 else entity.update();
                 return;
@@ -91,14 +107,14 @@ class World {
         name = null,
         local = true,
     ) {
-        const newPlayer = new Player(world, {
+        const newPlayer = new Player(runtime.world, {
             position: position,
-            entities: world.entities,
+            entities: runtime.world.entities,
             UUID: UUID ? UUID : uuidv4(),
             name: name ? name : "Player",
         });
         if (local) {
-            world.player = newPlayer;
+            runtime.world.player = newPlayer;
         }
         if (setOnGround) {
             const trySetOnGround = () => {
@@ -114,8 +130,8 @@ class World {
                 setTimeout(() => clearInterval(intervalId), 10000);
             }
         }
-        world.entities.push(newPlayer);
-        if (local) hotbar = new Hotbar(newPlayer.inventory);
+        runtime.world.entities.push(newPlayer);
+        if (local) runtime.hotbar = new Hotbar(newPlayer.inventory);
         return newPlayer;
     }
 
@@ -460,7 +476,7 @@ class World {
         });
 
         // Damage and knockback entities in range
-        for (const entity of world.entities) {
+        for (const entity of runtime.world.entities) {
             if (entity === excludeEntity || entity.invulnerable) continue;
 
             const distance = Vector2.Distance(position, entity.position);
@@ -542,7 +558,7 @@ class World {
 
     async getChunkFromServer(x, dimensionIndex = activeDimension) {
         try {
-            const chunkData = await server.get({
+            const chunkData = await runtime.server.get({
                 type: "getChunk",
                 message: { x: x, dimensionIndex: dimensionIndex },
             });
@@ -562,7 +578,7 @@ class World {
         dimensionIndex = activeDimension,
     ) {
         if (!multiplayer) return;
-        server.send({
+        runtime.server.send({
             type: "placeBlock",
             sender: this.player.UUID,
             message: {
@@ -588,7 +604,7 @@ class World {
         dimensionIndex = activeDimension,
     ) {
         if (!multiplayer) return;
-        server.send({
+        runtime.server.send({
             type: "breakBlock",
             sender: this.player.UUID,
             message: {
@@ -609,7 +625,7 @@ class World {
         if (!this.player) return;
         if (!multiplayer) return;
         const chunk = this.getChunkForX(chunkX, dimensionIndex);
-        await server.send({
+        await runtime.server.send({
             type: "uploadChunk",
             message: {
                 x: chunkX,
@@ -625,7 +641,7 @@ class World {
         const uuid = uuidv4();
         const drop = this.summonEntity(Drop, position, props, false, uuid);
         if (multiplayer) {
-            server.send({
+            runtime.server.send({
                 type: "summonDrop",
                 message: { UUID: uuid, position: position, props: props },
                 sender: this.player?.UUID,
@@ -647,7 +663,7 @@ class World {
         this.entities.push(newEntity);
 
         if (sync) {
-            server.send({
+            runtime.server.send({
                 type: "summonEntity",
                 message: {
                     entity: newEntity.name,
@@ -678,7 +694,7 @@ class World {
             this.entities.splice(index, 1);
         }
         if (sync) {
-            server.send({
+            runtime.server.send({
                 type: "removeEntity",
                 message: { UUID: entity.UUID },
             });

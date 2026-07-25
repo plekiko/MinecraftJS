@@ -1,4 +1,6 @@
-class Recipe {
+import { input } from "../utils/input.js";
+
+export class Recipe {
     constructor({ type, output, input }) {
         this.type = type;
         this.output = output;
@@ -6,13 +8,13 @@ class Recipe {
     }
 }
 
-const RecipeType = Object.freeze({
+export const RecipeType = Object.freeze({
     Shapeless: 0,
     Shaped: 1,
     Filled: 2,
 });
 
-class RecipeItem {
+export class RecipeItem {
     constructor({
         blockId = null,
         itemId = null,

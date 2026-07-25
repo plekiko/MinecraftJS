@@ -1,4 +1,7 @@
-class Noise {
+import tooloud from "tooloud/dist/tooloud.min.js";
+import { TERRAIN_HEIGHT } from "./globals.js";
+
+export class Noise {
     constructor(scale = 100, intensity = 1, min = 0) {
         this.scale = scale / 1000;
         this.intensity = intensity;
@@ -18,7 +21,7 @@ class Noise {
     }
 }
 
-const NoisePresets = Object.freeze({
+export const NoisePresets = Object.freeze({
     Flat: new Noise(7, 10, TERRAIN_HEIGHT),
     SmallHills: new Noise(5, 35, TERRAIN_HEIGHT),
     Mountains: new Noise(1.5, 160, TERRAIN_HEIGHT + 18),

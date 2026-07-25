@@ -1,4 +1,8 @@
-class PauseMenu {
+import { runtime } from "../utils/runtime.js";
+import { input } from "../utils/input.js";
+import { updateDebugButtonLabels } from "../../debug.js";
+
+export class PauseMenu {
     constructor() {
         this.container = document.querySelector("#pause-menu");
         this.pages = Array.from(
@@ -30,9 +34,9 @@ class PauseMenu {
             this.container.classList.add("visible");
             this.page = 1;
             this.root.style.setProperty("--drawMouse", "default");
-            if (world.player) {
-                world.player.canMove = false;
-                if (world.player.resetBreaking) world.player.resetBreaking();
+            if (runtime.world.player) {
+                runtime.world.player.canMove = false;
+                if (runtime.world.player.resetBreaking) runtime.world.player.resetBreaking();
             }
             // update pause menu difficulty label if present
             this.updateDifficultyLabel();
@@ -40,7 +44,7 @@ class PauseMenu {
             this.container.classList.remove("visible");
             this.page = 0;
             this.root.style.setProperty("--drawMouse", "none");
-            if (world.player) world.player.canMove = true;
+            if (runtime.world.player) runtime.world.player.canMove = true;
         }
     }
 
@@ -49,7 +53,7 @@ class PauseMenu {
             const btn = document.getElementById("pause-difficulty-btn");
             if (!btn) return;
             const label =
-                world && world.difficulty === "peaceful" ? "Peaceful" : "Easy";
+                runtime.world && runtime.world.difficulty === "peaceful" ? "Peaceful" : "Easy";
             btn.textContent = "Difficulty: " + label;
         } catch (e) {}
     }
@@ -79,14 +83,14 @@ class PauseMenu {
             return;
         }
 
-        if (game.chat.inChat || (world.player && world.player.windowOpen))
+        if (runtime.game.chat.inChat || (runtime.world.player && runtime.world.player.windowOpen))
             return;
         if (input._pauseConsumedByUI) {
             input._pauseConsumedByUI = false;
             return;
         }
 
-        if (world.player && !world.generator.loadingWorld) {
+        if (runtime.world.player && !runtime.world.generator.loadingWorld) {
             this.open();
         }
     }
@@ -100,19 +104,19 @@ class PauseMenu {
     }
 }
 
-function togglePauseDifficulty() {
+export function togglePauseDifficulty() {
     try {
-        if (!world) return;
+        if (!runtime.world) return;
         // cycle difficulty on the world
-        if (typeof world.cycleDifficulty === "function") {
-            const newDiff = world.cycleDifficulty();
+        if (typeof runtime.world.cycleDifficulty === "function") {
+            const newDiff = runtime.world.cycleDifficulty();
             // update any gamerule-dependent settings if needed
-        } else if (typeof world.setDifficulty === "function") {
-            const next = world.difficulty === "peaceful" ? "easy" : "peaceful";
-            world.setDifficulty(next);
+        } else if (typeof runtime.world.setDifficulty === "function") {
+            const next = runtime.world.difficulty === "peaceful" ? "easy" : "peaceful";
+            runtime.world.setDifficulty(next);
         }
 
         // update label in pause menu
-        if (game && game.pauseMenu) game.pauseMenu.updateDifficultyLabel();
+        if (runtime.game && runtime.game.pauseMenu) runtime.game.pauseMenu.updateDifficultyLabel();
     } catch (e) {}
 }

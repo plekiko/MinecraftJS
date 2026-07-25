@@ -1,4 +1,12 @@
-class Drop extends Entity {
+import { runtime } from "../utils/runtime.js";
+import { Entity, EntityTypes } from "../game/entity.js";
+import { getItem } from "../game/item.js";
+import { Vector2, arePropsEqual, uuidv4 } from "../utils/classes.js";
+import { BLOCK_SIZE } from "../utils/globals.js";
+import { getSpriteSize, getSpriteUrl } from "../utils/texturePackLoader.js";
+import { getBlock } from "../world/block.js";
+
+export class Drop extends Entity {
     constructor(
         world,
         {
@@ -80,13 +88,13 @@ class Drop extends Entity {
 
             if (combinedCount <= maxStackSize) {
                 this.count = combinedCount;
-                world.removeEntity(other);
+                runtime.world.removeEntity(other);
             } else {
                 const remainingSpace = maxStackSize - this.count;
                 this.count += remainingSpace;
                 other.count -= remainingSpace;
 
-                if (other.count <= 0) world.removeEntity(other);
+                if (other.count <= 0) runtime.world.removeEntity(other);
             }
         }
     }

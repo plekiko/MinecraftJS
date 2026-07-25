@@ -1,4 +1,8 @@
-const ChestLoot = Object.freeze({
+import { Items } from "../game/items.js";
+import { LootItem, LootTable } from "../game/lootTable.js";
+import { Blocks } from "./blocks.js";
+
+export const ChestLoot = Object.freeze({
     Spawner: new LootTable([
         new LootItem({
             itemId: Items.MusicDisc13,

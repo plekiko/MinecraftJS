@@ -39,7 +39,7 @@
     });
 })();
 
-function playButtonSound() {
+export function playButtonSound() {
     const s = JSON.parse(localStorage.getItem("settings") || "{}");
     const sfxVol = s.sfxVolume ?? (s.sfx === false ? 0 : 100);
     if (sfxVol === 0) return;
@@ -56,7 +56,7 @@ document.addEventListener("change", (e) => {
     if (e.target.matches?.(".slider-input")) playButtonSound();
 });
 
-function downloadWorldSave(saveData, filename) {
+export function downloadWorldSave(saveData, filename) {
     const blob = new Blob([saveData], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

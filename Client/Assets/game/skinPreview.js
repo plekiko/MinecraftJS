@@ -2,7 +2,7 @@
 // Denoted by position on player (Left on player = Right in UI)
 
 // Steve / classic (4px arms)
-const SKIN_PREVIEW_PARTS = [
+export const SKIN_PREVIEW_PARTS = [
     { crop: { x: 4, y: 20, width: 4, height: 12 }, pos: { x: 4, y: 20 } }, // left leg
     { crop: { x: 20, y: 52, width: 4, height: 12 }, pos: { x: 8, y: 20 } }, // right leg
     { crop: { x: 20, y: 20, width: 8, height: 12 }, pos: { x: 4, y: 8 } }, // torso
@@ -10,7 +10,7 @@ const SKIN_PREVIEW_PARTS = [
     { crop: { x: 36, y: 52, width: 4, height: 12 }, pos: { x: 12, y: 8 } }, // left arm
     { crop: { x: 8, y: 8, width: 8, height: 8 }, pos: { x: 4, y: 0 } }, // head
 ];
-const SKIN_PREVIEW_OVERLAY_PARTS = [
+export const SKIN_PREVIEW_OVERLAY_PARTS = [
     { crop: { x: 4, y: 36, width: 4, height: 12 }, pos: { x: 4, y: 20 } }, // right leg overlay
     { crop: { x: 4, y: 52, width: 4, height: 12 }, pos: { x: 8, y: 20 } }, // left leg overlay
     { crop: { x: 20, y: 32, width: 8, height: 12 }, pos: { x: 4, y: 8 } }, // torso overlay
@@ -20,7 +20,7 @@ const SKIN_PREVIEW_OVERLAY_PARTS = [
 ];
 
 // Alex / slim (3px arms)
-const ALEX_SKIN_PREVIEW_PARTS = [
+export const ALEX_SKIN_PREVIEW_PARTS = [
     { crop: { x: 4, y: 20, width: 4, height: 12 }, pos: { x: 4, y: 20 } }, // left leg
     { crop: { x: 20, y: 52, width: 4, height: 12 }, pos: { x: 8, y: 20 } }, // right leg
     { crop: { x: 20, y: 20, width: 8, height: 12 }, pos: { x: 4, y: 8 } }, // torso
@@ -28,7 +28,7 @@ const ALEX_SKIN_PREVIEW_PARTS = [
     { crop: { x: 36, y: 52, width: 3, height: 12 }, pos: { x: 12, y: 8 } }, // left arm
     { crop: { x: 8, y: 8, width: 8, height: 8 }, pos: { x: 4, y: 0 } }, // head
 ];
-const ALEX_SKIN_PREVIEW_OVERLAY_PARTS = [
+export const ALEX_SKIN_PREVIEW_OVERLAY_PARTS = [
     { crop: { x: 4, y: 36, width: 4, height: 12 }, pos: { x: 4, y: 20 } }, // right leg overlay
     { crop: { x: 4, y: 52, width: 4, height: 12 }, pos: { x: 8, y: 20 } }, // left leg overlay
     { crop: { x: 20, y: 32, width: 8, height: 12 }, pos: { x: 4, y: 8 } }, // torso overlay
@@ -38,7 +38,7 @@ const ALEX_SKIN_PREVIEW_OVERLAY_PARTS = [
 ];
 
 // 64x32 skins only store one arm and one leg, so the other side is mirrored
-const LEGACY_SKIN_PREVIEW_PARTS = [
+export const LEGACY_SKIN_PREVIEW_PARTS = [
     { crop: { x: 4, y: 20, width: 4, height: 12 }, pos: { x: 4, y: 20 } }, // left leg
     {
         crop: { x: 4, y: 20, width: 4, height: 12 },
@@ -55,24 +55,24 @@ const LEGACY_SKIN_PREVIEW_PARTS = [
     { crop: { x: 8, y: 8, width: 8, height: 8 }, pos: { x: 4, y: 0 } }, // head
 ];
 // the hat is the only overlay a 64x32 skin has
-const LEGACY_SKIN_PREVIEW_OVERLAY_PARTS = [
+export const LEGACY_SKIN_PREVIEW_OVERLAY_PARTS = [
     { crop: { x: 40, y: 8, width: 8, height: 8 }, pos: { x: 4, y: 0 } }, // head overlay
 ];
 
-function isLegacySkin(image) {
+export function isLegacySkin(image) {
     const width = image?.naturalWidth || image?.width || 0;
     const height = image?.naturalHeight || image?.height || 0;
     return height > 0 && width >= height * 2;
 }
 
-function normalizeSkinModel(model) {
+export function normalizeSkinModel(model) {
     return model === "alex" ? "alex" : "steve";
 }
 
 // Auto-detect Alex (slim) vs Steve (classic) by checking pixels that are only
 // filled on the 4px-wide classic arms. If those regions are fully transparent,
 // the skin is slim. Legacy 64x32 skins are always classic.
-function detectSkinModel(image) {
+export function detectSkinModel(image) {
     const width = image?.naturalWidth || image?.width || 0;
     const height = image?.naturalHeight || image?.height || 0;
     if (!width || !height) return "steve";
@@ -116,7 +116,7 @@ function detectSkinModel(image) {
     }
 }
 
-function drawSkinPreview(ctx, image, baseX, baseY, scale, model = "steve") {
+export function drawSkinPreview(ctx, image, baseX, baseY, scale, model = "steve") {
     if (!image?.complete) return;
     ctx.save();
     ctx.imageSmoothingEnabled = false;

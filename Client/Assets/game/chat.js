@@ -1,4 +1,20 @@
-class Chat {
+import { runtime } from "../utils/runtime.js";
+import { Entities } from "../entities/entities.js";
+import { InventoryItem } from "./inventoryItem.js";
+import { getItem } from "./item.js";
+import { Items } from "./items.js";
+import { Vector2 } from "../utils/classes.js";
+import { BLOCK_SIZE, CHUNK_WIDTH, multiplayer } from "../utils/globals.js";
+import { CANVAS, drawText } from "../utils/renderer.js";
+import { screenshotNearestChunks } from "../utils/screenshotChunks.js";
+import { AllBiomes } from "../world/biome.js";
+import { getBlock } from "../world/block.js";
+import { Blocks } from "../world/blocks.js";
+import { activeDimension, gotoDimension } from "../world/dimension.js";
+import { currentSave, saveWorld } from "../world/saving.js";
+import { Structures } from "../world/structures.js";
+
+export class Chat {
     constructor() {
         this.inChat = false;
 
@@ -30,7 +46,7 @@ class Chat {
     openChat() {
         this.historyIndex = 0;
         this.inChat = true;
-        if (world.player) world.player.canMove = false;
+        if (runtime.world.player) runtime.world.player.canMove = false;
         document.addEventListener("keydown", this._boundKeyHandler, {
             capture: true,
         });
@@ -38,7 +54,7 @@ class Chat {
 
     closeChat() {
         this.inChat = false;
-        if (world.player) world.player.canMove = true;
+        if (runtime.world.player) runtime.world.player.canMove = true;
         document.removeEventListener("keydown", this._boundKeyHandler, {
             capture: true,
         });
@@ -155,16 +171,16 @@ class Chat {
         }
 
         if (multiplayer && this.isValidText(message)) {
-            server.send({
+            runtime.server.send({
                 type: "chat",
                 message: message,
-                sender: world.player.UUID,
+                sender: runtime.world.player.UUID,
                 color,
             });
         }
 
         if (message) {
-            this.message(message, world.player.name, color);
+            this.message(message, runtime.world.player.name, color);
         }
 
         this.closeChat();
@@ -293,9 +309,9 @@ class Chat {
                     return [
                         "~",
                         "0",
-                        world.player
+                        runtime.world.player
                             ? Math.floor(
-                                  world.player.position.x / BLOCK_SIZE,
+                                  runtime.world.player.position.x / BLOCK_SIZE,
                               ).toString()
                             : "0",
                     ];
@@ -318,7 +334,7 @@ class Chat {
                     return biomeSuggestions;
                 case "rule":
                     const ruleSuggestions = [
-                        ...Object.keys(GAMERULES),
+                        ...Object.keys(runtime.GAMERULES),
                         "list",
                     ].filter((rule) => rule.toLowerCase().startsWith(prefix));
                     return ruleSuggestions;
@@ -351,10 +367,10 @@ class Chat {
 
         switch (difficulty) {
             case "peaceful":
-                world.setDifficulty("peaceful");
+                runtime.world.setDifficulty("peaceful");
                 break;
             case "easy":
-                world.setDifficulty("easy");
+                runtime.world.setDifficulty("easy");
                 break;
             default:
                 this.invalidCommand("/difficulty <difficulty>");
@@ -432,7 +448,7 @@ class Chat {
         const biome = AllBiomes[biomeName];
 
         if (biome) {
-            const biomeChunkX = world.generator.locateBiome(biome);
+            const biomeChunkX = runtime.world.generator.locateBiome(biome);
 
             if (!biomeChunkX) {
                 this.message("Biome not found.", "", Colors.Red);
@@ -483,8 +499,8 @@ class Chat {
                 this.summon(messageArray);
                 break;
             case "kill":
-                if (!world.player) break;
-                world.player.dieEvent();
+                if (!runtime.world.player) break;
+                runtime.world.player.dieEvent();
                 break;
             case "time":
                 this.setTime(messageArray);
@@ -499,7 +515,7 @@ class Chat {
                 this.locateBiome(messageArray);
                 break;
             case "seed":
-                this.message(`Seed: ${world.seed}`);
+                this.message(`Seed: ${runtime.world.seed}`);
 
                 if (!navigator?.clipboard) {
                     this.message(
@@ -508,12 +524,12 @@ class Chat {
                         Colors.Red,
                     );
                 } else {
-                    navigator.clipboard.writeText(world.seed);
+                    navigator.clipboard.writeText(runtime.world.seed);
                 }
                 this.message("Seed copied to clipboard.", "", Colors.Green);
                 break;
             case "hit":
-                if (!world.player) break;
+                if (!runtime.world.player) break;
                 this.hitPlayer(messageArray);
                 break;
             case "spawnpoint":
@@ -557,7 +573,7 @@ class Chat {
             return;
         }
 
-        const filename = `screenshot_${world.name}_${Date.now()}.png`;
+        const filename = `screenshot_${runtime.world.name}_${Date.now()}.png`;
 
         this.cheatMessage(
             `Capturing screenshot of nearest ${chunkCount} chunks...`,
@@ -602,7 +618,7 @@ class Chat {
             return;
         }
 
-        world.generator.fill(
+        runtime.world.generator.fill(
             position1.x,
             position1.y,
             position2.x,
@@ -611,10 +627,10 @@ class Chat {
         );
 
         this.cheatMessage(
-            `Filled area from (${world.worldToBlocks(position1).x}, ${
-                world.worldToBlocks(position1).y
-            }) to (${world.worldToBlocks(position2).x}, ${
-                world.worldToBlocks(position2).y
+            `Filled area from (${runtime.world.worldToBlocks(position1).x}, ${
+                runtime.world.worldToBlocks(position1).y
+            }) to (${runtime.world.worldToBlocks(position2).x}, ${
+                runtime.world.worldToBlocks(position2).y
             }) with ${blockName}.`,
             "",
             Colors.Green,
@@ -643,10 +659,10 @@ class Chat {
         if (block) {
             const userBlockPos = new Vector2(
                 Math.floor(position.x / BLOCK_SIZE),
-                world.worldToUserBlockY(position.y),
+                runtime.world.worldToUserBlockY(position.y),
             );
 
-            const placed = world.setBlockTypeAtUserBlockPosition(
+            const placed = runtime.world.setBlockTypeAtUserBlockPosition(
                 userBlockPos.x,
                 userBlockPos.y,
                 block,
@@ -657,10 +673,10 @@ class Chat {
             );
 
             if (placed) {
-                world.serverPlaceBlock(
-                    world.getChunkXForWorldX(position.x),
-                    world.worldToLocal(position.x, position.y).x,
-                    world.worldToLocal(position.x, position.y).y,
+                runtime.world.serverPlaceBlock(
+                    runtime.world.getChunkXForWorldX(position.x),
+                    runtime.world.worldToLocal(position.x, position.y).x,
+                    runtime.world.worldToLocal(position.x, position.y).y,
                     block,
                 );
             }
@@ -706,22 +722,22 @@ class Chat {
         const value = messageArray[2];
 
         if (rule === "list") {
-            for (const key in GAMERULES) {
-                this.message(`${key}: ${GAMERULES[key]}`);
+            for (const key in runtime.GAMERULES) {
+                this.message(`${key}: ${runtime.GAMERULES[key]}`);
             }
             return;
         }
 
-        if (GAMERULES[rule] === undefined) {
+        if (runtime.GAMERULES[rule] === undefined) {
             this.message("Invalid rule.");
             return;
         }
 
         if (value === "true") {
-            GAMERULES[rule] = true;
+            runtime.GAMERULES[rule] = true;
             this.cheatMessage(`${rule} set to true.`);
         } else if (value === "false") {
-            GAMERULES[rule] = false;
+            runtime.GAMERULES[rule] = false;
             this.cheatMessage(`${rule} set to false.`);
         } else {
             this.message("Invalid value. Use true or false.");
@@ -729,7 +745,7 @@ class Chat {
     }
 
     hitPlayer(messageArray) {
-        if (!world.player) return;
+        if (!runtime.world.player) return;
 
         if (!messageArray[1]) {
             this.invalidCommand("/hit <damage>");
@@ -743,7 +759,7 @@ class Chat {
             return;
         }
 
-        world.player.hit(damage);
+        runtime.world.player.hit(damage);
     }
 
     setTime(messageArray) {
@@ -761,7 +777,7 @@ class Chat {
 
         this.cheatMessage(`Time set to ${newTime}`);
 
-        time = newTime;
+        runtime.time = newTime;
     }
 
     structure(messageArray) {
@@ -773,10 +789,10 @@ class Chat {
         const structureName = messageArray[1];
 
         if (Structures[structureName] !== undefined) {
-            const playerUserPos = world.worldToBlocks(world.player.position);
-            world.generator.generateStructure(
+            const playerUserPos = runtime.world.worldToBlocks(runtime.world.player.position);
+            runtime.world.generator.generateStructure(
                 structureName,
-                world.player.position.x,
+                runtime.world.player.position.x,
                 playerUserPos.y * BLOCK_SIZE,
             );
 
@@ -816,10 +832,10 @@ class Chat {
 
         if (Entities[itemName] != null) {
             const entity = Entities[itemName];
-            const userPosition = world.worldToBlocks(position);
+            const userPosition = runtime.world.worldToBlocks(position);
 
             for (let i = 0; i < count; i++) {
-                world.summonEntity(entity, structuredClone(position));
+                runtime.world.summonEntity(entity, structuredClone(position));
             }
 
             this.cheatMessage(
@@ -832,17 +848,17 @@ class Chat {
 
     getWorldPosition(position) {
         if (position.x === "~")
-            position.x = world.player.position.x / BLOCK_SIZE;
+            position.x = runtime.world.player.position.x / BLOCK_SIZE;
         if (position.y === "~")
-            position.y = world.worldToBlocks(world.player.position).y;
+            position.y = runtime.world.worldToBlocks(runtime.world.player.position).y;
 
         if (isNaN(position.x) || isNaN(position.y)) return null;
 
-        return world.userBlocksToWorldPosition(position.x, position.y);
+        return runtime.world.userBlocksToWorldPosition(position.x, position.y);
     }
 
     teleport(messageArray) {
-        if (!world.player) {
+        if (!runtime.world.player) {
             this.message("No player found.");
             return;
         }
@@ -863,13 +879,13 @@ class Chat {
             return;
         }
 
-        world.player.teleport(targetPosition);
+        runtime.world.player.teleport(targetPosition);
 
         this.cheatMessage(`Teleported player to x: ${x} y: ${y}`);
     }
 
     spawnpoint(messageArray) {
-        if (!world.player) return;
+        if (!runtime.world.player) return;
 
         let targetPosition;
         const hasX = typeof messageArray[1] !== "undefined";
@@ -877,8 +893,8 @@ class Chat {
 
         if (!hasX && !hasY) {
             targetPosition = new Vector2(
-                world.player.position.x,
-                world.player.position.y,
+                runtime.world.player.position.x,
+                runtime.world.player.position.y,
             );
         } else if (hasX && hasY) {
             const x = messageArray[1] !== "~" ? parseInt(messageArray[1]) : "~";
@@ -893,14 +909,14 @@ class Chat {
             return;
         }
 
-        world.player.spawnPoint = new Vector2(
+        runtime.world.player.spawnPoint = new Vector2(
             targetPosition.x,
             targetPosition.y,
         );
-        currentSave.spawnPoint = JSON.stringify(world.player.spawnPoint);
+        currentSave.spawnPoint = JSON.stringify(runtime.world.player.spawnPoint);
         saveWorld(false);
 
-        const spawnBlockPos = world.worldToBlocks(targetPosition);
+        const spawnBlockPos = runtime.world.worldToBlocks(targetPosition);
         this.cheatMessage(
             `Spawnpoint set to x: ${spawnBlockPos.x} y: ${spawnBlockPos.y}`,
         );
@@ -912,7 +928,7 @@ class Chat {
             return;
         }
 
-        if (!world.player) {
+        if (!runtime.world.player) {
             this.message("No player found.");
             return;
         }
@@ -942,7 +958,7 @@ class Chat {
             return;
         }
 
-        world.player.setGamemode(gamemode);
+        runtime.world.player.setGamemode(gamemode);
 
         const gamemodeNames = [
             "Survival",
@@ -956,10 +972,10 @@ class Chat {
 
     cheatMessage(message) {
         if (multiplayer) {
-            server.send({
+            runtime.server.send({
                 type: "chat",
                 message: message,
-                sender: world.player.UUID,
+                sender: runtime.world.player.UUID,
             });
         }
 
@@ -1006,7 +1022,7 @@ class Chat {
     }
 
     give(messageArray) {
-        if (!world.player) return;
+        if (!runtime.world.player) return;
 
         if (messageArray.length < 2) {
             this.invalidCommand("/give <Category.ItemName>");
@@ -1039,7 +1055,7 @@ class Chat {
 
             if (inventoryItem.air) return;
 
-            world.player.inventory.addItem(inventoryItem);
+            runtime.world.player.inventory.addItem(inventoryItem);
 
             this.cheatMessage(
                 `Gave ${count} ${
@@ -1055,7 +1071,7 @@ class Chat {
 
     clear() {
         this.cheatMessage("Cleared Inventory");
-        world.player.inventory.createItemArray();
+        runtime.world.player.inventory.createItemArray();
     }
 
     draw(ctx) {
@@ -1137,7 +1153,7 @@ class Chat {
                 Math.min(this.currentMessage.length, this.cursorPosition),
             );
 
-            this.cursorBlinkTime += deltaTime;
+            this.cursorBlinkTime += runtime.deltaTime;
 
             if (this.cursorBlinkTime >= 0.5) {
                 this.showCursor = !this.showCursor;
@@ -1147,7 +1163,7 @@ class Chat {
     }
 }
 
-const Colors = Object.freeze({
+export const Colors = Object.freeze({
     Red: "#FF5555",
     DarkRed: "#AA0000",
     Green: "#55FF55",
