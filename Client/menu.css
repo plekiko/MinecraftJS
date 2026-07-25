@@ -430,6 +430,99 @@ body {
         inset 0 12px 24px -12px rgba(0, 0, 0, 0.5);
 }
 
+.skins-carousel {
+    width: 100%;
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: safe center;
+    gap: 1.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    padding: 1.5rem max(1rem, calc(50% - 7rem));
+    box-sizing: border-box;
+    background-color: #00000080;
+    box-shadow:
+        inset 0 -12px 24px -12px rgba(0, 0, 0, 0.5),
+        inset 0 12px 24px -12px rgba(0, 0, 0, 0.5);
+}
+
+.skins-carousel::-webkit-scrollbar {
+    height: 10px;
+}
+
+.skins-carousel::-webkit-scrollbar-thumb {
+    background: rgba(210, 210, 210, 0.45);
+}
+
+.skin-card {
+    flex: 0 0 auto;
+    width: 14rem;
+    min-height: 22rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 0.75rem;
+    box-sizing: border-box;
+    background-color: rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+}
+
+.skin-card.selected {
+    background-color: rgba(0, 0, 0, 0.6);
+    outline: solid rgb(210, 210, 210) 3px;
+}
+
+.skin-card-preview {
+    width: 128px;
+    height: 256px;
+    image-rendering: pixelated;
+}
+
+.skin-card-name {
+    font-family: "Pixel";
+    font-size: 1.4rem;
+    color: white;
+    text-shadow: 0.2vh 0.2vh rgba(0, 0, 0, 0.395);
+    text-align: center;
+    user-select: none;
+}
+
+.skin-carousel-item {
+    flex: 0 0 auto;
+    position: relative;
+    width: 14rem;
+}
+
+.custom-skin-actions {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    min-width: 22rem;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.skin-card-btn {
+    --btn-height: 36px;
+    width: 11rem;
+    min-width: 11rem;
+    max-width: none;
+    flex: 0 0 auto;
+    font-size: 110%;
+}
+
 .small-text {
     color: rgb(178, 178, 178);
 }

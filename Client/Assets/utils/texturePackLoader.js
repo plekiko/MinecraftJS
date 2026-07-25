@@ -38,7 +38,7 @@ async function loadVanillaTextures() {
     spritePaths.push(`entity/sheep/sheep_fur`);
 
     // Player
-    spritePaths.push(`entity/steve`);
+    spritePaths.push(`entity/player/steve`);
 
     // All GUI elements
     spritePaths.push(`gui/icons`);

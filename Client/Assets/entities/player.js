@@ -1826,7 +1826,7 @@ class Player extends Entity {
 const skinData = localStorage.getItem("playerSkin");
 function createPlayerBody() {
     return new Body({
-        sprite: skinData || "steve",
+        sprite: skinData || "player/steve",
         parts: {
             head: new BodyPart({
                 spriteCrop: { x: 0, y: 8, width: 8, height: 8 },
