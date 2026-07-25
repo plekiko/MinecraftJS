@@ -44,7 +44,7 @@ function packMediaZip() {
                 for (const full of walkFiles(dir)) {
                     const zipPath = join(
                         "Assets",
-                        relative(assetsRoot, full),
+                        relative(assetsRoot, full)
                     ).replaceAll("\\", "/");
                     zip.file(zipPath, readFileSync(full));
                     fileCount++;
@@ -58,7 +58,11 @@ function packMediaZip() {
             });
             writeFileSync(join(dist, "media.zip"), zipBuf);
             console.log(
-                `[pack-media-zip] Wrote media.zip (${fileCount} files, ${(zipBuf.length / 1024 / 1024).toFixed(1)} MB)`,
+                `[pack-media-zip] Wrote media.zip (${fileCount} files, ${(
+                    zipBuf.length /
+                    1024 /
+                    1024
+                ).toFixed(1)} MB)`
             );
 
             const menuText = resolve(__dirname, "menu_text.json");
@@ -70,7 +74,7 @@ function packMediaZip() {
             console.log(`[pack-media-zip] dist file count: ${distFileCount}`);
             if (distFileCount >= 1000) {
                 throw new Error(
-                    `dist has ${distFileCount} files (itch.io limit is ~1000). Reduce loose assets.`,
+                    `dist has ${distFileCount} files (itch.io limit is ~1000). Reduce loose assets.`
                 );
             }
         },
@@ -80,6 +84,7 @@ function packMediaZip() {
 export default defineConfig({
     root: ".",
     publicDir: false,
+    base: "./",
     plugins: [packMediaZip()],
     build: {
         outDir: "dist",
