@@ -1,5 +1,5 @@
-import { WATER_LEVEL } from "../utils/globals.js";
-import { Noise, NoisePresets } from "../utils/noise.js";
+import { WATER_LEVEL } from "./constants.js";
+import { Noise, NoisePresets } from "./noise.js";
 import { Blocks } from "./blocks.js";
 import { Trees } from "./trees.js";
 

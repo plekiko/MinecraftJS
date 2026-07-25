@@ -1,9 +1,9 @@
 import { runtime } from "../utils/runtime.js";
 import { entityRegistry } from "../entities/entityRegistry.js";
 import { ORE_THRESHOLDS, multiplayer } from "../utils/globals.js";
-import { Noise } from "../utils/noise.js";
-import { NetherBiomes, OverworldBiomes } from "./biome.js";
-import { Blocks } from "./blocks.js";
+import { Noise } from "@minecraftjs/shared/noise.js";
+import { NetherBiomes, OverworldBiomes } from "@minecraftjs/shared/biome.js";
+import { Blocks } from "@minecraftjs/shared/blocks.js";
 import {
     Dimensions,
     activeDimension,

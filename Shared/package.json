@@ -1,0 +1,12 @@
+{
+    "name": "@minecraftjs/shared",
+    "version": "1.0.0",
+    "type": "module",
+    "exports": {
+        ".": "./index.js",
+        "./*": "./*"
+    },
+    "dependencies": {
+        "tooloud": "^2.0.4"
+    }
+}

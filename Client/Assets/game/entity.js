@@ -12,7 +12,7 @@ import { getSpriteAverageColor } from "../utils/texturePackLoader.js";
 import { SpecialType, getBlock } from "../world/block.js";
 import { Dimensions, activeDimension, getDimensionChunks, gotoDimension } from "../world/dimension.js";
 import { entityRegistry } from "../entities/entityRegistry.js";
-import { inventoryRegistry } from "./inventoryRegistry.js";
+import { inventoryRegistry } from "@minecraftjs/shared/inventoryRegistry.js";
 
 export const EntityTypes = Object.freeze({
     Drop: 0,

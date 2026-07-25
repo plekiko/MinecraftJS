@@ -9,6 +9,7 @@
         "lint": "eslint ."
     },
     "dependencies": {
+        "@minecraftjs/shared": "file:../Shared",
         "jszip": "^3.10.1",
         "tooloud": "^2.0.4"
     },

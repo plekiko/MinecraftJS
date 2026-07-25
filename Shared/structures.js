@@ -1,7 +1,7 @@
 import { OverworldBiomes } from "./biome.js";
 import { Blocks } from "./blocks.js";
 import { ChestLoot } from "./chestLoot.js";
-import { Dimensions } from "./dimension.js";
+import { Dimensions } from "./dimensions.js";
 import { Structure } from "./structure.js";
 
 export const Structures = Object.freeze({

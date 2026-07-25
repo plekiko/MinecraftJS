@@ -8,7 +8,7 @@ import { Vector2, uuidv4 } from "../utils/classes.js";
 import { BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, ENTITY_UPDATE_DISTANCE, TICK_SPEED, dayNightSpeed, multiplayer, updatingBlocks } from "../utils/globals.js";
 import { camera } from "../utils/renderer.js";
 import { SpecialType, getBlock } from "./block.js";
-import { Blocks } from "./blocks.js";
+import { Blocks } from "@minecraftjs/shared/blocks.js";
 import { activeDimension, dimensions } from "./dimension.js";
 import { WorldGenerator } from "./generator.js";
 import { removeParticleEmitter } from "./particleEmitter.js";

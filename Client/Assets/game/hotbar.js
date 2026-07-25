@@ -1,5 +1,5 @@
 import { runtime } from "../utils/runtime.js";
-import { getItem } from "./item.js";
+import { getItem } from "@minecraftjs/shared/item.js";
 import { input } from "../utils/input.js";
 import { CANVAS, drawImage, drawText } from "../utils/renderer.js";
 import { getSpriteUrl, isEqualToOriginal } from "../utils/texturePackLoader.js";

@@ -4,6 +4,7 @@ import { WebSocketServer } from "ws";
 import { World } from "./Classes/world.js";
 import { createInterface } from "readline";
 import fs from "fs";
+import { BLOCK_SIZE, CHUNK_HEIGHT } from "@minecraftjs/shared/constants.js";
 
 const propertiesFile = "server.properties";
 const userCacheFile = "usercache.json";
@@ -14,8 +15,6 @@ const iconPaths = [
     { path: "server-icon.gif", mime: "image/gif" },
 ];
 const maxIconSize = 1 * 1024 * 1024; // 1 MB
-const BLOCK_SIZE = 64;
-const CHUNK_HEIGHT = 110;
 
 let serverIcon = null;
 let userCache = [];

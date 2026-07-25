@@ -1,5 +1,5 @@
 import { runtime } from "../utils/runtime.js";
-import { getItem } from "./item.js";
+import { getItem } from "@minecraftjs/shared/item.js";
 import { BLOCK_SIZE, ToolType } from "../utils/globals.js";
 import { drawImage } from "../utils/renderer.js";
 import { getSpriteSize, getSpriteUrl, isEqualToOriginal } from "../utils/texturePackLoader.js";

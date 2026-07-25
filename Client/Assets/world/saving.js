@@ -3,7 +3,7 @@ import { Colors } from "../game/chat.js";
 import { InventoryItem } from "../game/inventoryItem.js";
 import { Vector2 } from "../utils/classes.js";
 import { CHUNK_HEIGHT, CHUNK_WIDTH, SPAWN_PLAYER, multiplayer } from "../utils/globals.js";
-import { AllBiomes } from "./biome.js";
+import { AllBiomes } from "@minecraftjs/shared/biome.js";
 import { getBlock } from "./block.js";
 import { Chunk } from "./chunk.js";
 import { Dimensions, activeDimension, dimensions, getDimension, gotoDimension } from "./dimension.js";

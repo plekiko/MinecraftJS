@@ -20,7 +20,7 @@ await Promise.all([
     import("./Assets/entities/entities.js"),
     import("./Assets/entities/TNT.js"),
     import("./Assets/game/inventoryItem.js"),
-    import("./Assets/world/trees.js"),
+    import("@minecraftjs/shared/trees.js"),
     import("./Assets/world/dimension.js"),
     import("./Assets/multiplayer/messageHandler.js"),
     import("./Assets/multiplayer/server.js"),
