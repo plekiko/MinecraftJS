@@ -26,7 +26,7 @@
 ## Local Development
 
 ### Option 1 - Node.js
-To get set up, run `npm install` in both the Client and Server directories.
+To get set up, run `npm install` in the Shared, Client, and Server directories.
 
 From the Client directory, run `npm run dev` to start the Vite dev server on `localhost:3000` (hot module reload for the client).
 
