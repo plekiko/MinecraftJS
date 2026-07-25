@@ -1,34 +1,35 @@
-const RENDER_DISTANCE = 1; // In Chunks
-const ENTITY_UPDATE_DISTANCE = 50; // In Blocks
-const CHUNK_WIDTH = 16;
-const CHUNK_HEIGHT = 110; // 150
-const BLOCK_SIZE = 64; // 64
-const CAVES_THRESHOLD = 4;
-const TERRAIN_HEIGHT = 50; // 50
-const WATER_LEVEL = 10;
-const CHUNK_FILE_SIZE = 7.5; // kB
-const GRAVITY = 30 * BLOCK_SIZE;
-const INTERACT_DISTANCE = 4;
-const TICK_SPEED = 20;
+import { runtime } from "./runtime.js";
+
+export const RENDER_DISTANCE = 1; // In Chunks
+export const ENTITY_UPDATE_DISTANCE = 50; // In Blocks
+export const CHUNK_WIDTH = 16;
+export const CHUNK_HEIGHT = 110; // 150
+export const BLOCK_SIZE = 64; // 64
+export const CAVES_THRESHOLD = 4;
+export const TERRAIN_HEIGHT = 50; // 50
+export const WATER_LEVEL = 10;
+export const CHUNK_FILE_SIZE = 7.5; // kB
+export const GRAVITY = 30 * BLOCK_SIZE;
+export const INTERACT_DISTANCE = 4;
+export const TICK_SPEED = 20;
 // Get multiplayer bool from url
-const url = new URL(window.location.href);
-const multiplayer = url.searchParams.get("multiplayer") === "true";
+export const url = new URL(window.location.href);
+export const multiplayer = url.searchParams.get("multiplayer") === "true";
 
-let deltaTime;
 
-const mobSpawnDelay = { min: 10, max: 120 };
+export const mobSpawnDelay = { min: 10, max: 120 };
 
-let isTexturePackLoaded = false;
+runtime.isTexturePackLoaded = false;
 
-let passedTime = 0;
+runtime.passedTime = 0;
 
-let lighting = true;
+export let lighting = true;
 
-let time = 1;
-const dayNightSpeed = 0.001;
-let day = true;
+runtime.time = 1;
+export const dayNightSpeed = 0.001;
+runtime.day = true;
 
-const ORE_THRESHOLDS = {
+export const ORE_THRESHOLDS = {
     coal: 2.5,
     iron: 2,
     redstone: 1.5,
@@ -42,12 +43,12 @@ const ORE_THRESHOLDS = {
     dirt: 1.5,
 };
 
-const SPAWN_PLAYER = true;
+export const SPAWN_PLAYER = true;
 
-let globalFrame = 0;
-let updatingBlocks = []; //eg furnace
+runtime.globalFrame = 0;
+export let updatingBlocks = []; //eg furnace
 
-let GAMERULES = {
+runtime.GAMERULES = {
     keepInventory: false,
     doDaylightCycle: true,
     doMobSpawning: true,
@@ -57,7 +58,7 @@ let GAMERULES = {
     doMobGriefing: true,
 };
 
-const ToolType = Object.freeze({
+export const ToolType = Object.freeze({
     Nothing: 0,
     Pickaxe: 1,
     Axe: 2,
@@ -69,4 +70,4 @@ const ToolType = Object.freeze({
     Flame: 8,
 });
 
-let server = null;
+runtime.server = null;

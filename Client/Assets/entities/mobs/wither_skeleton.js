@@ -1,4 +1,14 @@
-class WitherSkeleton extends Mob {
+import { runtime } from "../../utils/runtime.js";
+import { AI, Mob } from "../mob.js";
+import { Body, BodyPart } from "../../game/body.js";
+import { EntityTypes } from "../../game/entity.js";
+import { Items } from "../../game/items.js";
+import { LootItem, LootTable } from "../../game/lootTable.js";
+import { Sounds, playPositionalSound, playRandomSoundFromArray } from "../../game/sounds.js";
+import { Vector2 } from "../../utils/classes.js";
+import { BLOCK_SIZE } from "../../utils/globals.js";
+
+export class WitherSkeleton extends Mob {
     constructor(
         world,
         {
@@ -87,7 +97,7 @@ class WitherSkeleton extends Mob {
     dieEvent() {
         this.dropLoot();
         playPositionalSound(this.position, "mobs/zombie/death.ogg");
-        world.removeEntity(this);
+        runtime.world.removeEntity(this);
     }
 
     tickUpdate() {
@@ -97,7 +107,7 @@ class WitherSkeleton extends Mob {
     interact(player, item) {}
 }
 
-function createWitherSkeletonBody() {
+export function createWitherSkeletonBody() {
     return new Body({
         flipCorrection: 0,
         sprite: "skeleton/wither_skeleton",

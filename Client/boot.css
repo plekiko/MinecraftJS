@@ -1,0 +1,76 @@
+/* Boot loader — matches title-screen dirt / pixel UI */
+
+@font-face {
+    font-family: "Pixel";
+    src: url("Assets/fonts/minecraft-font/MinecraftRegular-Bmg3.otf");
+}
+
+#media-boot {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #1a120b;
+    background-image: url("Assets/sprites/blocks/dirt.png");
+    background-size: 64px 64px;
+    background-repeat: repeat;
+    image-rendering: pixelated;
+    color: #fff;
+    font-family: "Pixel", monospace;
+}
+
+#media-boot::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+}
+
+#media-boot.media-boot-hidden {
+    display: none;
+}
+
+.media-boot-inner {
+    position: relative;
+    z-index: 1;
+    width: min(28rem, 86vw);
+    text-align: center;
+}
+
+.media-boot-title {
+    margin: 0 0 1.25rem;
+    font-size: 1.35rem;
+    color: #fff;
+    text-shadow: 0.15em 0.15em rgba(0, 0, 0, 0.55);
+    letter-spacing: 0.02em;
+}
+
+.media-boot-bar {
+    box-sizing: border-box;
+    height: 28px;
+    padding: 3px;
+    background: #000;
+    border: 2px solid #555;
+    box-shadow:
+        inset 0 0 0 1px #1a1a1a,
+        0 0 0 1px #000;
+    image-rendering: pixelated;
+}
+
+.media-boot-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(#6fce3b, #50a825 45%, #3d7f1c);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.2);
+    transition: width 0.08s linear;
+}
+
+.media-boot-pct {
+    margin-top: 0.85rem;
+    font-size: 1.1rem;
+    color: #fff;
+    text-shadow: 0.12em 0.12em rgba(0, 0, 0, 0.55);
+}

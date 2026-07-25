@@ -1,10 +1,14 @@
-const musicStartDelayRange = { min: 10, max: 60 };
-const musicBetweenDelay = { min: 60, max: 180 };
+import { runtime } from "../utils/runtime.js";
+import { randomRange } from "../utils/classes.js";
+import { resolveAssetUrl } from "../utils/assetBundle.js";
 
-let isPlaying = false;
-let musicPlayer = new Audio();
+export const musicStartDelayRange = { min: 10, max: 60 };
+export const musicBetweenDelay = { min: 60, max: 180 };
 
-const songs = [
+export let isPlaying = false;
+export let musicPlayer = new Audio();
+
+export const songs = [
     "calm1",
     "calm2",
     "calm3",
@@ -19,12 +23,14 @@ const songs = [
     "piano3",
 ];
 
-function playRandomSong() {
+export function playRandomSong() {
     let randomSongIndex = randomRange(0, songs.length);
-    let randomSongUrl = "Assets/audio/music/" + songs[randomSongIndex] + ".ogg";
+    let randomSongUrl = resolveAssetUrl(
+        "Assets/audio/music/" + songs[randomSongIndex] + ".ogg",
+    );
 
     musicPlayer.src = randomSongUrl;
-    const musicVol = (game.settings.musicVolume ?? 100) / 100;
+    const musicVol = (runtime.game.settings.musicVolume ?? 100) / 100;
     musicPlayer.volume = musicVol * 0.3;
     musicPlayer.play();
 
@@ -38,7 +44,7 @@ function playRandomSong() {
     };
 }
 
-function startMusic() {
+export function startMusic() {
     if (isPlaying) return;
 
     let startDelay =

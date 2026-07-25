@@ -1,4 +1,9 @@
-class ParticleEmitter {
+import { runtime } from "../utils/runtime.js";
+import { Vector2, adjustColorBrightness, randomRange } from "../utils/classes.js";
+import { lighting } from "../utils/globals.js";
+import { Particle } from "./particle.js";
+
+export class ParticleEmitter {
     constructor({
         x = 0,
         y = 0,
@@ -10,7 +15,7 @@ class ParticleEmitter {
         gravity = 0,
         initialVelocity = new Vector2(),
         fadeOutTime = 1000,
-        color = Colors.White,
+        color = "#FFFFFF",
         randomScale = false,
         range = 0,
         lighting = false,
@@ -81,7 +86,7 @@ class ParticleEmitter {
     }
 
     getLightLevel() {
-        return world.getBlockAtWorldPosition(this.x, this.y)?.lightLevel;
+        return runtime.world.getBlockAtWorldPosition(this.x, this.y)?.lightLevel;
     }
 
     emitBurst() {
@@ -122,7 +127,7 @@ class ParticleEmitter {
     }
 }
 
-function createParticleEmitter({
+export function createParticleEmitter({
     x = 0,
     y = 0,
     radius = 1,
@@ -133,7 +138,7 @@ function createParticleEmitter({
     gravity = 0,
     initialVelocity = new Vector2(),
     fadeOutTime = 1000,
-    color = Colors.White,
+    color = "#FFFFFF",
     randomScale = false,
     range = 0,
     lighting = true,
@@ -157,27 +162,27 @@ function createParticleEmitter({
         scale: scale,
     });
 
-    world.particleEmitters.push(newEmitter);
+    runtime.world.particleEmitters.push(newEmitter);
 
     return newEmitter;
 }
 
-function removeParticleEmitter(emitter) {
-    const index = world.particleEmitters.indexOf(emitter);
+export function removeParticleEmitter(emitter) {
+    const index = runtime.world.particleEmitters.indexOf(emitter);
     if (index > -1) {
-        world.particleEmitters.splice(index, 1);
+        runtime.world.particleEmitters.splice(index, 1);
     }
 }
 
-function createParticleEmitterAtPlayer(
+export function createParticleEmitterAtPlayer(
     radius,
     type,
     maxParticles,
     direction = 0,
 ) {
     const emitter = createParticleEmitter({
-        x: world.player.position.x,
-        y: world.player.position.y,
+        x: runtime.world.player.position.x,
+        y: runtime.world.player.position.y,
         radius: radius,
         type: type,
         maxParticles: maxParticles,

@@ -1,8 +1,15 @@
-const SHIMMER_SPEED = 30;
-const SHIMMER_DISTANCE = 1;
-const BAR_ICON_SCALE = 2.85;
+import { runtime } from "../utils/runtime.js";
+import { getItem } from "./item.js";
+import { input } from "../utils/input.js";
+import { CANVAS, drawImage, drawText } from "../utils/renderer.js";
+import { getSpriteUrl, isEqualToOriginal } from "../utils/texturePackLoader.js";
+import { getBlock } from "../world/block.js";
 
-class Hotbar {
+export const SHIMMER_SPEED = 30;
+export const SHIMMER_DISTANCE = 1;
+export const BAR_ICON_SCALE = 2.85;
+
+export class Hotbar {
     constructor(inventory = null) {
         this.inventory = inventory;
         this.currentSlot = 0;
@@ -31,19 +38,19 @@ class Hotbar {
     }
 
     drawHearts(health, maxHealth, hotbar) {
-        if (!world.player.abilities.hasHealth) return;
+        if (!runtime.world.player.abilities.hasHealth) return;
 
-        this.shimmerTime += deltaTime;
+        this.shimmerTime += runtime.deltaTime;
 
-        if (this.flashingHearts) this.flashCounter += deltaTime;
+        if (this.flashingHearts) this.flashCounter += runtime.deltaTime;
 
         if (this.flashCounter >= 0.1) {
             this.flashingHearts = false;
             this.flashCounter = 0;
         }
 
-        if (this.previousHealth !== world.player.health) {
-            this.previousHealth = world.player.health;
+        if (this.previousHealth !== runtime.world.player.health) {
+            this.previousHealth = runtime.world.player.health;
             this.flashingHearts = true;
         }
 
@@ -85,17 +92,17 @@ class Hotbar {
     }
 
     drawFood(food, maxFood, hotbar) {
-        if (!world.player.abilities.hasHealth) return;
+        if (!runtime.world.player.abilities.hasHealth) return;
 
-        if (this.flashingFood) this.foodFlashCounter += deltaTime;
+        if (this.flashingFood) this.foodFlashCounter += runtime.deltaTime;
 
         if (this.foodFlashCounter >= 0.1) {
             this.flashingFood = false;
             this.foodFlashCounter = 0;
         }
 
-        if (this.previousFood !== world.player.foodLevel) {
-            this.previousFood = world.player.foodLevel;
+        if (this.previousFood !== runtime.world.player.foodLevel) {
+            this.previousFood = runtime.world.player.foodLevel;
             this.flashingFood = true;
         }
 
@@ -146,7 +153,7 @@ class Hotbar {
     }
 
     drawBubbles(air, maxAir, hotbar) {
-        if (!world.player.abilities.hasHealth) return;
+        if (!runtime.world.player.abilities.hasHealth) return;
         if (air <= 0) return;
         if (air >= maxAir) return;
 
@@ -211,13 +218,13 @@ class Hotbar {
         });
 
         this.drawItems();
-        this.drawHearts(world.player.health, world.player.maxHealth, hotbar);
+        this.drawHearts(runtime.world.player.health, runtime.world.player.maxHealth, hotbar);
         this.drawFood(
-            world.player.foodLevel,
-            world.player.maxFoodLevel,
+            runtime.world.player.foodLevel,
+            runtime.world.player.maxFoodLevel,
             hotbar,
         );
-        this.drawBubbles(world.player.air, world.player.maxAir, hotbar);
+        this.drawBubbles(runtime.world.player.air, runtime.world.player.maxAir, hotbar);
         this.drawSelectedItemName(ctx);
     }
 
@@ -326,8 +333,8 @@ class Hotbar {
     }
 
     handleSelecting() {
-        if (game.chat.inChat) return;
-        if (world.player.windowOpen) return;
+        if (runtime.game.chat.inChat) return;
+        if (runtime.world.player.windowOpen) return;
 
         if (input.isActionPressed("hotbarUp")) this.currentSlot--;
         if (input.isActionPressed("hotbarDown")) this.currentSlot++;

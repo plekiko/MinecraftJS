@@ -1,4 +1,9 @@
-class Vector2 {
+import { runtime } from "./runtime.js";
+import { BLOCK_SIZE } from "./globals.js";
+import { ctx, drawSimpleImage } from "./drawHelpers.js";
+import { getSpriteSize, getSpriteUrl } from "./texturePackLoader.js";
+
+export class Vector2 {
     constructor(x = 0, y = 0) {
         this.x = x;
         this.y = y;
@@ -38,7 +43,7 @@ class Vector2 {
     }
 }
 
-function calculateDirection(positionA, positionB) {
+export function calculateDirection(positionA, positionB) {
     const direction = new Vector2(
         positionB.x - positionA.x,
         positionB.y - positionA.y,
@@ -47,7 +52,7 @@ function calculateDirection(positionA, positionB) {
     return direction;
 }
 
-class Transform {
+export class Transform {
     constructor(position = new Vector2(), size = new Vector2()) {
         this.position = position;
         this.size = size;
@@ -55,7 +60,7 @@ class Transform {
     }
 }
 
-class Square {
+export class Square {
     constructor(
         transform,
         alpha = 1,
@@ -169,7 +174,7 @@ class Square {
         }
 
         const offset = this.blockType
-            ? (getBlock(this.blockType).blockOffset ?? { x: 0, y: 0 })
+            ? (runtime.getBlock(this.blockType).blockOffset ?? { x: 0, y: 0 })
             : { x: 0, y: 0 };
 
         // Determine drawing values (common for animated and non-animated)
@@ -234,7 +239,7 @@ class Square {
     drawAnimation(ctx, camera) {
         const frameHeight = this.spriteSize;
         const effectiveFrame =
-            Math.floor(globalFrame * this.frameRate) % this.frameCount;
+            Math.floor(runtime.globalFrame * this.frameRate) % this.frameCount;
         const frameY = effectiveFrame * frameHeight;
 
         const drawX = Math.round(
@@ -297,7 +302,7 @@ class Square {
     }
 }
 
-class SimpleSprite {
+export class SimpleSprite {
     constructor({
         sprite,
         transform,
@@ -361,7 +366,7 @@ class SimpleSprite {
         const frameHeight = this.spriteSize.width;
 
         const effectiveFrame =
-            Math.floor(globalFrame / this.frameRate) % this.frameCount;
+            Math.floor(runtime.globalFrame / this.frameRate) % this.frameCount;
         const frameY = effectiveFrame * frameHeight;
 
         // Crop using animation frame
@@ -384,7 +389,7 @@ class SimpleSprite {
     }
 }
 
-function arePropsEqual(a, b) {
+export function arePropsEqual(a, b) {
     // Treat null/undefined as equal
     if (!a && !b) return true;
     if ((a && !b) || (!a && b)) return false;
@@ -397,19 +402,22 @@ function arePropsEqual(a, b) {
     return true;
 }
 
-function hexToRgb(hex) {
-    const cleanHex = hex.replace("#", "");
+export function hexToRgb(hex) {
+    if (hex && typeof hex === "object" && "r" in hex) {
+        return { r: hex.r, g: hex.g, b: hex.b };
+    }
+    const cleanHex = String(hex ?? "#000000").replace("#", "");
     return {
-        r: parseInt(cleanHex.slice(0, 2), 16),
-        g: parseInt(cleanHex.slice(2, 4), 16),
-        b: parseInt(cleanHex.slice(4, 6), 16),
+        r: parseInt(cleanHex.slice(0, 2), 16) || 0,
+        g: parseInt(cleanHex.slice(2, 4), 16) || 0,
+        b: parseInt(cleanHex.slice(4, 6), 16) || 0,
     };
 }
 
-function adjustColorBrightness(hexColor, lighting) {
+export function adjustColorBrightness(hexColor, lighting) {
     const { r, g, b } = hexToRgb(hexColor);
     // Scale lighting from 0–15 to 0–1 (0 = black, 15 = original color)
-    const brightness = lighting / 15;
+    const brightness = (lighting ?? 15) / 15;
     // Adjust RGB values by multiplying with brightness
     const adjustedR = r * brightness;
     const adjustedG = g * brightness;
@@ -418,7 +426,7 @@ function adjustColorBrightness(hexColor, lighting) {
 }
 
 // Helper function to convert RGB to hex color
-function rgbToHex(r, g, b) {
+export function rgbToHex(r, g, b) {
     return `#${Math.round(r).toString(16).padStart(2, "0")}${Math.round(g)
         .toString(16)
         .padStart(2, "0")}${Math.round(b)
@@ -426,24 +434,22 @@ function rgbToHex(r, g, b) {
         .padStart(2, "0")}`.toUpperCase();
 }
 
-function randomRange(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min;
-}
+export { randomRange } from "./mathUtils.js";
 
-function angleToVector(angle) {
+export function angleToVector(angle) {
     return new Vector2(Math.cos(angle), Math.sin(angle));
 }
 
-function lerp(a, b, t) {
+export function lerp(a, b, t) {
     return a + (b - a) * t;
 }
 
-function caculateDirection(positionA, positionB) {
+export function caculateDirection(positionA, positionB) {
     if (positionA.x > positionB.x) return -1;
     return 1;
 }
 
-function isValidClassType(variable) {
+export function isValidClassType(variable) {
     try {
         if (typeof variable === "function" && variable.prototype) {
             Reflect.construct(() => {}, [], variable);
@@ -455,38 +461,38 @@ function isValidClassType(variable) {
     return false;
 }
 
-function easeInOut(t) {
+export function easeInOut(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-function lerpEaseInOut(a, b, t) {
+export function lerpEaseInOut(a, b, t) {
     const easedT = easeInOut(t);
     return a + (b - a) * easedT;
 }
 
-function easeIn(t) {
+export function easeIn(t) {
     return t * t * t; // Cubic ease-in
 }
 
-function easeOut(t) {
+export function easeOut(t) {
     return 1 - Math.pow(1 - t, 3); // Cubic ease-out
 }
 
-function lerpEaseIn(a, b, t) {
+export function lerpEaseIn(a, b, t) {
     const easedT = easeIn(t);
     return a + (b - a) * easedT;
 }
 
-function lerpEaseOut(a, b, t) {
+export function lerpEaseOut(a, b, t) {
     const easedT = easeOut(t);
     return a + (b - a) * easedT;
 }
 
-function uuidv4() {
+export function uuidv4() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
         (
             c ^
             (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-        ).toString(this.spriteSize),
+        ).toString(16),
     );
 }

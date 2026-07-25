@@ -1,4 +1,11 @@
-class Body {
+import { runtime } from "../utils/runtime.js";
+import { getItem } from "./item.js";
+import { BLOCK_SIZE, ToolType } from "../utils/globals.js";
+import { drawImage } from "../utils/renderer.js";
+import { getSpriteSize, getSpriteUrl, isEqualToOriginal } from "../utils/texturePackLoader.js";
+import { getBlock } from "../world/block.js";
+
+export class Body {
     constructor({
         position = { x: 0, y: 0 },
         parts = [],
@@ -110,7 +117,7 @@ class Body {
                 );
 
                 // Smoothly interpolate between current rotation and the adjusted look direction
-                const rotationSpeed = 1000 * deltaTime; // You can adjust this speed to make it smoother or faster
+                const rotationSpeed = 1000 * runtime.deltaTime; // You can adjust this speed to make it smoother or faster
 
                 // Update the rotation towards the target rotation
                 part.rotation +=
@@ -175,7 +182,7 @@ class Body {
     }
 }
 
-class BodyPart {
+export class BodyPart {
     constructor({
         spriteCrop = { x: 0, y: 0, width: 16, height: 16 },
         spriteRotation = 0,
@@ -394,7 +401,7 @@ class BodyPart {
         if (!this.isSwinging) return;
 
         // Continue with swing logic
-        this.swingProgress += this.swingSpeed * deltaTime;
+        this.swingProgress += this.swingSpeed * runtime.deltaTime;
 
         let angle =
             Math.sin(this.swingProgress * Math.PI) * this.swingAmplitude;

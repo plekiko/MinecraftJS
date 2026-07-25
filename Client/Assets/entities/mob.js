@@ -1,4 +1,11 @@
-class Mob extends Entity {
+import { runtime } from "../utils/runtime.js";
+import { Drop } from "./drop.js";
+import { Entity, EntityTypes } from "../game/entity.js";
+import { playRandomSoundFromArray } from "../game/sounds.js";
+import { Vector2, caculateDirection, randomRange } from "../utils/classes.js";
+import { BLOCK_SIZE } from "../utils/globals.js";
+
+export class Mob extends Entity {
     constructor(
         world,
         {
@@ -110,7 +117,7 @@ class Mob extends Entity {
     }
 
     attackCooldownLogic() {
-        if (this.attackCooldown > 0) this.attackCooldown -= deltaTime;
+        if (this.attackCooldown > 0) this.attackCooldown -= runtime.deltaTime;
 
         if (this.attackCooldown < 0) this.attackCooldown = 0;
     }
@@ -178,11 +185,11 @@ class Mob extends Entity {
             });
         }
 
-        this.ambientSoundCounter += deltaTime;
+        this.ambientSoundCounter += runtime.deltaTime;
     }
 
     passiveWander() {
-        this.timeLastMoved += deltaTime;
+        this.timeLastMoved += runtime.deltaTime;
 
         if (this.timeLastMoved >= this.randomMoveTime) {
             if (!this.moving) this.moveToRandomX();
@@ -210,7 +217,7 @@ class Mob extends Entity {
 
     dropLoot() {
         if (!this.lootTable) return;
-        if (!GAMERULES.doMobLoot) return;
+        if (!runtime.GAMERULES.doMobLoot) return;
 
         const loot = this.lootTable.getRandomLoot();
 
@@ -252,7 +259,7 @@ class Mob extends Entity {
     }
 }
 
-class aiType {
+export class aiType {
     constructor({
         moveTimeRange = { min: 1, max: 10 },
         agressionLevel = Agression.Passive,
@@ -264,18 +271,18 @@ class aiType {
     }
 }
 
-const Agression = Object.freeze({
+export const Agression = Object.freeze({
     Passive: 0,
     Agressive: 1,
     Neutral: 2,
 });
 
-const aiState = Object.freeze({
+export const aiState = Object.freeze({
     Wander: 0,
     Agression: 1,
 });
 
-const AI = Object.freeze({
+export const AI = Object.freeze({
     PassiveSimple: new aiType({
         moveTimeRange: { min: 3, max: 7 },
     }),

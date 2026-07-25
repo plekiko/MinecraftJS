@@ -1,4 +1,11 @@
-class TNT extends Entity {
+import { entityRegistry } from "./entityRegistry.js";
+import { Entity } from "../game/entity.js";
+import { playPositionalSound } from "../game/sounds.js";
+import { Vector2 } from "../utils/classes.js";
+import { BLOCK_SIZE } from "../utils/globals.js";
+import { getSpriteSize, getSpriteUrl } from "../utils/texturePackLoader.js";
+
+export class TNT extends Entity {
     constructor(world, { position } = {}) {
         // Get the sprite URL for TNT side
         const spritePath = "blocks/tnt_side";
@@ -75,3 +82,5 @@ class TNT extends Entity {
         this.world.removeEntity(this);
     }
 }
+
+entityRegistry.TNT = TNT;

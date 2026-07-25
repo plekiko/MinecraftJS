@@ -1,4 +1,16 @@
-class Game {
+import { runtime } from "../utils/runtime.js";
+import { Chat } from "./chat.js";
+import { PauseMenu } from "./pauseMenu.js";
+import { Vector2 } from "../utils/classes.js";
+import { BLOCK_SIZE, INTERACT_DISTANCE, multiplayer } from "../utils/globals.js";
+import { input } from "../utils/input.js";
+import { draw } from "../utils/renderer.js";
+import { activeDimension, getDimensionChunks } from "../world/dimension.js";
+import { loadWorldFromLocalStorage } from "../world/saving.js";
+import { World } from "../world/world.js";
+import { handleDebugInput, updateDebug } from "../../debug.js";
+
+export class Game {
     constructor() {
         this.lastFrameTime = performance.now();
         this.fpsDisplay = 0;
@@ -15,7 +27,7 @@ class Game {
     waitForTexturePack() {
         return new Promise((resolve) => {
             const checkLoaded = () => {
-                if (isTexturePackLoaded) {
+                if (runtime.isTexturePackLoaded) {
                     resolve();
                 } else {
                     setTimeout(checkLoaded, 100);
@@ -52,10 +64,10 @@ class Game {
 
     async gameLoop() {
         const currentFrameTime = performance.now();
-        deltaTime = (currentFrameTime - this.lastFrameTime) / 1000;
-        passedTime += deltaTime;
+        runtime.deltaTime = (currentFrameTime - this.lastFrameTime) / 1000;
+        runtime.passedTime += runtime.deltaTime;
 
-        await world.startGenerator();
+        await runtime.world.startGenerator();
 
         this.updateGame();
 
@@ -74,13 +86,13 @@ class Game {
     }
 
     updateGame() {
-        if (!world) return;
+        if (!runtime.world) return;
 
-        world.updateEntities();
-        world.updateParticleEmitters();
+        runtime.world.updateEntities();
+        runtime.world.updateParticleEmitters();
 
-        if (world.player) this.cursorBlockLogic();
-        if (hotbar) hotbar.update();
+        if (runtime.world.player) this.cursorBlockLogic();
+        if (runtime.hotbar) runtime.hotbar.update();
         if (this.pauseMenu) this.pauseMenu.update();
         if (this.chat) this.chat.update();
 
@@ -88,7 +100,7 @@ class Game {
     }
 
     async initGame() {
-        world = new World();
+        runtime.world = new World();
         
         console.log("Initializing game...");
 
@@ -103,11 +115,11 @@ class Game {
         if (!multiplayer) {
             loadWorldFromLocalStorage();
         } else {
-            while (!world.generator.multiplayerSeedLoaded) {
+            while (!runtime.world.generator.multiplayerSeedLoaded) {
                 await new Promise((resolve) => setTimeout(resolve, 50));
             }
         }
-        world.generator.loadingWorld = false;
+        runtime.world.generator.loadingWorld = false;
     }
 
     updateArray(array, deltaTime) {
@@ -118,33 +130,33 @@ class Game {
 
     cursorBlockLogic() {
         if (this.pauseMenu?.getActive()) {
-            cursorInRange = false;
-            if (world.player) {
-                world.player.hoverBlock = null;
-                world.player.hoverWall = null;
+            runtime.cursorInRange = false;
+            if (runtime.world.player) {
+                runtime.world.player.hoverBlock = null;
+                runtime.world.player.hoverWall = null;
             }
             return;
         }
         const cursorDistance = Math.floor(
             Vector2.Distance(
-                world.player.position,
+                runtime.world.player.position,
                 new Vector2(
                     input.getMousePositionOnBlockGrid().x,
                     input.getMousePositionOnBlockGrid().y,
                 ),
             ) / BLOCK_SIZE,
         );
-        cursorInRange = !world.player.abilities.instaBuild
+        runtime.cursorInRange = !runtime.world.player.abilities.instaBuild
             ? cursorDistance <= INTERACT_DISTANCE
             : true;
-        world.player.hoverBlock = cursorInRange
-            ? world.getBlockAtWorldPosition(
+        runtime.world.player.hoverBlock = runtime.cursorInRange
+            ? runtime.world.getBlockAtWorldPosition(
                   input.getMousePositionOnBlockGrid().x,
                   input.getMousePositionOnBlockGrid().y,
               )
             : null;
-        world.player.hoverWall = cursorInRange
-            ? world.getBlockAtWorldPosition(
+        runtime.world.player.hoverWall = runtime.cursorInRange
+            ? runtime.world.getBlockAtWorldPosition(
                   input.getMousePositionOnBlockGrid().x,
                   input.getMousePositionOnBlockGrid().y,
                   true,
@@ -153,6 +165,6 @@ class Game {
     }
 
     animateFrame() {
-        globalFrame++;
+        runtime.globalFrame++;
     }
 }

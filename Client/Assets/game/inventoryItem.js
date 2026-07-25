@@ -1,4 +1,11 @@
-class InventoryItem {
+import { runtime } from "../utils/runtime.js";
+import { getItem } from "./item.js";
+import { inventoryRegistry } from "./inventoryRegistry.js";
+import { drawImage, drawRect, drawText } from "../utils/renderer.js";
+import { getSpriteSize, getSpriteUrl } from "../utils/texturePackLoader.js";
+import { getBlock } from "../world/block.js";
+
+export class InventoryItem {
     constructor({ blockId = null, itemId = null, count = 0, props = {} } = {}) {
         this.blockId = blockId;
         this.itemId = itemId;
@@ -51,7 +58,7 @@ class InventoryItem {
     }
 }
 
-class InventorySlot {
+export class InventorySlot {
     constructor({
         position = { x: 0, y: 0 },
         item = new InventoryItem(),
@@ -116,7 +123,7 @@ class InventorySlot {
         const frameCount = Math.floor(actualHeight / actualWidth); // Total number of frames in the sprite sheet
 
         const animationSpeed = 2;
-        const frame = Math.floor(globalFrame / animationSpeed) % frameCount;
+        const frame = Math.floor(runtime.globalFrame / animationSpeed) % frameCount;
 
         // Calculate the crop Y offset for the current frame
         const cropY = frame * actualWidth; // Adjust the Y position for the current frame
@@ -188,3 +195,5 @@ class InventorySlot {
         }
     }
 }
+
+inventoryRegistry.InventoryItem = InventoryItem;

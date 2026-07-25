@@ -1,34 +1,45 @@
-const CANVAS = document.getElementById("canvas");
-const ctx = CANVAS.getContext("2d");
+import { runtime } from "./runtime.js";
+import { Camera } from "../game/camera.js";
+import { Vector2 } from "./classes.js";
+import {
+    BLOCK_SIZE,
+    CHUNK_FILE_SIZE,
+    CHUNK_HEIGHT,
+    CHUNK_WIDTH,
+    RENDER_DISTANCE,
+    TERRAIN_HEIGHT,
+    url,
+} from "./globals.js";
+import { input } from "./input.js";
+import { getSpriteSize, getSpriteUrl } from "./texturePackLoader.js";
+import {
+    activeDimension,
+    getDimension,
+    getDimensionChunks,
+} from "../world/dimension.js";
+import { CANVAS, ctx, r } from "./canvas.js";
 
-var r = document.querySelector(":root");
+export { CANVAS, ctx, r };
 
-CANVAS.width = 1600;
-CANVAS.height = 900;
-ctx.imageSmoothingEnabled = false;
-ctx.webkitImageSmoothingEnabled = false;
-ctx.mozImageSmoothingEnabled = false;
+runtime.drawingChunkBorders = false;
+runtime.drawCameraOverlay = false;
+runtime.drawHeightOverlay = false;
+runtime.drawDebugMouseBlockOverlay = false;
+runtime.drawFileSizeOverlay = false;
+runtime.drawFpsOverlay = true;
+runtime.drawHitbox = false;
+runtime.drawCoordinatesOverlay = true;
 
-let drawingChunkBorders = false;
-let drawCameraOverlay = false;
-let drawHeightOverlay = false;
-let drawDebugMouseBlockOverlay = false;
-let drawFileSizeOverlay = false;
-let drawFpsOverlay = true;
-let drawHitbox = false;
-let drawCoordinatesOverlay = true;
+runtime.cursorInRange = false;
 
-let cursorInRange = false;
+runtime.hotbar = null;
 
-let hotbar = null;
+export let fps;
 
-let fps;
+export const camera = new Camera(0, CHUNK_HEIGHT * 2);
+runtime.camera = camera;
 
-const camera = new Camera(0, CHUNK_HEIGHT * 2);
-
-r.style.setProperty("--drawMouse", "none");
-
-function drawBackground() {
+export function drawBackground() {
     const dimension = getDimension(activeDimension);
 
     // Calculate the color stops based on time
@@ -40,12 +51,12 @@ function drawBackground() {
     const topColor = interpolateColor(
         nightColor,
         dayColor,
-        Math.sin(time) * 0.5 + 0.5,
+        Math.sin(runtime.time) * 0.5 + 0.5,
     );
     const bottomColor = interpolateColor(
         midnightColor,
         sunsetColor,
-        Math.sin(time) * 0.5 + 0.5,
+        Math.sin(runtime.time) * 0.5 + 0.5,
     );
 
     const gradient = ctx.createLinearGradient(0, CANVAS.height, 0, 0);
@@ -62,7 +73,7 @@ function drawBackground() {
     ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 }
 
-function interpolateColor(color1, color2, factor) {
+export function interpolateColor(color1, color2, factor) {
     const c1 = hexToRgb(color1);
     const c2 = hexToRgb(color2);
     const r = Math.round(c1.r + (c2.r - c1.r) * factor);
@@ -71,7 +82,7 @@ function interpolateColor(color1, color2, factor) {
     return `rgb(${r}, ${g}, ${b})`;
 }
 
-function hexToRgb(hex) {
+export function hexToRgb(hex) {
     const bigint = parseInt(hex.slice(1), 16);
     return {
         r: (bigint >> 16) & 255,
@@ -80,8 +91,8 @@ function hexToRgb(hex) {
     };
 }
 
-function mouseOverPosition(x, y, sizeX, sizeY, world = false) {
-    const mousePos = world
+export function mouseOverPosition(x, y, sizeX, sizeY, world = false) {
+    const mousePos = runtime.world
         ? input.getMouseWorldPosition()
         : input.getMousePosition();
 
@@ -93,7 +104,7 @@ function mouseOverPosition(x, y, sizeX, sizeY, world = false) {
     );
 }
 
-function isColliding(pos1, size1, pos2, size2) {
+export function isColliding(pos1, size1, pos2, size2) {
     return (
         pos1.x < pos2.x + size2.x &&
         pos1.x + size1.x > pos2.x &&
@@ -102,20 +113,20 @@ function isColliding(pos1, size1, pos2, size2) {
     );
 }
 
-function drawParticleEmitters() {
-    for (const particleEmitter of world.particleEmitters) {
+export function drawParticleEmitters() {
+    for (const particleEmitter of runtime.world.particleEmitters) {
         particleEmitter.draw(camera);
     }
 }
 
-function draw(chunks, frames) {
+export function draw(chunks, frames) {
     fps = frames;
 
     drawBackground();
     drawChunks(chunks);
 
-    if (world.player && !game.pauseMenu?.getActive() && !world.player.isDead) {
-        drawBreakAndPlaceCursor(cursorInRange);
+    if (runtime.world.player && !runtime.game.pauseMenu?.getActive() && !runtime.world.player.isDead) {
+        drawBreakAndPlaceCursor(runtime.cursorInRange);
         drawDestroyStage();
     }
 
@@ -128,8 +139,8 @@ function draw(chunks, frames) {
     drawLoadScreen();
 }
 
-function drawLoadScreen() {
-    if (!isTexturePackLoaded || world?.generator?.loadingWorld) {
+export function drawLoadScreen() {
+    if (!runtime.isTexturePackLoaded || runtime.world?.generator?.loadingWorld) {
         ctx.fillStyle = "black";
         ctx.fillRect(0, 0, CANVAS.width, CANVAS.height);
 
@@ -137,13 +148,13 @@ function drawLoadScreen() {
         ctx.font = "30px Pixel";
         ctx.textAlign = "center";
 
-        if (!isTexturePackLoaded)
+        if (!runtime.isTexturePackLoaded)
             ctx.fillText(
                 "Loading texture pack...",
                 CANVAS.width / 2,
                 CANVAS.height / 2,
             );
-        else if (world?.generator?.loadingWorld)
+        else if (runtime.world?.generator?.loadingWorld)
             ctx.fillText(
                 "Loading world...",
                 CANVAS.width / 2,
@@ -152,8 +163,8 @@ function drawLoadScreen() {
     }
 }
 
-function drawEntities() {
-    world.entities.forEach((entity) => {
+export function drawEntities() {
+    runtime.world.entities.forEach((entity) => {
         if (entity.dimension !== activeDimension) return;
         if (
             Math.abs(
@@ -172,19 +183,19 @@ function drawEntities() {
                 );
                 if (chunk) chunk.removeEntityFromChunk(entity);
 
-                world.removeEntity(entity);
+                runtime.world.removeEntity(entity);
             }
         }
     });
 
-    if (drawHitbox) drawHitboxes();
+    if (runtime.drawHitbox) drawHitboxes();
 }
 
-function drawBreakAndPlaceCursor(inRange = false) {
+export function drawBreakAndPlaceCursor(inRange = false) {
     const mouseX = input.getMousePositionOnBlockGrid().x;
     const mouseY = input.getMousePositionOnBlockGrid().y;
 
-    const selectedBlock = world.player.inventory.selectedBlock;
+    const selectedBlock = runtime.world.player.inventory.selectedBlock;
 
     if (selectedBlock) {
         const spritePath = "blocks/" + selectedBlock.sprite;
@@ -213,17 +224,17 @@ function drawBreakAndPlaceCursor(inRange = false) {
     );
 }
 
-function drawChunks(chunksMap) {
+export function drawChunks(chunksMap) {
     const currentChunkX = camera.getCurrentChunkIndex(); // Get the x position of the current chunk
 
-    world.chunks_in_render_distance.clear();
+    runtime.world.chunks_in_render_distance.clear();
 
     for (let i = -RENDER_DISTANCE; i <= RENDER_DISTANCE; i++) {
         const chunkX = (currentChunkX + i) * CHUNK_WIDTH * BLOCK_SIZE; // Calculate the x position of the chunk to render
         // console.log(chunkX + " is " + chunksMap.has(chunkX));
 
         if (chunksMap.has(chunkX)) {
-            world.chunks_in_render_distance.set(chunkX, chunksMap.get(chunkX));
+            runtime.world.chunks_in_render_distance.set(chunkX, chunksMap.get(chunkX));
 
             const chunk = chunksMap.get(chunkX);
 
@@ -233,9 +244,9 @@ function drawChunks(chunksMap) {
     }
 }
 
-function drawCoordinates() {
-    if (!world.player) return;
-    const blockPos = world.worldToBlocks(world.player.position);
+export function drawCoordinates() {
+    if (!runtime.world.player) return;
+    const blockPos = runtime.world.worldToBlocks(runtime.world.player.position);
     drawText({
         text: `x: ${Math.round(blockPos.x * 100) / 100} y: ${
             Math.round(blockPos.y * 100) / 100
@@ -249,57 +260,57 @@ function drawCoordinates() {
     });
 }
 
-function drawCamera() {
+export function drawCamera() {
     ctx.fillStyle = "white";
     ctx.fillRect(CANVAS.width / 2 - 2, CANVAS.height / 2 - 2, 14, 14);
     ctx.fillStyle = "black";
     ctx.fillRect(CANVAS.width / 2, CANVAS.height / 2, 10, 10);
 }
 
-function drawLate(chunk) {
-    if (drawingChunkBorders) drawChunkLine(chunk);
-    if (drawHeightOverlay) drawHeight();
+export function drawLate(chunk) {
+    if (runtime.drawingChunkBorders) drawChunkLine(chunk);
+    if (runtime.drawHeightOverlay) drawHeight();
 }
 
-function afterDraw() {
-    if (world.player && !world.player.isDead) {
+export function afterDraw() {
+    if (runtime.world.player && !runtime.world.player.isDead) {
         drawUI();
-        if (!game.pauseMenu?.getActive()) drawCursor();
-        if (drawCoordinatesOverlay) drawCoordinates();
+        if (!runtime.game.pauseMenu?.getActive()) drawCursor();
+        if (runtime.drawCoordinatesOverlay) drawCoordinates();
     }
-    if (drawCameraOverlay) drawCamera();
-    if (drawDebugMouseBlockOverlay) drawDebugMouseBlock();
-    if (drawFileSizeOverlay) drawExpectedFileSize();
-    if (drawFpsOverlay) drawFps();
+    if (runtime.drawCameraOverlay) drawCamera();
+    if (runtime.drawDebugMouseBlockOverlay) drawDebugMouseBlock();
+    if (runtime.drawFileSizeOverlay) drawExpectedFileSize();
+    if (runtime.drawFpsOverlay) drawFps();
 }
 
-function drawUI() {
+export function drawUI() {
     drawHotbar();
     drawInventory();
-    game.chat.draw(ctx);
+    runtime.game.chat.draw(ctx);
 }
 
-function drawInventory() {
-    if (!world.player.windowOpen) return;
+export function drawInventory() {
+    if (!runtime.world.player.windowOpen) return;
 
-    world.player.inventory.draw(ctx);
+    runtime.world.player.inventory.draw(ctx);
 }
 
-function drawDestroyStage() {
-    if (!world.player) return;
-    if (world.player.breakingStage == 0 || world.player.breakingStage > 10)
+export function drawDestroyStage() {
+    if (!runtime.world.player) return;
+    if (runtime.world.player.breakingStage == 0 || runtime.world.player.breakingStage > 10)
         return;
 
     const mouseX = input.getMousePositionOnBlockGrid().x;
     const mouseY = input.getMousePositionOnBlockGrid().y;
 
     const spriteSize = getSpriteSize(
-        "blocks/destroy_stage_" + (world.player.breakingStage - 1),
+        "blocks/destroy_stage_" + (runtime.world.player.breakingStage - 1),
     ).width;
 
     drawImage({
         url: getSpriteUrl(
-            "blocks/destroy_stage_" + (world.player.breakingStage - 1),
+            "blocks/destroy_stage_" + (runtime.world.player.breakingStage - 1),
         ),
         x: mouseX - Math.floor(camera.x),
         y: mouseY - Math.floor(camera.y),
@@ -308,7 +319,7 @@ function drawDestroyStage() {
     });
 }
 
-function drawChunkLine(chunk) {
+export function drawChunkLine(chunk) {
     const chunkX = chunk.x;
     ctx.strokeStyle = "red";
     ctx.beginPath();
@@ -324,10 +335,10 @@ function drawChunkLine(chunk) {
     drawChunkStats(chunk, chunkX);
 }
 
-function drawCursor() {
-    if (!world.player) return;
+export function drawCursor() {
+    if (!runtime.world.player) return;
 
-    if (world.player.windowOpen) {
+    if (runtime.world.player.windowOpen) {
         drawImage({
             url: getSpriteUrl("misc/cursor"),
             x: input.getMousePosition().x,
@@ -347,7 +358,7 @@ function drawCursor() {
     });
 }
 
-function drawFps() {
+export function drawFps() {
     ctx.fillStyle = "black";
     ctx.font = "20px Pixel";
     ctx.textAlign = "right";
@@ -355,7 +366,7 @@ function drawFps() {
     ctx.fillText(fps, CANVAS.width - 10, CANVAS.height - 10);
 }
 
-function drawChunkStats(chunk, chunkX) {
+export function drawChunkStats(chunk, chunkX) {
     ctx.textAlign = "left";
     const index = chunk.x / CHUNK_WIDTH / BLOCK_SIZE;
     const dimension = getDimension(activeDimension);
@@ -411,7 +422,7 @@ function drawChunkStats(chunk, chunkX) {
     }
 }
 
-function drawExpectedFileSize() {
+export function drawExpectedFileSize() {
     ctx.fillStyle = "black";
     ctx.font = "15px Pixel";
     ctx.textAlign = "left";
@@ -425,7 +436,7 @@ function drawExpectedFileSize() {
     );
 }
 
-function drawHeight() {
+export function drawHeight() {
     ctx.beginPath();
 
     // Get the world position at the leftmost visible edge of the screen
@@ -474,7 +485,7 @@ function drawHeight() {
     ctx.stroke();
 }
 
-function drawDebugMouseBlock() {
+export function drawDebugMouseBlock() {
     r.style.setProperty("--drawMouse", "none");
 
     const mouseX = input.getMousePositionOnBlockGrid().x;
@@ -497,13 +508,13 @@ function drawDebugMouseBlock() {
     ctx.lineWidth = 1;
 }
 
-function drawHotbar() {
-    if (!hotbar) return;
+export function drawHotbar() {
+    if (!runtime.hotbar) return;
 
-    hotbar.draw(ctx);
+    runtime.hotbar.draw(ctx);
 }
 
-function drawText({
+export function drawText({
     text,
     x,
     y,
@@ -550,58 +561,17 @@ function drawText({
     ctx.fillText(text, x, y);
 }
 
-function drawHitboxes() {
-    world.entities.forEach((entity) => {
+export function drawHitboxes() {
+    runtime.world.entities.forEach((entity) => {
         entity.drawHitbox(ctx);
     });
 }
 
-function drawSimpleImage({
-    image,
-    x = 0,
-    y = 0,
-    width = 0,
-    height = 0,
-    scale = 1,
-    centerX = false,
-    centerY = false,
-    opacity = 1,
-    crop = { x: 0, y: 0, width: 0, height: 0 },
-}) {
-    if (!image) return;
+export { drawSimpleImage } from "./drawHelpers.js";
 
-    ctx.globalAlpha = opacity;
+export const imageCache = new Map();
 
-    const shouldCrop = crop.width > 0 && crop.height > 0;
-    const sourceWidth = shouldCrop ? crop.width : image.width;
-    const sourceHeight = shouldCrop ? crop.height : image.height;
-    const sourceX = shouldCrop ? crop.x : 0;
-    const sourceY = shouldCrop ? crop.y : 0;
-
-    const drawWidth = width || sourceWidth * scale;
-    const drawHeight = height || sourceHeight * scale;
-
-    // Adjust position based on centering
-    const drawX = centerX ? x - drawWidth / 2 : x;
-    const drawY = centerY ? y - drawHeight / 2 : y;
-
-    // Draw the image
-    ctx.drawImage(
-        image,
-        sourceX, // Source x
-        sourceY, // Source y
-        sourceWidth, // Source width
-        sourceHeight, // Source height
-        drawX, // Canvas x
-        drawY, // Canvas y
-        drawWidth, // Scaled width
-        drawHeight, // Scaled height
-    );
-}
-
-const imageCache = new Map();
-
-function drawImage({
+export function drawImage({
     url,
     image,
     x = 0,
@@ -721,7 +691,7 @@ function drawImage({
     };
 }
 
-function drawRect({
+export function drawRect({
     x,
     y,
     width,

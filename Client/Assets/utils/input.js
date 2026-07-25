@@ -1,4 +1,10 @@
-class InputHandler {
+import { runtime } from "./runtime.js";
+import { Vector2 } from "./classes.js";
+import { BLOCK_SIZE } from "./globals.js";
+import { loadKeyBindings } from "./keyBindings.js";
+import { CANVAS } from "./canvas.js";
+
+export class InputHandler {
     constructor(keyBindings) {
         this.keyBindings = keyBindings;
         const keysFromBindings = new Set();
@@ -47,9 +53,10 @@ class InputHandler {
     }
 
     _handleKeyDown(event) {
-        if (game.chat.inChat) return;
+        if (!runtime.game) return;
+        if (runtime.game.chat.inChat) return;
         const key = event.code;
-        if (game.pauseMenu.getActive()) {
+        if (runtime.game.pauseMenu.getActive()) {
             const pauseKeys = this.keyBindings.pause;
             if (!pauseKeys || !pauseKeys.includes(key)) return;
         }
@@ -65,22 +72,22 @@ class InputHandler {
             }
             this.keys[key] = true; // Keep keys set to true as long as the key is held down
             if (
-                !game.chat.inChat &&
-                world.player &&
-                !world.player.inventory.isEditingSign
+                !runtime.game.chat.inChat &&
+                runtime.world?.player &&
+                !runtime.world.player.inventory.isEditingSign
             ) {
                 if (
                     this.keyBindings.chatOpen &&
                     this.keyBindings.chatOpen.includes(key)
                 ) {
-                    game.chat.openChat();
+                    runtime.game.chat.openChat();
                 } else if (
                     this.keyBindings.chatCommand &&
                     this.keyBindings.chatCommand.includes(key)
                 ) {
-                    game.chat.currentMessage = "/";
-                    game.chat.cursorPosition = 1;
-                    game.chat.openChat();
+                    runtime.game.chat.currentMessage = "/";
+                    runtime.game.chat.cursorPosition = 1;
+                    runtime.game.chat.openChat();
                 }
             }
         }
@@ -244,16 +251,18 @@ class InputHandler {
     getMouseWorldPosition() {
         const pos = this.getMousePosition();
         return {
-            x: pos.x + camera.x,
-            y: pos.y + camera.y,
+            x: pos.x + runtime.camera.x,
+            y: pos.y + runtime.camera.y,
         };
     }
 
     getMousePositionOnBlockGrid() {
         const pos = this.getMousePosition();
 
-        const gridX = Math.floor((pos.x + camera.x) / BLOCK_SIZE) * BLOCK_SIZE;
-        const gridY = Math.floor((pos.y + camera.y) / BLOCK_SIZE) * BLOCK_SIZE;
+        const gridX =
+            Math.floor((pos.x + runtime.camera.x) / BLOCK_SIZE) * BLOCK_SIZE;
+        const gridY =
+            Math.floor((pos.y + runtime.camera.y) / BLOCK_SIZE) * BLOCK_SIZE;
 
         return new Vector2(Math.floor(gridX), Math.floor(gridY));
     }
@@ -286,5 +295,5 @@ class InputHandler {
     }
 }
 
-const keyBindings = loadKeyBindings();
-const input = new InputHandler(keyBindings);
+export const keyBindings = loadKeyBindings();
+export const input = new InputHandler(keyBindings);

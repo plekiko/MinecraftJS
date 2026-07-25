@@ -1,12 +1,10 @@
 // Shared button utilities for menus (both title screen and all in-game menus)
 
+import { resolveAssetUrl } from "./Assets/utils/assetBundle.js";
+
 // Crops center of button image for CSS to tile (used for dynamic UI scaling)
 // I wanted to do this in CSS but apparently it's not possible
-(function () {
-    const base = new URL(
-        "Assets/sprites/menu/",
-        document.baseURI || document.URL,
-    ).href;
+export function initButtonCenterImages() {
     const w = 192,
         h = 20,
         slice = 4;
@@ -35,15 +33,17 @@
                     );
             }, "image/png");
         };
-        img.src = base + file;
+        img.src = resolveAssetUrl(`Assets/sprites/menu/${file}`);
     });
-})();
+}
 
-function playButtonSound() {
+export function playButtonSound() {
     const s = JSON.parse(localStorage.getItem("settings") || "{}");
     const sfxVol = s.sfxVolume ?? (s.sfx === false ? 0 : 100);
     if (sfxVol === 0) return;
-    const audio = new Audio("Assets/audio/sfx/ui/click.ogg");
+    const audio = new Audio(
+        resolveAssetUrl("Assets/audio/sfx/ui/click.ogg"),
+    );
     audio.volume = (sfxVol / 100) * 0.3;
     audio.play();
 }
@@ -56,7 +56,7 @@ document.addEventListener("change", (e) => {
     if (e.target.matches?.(".slider-input")) playButtonSound();
 });
 
-function downloadWorldSave(saveData, filename) {
+export function downloadWorldSave(saveData, filename) {
     const blob = new Blob([saveData], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

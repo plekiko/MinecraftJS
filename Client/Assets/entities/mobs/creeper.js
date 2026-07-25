@@ -1,4 +1,13 @@
-class Creeper extends Mob {
+import { runtime } from "../../utils/runtime.js";
+import { AI, Mob } from "../mob.js";
+import { Body, BodyPart } from "../../game/body.js";
+import { Items } from "../../game/items.js";
+import { LootItem, LootTable } from "../../game/lootTable.js";
+import { Sounds, playPositionalSound, playRandomSoundFromArray } from "../../game/sounds.js";
+import { Vector2 } from "../../utils/classes.js";
+import { BLOCK_SIZE } from "../../utils/globals.js";
+
+export class Creeper extends Mob {
     constructor(
         world,
         {
@@ -91,7 +100,7 @@ class Creeper extends Mob {
             damage: 12,
             power: 12,
             excludeEntity: this,
-            destroyTerrain: GAMERULES.doMobGriefing,
+            destroyTerrain: runtime.GAMERULES.doMobGriefing,
         });
     }
 
@@ -122,7 +131,7 @@ class Creeper extends Mob {
     interact(player, item) {}
 }
 
-function createCreeperBody() {
+export function createCreeperBody() {
     return new Body({
         flipCorrection: 0,
         sprite: "creeper/creeper",

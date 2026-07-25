@@ -4,6 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Structure Creator</title>
+        <link rel="stylesheet" href="boot.css" />
         <style>
             /* General Page Styles */
             body {
@@ -228,6 +229,13 @@
         </style>
     </head>
     <body>
+        <div id="media-boot">
+            <div class="media-boot-inner">
+                <div class="media-boot-title">Loading resources...</div>
+                <div class="media-boot-bar"><div class="media-boot-fill"></div></div>
+                <div class="media-boot-pct">0%</div>
+            </div>
+        </div>
         <div class="editor">
             <h1 class="title">Structure Creator</h1>
             <canvas id="gridCanvas" width="512" height="512"></canvas>
@@ -268,16 +276,6 @@
         </div>
         <div class="palette" id="palette"></div>
 
-        <!-- External Scripts -->
-        <script src="Assets/utils/globals.js"></script>
-        <script src="Assets/utils/classes.js"></script>
-        <script src="Assets/game/sounds.js"></script>
-        <script src="Assets/game/lootTable.js"></script>
-        <script src="Assets/game/item.js"></script>
-        <script src="Assets/game/items.js"></script>
-        <script src="Assets/world/block.js"></script>
-        <script src="Assets/world/blocks.js"></script>
-        <script src="Assets/world/chestLoot.js"></script>
-        <script src="structureCreator.js"></script>
+        <script type="module" src="/structure-creator-main.js"></script>
     </body>
 </html>

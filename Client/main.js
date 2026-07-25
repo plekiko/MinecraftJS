@@ -1,12 +1,16 @@
-const game = new Game();
-let world = null;
+import { runtime } from "./Assets/utils/runtime.js";
+import { Game } from "./Assets/game/game.js";
+import { drawLoadScreen } from "./Assets/utils/renderer.js";
+
+runtime.game = new Game();
+runtime.world = null;
 
 drawLoadScreen();
 
-window.onload = async function () {
-    await game.initGame().catch((error) => {
-        console.error("Failed to initialize game:", error);
-    });
+// Don't use window.onload — game-main awaits media.zip first, so the load
+// event has usually already fired by the time this module runs.
+await runtime.game.initGame().catch((error) => {
+    console.error("Failed to initialize game:", error);
+});
 
-    requestAnimationFrame(() => game.gameLoop());
-};
+requestAnimationFrame(() => runtime.game.gameLoop());

@@ -1,4 +1,8 @@
-class Projectile extends Entity {
+import { Entity, EntityTypes } from "../game/entity.js";
+import { Vector2 } from "../utils/classes.js";
+import { BLOCK_SIZE } from "../utils/globals.js";
+
+export class Projectile extends Entity {
     constructor(
         world,
         {

@@ -1,4 +1,20 @@
-class Inventory {
+import { runtime } from "../utils/runtime.js";
+import { InventoryItem, InventorySlot } from "./inventoryItem.js";
+import { getItem } from "./item.js";
+import { Items } from "./items.js";
+import { RecipeType } from "./recipe.js";
+import { recipes } from "./recipes.js";
+import { drawSkinPreview } from "./skinPreview.js";
+import { playPositionalSound, playSound } from "./sounds.js";
+import { Vector2, randomRange } from "../utils/classes.js";
+import { BLOCK_SIZE, multiplayer } from "../utils/globals.js";
+import { input } from "../utils/input.js";
+import { CANVAS, ctx, drawImage, drawRect, drawText, mouseOverPosition } from "../utils/renderer.js";
+import { getSpriteSize, getSpriteUrl, isEqualToOriginal } from "../utils/texturePackLoader.js";
+import { getBlock } from "../world/block.js";
+import { Blocks } from "../world/blocks.js";
+
+export class Inventory {
     constructor() {
         this.inventoryUI = { x: 492, y: 150 };
 
@@ -107,8 +123,8 @@ class Inventory {
     }
 
     syncInventoryMultiplayer() {
-        if (!multiplayer || !server || !world.player) return;
-        if (world.player.inventory !== this) return;
+        if (!multiplayer || !runtime.server || !runtime.world.player) return;
+        if (runtime.world.player.inventory !== this) return;
 
         const inventoryPayload = this.serializeInventoryForMultiplayer();
         const payloadString = JSON.stringify(inventoryPayload);
@@ -117,9 +133,9 @@ class Inventory {
 
         this.lastSyncedInventoryPayload = payloadString;
 
-        server.send({
+        runtime.server.send({
             type: "playerInventory",
-            sender: world.player.UUID,
+            sender: runtime.world.player.UUID,
             message: {
                 inventory: inventoryPayload,
             },
@@ -175,7 +191,7 @@ class Inventory {
                 if (!item.blockId && (!item.itemId || item.itemId === 0))
                     continue;
 
-                world.spawnDrop(
+                runtime.world.spawnDrop(
                     new Vector2(
                         position.x + randomRange(-BLOCK_SIZE, BLOCK_SIZE),
                         position.y,
@@ -640,7 +656,7 @@ class Inventory {
 
             this.reverseSync();
 
-            playPositionalSound(world.player.position, "blocks/anvil_use.ogg");
+            playPositionalSound(runtime.world.player.position, "blocks/anvil_use.ogg");
             return;
         }
 
@@ -1240,7 +1256,7 @@ class Inventory {
 
     handleHotbarAssignment() {
         // Only proceed if an item is hovered and the inventory UI is open
-        if (!this.hoverItem || !world.player.windowOpen) return;
+        if (!this.hoverItem || !runtime.world.player.windowOpen) return;
 
         // Map number keys to hotbar slots
         for (let i = 1; i <= 9; i++) {
@@ -1774,7 +1790,7 @@ class Inventory {
 
     drawPlayerSkin(ctx) {
         if (
-            !world.player?.body?.image?.complete ||
+            !runtime.world.player?.body?.image?.complete ||
             typeof drawSkinPreview !== "function"
         )
             return;
@@ -1792,11 +1808,11 @@ class Inventory {
             this.openUIOffset.y;
         drawSkinPreview(
             ctx,
-            world.player.body.image,
+            runtime.world.player.body.image,
             baseX,
             baseY,
             INVENTORY_PLAYER_SCALE,
-            world.player.skinModel ||
+            runtime.world.player.skinModel ||
                 localStorage.getItem("playerSkinModel") ||
                 "steve",
         );
@@ -2307,7 +2323,7 @@ class Inventory {
     }
 
     drawHoverTitle() {
-        if (!world.player.windowOpen) return;
+        if (!runtime.world.player.windowOpen) return;
         if (!this.hoverItem) return;
         if (!this.hoverItem.blockId && this.hoverItem.itemId == null) return;
 
@@ -2335,7 +2351,7 @@ class Inventory {
     }
 
     drawHoldItem() {
-        if (!world.player.windowOpen) return;
+        if (!runtime.world.player.windowOpen) return;
         const holdingItem = this.holdingItem;
         if (!holdingItem) return;
         const mousePos = input.getMousePosition();
@@ -2407,7 +2423,7 @@ class Inventory {
     }
 }
 
-class Button {
+export class Button {
     constructor({
         position = { x: 0, y: 0 },
         size = { x: 50, y: 20 },
@@ -2485,7 +2501,7 @@ class Button {
     }
 }
 
-class TextElement {
+export class TextElement {
     constructor({
         text = "",
         position = { x: 0, y: 0 },

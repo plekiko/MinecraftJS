@@ -1,4 +1,14 @@
-class Snowball extends Projectile {
+import { runtime } from "../../utils/runtime.js";
+import { Projectile } from "../projectile.js";
+import { Colors } from "../../game/chat.js";
+import { Sounds, playRandomSoundFromArray } from "../../game/sounds.js";
+import { Vector2 } from "../../utils/classes.js";
+import { BLOCK_SIZE } from "../../utils/globals.js";
+import { getSpriteUrl } from "../../utils/texturePackLoader.js";
+import { PARTICLE } from "../../world/particle.js";
+import { createParticleEmitter } from "../../world/particleEmitter.js";
+
+export class Snowball extends Projectile {
     constructor(
         world,
         {
@@ -45,6 +55,6 @@ class Snowball extends Projectile {
             range: 10,
             origin: this.position,
         });
-        world.removeEntity(this);
+        runtime.world.removeEntity(this);
     }
 }

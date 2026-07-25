@@ -27,12 +27,24 @@
 
 ### Option 1 - Node.js
 To get set up, run `npm install` in both the Client and Server directories.
-You can then run `npx serve Client` in the root directory to host the client on `localhost:3000`. There is no hot-reloading, so any changes will require a page refresh.
-To host a server, run `node server.js` from the Server directory. By default, this hosts on port 25565.
+
+From the Client directory, run `npm run dev` to start the Vite dev server on `localhost:3000` (hot module reload for the client).
+
+To statically catch missing imports / undefined names (the usual ESM migration failures), run `npm run lint` in the Client directory.
+
+To host a multiplayer server, run `node server.js` from the Server directory. By default, this hosts on port 25565.
+
+Production client build:
+
+```bash
+cd Client && npm run build
+```
+
+The output is written to `Client/dist/`. Preview it with `npm run preview`.
 
 ### Option 2 - Docker
 If you wish to build the project with Docker, you can run:
-`docker build -t minecraftjs .`. You can then run it with `docker run minecraftjs`, which will host the game on port 80 (simply `localhost`).
+`docker build -t minecraftjs .`. You can then run it with `docker run -p 80:80 minecraftjs`, which will host the game on port 80 (simply `localhost`).
 Please be advised that this is a static build and will not update when you modify the code unless you re-run the build command.
 
 > [!NOTE]

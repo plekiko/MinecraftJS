@@ -1,3 +1,8 @@
+import { Blocks, blockTypes } from "./Assets/world/blocks.js";
+import { getBlock } from "./Assets/world/block.js";
+import { ChestLoot } from "./Assets/world/chestLoot.js";
+import { resolveAssetUrl } from "./Assets/utils/assetBundle.js";
+
 // ----- CONFIGURATION -----
 const canvas = document.getElementById("gridCanvas");
 const ctx = canvas.getContext("2d");
@@ -80,8 +85,9 @@ function drawGrid() {
                     const block = getBlock(cell);
                     if (block && block.sprite) {
                         const img = new Image();
-                        img.src =
-                            "Assets/sprites/blocks/" + block.sprite + ".png";
+                        img.src = resolveAssetUrl(
+                            "Assets/sprites/blocks/" + block.sprite + ".png",
+                        );
                         ctx.drawImage(
                             img,
                             c * cellSize,
@@ -109,7 +115,9 @@ function drawGrid() {
                     }
                 } else if (typeof cell === "string") {
                     const img = new Image();
-                    img.src = "Assets/sprites/blocks/chest.png";
+                    img.src = resolveAssetUrl(
+                        "Assets/sprites/blocks/chest.png",
+                    );
                     ctx.drawImage(
                         img,
                         c * cellSize,
@@ -131,8 +139,9 @@ function drawGrid() {
                     const block = getBlock(cell);
                     if (block && block.sprite) {
                         const img = new Image();
-                        img.src =
-                            "Assets/sprites/blocks/" + block.sprite + ".png";
+                        img.src = resolveAssetUrl(
+                            "Assets/sprites/blocks/" + block.sprite + ".png",
+                        );
                         ctx.drawImage(
                             img,
                             c * cellSize,
@@ -153,7 +162,9 @@ function drawGrid() {
                     }
                 } else if (typeof cell === "string") {
                     const img = new Image();
-                    img.src = "Assets/sprites/blocks/chest.png";
+                    img.src = resolveAssetUrl(
+                        "Assets/sprites/blocks/chest.png",
+                    );
                     ctx.drawImage(
                         img,
                         c * cellSize,
@@ -294,9 +305,11 @@ sortedBlocks.forEach((block) => {
         .replace(/([A-Z])/g, " $1")
         .trim();
 
-    const imgSrc = block.sprite
-        ? "Assets/sprites/blocks/" + block.iconSprite + ".png"
-        : "Assets/sprites/misc/placeholder.png";
+    const imgSrc = resolveAssetUrl(
+        block.sprite
+            ? "Assets/sprites/blocks/" + block.iconSprite + ".png"
+            : "Assets/sprites/misc/placeholder.png",
+    );
     const item = createPaletteItem(
         name + " - " + block.blockId,
         imgSrc,
@@ -314,7 +327,7 @@ paletteContainer.appendChild(lootTitle);
 for (const key in ChestLoot) {
     if (ChestLoot.hasOwnProperty(key)) {
         const lootId = "ChestLoot." + key;
-        const imgSrc = "Assets/sprites/blocks/chest.png";
+        const imgSrc = resolveAssetUrl("Assets/sprites/blocks/chest.png");
         const item = createPaletteItem(key, imgSrc, lootId);
         if (activeBlockId === lootId) item.classList.add("selected");
         paletteContainer.appendChild(item);
@@ -436,7 +449,9 @@ function getBlockAverageColor(block, fallbackColor = "#ffffff") {
     }
     if (block.sprite) {
         const img = new Image();
-        img.src = "Assets/sprites/blocks/" + block.sprite + ".png";
+        img.src = resolveAssetUrl(
+            "Assets/sprites/blocks/" + block.sprite + ".png",
+        );
         if (img.complete) {
             const offCanvas = document.createElement("canvas");
             offCanvas.width = 1;

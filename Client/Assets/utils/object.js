@@ -1,4 +1,4 @@
-function checkCollision(object1, object2) {
+export function checkCollision(object1, object2) {
     const rect1 = {
         x: object1.x,
         y: object1.y,
@@ -20,7 +20,7 @@ function checkCollision(object1, object2) {
     return true;
 }
 
-function checkCollisionUsingObjects(object1, object2) {
+export function checkCollisionUsingObjects(object1, object2) {
     const rect1 = {
         x: object1.transform.position.x,
         y: object1.transform.position.y,

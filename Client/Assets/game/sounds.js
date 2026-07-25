@@ -1,4 +1,9 @@
-const Sounds = Object.freeze({
+import { runtime } from "../utils/runtime.js";
+import { Vector2, randomRange, uuidv4 } from "../utils/classes.js";
+import { BLOCK_SIZE } from "../utils/globals.js";
+import { isMediaPacked, resolveAssetUrl } from "../utils/assetBundle.js";
+
+export const Sounds = Object.freeze({
     Break_Grass: ["dig/grass1", "dig/grass2", "dig/grass3", "dig/grass4"],
     Break_Cloth: ["dig/cloth1", "dig/cloth2", "dig/cloth3", "dig/cloth4"],
     Break_Gravel: ["dig/gravel1", "dig/gravel2", "dig/gravel3", "dig/gravel4"],
@@ -125,43 +130,66 @@ const Sounds = Object.freeze({
 });
 
 // Base URL for audio files
-const AUDIO_BASE_URL = "Assets/audio/sfx/";
+export const AUDIO_BASE_URL = "Assets/audio/sfx/";
 
 // Cache for preloaded audio elements
-const soundCache = {};
+export const soundCache = {};
 
 // Create AudioContext
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+export const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 // Global array to store currently playing positional audio objects
-let playingAudio = [];
-let messySounds = [];
+export let playingAudio = [];
+export let messySounds = [];
+
+function createPreloadedAudio(url, mime = "audio/ogg") {
+    const audio = new Audio();
+    audio.preload = "auto";
+    // <source type> helps browsers decode blob: URLs
+    if (url.startsWith("blob:") || url.startsWith("data:")) {
+        const source = document.createElement("source");
+        source.src = url;
+        source.type = mime;
+        audio.appendChild(source);
+    } else {
+        audio.src = url;
+    }
+    return audio;
+}
 
 // Preload all sounds at game initialization
-function preloadSounds() {
+export function preloadSounds() {
     const allSounds = Object.values(Sounds).flat();
     allSounds.forEach((sound) => {
-        const url = `${AUDIO_BASE_URL}${sound}.ogg`;
-        if (!soundCache[url]) {
-            const audio = new Audio(url);
-            audio.preload = "auto";
-            audio.onerror = () => {
-                console.error(`Failed to preload sound: ${url}`);
-                delete soundCache[url]; // Remove failed entries
-            };
-            audio.oncanplaythrough = () => {
-                // Ensure audio is fully loaded before marking as ready
-                soundCache[url] = audio;
-            };
+        const logical = `${AUDIO_BASE_URL}${sound}.ogg`;
+        const url = resolveAssetUrl(logical);
+        if (soundCache[url]) return;
+
+        // Packed build: skip paths that never made it into media.zip
+        if (
+            isMediaPacked() &&
+            !url.startsWith("blob:") &&
+            !url.startsWith("data:")
+        ) {
+            console.warn(`Sound missing from media pack: ${logical}`);
+            return;
         }
+
+        const audio = createPreloadedAudio(url, "audio/ogg");
+        soundCache[url] = audio;
+        audio.onerror = () => {
+            console.warn(`Failed to preload sound: ${logical}`);
+            delete soundCache[url];
+        };
+        audio.load();
     });
 }
 
-// Call this at game startup
+// Call this at game startup (after media.zip is unpacked in production)
 preloadSounds();
 
 // Play a random sound from an array
-function playRandomSoundFromArray({
+export function playRandomSoundFromArray({
     array,
     pathInSfx = "",
     end = ".ogg",
@@ -180,7 +208,7 @@ function playRandomSoundFromArray({
     }
 }
 
-function removeAudio(audio) {
+export function removeAudio(audio) {
     if (!audio || !(audio instanceof Audio)) return;
 
     const index = playingAudio.findIndex((item) => item.audioElem === audio);
@@ -219,16 +247,16 @@ function removeAudio(audio) {
 }
 
 // Play a non-positional sound with error handling
-function playSound(sound, volume = 1, pitch = 1, loop = false) {
-    const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
+export function playSound(sound, volume = 1, pitch = 1, loop = false) {
+    const sfxMultiplier = (runtime.game.settings.sfxVolume ?? 100) / 100;
     volume = volume * sfxMultiplier;
 
-    const url = `${AUDIO_BASE_URL}${sound}`;
+    const url = resolveAssetUrl(`${AUDIO_BASE_URL}${sound}`);
     const cachedAudio = soundCache[url];
 
     if (cachedAudio) {
         // Clone the cached audio to allow multiple simultaneous plays
-        const audio = cachedAudio.cloneNode();
+        const audio = cachedAudio.cloneNode(true);
         audio.volume = volume;
         audio.preservesPitch = false;
         audio.webkitPreservesPitch = false;
@@ -248,7 +276,7 @@ function playSound(sound, volume = 1, pitch = 1, loop = false) {
     } else {
         console.warn(`Sound not preloaded or failed to load: ${url}`);
         // Fallback: attempt to play directly
-        const audio = new Audio(url);
+        const audio = createPreloadedAudio(url, "audio/ogg");
         audio.volume = volume;
         audio.preservesPitch = false;
         audio.webkitPreservesPitch = false;
@@ -266,7 +294,7 @@ function playSound(sound, volume = 1, pitch = 1, loop = false) {
 }
 
 // Play a positional sound with Web Audio API
-function playPositionalSound(
+export function playPositionalSound(
     origin,
     sound,
     range = 10,
@@ -274,23 +302,23 @@ function playPositionalSound(
     pitch = 1,
     loop = false,
 ) {
-    const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
+    const sfxMultiplier = (runtime.game.settings.sfxVolume ?? 100) / 100;
     maxVolume = maxVolume * sfxMultiplier;
 
-    if (!world.player) {
+    if (!runtime.world.player) {
         playSound(sound, maxVolume, pitch);
         return;
     }
 
-    const url = `${AUDIO_BASE_URL}${sound}`;
+    const url = resolveAssetUrl(`${AUDIO_BASE_URL}${sound}`);
     const cachedAudio = soundCache[url];
 
     let audioElem;
     if (cachedAudio) {
-        audioElem = cachedAudio.cloneNode();
+        audioElem = cachedAudio.cloneNode(true);
     } else {
         // console.warn(`Positional sound not preloaded: ${url}`);
-        audioElem = new Audio(url);
+        audioElem = createPreloadedAudio(url, "audio/ogg");
     }
 
     audioElem.preservesPitch = false;
@@ -304,14 +332,14 @@ function playPositionalSound(
     sourceNode.connect(panner);
     panner.connect(audioCtx.destination);
 
-    const distance = Vector2.Distance(world.player.position, origin);
+    const distance = Vector2.Distance(runtime.world.player.position, origin);
     const volume =
         distance <= range * BLOCK_SIZE
             ? maxVolume * (1 - distance / (range * BLOCK_SIZE))
             : 0;
     audioElem.volume = volume;
 
-    const panDiff = (origin.x - world.player.position.x) / (range * BLOCK_SIZE);
+    const panDiff = (origin.x - runtime.world.player.position.x) / (range * BLOCK_SIZE);
     const panValue = Math.max(-1, Math.min(1, panDiff));
     panner.pan.value = panValue;
 
@@ -332,14 +360,14 @@ function playPositionalSound(
     return audioElem;
 }
 
-function playMessySound(
+export function playMessySound(
     origin,
     sound,
     range = 10,
     maxVolume = 1,
     messyRange = new Vector2(1, 4),
 ) {
-    const sfxMultiplier = (game.settings.sfxVolume ?? 100) / 100;
+    const sfxMultiplier = (runtime.game.settings.sfxVolume ?? 100) / 100;
     maxVolume = maxVolume * sfxMultiplier;
 
     // A positional sound that plays every messyRange seconds, only if the player is within range
@@ -357,8 +385,8 @@ function playMessySound(
     const playAndSchedule = () => {
         // Check if player is within range
         if (
-            world.player &&
-            Vector2.Distance(world.player.position, origin) <=
+            runtime.world.player &&
+            Vector2.Distance(runtime.world.player.position, origin) <=
                 range * BLOCK_SIZE
         ) {
             const pitch = randomRange(0.5, 1.5); // Randomize pitch for each play
@@ -394,7 +422,7 @@ function playMessySound(
     return soundId; // Return ID for stopping specific sounds
 }
 
-function stopMessySound(soundId) {
+export function stopMessySound(soundId) {
     // Stops a specific messy sound by soundId
     if (!soundId) {
         console.warn(`No soundId provided to stopMessySound`);
@@ -411,10 +439,10 @@ function stopMessySound(soundId) {
 }
 
 // Update positional audio in the game loop
-function updatePositionalAudioVolumes() {
-    if (!world.player) return;
+export function updatePositionalAudioVolumes() {
+    if (!runtime.world.player) return;
     playingAudio.forEach((item) => {
-        const distance = Vector2.Distance(world.player.position, item.origin);
+        const distance = Vector2.Distance(runtime.world.player.position, item.origin);
         let volume =
             distance <= item.range * BLOCK_SIZE
                 ? item.maxVolume * (1 - distance / (item.range * BLOCK_SIZE))
@@ -422,7 +450,7 @@ function updatePositionalAudioVolumes() {
         item.audioElem.volume = volume;
 
         const panDiff =
-            (item.origin.x - world.player.position.x) /
+            (item.origin.x - runtime.world.player.position.x) /
             (item.range * BLOCK_SIZE);
         const panValue = Math.max(-1, Math.min(1, panDiff));
         item.panner.pan.value = panValue;

@@ -1,4 +1,11 @@
-class Camera {
+import { runtime } from "../utils/runtime.js";
+import { Vector2, lerp } from "../utils/classes.js";
+import { BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH } from "../utils/globals.js";
+import { input } from "../utils/input.js";
+import { CANVAS } from "../utils/canvas.js";
+import { activeDimension, getDimension } from "../world/dimension.js";
+
+export class Camera {
     constructor(x, y) {
         this.x = x;
         this.y = y;
@@ -39,15 +46,15 @@ class Camera {
         );
     }
 
-    update(target = world.player) {
+    update(target = runtime.world?.player) {
         if (!target) {
             const calculatedSpeed = input.isActionDown("sprint")
                 ? this.speed * 2
                 : this.speed;
 
             // Update camera position based on velocity
-            this.x += this.velocity.x * calculatedSpeed * deltaTime;
-            this.y += this.velocity.y * calculatedSpeed * deltaTime;
+            this.x += this.velocity.x * calculatedSpeed * runtime.deltaTime;
+            this.y += this.velocity.y * calculatedSpeed * runtime.deltaTime;
         } else {
             this.followPlayer(target);
         }
@@ -60,10 +67,10 @@ class Camera {
         }
     }
 
-    followPlayer(target = world.player) {
+    followPlayer(target = runtime.world?.player) {
         if (!target) return;
 
-        const increment = deltaTime * this.lerpSpeed;
+        const increment = runtime.deltaTime * this.lerpSpeed;
 
         let targetX = target.position.x - CANVAS.width / 2;
         let targetY = this.getWorldY(target.position.y);

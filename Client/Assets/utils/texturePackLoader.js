@@ -1,18 +1,29 @@
-let texturePackZip = null;
-let texturePackFiles = null;
-let vanillaTextureCache = null;
+import { runtime } from "./runtime.js";
+import JSZip from "jszip";
+import { entityRegistry } from "../entities/entityRegistry.js";
+import { getItem } from "../game/item.js";
+import { Items } from "../game/items.js";
+import { getFromLdb } from "./indexDB.js";
+import { blockRegistry } from "../world/blockRegistry.js";
+import { resolveAssetUrl } from "./assetBundle.js";
+
+export let texturePackZip = null;
+export let texturePackFiles = null;
+export let vanillaTextureCache = null;
 
 // Load vanilla textures by iterating over Blocks and Items
-async function loadVanillaTextures() {
+export async function loadVanillaTextures() {
     vanillaTextureCache = {};
 
     // Collect sprite paths from Blocks and Items
     const spritePaths = [];
 
     // Loop through Blocks
+    const Blocks = blockRegistry.Blocks;
+    const getBlock = runtime.getBlock;
     for (const blockKey in Blocks) {
         const block = getBlock(Blocks[blockKey]);
-        if (block.iconSprite) {
+        if (block?.iconSprite) {
             spritePaths.push(`blocks/${block.iconSprite}`);
         }
     }
@@ -26,11 +37,14 @@ async function loadVanillaTextures() {
     }
 
     // Loop through Entities
-    for (const entityKey in Entities) {
-        const entity = Entities[entityKey];
-        const initEntity = new entity();
-        if (initEntity.body?.sprite) {
-            spritePaths.push(`entity/${initEntity.body.sprite}`);
+    const Entities = entityRegistry.Entities;
+    if (Entities) {
+        for (const entityKey in Entities) {
+            const entity = Entities[entityKey];
+            const initEntity = new entity();
+            if (initEntity.body?.sprite) {
+                spritePaths.push(`entity/${initEntity.body.sprite}`);
+            }
         }
     }
 
@@ -68,7 +82,7 @@ async function loadVanillaTextures() {
     await Promise.all(
         uniquePaths.map(async (path) => {
             try {
-                const imgUrl = `Assets/sprites/${path}.png`;
+                const imgUrl = resolveAssetUrl(`Assets/sprites/${path}.png`);
                 const img = new Image();
                 img.src = imgUrl;
 
@@ -100,7 +114,7 @@ async function loadVanillaTextures() {
             } catch (err) {
                 console.warn(`Failed to load vanilla texture ${path}:`, err);
                 vanillaTextureCache[path] = {
-                    url: `Assets/sprites/${path}.png`,
+                    url: resolveAssetUrl(`Assets/sprites/${path}.png`),
                     width: 16,
                     height: 16,
                     originalWidth: 16,
@@ -113,10 +127,10 @@ async function loadVanillaTextures() {
 }
 
 // Load the active texture pack from localStorage
-async function loadTexturePack() {
+export async function loadTexturePack() {
     const currentPackKey =
         localStorage.getItem("currentTexturePack") || "default";
-    isTexturePackLoaded = false;
+    runtime.isTexturePackLoaded = false;
 
     // Load vanilla textures first
     await loadVanillaTextures();
@@ -124,7 +138,7 @@ async function loadTexturePack() {
     if (currentPackKey === "default") {
         texturePackZip = null;
         texturePackFiles = null;
-        isTexturePackLoaded = true;
+        runtime.isTexturePackLoaded = true;
         return;
     }
 
@@ -138,7 +152,7 @@ async function loadTexturePack() {
             );
             texturePackZip = null;
             texturePackFiles = null;
-            isTexturePackLoaded = true;
+            runtime.isTexturePackLoaded = true;
             localStorage.setItem("currentTexturePack", "default");
             return;
         }
@@ -190,27 +204,25 @@ async function loadTexturePack() {
             })
         );
 
-        isTexturePackLoaded = true;
+        runtime.isTexturePackLoaded = true;
     } catch (err) {
         console.error(`Failed to load texture pack ${currentPackKey}:`, err);
         texturePackZip = null;
         texturePackFiles = null;
-        isTexturePackLoaded = true;
+        runtime.isTexturePackLoaded = true;
         localStorage.setItem("currentTexturePack", "default");
     }
 }
 
 // Initialize both vanilla and texture pack loading
-async function initializeTextures() {
+export async function initializeTextures() {
     await loadTexturePack();
 }
 
-initializeTextures();
-
-function getSpriteUrl(path, useTexturePack = true) {
+export function getSpriteUrl(path, useTexturePack = true) {
     // If undefined is anywhere in the path, return a placeholder
     if (path === undefined || path.includes("undefined")) {
-        return `Assets/sprites/blocks/missing_texture.png`;
+        return resolveAssetUrl(`Assets/sprites/blocks/missing_texture.png`);
     }
 
     if (isBase64(path)) {
@@ -226,10 +238,10 @@ function getSpriteUrl(path, useTexturePack = true) {
         return vanillaTextureCache[path].url;
     }
 
-    return `Assets/sprites/${path}.png`;
+    return resolveAssetUrl(`Assets/sprites/${path}.png`);
 }
 
-function getSpriteAverageColor(path) {
+export function getSpriteAverageColor(path) {
     if (isBase64(path)) {
         return { r: 0, g: 0, b: 0 }; // Base64 images not cached
     }
@@ -245,7 +257,7 @@ function getSpriteAverageColor(path) {
     return { r: 0, g: 0, b: 0 }; // Default if not found
 }
 
-function getSpriteSize(path) {
+export function getSpriteSize(path) {
     if (isBase64(path)) {
         return {
             width: 0,
@@ -275,7 +287,7 @@ function getSpriteSize(path) {
     };
 }
 
-function isEqualToOriginal(path) {
+export function isEqualToOriginal(path) {
     const spriteSize = getSpriteSize(path);
 
     if (
@@ -294,7 +306,7 @@ function isEqualToOriginal(path) {
 
 // waitForTexturePack is now a method on the Game class
 
-function isBase64(str) {
+export function isBase64(str) {
     try {
         return (
             typeof str === "string" && str.includes("data:image/png;base64,")
@@ -304,7 +316,7 @@ function isBase64(str) {
     }
 }
 
-async function getAverageColor(img) {
+export async function getAverageColor(img) {
     try {
         // Create an ImageBitmap from the image
         const bitmap = await createImageBitmap(img);

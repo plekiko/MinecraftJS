@@ -1,12 +1,29 @@
-const EntityTypes = Object.freeze({
+import { runtime } from "../utils/runtime.js";
+import { Sounds, playPositionalSound, playRandomSoundFromArray } from "./sounds.js";
+import {
+    SimpleSprite,
+    Transform,
+    Vector2,
+    uuidv4,
+} from "../utils/classes.js";
+import { BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, GRAVITY } from "../utils/globals.js";
+import { camera } from "../utils/renderer.js";
+import { getSpriteAverageColor } from "../utils/texturePackLoader.js";
+import { SpecialType, getBlock } from "../world/block.js";
+import { Dimensions, activeDimension, getDimensionChunks, gotoDimension } from "../world/dimension.js";
+import { entityRegistry } from "../entities/entityRegistry.js";
+import { inventoryRegistry } from "./inventoryRegistry.js";
+
+export const EntityTypes = Object.freeze({
     Drop: 0,
     Player: 1,
     Entity: 2,
     Mob: 3,
     Projectile: 4,
 });
+entityRegistry.EntityTypes = EntityTypes;
 
-class Entity {
+export class Entity {
     constructor(
         world,
         {
@@ -45,7 +62,7 @@ class Entity {
             body = null,
             despawn = true,
             direction = 1,
-            holdItem = new InventoryItem(),
+            holdItem = undefined,
             canBurn = true,
 
             maxPortalCooldown = 40,
@@ -65,6 +82,9 @@ class Entity {
         this.rotation = rotation;
         this.hitbox = hitbox;
         this.velocity = velocity;
+        if (holdItem === undefined) {
+            holdItem = new inventoryRegistry.InventoryItem();
+        }
         this.targetVelocity = targetVelocity;
         this.acceleration = acceleration;
         this.maxVelocity = maxVelocity;
@@ -167,7 +187,7 @@ class Entity {
     getBlockAtPosition(worldX, worldY) {
         worldX = Math.floor(worldX / BLOCK_SIZE) * BLOCK_SIZE;
         worldY = Math.floor(worldY / BLOCK_SIZE) * BLOCK_SIZE;
-        return world.getBlockAtWorldPosition(worldX, worldY);
+        return runtime.world.getBlockAtWorldPosition(worldX, worldY);
     }
 
     isFluid(blockType) {
@@ -194,7 +214,7 @@ class Entity {
                 if (this.velocity.y < 0) return null;
                 const currentBottomY = this.position.y + this.hitbox.y;
                 if (currentBottomY > blockTopY) return null;
-                const blockAbove = world.getBlockAtWorldPosition(
+                const blockAbove = runtime.world.getBlockAtWorldPosition(
                     block.transform.position.x,
                     block.transform.position.y - BLOCK_SIZE,
                 );
@@ -368,7 +388,7 @@ class Entity {
 
     hurtCooldownLogic() {
         if (!this.hurtCooldown) return;
-        this.hurtCooldown -= deltaTime;
+        this.hurtCooldown -= runtime.deltaTime;
         if (this.hurtCooldown <= 0) this.hurtCooldown = 0;
     }
 
@@ -557,7 +577,7 @@ class Entity {
                 }
 
                 if (activeDimension !== Dimensions.Nether) {
-                    const gotoPosition = world.placePortalInDimension(
+                    const gotoPosition = runtime.world.placePortalInDimension(
                         Dimensions.Nether,
                         new Vector2(
                             block.transform.position.x / 8,
@@ -576,7 +596,7 @@ class Entity {
 
                     break;
                 } else {
-                    const gotoPosition = world.placePortalInDimension(
+                    const gotoPosition = runtime.world.placePortalInDimension(
                         Dimensions.Overworld,
                         new Vector2(
                             block.transform.position.x * 8,
@@ -619,7 +639,7 @@ class Entity {
 
         if (this.type === EntityTypes.Drop) {
             if (this.fireDamageTimer >= 9) {
-                if (GAMERULES.doFireTick) world.removeEntity(this);
+                if (runtime.GAMERULES.doFireTick) runtime.world.removeEntity(this);
                 return;
             }
         }
@@ -669,7 +689,7 @@ class Entity {
 
         this.fireDamageTimer++;
         if (this.fireDamageTimer >= 10) {
-            if (GAMERULES.doFireTick)
+            if (runtime.GAMERULES.doFireTick)
                 this.hit(1, this.position.x, 0, "Burned to death");
             this.fireDamageTimer = 0;
         }
@@ -693,7 +713,7 @@ class Entity {
         this.offset.y = Math.sin((Date.now() - this.originDate) / 120) * 1.5;
     }
 
-    calculateGravity(dt = deltaTime) {
+    calculateGravity(dt = runtime.deltaTime) {
         if (this.noGravity) return;
         this.velocity.y += GRAVITY * dt;
     }
@@ -704,7 +724,7 @@ class Entity {
         this.shouldAddForce = { x: 0, y: 0 };
     }
 
-    handleTargetVelocity(dt = deltaTime) {
+    handleTargetVelocity(dt = runtime.deltaTime) {
         if (this.isGettingKnockback) return;
         if (this.targetVelocity.x === 0) return;
         if (this.velocity.x < this.targetVelocity.x) {
@@ -722,7 +742,7 @@ class Entity {
         this.targetVelocity = new Vector2();
     }
 
-    updatePositionWithVelocity(delta = deltaTime) {
+    updatePositionWithVelocity(delta = runtime.deltaTime) {
         if (!this.getCurrentChunk()?.generated) return;
 
         const maxStepDeltaTime = 1 / 30;
@@ -785,7 +805,7 @@ class Entity {
                 ) {
                     const newY = blockTopY - this.hitbox.y;
                     const checkAbove = this.checkUpCollision(newY);
-                    const blockAboveSlab = world.getBlockAtWorldPosition(
+                    const blockAboveSlab = runtime.world.getBlockAtWorldPosition(
                         rightCollision.transform.position.x,
                         blockTopY - BLOCK_SIZE,
                     );
@@ -826,7 +846,7 @@ class Entity {
                 ) {
                     const newY = blockTopY - this.hitbox.y;
                     const checkAbove = this.checkUpCollision(newY);
-                    const blockAboveSlab = world.getBlockAtWorldPosition(
+                    const blockAboveSlab = runtime.world.getBlockAtWorldPosition(
                         leftCollision.transform.position.x,
                         blockTopY - BLOCK_SIZE,
                     );
@@ -947,13 +967,13 @@ class Entity {
     }
 
     floatLogic() {
-        this.velocity.y += -GRAVITY * 2 * deltaTime;
+        this.velocity.y += -GRAVITY * 2 * runtime.deltaTime;
     }
 
     playFootstepSounds() {
         if (!this.grounded || Math.abs(this.velocity.x) === 0) return;
         if (!this.standingOnBlockType) return;
-        this.stepCounter += Math.abs(this.velocity.x / 100) * deltaTime;
+        this.stepCounter += Math.abs(this.velocity.x / 100) * runtime.deltaTime;
         if (this.stepCounter >= this.stepSize) {
             if (!this.footstepSounds) {
                 const block = getBlock(this.standingOnBlockType);
@@ -996,7 +1016,7 @@ class Entity {
             for (let y = startY; y <= endY; y++) {
                 const blockX = x * BLOCK_SIZE;
                 const blockY = y * BLOCK_SIZE;
-                const block = world.getBlockAtWorldPosition(blockX, blockY);
+                const block = runtime.world.getBlockAtWorldPosition(blockX, blockY);
                 if (block && block.blockType) {
                     // If blockType is specified, skip blocks that don't match
                     if (blockType !== null && block.blockType !== blockType) {
@@ -1068,7 +1088,7 @@ class Entity {
         });
     }
 
-    applyDrag(dt = deltaTime) {
+    applyDrag(dt = runtime.deltaTime) {
         if (this.targetVelocity.x !== 0) return;
         if (this.isGettingKnockback) return;
         if (this.velocity.x > 0) {

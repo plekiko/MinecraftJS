@@ -1,8 +1,14 @@
-function getMultiplayerUsername() {
+import { runtime } from "../utils/runtime.js";
+import { callbacks, processMessage } from "./messageHandler.js";
+import { uuidv4 } from "../utils/classes.js";
+import { multiplayer } from "../utils/globals.js";
+import { saveWorld } from "../world/saving.js";
+
+export function getMultiplayerUsername() {
     const fallback = "Player";
 
-    if (typeof game !== "undefined" && game?.settings?.username) {
-        return game.settings.username;
+    if (typeof runtime.game !== "undefined" && runtime.game?.settings?.username) {
+        return runtime.game.settings.username;
     }
 
     try {
@@ -18,7 +24,7 @@ function getMultiplayerUsername() {
     return fallback;
 }
 
-class Server {
+export class Server {
     constructor(ip, port) {
         this.suppressCloseWarning = false;
         this.ws = new WebSocket(`ws://${ip}:${port}`);
@@ -96,65 +102,65 @@ class Server {
     }
 
     entityRPC(data) {
-        const entity = world?.getEntityByUUID(data.sender);
+        const entity = runtime.world?.getEntityByUUID(data.sender);
         if (entity && typeof entity[data.message.method] === "function") {
             entity[data.message.method](data.message);
         }
     }
 }
 
-let multiplayerLeaveSyncSent = false;
+export let multiplayerLeaveSyncSent = false;
 window.suppressServerCloseWarning = false;
 
-function buildMultiplayerLeaveSnapshot() {
-    if (!world.player) return null;
+export function buildMultiplayerLeaveSnapshot() {
+    if (!runtime.world.player) return null;
 
     const inventoryPayload =
-        world.player.inventory &&
-        typeof world.player.inventory.serializeInventoryForMultiplayer ===
+        runtime.world.player.inventory &&
+        typeof runtime.world.player.inventory.serializeInventoryForMultiplayer ===
             "function"
-            ? world.player.inventory.serializeInventoryForMultiplayer()
+            ? runtime.world.player.inventory.serializeInventoryForMultiplayer()
             : [];
 
     return {
         position: {
             x:
-                typeof world.player.position?.x === "number"
-                    ? world.player.position.x
+                typeof runtime.world.player.position?.x === "number"
+                    ? runtime.world.player.position.x
                     : 0,
             y:
-                typeof world.player.position?.y === "number"
-                    ? world.player.position.y
+                typeof runtime.world.player.position?.y === "number"
+                    ? runtime.world.player.position.y
                     : 0,
         },
         dimension:
-            typeof world.player.dimension === "number"
-                ? world.player.dimension
+            typeof runtime.world.player.dimension === "number"
+                ? runtime.world.player.dimension
                 : 0,
         gamemode:
-            typeof world.player.gamemode === "number"
-                ? world.player.gamemode
+            typeof runtime.world.player.gamemode === "number"
+                ? runtime.world.player.gamemode
                 : 0,
         health:
-            typeof world.player.health === "number" ? world.player.health : 20,
+            typeof runtime.world.player.health === "number" ? runtime.world.player.health : 20,
         food:
-            typeof world.player.foodLevel === "number"
-                ? world.player.foodLevel
-                : typeof world.player.food === "number"
-                  ? world.player.food
+            typeof runtime.world.player.foodLevel === "number"
+                ? runtime.world.player.foodLevel
+                : typeof runtime.world.player.food === "number"
+                  ? runtime.world.player.food
                   : 20,
         inventory: inventoryPayload,
     };
 }
 
-function sendMultiplayerLeaveSync(closeSocket = false) {
-    if (!multiplayer || !server || !server.ws || !world.player) return;
+export function sendMultiplayerLeaveSync(closeSocket = false) {
+    if (!multiplayer || !runtime.server || !runtime.server.ws || !runtime.world.player) return;
     if (multiplayerLeaveSyncSent) return;
 
     window.suppressServerCloseWarning = true;
-    server.suppressCloseWarning = true;
+    runtime.server.suppressCloseWarning = true;
 
-    if (server.ws.readyState !== WebSocket.OPEN) {
+    if (runtime.server.ws.readyState !== WebSocket.OPEN) {
         multiplayerLeaveSyncSent = true;
         return;
     }
@@ -164,9 +170,9 @@ function sendMultiplayerLeaveSync(closeSocket = false) {
 
     multiplayerLeaveSyncSent = true;
 
-    server.send({
+    runtime.server.send({
         type: "playerUpdate",
-        sender: world.player.UUID,
+        sender: runtime.world.player.UUID,
         message: {
             position: snapshot.position,
             gamemode: snapshot.gamemode,
@@ -175,24 +181,24 @@ function sendMultiplayerLeaveSync(closeSocket = false) {
         },
     });
 
-    server.send({
+    runtime.server.send({
         type: "playerInventory",
-        sender: world.player.UUID,
+        sender: runtime.world.player.UUID,
         message: {
             inventory: snapshot.inventory,
         },
     });
 
-    server.send({
+    runtime.server.send({
         type: "playerSyncOnLeave",
-        sender: world.player.UUID,
+        sender: runtime.world.player.UUID,
         message: snapshot,
     });
 
     if (closeSocket) {
         setTimeout(() => {
-            if (server.ws.readyState === WebSocket.OPEN) {
-                server.ws.close();
+            if (runtime.server.ws.readyState === WebSocket.OPEN) {
+                runtime.server.ws.close();
             }
         }, 60);
     }
@@ -208,7 +214,7 @@ window.leaveGameToTitle = function () {
     }
 
     window.suppressServerCloseWarning = true;
-    if (server) server.suppressCloseWarning = true;
+    if (runtime.server) runtime.server.suppressCloseWarning = true;
 
     sendMultiplayerLeaveSync(true);
     setTimeout(() => {
@@ -218,13 +224,13 @@ window.leaveGameToTitle = function () {
 
 window.addEventListener("pagehide", () => {
     window.suppressServerCloseWarning = true;
-    if (server) server.suppressCloseWarning = true;
+    if (runtime.server) runtime.server.suppressCloseWarning = true;
     sendMultiplayerLeaveSync(true);
 });
 
 window.addEventListener("beforeunload", () => {
     window.suppressServerCloseWarning = true;
-    if (server) server.suppressCloseWarning = true;
+    if (runtime.server) runtime.server.suppressCloseWarning = true;
     sendMultiplayerLeaveSync(true);
 });
 
@@ -233,7 +239,7 @@ if (multiplayer) {
     const port = localStorage.getItem("multiplayerPort");
 
     if (ip && port) {
-        server = new Server(ip, port);
+        runtime.server = new Server(ip, port);
     } else {
         alert("Multiplayer server IP and port not set!");
         window.location.href = "./"; // Redirect to home if no server is set

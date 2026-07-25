@@ -1,4 +1,31 @@
-class BlockType {
+import { runtime } from "../utils/runtime.js";
+import { entityRegistry } from "../entities/entityRegistry.js";
+import { inventoryRegistry } from "../game/inventoryRegistry.js";
+import { getItem } from "../game/item.js";
+import { Sounds, playMessySound, playPositionalSound, playRandomSoundFromArray, removeAudio, stopMessySound } from "../game/sounds.js";
+import { Square, Transform, Vector2, arePropsEqual, randomRange } from "../utils/classes.js";
+import { BLOCK_SIZE, CHUNK_HEIGHT, TICK_SPEED, ToolType, multiplayer, updatingBlocks } from "../utils/globals.js";
+import { getSpriteAverageColor, getSpriteSize, getSpriteUrl } from "../utils/texturePackLoader.js";
+import { blockRegistry } from "./blockRegistry.js";
+import {
+    activeDimension,
+    getDimension,
+    getDimensionChunks,
+} from "./dimensionState.js";
+import { createParticleEmitter } from "./particleEmitter.js";
+import { treesRegistry } from "./treesRegistry.js";
+
+function Blocks() {
+    return blockRegistry.Blocks;
+}
+function blockMap() {
+    return blockRegistry.blockMap;
+}
+function InventoryItem(...args) {
+    return new inventoryRegistry.InventoryItem(...args);
+}
+
+export class BlockType {
     constructor({
         blockId,
         sprite = null,
@@ -179,7 +206,7 @@ class BlockType {
     }
 }
 
-const SpecialType = Object.freeze({
+export const SpecialType = Object.freeze({
     CraftingTable: 1,
     Furnace: 2,
     SingleChest: 3,
@@ -196,13 +223,13 @@ const SpecialType = Object.freeze({
     Sign: 14,
 });
 
-const BlockCategory = Object.freeze({
+export const BlockCategory = Object.freeze({
     Logs: 1,
     Planks: 2,
     Wool: 3,
 });
 
-function normalizeMetaDataObject(metaData) {
+export function normalizeMetaDataObject(metaData) {
     if (!metaData || typeof metaData !== "object") return null;
 
     if (metaData.props && typeof metaData.props === "object") {
@@ -213,7 +240,7 @@ function normalizeMetaDataObject(metaData) {
     return metaData;
 }
 
-class Metadata {
+export class Metadata {
     constructor(metaData = null) {
         const normalized = normalizeMetaDataObject(metaData);
         if (normalized) {
@@ -222,7 +249,7 @@ class Metadata {
     }
 }
 
-function checkDissipation(block, worldPos) {
+export function checkDissipation(block, worldPos) {
     // For non‑source water blocks, check neighbors (above, left, right)
     // to see if any have a higher water level.
     let neighborHasHigher = false;
@@ -233,7 +260,7 @@ function checkDissipation(block, worldPos) {
     ];
 
     neighborOffsets.forEach((offset) => {
-        const neighbor = world.getBlockAtWorldPosition(
+        const neighbor = runtime.world.getBlockAtWorldPosition(
             worldPos.x + offset.dx,
             worldPos.y + offset.dy,
         );
@@ -249,15 +276,15 @@ function checkDissipation(block, worldPos) {
         block.metaData.waterLevel += 0.25;
         block.cutoff = block.metaData.waterLevel;
         if (block.metaData.waterLevel >= 0.85) {
-            world.setBlockType(block, Blocks.Air);
+            runtime.world.setBlockType(block, Blocks().Air);
             return true;
         }
     }
     return false;
 }
 
-function flowDownward(block, worldPos) {
-    let below = world.getBlockAtWorldPosition(
+export function flowDownward(block, worldPos) {
+    let below = runtime.world.getBlockAtWorldPosition(
         worldPos.x,
         worldPos.y + BLOCK_SIZE,
     );
@@ -277,8 +304,8 @@ function flowDownward(block, worldPos) {
     return below;
 }
 
-function verticalCheckAbove(block, worldPos) {
-    let above = world.getBlockAtWorldPosition(
+export function verticalCheckAbove(block, worldPos) {
+    let above = runtime.world.getBlockAtWorldPosition(
         worldPos.x,
         worldPos.y - BLOCK_SIZE,
     );
@@ -293,8 +320,8 @@ function verticalCheckAbove(block, worldPos) {
     }
 }
 
-function flowSideways(block, worldPos, direction) {
-    let target = world.getBlockAtWorldPosition(
+export function flowSideways(block, worldPos, direction) {
+    let target = runtime.world.getBlockAtWorldPosition(
         worldPos.x + direction.dx,
         worldPos.y + direction.dy,
     );
@@ -308,11 +335,11 @@ function flowSideways(block, worldPos, direction) {
             target.breakBlock(getBlock(target.blockType).dropWithoutTool);
         }
         if (
-            target.blockType === Blocks.Lava &&
-            block.blockType === Blocks.Water
+            target.blockType === Blocks().Lava &&
+            block.blockType === Blocks().Water
         ) {
-            if (target.metaData.isSource) target.setBlockType(Blocks.Obsidian);
-            else target.setBlockType(Blocks.Cobblestone);
+            if (target.metaData.isSource) target.setBlockType(Blocks().Obsidian);
+            else target.setBlockType(Blocks().Cobblestone);
         }
         target.setBlockType(block.blockType);
         target.metaData.isSource = false;
@@ -330,12 +357,12 @@ function flowSideways(block, worldPos, direction) {
     return null;
 }
 
-class Block extends Square {
+export class Block extends Square {
     constructor(
         world,
         x = 0,
         y = 0,
-        blockType = Blocks.Air,
+        blockType = Blocks().Air,
         chunkX = 0,
         wall = false,
     ) {
@@ -389,7 +416,7 @@ class Block extends Square {
 
     explode(shortFuse = false) {
         const tntEntity = this.world.summonEntity(
-            TNT,
+            entityRegistry.TNT,
             this.world.getBlockWorldPosition(this),
         );
         if (shortFuse) {
@@ -469,10 +496,10 @@ class Block extends Square {
             case SpecialType.Furnace:
                 storage = [
                     [
-                        new InventoryItem(), // input
-                        new InventoryItem(), // fuel
+                        InventoryItem(), // input
+                        InventoryItem(), // fuel
                     ],
-                    [new InventoryItem()], // output
+                    [InventoryItem()], // output
                 ];
                 props.burningFuelTime = 0;
                 props.fuelProgression = 0;
@@ -482,16 +509,16 @@ class Block extends Square {
                 for (let y = 0; y < 3; y++) {
                     storage[y] = [];
                     for (let x = 0; x < 9; x++) {
-                        storage[y][x] = new InventoryItem();
+                        storage[y][x] = InventoryItem();
                     }
                 }
                 break;
             case SpecialType.Jukebox:
-                storage = [[new InventoryItem()]];
+                storage = [[InventoryItem()]];
                 props.myAudio = null;
                 break;
             case SpecialType.Converter:
-                storage = [[new InventoryItem(), new InventoryItem()]];
+                storage = [[InventoryItem(), InventoryItem()]];
                 break;
             case SpecialType.NoteBlock:
                 props.note = 0;
@@ -503,11 +530,11 @@ class Block extends Square {
             case SpecialType.Hopper:
                 storage = [
                     [
-                        new InventoryItem(),
-                        new InventoryItem(),
-                        new InventoryItem(),
-                        new InventoryItem(),
-                        new InventoryItem(),
+                        InventoryItem(),
+                        InventoryItem(),
+                        InventoryItem(),
+                        InventoryItem(),
+                        InventoryItem(),
                     ],
                 ];
                 break;
@@ -526,7 +553,7 @@ class Block extends Square {
         if (!multiplayer) return;
         if (!this.metaData) return;
 
-        server.send({
+        runtime.server.send({
             type: "syncMetaData",
             sender: this.world.player.UUID,
             message: {
@@ -547,7 +574,7 @@ class Block extends Square {
 
         if (this.metaData.storage) {
             const storage = this.metaData.storage.map((row) =>
-                row.map((item) => new InventoryItem(item)),
+                row.map((item) => InventoryItem(item)),
             );
 
             this.metaData.storage = storage;
@@ -564,7 +591,7 @@ class Block extends Square {
         if (this.metaData.storage) {
             // Create a deep copy of the storage array and create new InventoryItem instances with the copied data
             const storage = this.metaData.storage.map((row) =>
-                row.map((item) => new InventoryItem(item)),
+                row.map((item) => InventoryItem(item)),
             );
 
             this.metaData.storage = storage;
@@ -990,7 +1017,7 @@ class Block extends Square {
             y: -BLOCK_SIZE / 2,
         });
         return entitiesOnBlock.filter(
-            (entity) => entity.type === EntityTypes.Drop,
+            (entity) => entity.type === entityRegistry.EntityTypes.Drop,
         );
     }
 
@@ -1054,12 +1081,12 @@ class Block extends Square {
     spawnEntity(entityTypeName) {
         const spawnPos = this.world.getBlockWorldPosition(this);
 
-        const entityType = Entities[entityTypeName];
+        const entityType = entityRegistry.Entities[entityTypeName];
 
         if (!entityType) return;
 
         // Respect global gamerule
-        if (!GAMERULES.doMobSpawning) return;
+        if (!runtime.GAMERULES.doMobSpawning) return;
 
         const entity = this.world.summonEntity(
             entityType,
@@ -1123,7 +1150,7 @@ class Block extends Square {
         if (!outcome) return;
 
         // Get tree type using Trees enum
-        const treeType = Trees[outcome];
+        const treeType = treesRegistry.Trees[outcome];
 
         if (!treeType) return;
 
@@ -1220,7 +1247,7 @@ class Block extends Square {
 
         // If burning fuel time is active, increment fuel progression
         if (this.metaData.burningFuelTime > 0) {
-            this.metaData.fuelProgression += deltaTime;
+            this.metaData.fuelProgression += runtime.deltaTime;
         }
 
         // Reset burning fuel time if it has been used up
@@ -1408,7 +1435,7 @@ class Block extends Square {
         this.metaData.note++;
         if (this.metaData.note > 24) this.metaData.note = 0;
 
-        game.chat.message("Playing note: " + this.metaData.note);
+        runtime.game.chat.message("Playing note: " + this.metaData.note);
 
         this.playNote();
     }
@@ -1417,7 +1444,7 @@ class Block extends Square {
         if (!item || this.metaData.storage[0][0].itemId !== null) {
             // Remove disc from jukebox'
             if (this.metaData.storage[0][0].itemId !== null) {
-                this.world.spawnDrop(world.getBlockWorldPosition(this), {
+                this.world.spawnDrop(runtime.world.getBlockWorldPosition(this), {
                     itemId: this.metaData.storage[0][0].itemId,
                     blockId: null,
                     count: 1,
@@ -1425,7 +1452,7 @@ class Block extends Square {
 
                 removeAudio(this.metaData.myAudio);
 
-                this.metaData.storage[0][0] = new InventoryItem();
+                this.metaData.storage[0][0] = InventoryItem();
             }
 
             this.syncMetaData();
@@ -1475,7 +1502,7 @@ class Block extends Square {
 
         // If there isnt lava in any of these blocks, return
         for (let block of [left, right, above, below]) {
-            if (block && block.blockType === Blocks.Lava) {
+            if (block && block.blockType === Blocks().Lava) {
                 lavaBlocksNear.push(block);
             }
         }
@@ -1485,11 +1512,11 @@ class Block extends Square {
         // Loop thru all lava blocks
         for (let lavaBlock of lavaBlocksNear) {
             if (lavaBlock.metaData.isSource) {
-                lavaBlock.setBlockType(Blocks.Obsidian);
+                lavaBlock.setBlockType(Blocks().Obsidian);
                 return;
             }
 
-            lavaBlock.setBlockType(Blocks.Cobblestone);
+            lavaBlock.setBlockType(Blocks().Cobblestone);
         }
 
         playPositionalSound(
@@ -1504,9 +1531,9 @@ class Block extends Square {
         if (this.dimensionIndex !== activeDimension) return;
 
         if (getDimension(activeDimension).fastLava) {
-            blockMap.get(Blocks.Lava).updateSpeed = 0.15;
+            blockMap().get(Blocks().Lava).updateSpeed = 0.15;
         } else {
-            blockMap.get(Blocks.Lava).updateSpeed = 0.05;
+            blockMap().get(Blocks().Lava).updateSpeed = 0.05;
         }
 
         // Only process if this block is fluid.
@@ -1526,7 +1553,7 @@ class Block extends Square {
 
         const worldPos = this.world.getBlockWorldPosition(this);
 
-        if (this.blockType === Blocks.Water)
+        if (this.blockType === Blocks().Water)
             this.checkLavaWaterInteraction(worldPos);
 
         // Dissipation (only for non-source blocks).
@@ -1725,7 +1752,7 @@ class Block extends Square {
         if (blockDef.changeToBlockWhenBroken) {
             this.world.setBlockType(this, blockDef.changeToBlockWhenBroken);
         } else {
-            this.world.setBlockType(this, Blocks.Air);
+            this.world.setBlockType(this, Blocks().Air);
         }
     }
 
@@ -1776,7 +1803,7 @@ class Block extends Square {
     }
 
     gravityBlock() {
-        let fallEntity = Entities.Sand;
+        let fallEntity = entityRegistry.Entities.Sand;
 
         this.world.summonEntity(
             fallEntity,
@@ -1786,7 +1813,7 @@ class Block extends Square {
             },
         );
 
-        this.world.setBlockType(this, Blocks.Air);
+        this.world.setBlockType(this, Blocks().Air);
     }
 
     playBreakSound() {
@@ -1822,7 +1849,7 @@ class Block extends Square {
     }
 
     dropBlock() {
-        if (!GAMERULES.doTileDrops) return;
+        if (!runtime.GAMERULES.doTileDrops) return;
 
         const block = getBlock(this.blockType);
 
@@ -1936,6 +1963,7 @@ class Block extends Square {
     }
 }
 
-function getBlock(blockId) {
-    return blockMap.has(blockId) ? blockMap.get(blockId) : 0;
+export function getBlock(blockId) {
+    return blockMap().has(blockId) ? blockMap().get(blockId) : 0;
 }
+runtime.getBlock = getBlock;

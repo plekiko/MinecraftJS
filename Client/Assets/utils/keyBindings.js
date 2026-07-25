@@ -1,5 +1,5 @@
 // intended for latin layouts
-const DEFAULT_KEY_BINDINGS = {
+export const DEFAULT_KEY_BINDINGS = {
     attack: ["Mouse0"],
     pickBlock: ["Mouse1"],
     place: ["Mouse2"],
@@ -44,7 +44,7 @@ const DEFAULT_KEY_BINDINGS = {
     debugSaveBackup: ["KeyP"],
 };
 
-const ACTION_LABELS = {
+export const ACTION_LABELS = {
     attack: "Attack/Destroy",
     pickBlock: "Pick Block",
     place: "Use Item/Place Block",
@@ -89,7 +89,7 @@ const ACTION_LABELS = {
     debugSaveBackup: "Save Backup",
 };
 
-const GAMEPLAY_ACTIONS = [
+export const GAMEPLAY_ACTIONS = [
     "attack",
     "pickBlock",
     "place",
@@ -120,7 +120,7 @@ const GAMEPLAY_ACTIONS = [
     "signDelete",
 ];
 
-const DEBUG_ACTIONS = [
+export const DEBUG_ACTIONS = [
     "debugChunkBorders",
     "debugCamera",
     "debugHitbox",
@@ -132,9 +132,9 @@ const DEBUG_ACTIONS = [
     "debugSaveBackup",
 ];
 
-const REBINDABLE_ACTIONS = [...GAMEPLAY_ACTIONS, ...DEBUG_ACTIONS];
+export const REBINDABLE_ACTIONS = [...GAMEPLAY_ACTIONS, ...DEBUG_ACTIONS];
 
-const KEY_DISPLAY_NAMES = {
+export const KEY_DISPLAY_NAMES = {
     Mouse0: "Left Click",
     Mouse1: "Middle Click",
     Mouse2: "Right Click",
@@ -200,15 +200,15 @@ const KEY_DISPLAY_NAMES = {
     Delete: "Delete",
 };
 
-function getKeyDisplayName(keyCode) {
+export function getKeyDisplayName(keyCode) {
     return KEY_DISPLAY_NAMES[keyCode] || keyCode;
 }
 
-function getActionLabel(action) {
+export function getActionLabel(action) {
     return ACTION_LABELS[action] || action;
 }
 
-function loadKeyBindings() {
+export function loadKeyBindings() {
     try {
         const raw = localStorage.getItem("keyBindings");
         if (!raw) return { ...DEFAULT_KEY_BINDINGS };
@@ -225,7 +225,7 @@ function loadKeyBindings() {
     }
 }
 
-function saveKeyBindings(bindings) {
+export function saveKeyBindings(bindings) {
     const out = { ...bindings };
     out.pause = ["Escape"];
     localStorage.setItem("keyBindings", JSON.stringify(out));

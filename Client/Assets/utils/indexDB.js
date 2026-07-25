@@ -32,7 +32,7 @@
                 n = e.target.db;
             };
         }),
-        (window.ldb = {
+        (window.ldb = globalThis.ldb = {
             get: e,
             set: function (e, t) {
                 ((o.k = e),
@@ -55,7 +55,7 @@
         }));
 })();
 
-function getFromLdb(key) {
+export function getFromLdb(key) {
     return new Promise((resolve, reject) => {
         ldb.get(key, (data) => {
             if (data !== undefined && data !== null) {
@@ -67,7 +67,7 @@ function getFromLdb(key) {
     });
 }
 
-function deleteFromLdb(key) {
+export function deleteFromLdb(key) {
     return new Promise((resolve, reject) => {
         ldb.remove(key, (err) => {
             if (err) {
@@ -80,3 +80,6 @@ function deleteFromLdb(key) {
         });
     });
 }
+
+
+export const ldb = window.ldb;

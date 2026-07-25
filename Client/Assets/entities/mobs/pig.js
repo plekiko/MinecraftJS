@@ -1,4 +1,13 @@
-class Pig extends Mob {
+import { runtime } from "../../utils/runtime.js";
+import { AI, Mob } from "../mob.js";
+import { Body, BodyPart } from "../../game/body.js";
+import { Items } from "../../game/items.js";
+import { LootItem, LootTable } from "../../game/lootTable.js";
+import { Sounds, playPositionalSound, playRandomSoundFromArray } from "../../game/sounds.js";
+import { Vector2 } from "../../utils/classes.js";
+import { BLOCK_SIZE } from "../../utils/globals.js";
+
+export class Pig extends Mob {
     constructor(
         world,
         {
@@ -54,7 +63,7 @@ class Pig extends Mob {
     dieEvent() {
         this.dropLoot();
         playPositionalSound(this.position, "mobs/pig/death.ogg");
-        world.removeEntity(this);
+        runtime.world.removeEntity(this);
     }
 
     tickUpdate() {
@@ -64,7 +73,7 @@ class Pig extends Mob {
     interact(player, item) {}
 }
 
-function createPigBody() {
+export function createPigBody() {
     return new Body({
         sprite: "pig/pig",
         flipCorrection: 3,
