@@ -102,7 +102,10 @@ function processMessage(data) {
                 message.player.name,
                 false,
             );
-            newPlayer.setSkin(message.player.skin || "steve");
+            newPlayer.setSkin(
+                message.player.skin || "player/steve",
+                message.player.model,
+            );
             break;
         case "playerLeft":
             world.removeEntity(world.getEntityByUUID(message));
@@ -154,7 +157,7 @@ function processMessage(data) {
             console.log("Received player data:", message);
             const player = world.getEntityByUUID(message.UUID);
             if (player) {
-                player.setSkin(message.skin);
+                player.setSkin(message.skin, message.model);
                 player.name = message.name;
             }
             break;
@@ -309,7 +312,8 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
         sender: player.UUID,
         message: {
             UUID: player.UUID,
-            skin: myPlayer.body.sprite ?? "steve",
+            skin: myPlayer.body.sprite ?? "player/steve",
+            model: myPlayer.skinModel || "steve",
             name: game.settings.username,
         },
     });
@@ -329,7 +333,7 @@ async function iJoined(player, existingPlayers, gamemode = 0) {
 
             newPlayer.dimension = p.dimension;
 
-            newPlayer.setSkin(p.skin || "steve");
+            newPlayer.setSkin(p.skin || "player/steve", p.model);
         });
     }
 }

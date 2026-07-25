@@ -25,6 +25,23 @@ class Body {
     setSprite(sprite) {
         this.sprite = sprite;
 
+        this.image.onerror = () => {
+            // Missing player skin file — fall back to Steve (ignore mob/other sprites)
+            if (!this.sprite.startsWith("player/") || this.sprite === "player/steve") {
+                return;
+            }
+            this.sprite = "player/steve";
+            this.image.src = getSpriteUrl(
+                "entity/player/steve",
+                isEqualToOriginal("entity/player/steve"),
+            );
+            if (typeof localStorage !== "undefined") {
+                localStorage.setItem("playerSkinId", "steve");
+                localStorage.removeItem("playerSkin");
+                localStorage.setItem("playerSkinModel", "steve");
+            }
+        };
+
         this.image.src = getSpriteUrl(
             "entity/" + sprite,
             isEqualToOriginal("entity/" + sprite),
@@ -71,7 +88,11 @@ class Body {
                 let adjustedLookDirection = lookDirection;
 
                 // Adjust for flipping logic based on body direction or eyes flip
-                if (part.flip || lookDirection < -90 || lookDirection > 90) {
+                if (
+                    (!part.skipLookFlip && part.flip) ||
+                    lookDirection < -90 ||
+                    lookDirection > 90
+                ) {
                     adjustedLookDirection = 180 + lookDirection;
                 }
 
@@ -176,6 +197,7 @@ class BodyPart {
         mainArm = false,
         holdOrigin = { x: 0, y: 0 },
         flip = false,
+        skipLookFlip = false,
     }) {
         this.id = id;
         this.spriteCrop = spriteCrop;
@@ -187,6 +209,7 @@ class BodyPart {
         this.zIndex = zIndex;
 
         this.flip = flip;
+        this.skipLookFlip = skipLookFlip;
         this.flipOrigin = {
             x: flipOrigin.x * (BLOCK_SIZE / 64),
             y: flipOrigin.y * (BLOCK_SIZE / 64),
@@ -215,7 +238,50 @@ class BodyPart {
         this.swingProgress = 0;
         this.swingSpeed = 10;
         this.swingAmplitude = 50;
+
+        this._cropCanvas = null;
+        this._cropImage = null;
+        this._cropSrc = "";
+        this._cropRect = null;
     }
+
+    getCroppedSprite(image) {
+        // Never cache from an unloaded image, or the blank result sticks
+        if (!image?.complete || !image.naturalWidth) return null;
+
+        const { x, y, width, height } = this.spriteCrop;
+        if (!width || !height) return null;
+
+        const rect = this._cropRect;
+        if (
+            this._cropCanvas &&
+            this._cropImage === image &&
+            this._cropSrc === image.src &&
+            rect &&
+            rect.x === x &&
+            rect.y === y &&
+            rect.width === width &&
+            rect.height === height
+        ) {
+            return this._cropCanvas;
+        }
+
+        if (!this._cropCanvas) {
+            this._cropCanvas = document.createElement("canvas");
+        }
+        this._cropCanvas.width = width;
+        this._cropCanvas.height = height;
+        this._cropImage = image;
+        this._cropSrc = image.src;
+        this._cropRect = { x, y, width, height };
+
+        const cropCtx = this._cropCanvas.getContext("2d");
+        cropCtx.imageSmoothingEnabled = false;
+        cropCtx.clearRect(0, 0, width, height);
+        cropCtx.drawImage(image, x, y, width, height, 0, 0, width, height);
+        return this._cropCanvas;
+    }
+
     getSwayRotation(speed, grounded) {
         const oscillation = Math.sin(
             Date.now() / (grounded ? this.swaySpeed : this.swaySpeed * 5) +
@@ -246,6 +312,7 @@ class BodyPart {
         }
 
         ctx.save();
+        ctx.imageSmoothingEnabled = false;
         ctx.filter = `brightness(${brightness})`;
 
         // Step 1: Translate to the initial position
@@ -255,7 +322,9 @@ class BodyPart {
         let shouldFlip = false;
         // Use exact same flipping logic as before
         if (this.eyes) {
-            shouldFlip = lookDirection < -90 || lookDirection > 90;
+            shouldFlip =
+                !this.skipLookFlip &&
+                (lookDirection < -90 || lookDirection > 90);
         } else {
             shouldFlip = direction < 0;
         }
@@ -276,41 +345,40 @@ class BodyPart {
         const spriteSize = getSpriteSize(this.ownSpriteMap || this.sprite);
         const baseSize = spriteSize.width || 16;
         const scaleFactor = BLOCK_SIZE / baseSize;
-        const destWidth = this.spriteCrop.width * scaleFactor;
-        const destHeight = this.spriteCrop.height * scaleFactor;
+        const destWidth = Math.round(this.spriteCrop.width * scaleFactor);
+        const destHeight = Math.round(this.spriteCrop.height * scaleFactor);
+        const destX = Math.round(-destWidth / (scaleFactor * 2));
+        const destY = Math.round(-destHeight / (scaleFactor * 2));
 
-        ctx.drawImage(
-            img,
-            this.spriteCrop.x,
-            this.spriteCrop.y,
-            this.spriteCrop.width,
-            this.spriteCrop.height,
-            -destWidth / (scaleFactor * 2),
-            -destHeight / (scaleFactor * 2),
-            destWidth,
-            destHeight,
-        );
-
-        if (this.zIndex < 0) {
-            ctx.globalAlpha = 0.3;
-            ctx.fillStyle = "black";
-            ctx.fillRect(
-                -destWidth / (scaleFactor * 2),
-                -destHeight / (scaleFactor * 2),
+        // Draw from a pre-cropped canvas so rotation can't bleed adjacent atlas pixels
+        // (e.g. left head face sits under the head-bottom face on the skin sheet).
+        const cropped = this.getCroppedSprite(img);
+        if (cropped) {
+            ctx.drawImage(cropped, destX, destY, destWidth, destHeight);
+        } else {
+            ctx.drawImage(
+                img,
+                this.spriteCrop.x,
+                this.spriteCrop.y,
+                this.spriteCrop.width,
+                this.spriteCrop.height,
+                destX,
+                destY,
                 destWidth,
                 destHeight,
             );
         }
 
+        if (this.zIndex < 0) {
+            ctx.globalAlpha = 0.3;
+            ctx.fillStyle = "black";
+            ctx.fillRect(destX, destY, destWidth, destHeight);
+        }
+
         if (flashingColor) {
             ctx.globalAlpha = 0.4;
             ctx.fillStyle = flashingColor;
-            ctx.fillRect(
-                -destWidth / (scaleFactor * 2),
-                -destHeight / (scaleFactor * 2),
-                destWidth,
-                destHeight,
-            );
+            ctx.fillRect(destX, destY, destWidth, destHeight);
             ctx.globalAlpha = 1;
         }
 

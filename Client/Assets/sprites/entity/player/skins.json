@@ -1,0 +1,317 @@
+[
+  {
+    "file": "steve.png",
+    "name": "Steve",
+    "model": "steve"
+  },
+  {
+    "file": "alex.png",
+    "model": "alex",
+    "name": "Alex"
+  },
+  {
+    "file": "alex1.png",
+    "name": "Tennis Alex",
+    "model": "alex"
+  },
+  {
+    "file": "alex2.png",
+    "name": "Tuxedo Alex",
+    "model": "alex"
+  },
+  {
+    "file": "alex3.png",
+    "name": "Athlete Alex",
+    "model": "alex"
+  },
+  {
+    "file": "alex4.png",
+    "name": "Swedish Alex",
+    "model": "alex"
+  },
+  {
+    "file": "alex5.png",
+    "name": "Prisoner Alex",
+    "model": "alex"
+  },
+  {
+    "file": "alex6.png",
+    "name": "Cyclist Alex",
+    "model": "alex"
+  },
+  {
+    "file": "alex7.png",
+    "name": "Boxer Alex",
+    "model": "alex"
+  },
+  {
+    "file": "char1.png",
+    "name": "Tennis Steve",
+    "model": "steve"
+  },
+  {
+    "file": "char2.png",
+    "name": "Tuxedo Steve",
+    "model": "steve"
+  },
+  {
+    "file": "char3.png",
+    "name": "Athlete Steve",
+    "model": "steve"
+  },
+  {
+    "file": "char4.png",
+    "name": "Scottish Steve",
+    "model": "steve"
+  },
+  {
+    "file": "char5.png",
+    "name": "Prisoner Steve",
+    "model": "steve"
+  },
+  {
+    "file": "char6.png",
+    "name": "Cyclist Steve",
+    "model": "steve"
+  },
+  {
+    "file": "char7.png",
+    "name": "Boxer Steve",
+    "model": "steve"
+  },
+  {
+    "file": "DevAlex.png",
+    "model": "alex",
+    "name": "Dev Alex"
+  },
+  {
+    "file": "DevSteve.png",
+    "name": "Dev Steve",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000000.png",
+    "name": "Creeper",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000001.png",
+    "name": "Squid",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000002.png",
+    "name": "Zombie",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000003.png",
+    "name": "Herobrine",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000004.png",
+    "name": "Jack of Blades",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000005.png",
+    "name": "Hero",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000006.png",
+    "name": "Garth",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000007.png",
+    "name": "Reaver",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000008.png",
+    "name": "Hammer",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000009.png",
+    "name": "Locust Drone",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000010.png",
+    "name": "Clayton Carmine",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000011.png",
+    "name": "Cole Train",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000012.png",
+    "name": "Master Chief",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000013.png",
+    "name": "Covenant Grunt",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000014.png",
+    "name": "Covenant Brute",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000015.png",
+    "name": "Banjo",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000016.png",
+    "name": "Grunty",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000017.png",
+    "name": "Bottles",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000018.png",
+    "name": "Tooty",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000019.png",
+    "name": "Mumbo Jumbo",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000020.png",
+    "name": "Klungo",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000021.png",
+    "name": "Trials Rider",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000022.png",
+    "name": "Freestyle",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000023.png",
+    "name": "Old-School",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000024.png",
+    "name": "Biker",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000025.png",
+    "name": "Combat",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000026.png",
+    "name": "'Splosion Man",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000027.png",
+    "name": "Scientist Wilson",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000028.png",
+    "name": "Scientist Danklef",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000029.png",
+    "name": "Ms. 'Splosion Man",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000030.png",
+    "name": "Mandy Elite",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000031.png",
+    "name": "Racing Driver 1",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000032.png",
+    "name": "Racing Driver 2",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000033.png",
+    "name": "Racing Driver 3",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000034.png",
+    "name": "Racing Driver 4",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000035.png",
+    "name": "Nurse",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000036.png",
+    "name": "Prisoner",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000037.png",
+    "name": "Victorian Swimmer",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000038.png",
+    "name": "Deep Sea Diver",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000039.png",
+    "name": "King",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000040.png",
+    "name": "Queen",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000041.png",
+    "name": "Jester",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000042.png",
+    "name": "Knight Templar",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000043.png",
+    "name": "Black Knight",
+    "model": "steve"
+  },
+  {
+    "file": "dlcskin00000044.png",
+    "name": "Wizard",
+    "model": "steve"
+  }
+]

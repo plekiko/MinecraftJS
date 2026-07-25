@@ -44,6 +44,10 @@ const optionsMain = document.getElementById("options-main");
 const controlsPanel = document.getElementById("controls-panel");
 const controls = document.getElementById("controls-list");
 const optionsPanelTitle = document.getElementById("options-panel-title");
+const skinsSelectContainer = document.querySelector("#skins-select-container");
+const skinsCarousel = document.getElementById("skins-carousel");
+const applySkinBtn = document.getElementById("apply-skin-btn");
+let customSkinActions = null;
 
 const musicVolumeSlider = document.getElementById("music-volume-slider");
 const musicVolumeLabel = document.getElementById("music-volume-label");
@@ -179,15 +183,6 @@ function saveSettings() {
     setUsernameFooter(currentSettings.username);
 
     localStorage.setItem("settings", JSON.stringify(currentSettings));
-
-    if (submittedUsername) {
-        const shouldDownload = confirm(
-            "Download and apply the skin for this username?",
-        );
-        if (shouldDownload) {
-            downloadSkinFromUsername();
-        }
-    }
 }
 
 function setUsernameFooter(username) {
@@ -531,27 +526,687 @@ function uploadTexturePack() {
     input.click();
 }
 
-function uploadSkin() {
+const PLAYER_SKINS_CONFIG_URL = "Assets/sprites/entity/player/skins.json";
+const PLAYER_SKINS_DIR = "Assets/sprites/entity/player";
+
+const SKIN_PREVIEW_SCALE = 8;
+const SKIN_PREVIEW_WIDTH = 16 * SKIN_PREVIEW_SCALE;
+const SKIN_PREVIEW_HEIGHT = 32 * SKIN_PREVIEW_SCALE;
+const skinImageCache = new Map();
+const skinDataUrlCache = new Map();
+
+let DEFAULT_SKINS = [{ id: "custom", name: "Custom Skin", type: "custom" }];
+let selectedSkinId = "steve";
+let customSkinData = null;
+let customSkinModel = "steve";
+let playerSkinsLoaded = false;
+let skinCarouselScrollFrame = null;
+let skinCarouselScrollTarget = 0;
+let skinCarouselScrollTime = null;
+let skinCarouselScrollMode = "snap"; // "snap" | "inertia"
+let skinCarouselVelocity = 0;
+let skinCarouselDidDrag = false;
+const skinCarouselDrag = {
+    active: false,
+    pointerId: null,
+    startX: 0,
+    startScroll: 0,
+    lastX: 0,
+    lastTime: 0,
+    samples: [],
+    skinId: null,
+};
+
+function buildBuiltinSkin(entry) {
+    const file = typeof entry === "string" ? entry : entry?.file;
+    if (typeof file !== "string" || !file.toLowerCase().endsWith(".png")) {
+        return null;
+    }
+
+    const id = file.replace(/\.png$/i, "");
+    const model = entry?.model === "alex" ? "alex" : "steve";
+    const name =
+        typeof entry?.name === "string" && entry.name.trim()
+            ? entry.name.trim()
+            : id;
+
+    return {
+        id,
+        name,
+        type: "builtin",
+        model,
+        src: `${PLAYER_SKINS_DIR}/${file}`,
+        sprite: `player/${id}`,
+    };
+}
+
+function buildDefaultSkins(config) {
+    const entries = Array.isArray(config) ? config : [];
+    const builtins = entries.map(buildBuiltinSkin).filter(Boolean);
+
+    const steve = builtins.find((skin) => skin.id === "steve");
+    const alex = builtins.find((skin) => skin.id === "alex");
+    const others = builtins.filter(
+        (skin) => skin.id !== "steve" && skin.id !== "alex",
+    );
+
+    return [
+        ...(steve ? [steve] : []),
+        ...(alex ? [alex] : []),
+        { id: "custom", name: "Custom Skin", type: "custom", model: "steve" },
+        ...others,
+    ];
+}
+
+async function loadPlayerSkins() {
+    if (playerSkinsLoaded) return DEFAULT_SKINS;
+
+    try {
+        const response = await fetch(PLAYER_SKINS_CONFIG_URL, { cache: "no-store" });
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        DEFAULT_SKINS = buildDefaultSkins(await response.json());
+    } catch (err) {
+        console.warn("Failed to load player skins config:", err);
+        DEFAULT_SKINS = [
+            buildBuiltinSkin({
+                file: "steve.png",
+                name: "Steve",
+                model: "steve",
+            }),
+            { id: "custom", name: "Custom Skin", type: "custom", model: "steve" },
+        ].filter(Boolean);
+    }
+
+    playerSkinsLoaded = true;
+    return DEFAULT_SKINS;
+}
+
+function applyPlayerSkin(skinData, skinId, model = "steve") {
+    if (skinData) {
+        localStorage.setItem("playerSkin", skinData);
+    } else {
+        localStorage.removeItem("playerSkin");
+    }
+    localStorage.setItem("playerSkinId", skinId);
+    localStorage.setItem(
+        "playerSkinModel",
+        model === "alex" ? "alex" : "steve",
+    );
+}
+
+function saveCustomSkin(skinData, model = "steve") {
+    customSkinData = skinData;
+    customSkinModel = model === "alex" ? "alex" : "steve";
+    if (skinData) {
+        localStorage.setItem("customPlayerSkin", skinData);
+        localStorage.setItem("customPlayerSkinModel", customSkinModel);
+    } else {
+        localStorage.removeItem("customPlayerSkin");
+        localStorage.removeItem("customPlayerSkinModel");
+    }
+}
+
+function loadCustomSkin() {
+    customSkinData = localStorage.getItem("customPlayerSkin");
+    customSkinModel =
+        localStorage.getItem("customPlayerSkinModel") === "alex"
+            ? "alex"
+            : "steve";
+    return customSkinData;
+}
+
+function migrateSkinStorage() {
+    const activeSkin = localStorage.getItem("playerSkin");
+    const skinId = localStorage.getItem("playerSkinId");
+    const savedCustom = localStorage.getItem("customPlayerSkin");
+
+    // Older saves only had playerSkin with no id — treat as custom
+    if (activeSkin && !skinId) {
+        localStorage.setItem("playerSkinId", "custom");
+        if (!savedCustom) {
+            localStorage.setItem("customPlayerSkin", activeSkin);
+        }
+        return;
+    }
+
+    // Custom was applied before customPlayerSkin existed — keep a copy
+    if (skinId === "custom" && activeSkin && !savedCustom) {
+        localStorage.setItem("customPlayerSkin", activeSkin);
+    }
+}
+
+function ensureActiveSkinExists() {
+    const skinId = localStorage.getItem("playerSkinId") || "steve";
+    const activeSkin = localStorage.getItem("playerSkin");
+
+    if (skinId === "custom") {
+        const hasCustom =
+            !!localStorage.getItem("customPlayerSkin") ||
+            (!!activeSkin && activeSkin.startsWith("data:image"));
+        if (!hasCustom) {
+            applyPlayerSkin(null, "steve", "steve");
+        }
+        return;
+    }
+
+    const skin = DEFAULT_SKINS.find(
+        (entry) => entry.id === skinId && entry.type === "builtin",
+    );
+    if (!skin) {
+        applyPlayerSkin(null, "steve", "steve");
+        return;
+    }
+
+    // Builtin skin selected but stored sprite path is missing/stale
+    if (
+        activeSkin &&
+        !activeSkin.startsWith("data:image") &&
+        activeSkin !== skin.sprite
+    ) {
+        applyPlayerSkin(
+            skin.sprite === "player/steve" ? null : skin.sprite,
+            skin.id,
+            skin.model,
+        );
+    }
+}
+
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+        img.src = src;
+    });
+}
+
+async function getCachedSkinImage(key, loader) {
+    if (skinImageCache.has(key)) {
+        return skinImageCache.get(key);
+    }
+    const image = await loader();
+    skinImageCache.set(key, image);
+    return image;
+}
+
+function drawBlackPlayerIcon(ctx, baseX, baseY, scale) {
+    ctx.fillStyle = "#000000";
+    for (const part of SKIN_PREVIEW_PARTS) {
+        ctx.fillRect(
+            Math.round(baseX + part.pos.x * scale),
+            Math.round(baseY + part.pos.y * scale),
+            Math.round(part.crop.width * scale),
+            Math.round(part.crop.height * scale),
+        );
+    }
+}
+
+async function renderSkinCardPreview(canvas, skin) {
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.imageSmoothingEnabled = false;
+
+    if (skin.type === "custom" && !customSkinData) {
+        drawBlackPlayerIcon(ctx, 0, 0, SKIN_PREVIEW_SCALE);
+        return;
+    }
+
+    try {
+        let image;
+        let model = skin.model;
+        if (skin.type === "custom") {
+            image = await loadImage(customSkinData);
+            model = customSkinModel;
+        } else if (skin.type === "builtin") {
+            image = await getCachedSkinImage(skin.id, () =>
+                loadImage(skin.src),
+            );
+        } else {
+            image = await getCachedSkinImage(skin.id, async () => {
+                const dataUrl = await fetchSkinDataUrl(skin.username);
+                return loadImage(dataUrl);
+            });
+        }
+        drawSkinPreview(ctx, image, 0, 0, SKIN_PREVIEW_SCALE, model);
+    } catch (err) {
+        console.warn(`Failed to render skin preview for ${skin.name}:`, err);
+        drawBlackPlayerIcon(ctx, 0, 0, SKIN_PREVIEW_SCALE);
+    }
+}
+
+function createSkinCard(skin) {
+    const card = document.createElement("div");
+    card.className = "skin-card";
+    card.dataset.skinId = skin.id;
+    card.onclick = () => {
+        if (skinCarouselDidDrag) {
+            skinCarouselDidDrag = false;
+            return;
+        }
+        selectSkin(skin.id);
+    };
+
+    const canvas = document.createElement("canvas");
+    canvas.className = "skin-card-preview";
+    canvas.width = SKIN_PREVIEW_WIDTH;
+    canvas.height = SKIN_PREVIEW_HEIGHT;
+
+    const name = document.createElement("div");
+    name.className = "skin-card-name";
+    name.textContent = skin.name;
+
+    card.append(canvas, name);
+    renderSkinCardPreview(canvas, skin);
+
+    if (skin.type !== "custom") {
+        return card;
+    }
+
+    const group = document.createElement("div");
+    group.className = "skin-carousel-item";
+
+    const actions = document.createElement("div");
+    actions.className = "custom-skin-actions";
+    actions.id = "custom-skin-actions";
+
+    const uploadBtn = document.createElement("button");
+    uploadBtn.type = "button";
+    uploadBtn.className = "btn skin-card-btn";
+    uploadBtn.textContent = "Upload File";
+    uploadBtn.onclick = (e) => {
+        e.stopPropagation();
+        uploadCustomSkin();
+    };
+
+    const usernameBtn = document.createElement("button");
+    usernameBtn.type = "button";
+    usernameBtn.className = "btn skin-card-btn";
+    usernameBtn.textContent = "Username";
+    usernameBtn.onclick = (e) => {
+        e.stopPropagation();
+        customSkinFromUsername();
+    };
+
+    actions.append(uploadBtn, usernameBtn);
+    group.append(card, actions);
+    customSkinActions = actions;
+    return group;
+}
+
+function updateSkinCardSelection() {
+    if (!skinsCarousel) return;
+    for (const card of skinsCarousel.querySelectorAll(".skin-card")) {
+        card.classList.toggle(
+            "selected",
+            card.dataset.skinId === selectedSkinId,
+        );
+    }
+    updateSkinsFooter();
+}
+
+function updateSkinsFooter() {
+    const isCustom = selectedSkinId === "custom";
+    if (customSkinActions) {
+        customSkinActions.style.visibility = isCustom ? "visible" : "hidden";
+        customSkinActions.style.pointerEvents = isCustom ? "auto" : "none";
+    }
+    if (applySkinBtn) {
+        applySkinBtn.disabled = isCustom && !customSkinData;
+    }
+}
+
+function stopSkinCarouselAnimation() {
+    if (skinCarouselScrollFrame !== null) {
+        cancelAnimationFrame(skinCarouselScrollFrame);
+        skinCarouselScrollFrame = null;
+    }
+    skinCarouselScrollTime = null;
+    skinCarouselVelocity = 0;
+}
+
+function selectSkin(skinId, behavior = "smooth") {
+    selectedSkinId = skinId;
+    updateSkinCardSelection();
+    centerSelectedCard(behavior);
+}
+
+function centerSelectedCard(behavior = "smooth") {
+    if (!skinsCarousel) return;
+    const card = skinsCarousel.querySelector(".skin-card.selected");
+    if (!card) return;
+
+    const item = card.closest(".skin-carousel-item") || card;
+    skinCarouselScrollTarget =
+        item.offsetLeft - (skinsCarousel.clientWidth - item.offsetWidth) / 2;
+    skinCarouselScrollMode = "snap";
+    skinCarouselVelocity = 0;
+
+    if (behavior === "auto") {
+        stopSkinCarouselAnimation();
+        skinsCarousel.scrollLeft = skinCarouselScrollTarget;
+        return;
+    }
+
+    if (skinCarouselScrollFrame === null) {
+        skinCarouselScrollFrame = requestAnimationFrame(animateSkinCarousel);
+    }
+}
+
+function animateSkinCarousel(timestamp) {
+    if (!skinsCarousel) {
+        stopSkinCarouselAnimation();
+        return;
+    }
+
+    const elapsed = skinCarouselScrollTime
+        ? Math.min(timestamp - skinCarouselScrollTime, 50)
+        : 16;
+    skinCarouselScrollTime = timestamp;
+
+    if (skinCarouselScrollMode === "inertia") {
+        skinsCarousel.scrollLeft -= skinCarouselVelocity * elapsed;
+        skinCarouselVelocity *= Math.pow(0.95, elapsed / 16.67);
+
+        const maxScroll = Math.max(
+            0,
+            skinsCarousel.scrollWidth - skinsCarousel.clientWidth,
+        );
+        if (skinsCarousel.scrollLeft <= 0) {
+            skinsCarousel.scrollLeft = 0;
+            skinCarouselVelocity = 0;
+        } else if (skinsCarousel.scrollLeft >= maxScroll) {
+            skinsCarousel.scrollLeft = maxScroll;
+            skinCarouselVelocity = 0;
+        }
+
+        if (Math.abs(skinCarouselVelocity) < 0.02) {
+            stopSkinCarouselAnimation();
+            return;
+        }
+
+        skinCarouselScrollFrame = requestAnimationFrame(animateSkinCarousel);
+        return;
+    }
+
+    const distance = skinCarouselScrollTarget - skinsCarousel.scrollLeft;
+    if (Math.abs(distance) < 0.5) {
+        skinsCarousel.scrollLeft = skinCarouselScrollTarget;
+        stopSkinCarouselAnimation();
+        return;
+    }
+
+    // Keep one continuous animation while held-key repeats update the target.
+    const easing = 1 - Math.pow(0.72, elapsed / 16.67);
+    skinsCarousel.scrollLeft += distance * easing;
+    skinCarouselScrollFrame = requestAnimationFrame(animateSkinCarousel);
+}
+
+function getSkinCarouselDragVelocity() {
+    const now = performance.now();
+    const samples = skinCarouselDrag.samples.filter(
+        (sample) => now - sample.time < 100,
+    );
+    if (samples.length < 2) return 0;
+
+    const first = samples[0];
+    const last = samples[samples.length - 1];
+    const dt = last.time - first.time;
+    if (dt <= 0) return 0;
+    return (last.x - first.x) / dt;
+}
+
+function onSkinCarouselPointerDown(e) {
+    if (!skinsCarousel || e.button !== 0) return;
+    if (e.target.closest("button, a, input, textarea, select, label")) return;
+
+    stopSkinCarouselAnimation();
+    skinCarouselDidDrag = false;
+    skinCarouselDrag.active = true;
+    skinCarouselDrag.pointerId = e.pointerId;
+    skinCarouselDrag.startX = e.clientX;
+    skinCarouselDrag.startScroll = skinsCarousel.scrollLeft;
+    skinCarouselDrag.lastX = e.clientX;
+    skinCarouselDrag.lastTime = performance.now();
+    skinCarouselDrag.skinId =
+        e.target.closest(".skin-card")?.dataset.skinId || null;
+    skinCarouselDrag.samples = [
+        { x: e.clientX, time: skinCarouselDrag.lastTime },
+    ];
+
+    skinsCarousel.classList.add("dragging");
+    skinsCarousel.setPointerCapture(e.pointerId);
+    e.preventDefault();
+}
+
+function onSkinCarouselPointerMove(e) {
+    if (!skinCarouselDrag.active || e.pointerId !== skinCarouselDrag.pointerId) {
+        return;
+    }
+
+    const dx = e.clientX - skinCarouselDrag.startX;
+    if (Math.abs(dx) > 4) skinCarouselDidDrag = true;
+
+    skinsCarousel.scrollLeft = skinCarouselDrag.startScroll - dx;
+
+    const now = performance.now();
+    skinCarouselDrag.samples.push({ x: e.clientX, time: now });
+    if (skinCarouselDrag.samples.length > 8) {
+        skinCarouselDrag.samples.shift();
+    }
+    skinCarouselDrag.lastX = e.clientX;
+    skinCarouselDrag.lastTime = now;
+}
+
+function onSkinCarouselPointerUp(e) {
+    if (!skinCarouselDrag.active || e.pointerId !== skinCarouselDrag.pointerId) {
+        return;
+    }
+
+    skinCarouselDrag.active = false;
+    skinsCarousel.classList.remove("dragging");
+
+    try {
+        skinsCarousel.releasePointerCapture(e.pointerId);
+    } catch (_) {}
+
+    const velocity = getSkinCarouselDragVelocity();
+    skinCarouselDrag.samples = [];
+
+    if (!skinCarouselDidDrag && skinCarouselDrag.skinId) {
+        selectSkin(skinCarouselDrag.skinId);
+        skinCarouselDrag.skinId = null;
+        return;
+    }
+    skinCarouselDrag.skinId = null;
+
+    if (Math.abs(velocity) < 0.05) {
+        skinCarouselVelocity = 0;
+        return;
+    }
+
+    skinCarouselVelocity = Math.max(-4, Math.min(4, velocity));
+    skinCarouselScrollMode = "inertia";
+    if (skinCarouselScrollFrame === null) {
+        skinCarouselScrollFrame = requestAnimationFrame(animateSkinCarousel);
+    }
+}
+
+function setupSkinsCarouselDrag() {
+    if (!skinsCarousel || skinsCarousel.dataset.dragReady === "1") return;
+    skinsCarousel.dataset.dragReady = "1";
+
+    skinsCarousel.addEventListener("pointerdown", onSkinCarouselPointerDown);
+    skinsCarousel.addEventListener("pointermove", onSkinCarouselPointerMove);
+    skinsCarousel.addEventListener("pointerup", onSkinCarouselPointerUp);
+    skinsCarousel.addEventListener("pointercancel", onSkinCarouselPointerUp);
+    skinsCarousel.addEventListener("lostpointercapture", (e) => {
+        if (skinCarouselDrag.active) onSkinCarouselPointerUp(e);
+    });
+}
+
+function moveSkinSelection(direction) {
+    const index = DEFAULT_SKINS.findIndex((skin) => skin.id === selectedSkinId);
+    const next = index + direction;
+    if (next < 0 || next >= DEFAULT_SKINS.length) return;
+    selectSkin(DEFAULT_SKINS[next].id);
+}
+
+function refreshCustomSkinCard() {
+    if (!skinsCarousel) return;
+    const card = skinsCarousel.querySelector('.skin-card[data-skin-id="custom"]');
+    const canvas = card?.querySelector(".skin-card-preview");
+    if (!canvas) return;
+    renderSkinCardPreview(
+        canvas,
+        DEFAULT_SKINS.find((skin) => skin.id === "custom"),
+    );
+}
+
+function populateSkinsCarousel() {
+    if (!skinsCarousel) return;
+    skinsCarousel.innerHTML = "";
+    for (const skin of DEFAULT_SKINS) {
+        skinsCarousel.appendChild(createSkinCard(skin));
+    }
+    updateSkinCardSelection();
+}
+
+async function showSkins() {
+    hideMenu();
+
+    await loadPlayerSkins();
+    ensureActiveSkinExists();
+
+    selectedSkinId = localStorage.getItem("playerSkinId") || "steve";
+    if (!DEFAULT_SKINS.some((skin) => skin.id === selectedSkinId)) {
+        selectedSkinId = "steve";
+    }
+    loadCustomSkin();
+
+    if (skinsSelectContainer) skinsSelectContainer.style.display = "flex";
+    setupSkinsCarouselDrag();
+    populateSkinsCarousel();
+    updateSkinsFooter();
+    requestAnimationFrame(() => centerSelectedCard("auto"));
+
+    // Detect model for custom skins saved before auto-detection existed
+    if (customSkinData && !localStorage.getItem("customPlayerSkinModel")) {
+        try {
+            const model = detectSkinModel(await loadImage(customSkinData));
+            saveCustomSkin(customSkinData, model);
+            refreshCustomSkinCard();
+        } catch (err) {
+            console.warn("Failed to detect stored custom skin model:", err);
+        }
+    }
+}
+
+document.addEventListener("keydown", (e) => {
+    if (!skinsSelectContainer || skinsSelectContainer.style.display === "none") {
+        return;
+    }
+    if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        moveSkinSelection(-1);
+    } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        moveSkinSelection(1);
+    }
+});
+
+async function applySelectedSkin() {
+    const skin = DEFAULT_SKINS.find((entry) => entry.id === selectedSkinId);
+    if (!skin) return;
+
+    if (skin.type === "custom") {
+        if (!customSkinData) {
+            alert("Upload a skin file or enter a username first.");
+            return;
+        }
+        applyPlayerSkin(customSkinData, skin.id, customSkinModel);
+    } else if (skin.type === "builtin") {
+        applyPlayerSkin(skin.sprite, skin.id, skin.model);
+    } else {
+        try {
+            applyPlayerSkin(
+                await fetchSkinDataUrl(skin.username),
+                skin.id,
+                skin.model || "steve",
+            );
+        } catch (err) {
+            console.warn("Failed to apply skin:", err);
+            alert("Failed to load skin. Try again later.");
+            return;
+        }
+    }
+
+    gotoOptions();
+}
+
+function uploadCustomSkin() {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".png";
+    input.accept = ".png,image/png";
 
     input.onchange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const skinData = event.target.result;
-                localStorage.setItem("playerSkin", skinData);
-                alert("Skin uploaded successfully!");
-            };
-            reader.readAsDataURL(file);
-        } else {
+        if (!file) {
             alert("No file selected.");
+            return;
         }
+
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            const dataUrl = event.target.result;
+            let model = "steve";
+            try {
+                model = detectSkinModel(await loadImage(dataUrl));
+            } catch (err) {
+                console.warn("Failed to detect uploaded skin model:", err);
+            }
+            saveCustomSkin(dataUrl, model);
+            selectSkin("custom");
+            refreshCustomSkinCard();
+            updateSkinsFooter();
+        };
+        reader.onerror = () => alert("Failed to read skin file.");
+        reader.readAsDataURL(file);
     };
 
     input.click();
+}
+
+async function customSkinFromUsername() {
+    const name = prompt("Enter a Minecraft username to download a skin:");
+    if (name === null) return;
+
+    const trimmed = name.trim();
+    if (!trimmed) {
+        alert("Enter a username first.");
+        return;
+    }
+
+    try {
+        const dataUrl = await fetchSkinDataUrl(trimmed);
+        let model = "steve";
+        try {
+            model = detectSkinModel(await loadImage(dataUrl));
+        } catch (err) {
+            console.warn("Failed to detect downloaded skin model:", err);
+        }
+        saveCustomSkin(dataUrl, model);
+        selectSkin("custom");
+        refreshCustomSkinCard();
+        updateSkinsFooter();
+    } catch (err) {
+        console.warn("Skin download failed:", err);
+        alert(
+            "Failed to download skin. Check the username and try again later.",
+        );
+    }
 }
 
 function readBlobAsDataUrl(blob) {
@@ -564,16 +1219,12 @@ function readBlobAsDataUrl(blob) {
     });
 }
 
-async function downloadSkinFromUsername() {
-    const inputName = usernameInput?.value?.trim();
-    const name = inputName || currentSettings.username?.trim();
-
-    if (!name) {
-        alert("Enter a username first.");
-        return;
+async function fetchSkinDataUrl(username) {
+    if (skinDataUrlCache.has(username)) {
+        return skinDataUrlCache.get(username);
     }
 
-    const encodedName = encodeURIComponent(name);
+    const encodedName = encodeURIComponent(username);
     const urls = [
         `https://mineskin.eu/skin/${encodedName}`,
         `https://mineskin.eu/download/${encodedName}`,
@@ -592,28 +1243,15 @@ async function downloadSkinFromUsername() {
                 throw new Error("Empty skin response.");
             }
 
-            const skinData = await readBlobAsDataUrl(blob);
-            localStorage.setItem("playerSkin", skinData);
-            alert("Skin downloaded successfully!");
-            return;
+            const dataUrl = await readBlobAsDataUrl(blob);
+            skinDataUrlCache.set(username, dataUrl);
+            return dataUrl;
         } catch (err) {
             lastError = err;
         }
     }
 
-    alert(
-        "Failed to download skin. Check the username and try again later.",
-    );
-    if (lastError) {
-        console.warn("Skin download failed:", lastError);
-    }
-}
-
-function clearSkin() {
-    if (confirm("Are you sure you want to remove your skin?")) {
-        localStorage.removeItem("playerSkin");
-        alert("Skin removed successfully!");
-    }
+    throw lastError || new Error("Failed to download skin.");
 }
 
 async function removeTexturePack() {
@@ -1378,6 +2016,7 @@ function gotoOptions() {
     optionsContainer.style.display = "flex";
     if (optionsMain) optionsMain.style.display = "flex";
     if (controlsPanel) controlsPanel.style.display = "none";
+    if (skinsSelectContainer) skinsSelectContainer.style.display = "none";
     if (optionsPanelTitle) optionsPanelTitle.textContent = "Options";
     if (rebindDocumentContextmenuHandler) {
         document.removeEventListener(
@@ -1626,6 +2265,7 @@ function showMenu() {
     addServerContainer.style.display = "none";
     quickConnectContainer.style.display = "none";
     optionsContainer.style.display = "none";
+    if (skinsSelectContainer) skinsSelectContainer.style.display = "none";
     worldCreateContainer.style.display = "none";
 
     // Reset selected states
@@ -1650,6 +2290,7 @@ function hideMenu() {
     addServerContainer.style.display = "none";
     quickConnectContainer.style.display = "none";
     optionsContainer.style.display = "none";
+    if (skinsSelectContainer) skinsSelectContainer.style.display = "none";
 
     // Reset selected states
     selectedWorld = null;
@@ -1666,6 +2307,10 @@ function hideMenu() {
 
 // Initialize everything after texture pack loading
 async function initialize() {
+    migrateSkinStorage();
+    await loadPlayerSkins();
+    ensureActiveSkinExists();
+
     populateWorlds();
     initializeDefaultTexturePack();
     await populateTexturePacks();

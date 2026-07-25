@@ -371,6 +371,24 @@
             </div>
         </div>
 
+        <!-- Skins menu -->
+        <div class="world-select-container" id="skins-select-container">
+            <div class="world-select-container-text">
+                <div class="big-text">Select Skin</div>
+                <div class="skins-carousel" id="skins-carousel"></div>
+                <div class="world-buttons-container">
+                    <button
+                        type="button"
+                        class="btn"
+                        id="apply-skin-btn"
+                        onclick="applySelectedSkin()"
+                    >
+                        Apply and Exit
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Options menu -->
         <div class="modal-container" id="options-container">
             <div class="center-modal" style="width: 100%">
@@ -417,17 +435,7 @@
                     <a class="btn" id="controls-btn" onclick="gotoControls()"
                         >Controls...</a
                     >
-                    <button
-                        type="button"
-                        class="btn"
-                        onclick="uploadSkin()"
-                        id="upload-skin-btn"
-                    >
-                        Upload Skin
-                    </button>
-                    <button type="button" class="btn" onclick="clearSkin()">
-                        Clear Skin
-                    </button>
+                    <a class="btn" onclick="showSkins()">Skins...</a>
 
                     <div class="input-field-container">
                         <div class="input-field-title">Username</div>
@@ -472,6 +480,7 @@
         </div>
 
         <script src="Assets/utils/keyBindings.js"></script>
+        <script src="Assets/game/skinPreview.js"></script>
         <script src="buttonUtils.js"></script>
         <script src="menu.js"></script>
     </body>
