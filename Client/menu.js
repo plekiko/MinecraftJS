@@ -704,7 +704,7 @@ async function renderSkinCardPreview(canvas, skin) {
                 return loadImage(dataUrl);
             });
         }
-        drawSkinPreview(ctx, image, 0, 0, SKIN_PREVIEW_SCALE);
+        drawSkinPreview(ctx, image, 0, 0, SKIN_PREVIEW_SCALE, skin.model);
     } catch (err) {
         console.warn(`Failed to render skin preview for ${skin.name}:`, err);
         drawBlackPlayerIcon(ctx, 0, 0, SKIN_PREVIEW_SCALE);

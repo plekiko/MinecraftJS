@@ -1796,6 +1796,9 @@ class Inventory {
             baseX,
             baseY,
             INVENTORY_PLAYER_SCALE,
+            world.player.skinModel ||
+                localStorage.getItem("playerSkinModel") ||
+                "steve",
         );
     }
 

@@ -488,6 +488,7 @@ function playerJoined(ws, playerData) {
         name: playerData?.name || `Player ${players.length + 1}`,
         ws: ws,
         skin: playerData?.skin || null,
+        model: playerData?.model === "alex" ? "alex" : "steve",
     });
 
     players.push(newPlayer);
@@ -628,6 +629,8 @@ function processMessage(message, ws) {
             if (player) {
                 const oldName = player.name;
                 player.skin = data.message.skin;
+                player.model =
+                    data.message.model === "alex" ? "alex" : "steve";
                 player.name = data.message.name;
                 broadcast(data, [data.sender]);
 

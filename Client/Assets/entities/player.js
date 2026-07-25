@@ -42,6 +42,11 @@ class Player extends Entity {
             despawn: false,
         });
 
+        this.skinModel =
+            localStorage.getItem("playerSkinModel") === "alex"
+                ? "alex"
+                : "steve";
+
         this.footstepEmitter = createParticleEmitter({
             x: this.position.x,
             y: this.position.y + this.hitbox.y,
@@ -324,8 +329,17 @@ class Player extends Entity {
         );
     }
 
-    setSkin(skin) {
+    setSkin(skin, model = "steve") {
+        this.skinModel = model === "alex" ? "alex" : "steve";
         this.body.setSprite(skin);
+        this.applyArmModel();
+    }
+
+    applyArmModel() {
+        if (!this.body?.parts?.leftArm || !this.body?.parts?.rightArm) return;
+        const arms = getPlayerArmCrops(this.skinModel);
+        this.body.parts.leftArm.spriteCrop = arms.leftArm;
+        this.body.parts.rightArm.spriteCrop = arms.rightArm;
     }
 
     multiplayerReceivePlayerState(data) {
@@ -1824,7 +1838,24 @@ class Player extends Entity {
 }
 
 const skinData = localStorage.getItem("playerSkin");
+const skinModel =
+    localStorage.getItem("playerSkinModel") === "alex" ? "alex" : "steve";
+
+function getPlayerArmCrops(model) {
+    if (model === "alex") {
+        return {
+            leftArm: { x: 44, y: 20, width: 3, height: 12 },
+            rightArm: { x: 47, y: 20, width: 4, height: 12 },
+        };
+    }
+    return {
+        leftArm: { x: 44, y: 20, width: 4, height: 12 },
+        rightArm: { x: 48, y: 20, width: 4, height: 12 },
+    };
+}
+
 function createPlayerBody() {
+    const arms = getPlayerArmCrops(skinModel);
     return new Body({
         sprite: skinData || "player/steve",
         parts: {
@@ -1841,7 +1872,7 @@ function createPlayerBody() {
             }),
             leftArm: new BodyPart({
                 offset: { x: 0, y: 34 },
-                spriteCrop: { x: 44, y: 20, width: 4, height: 12 },
+                spriteCrop: arms.leftArm,
                 zIndex: 2,
                 rotationOrigin: { x: 5, y: 4 },
                 sways: true,
@@ -1849,7 +1880,7 @@ function createPlayerBody() {
                 holdOrigin: { x: 6, y: 35 },
             }),
             rightArm: new BodyPart({
-                spriteCrop: { x: 48, y: 20, width: 4, height: 12 },
+                spriteCrop: arms.rightArm,
                 offset: { x: 0, y: 34 },
                 rotationOrigin: { x: 5, y: 4 },
                 zIndex: -2,
