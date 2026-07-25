@@ -538,6 +538,7 @@ const skinDataUrlCache = new Map();
 let DEFAULT_SKINS = [{ id: "custom", name: "Custom Skin", type: "custom" }];
 let selectedSkinId = "steve";
 let customSkinData = null;
+let customSkinModel = "steve";
 let playerSkinsLoaded = false;
 
 function buildBuiltinSkin(entry) {
@@ -615,17 +616,24 @@ function applyPlayerSkin(skinData, skinId, model = "steve") {
     );
 }
 
-function saveCustomSkin(skinData) {
+function saveCustomSkin(skinData, model = "steve") {
     customSkinData = skinData;
+    customSkinModel = model === "alex" ? "alex" : "steve";
     if (skinData) {
         localStorage.setItem("customPlayerSkin", skinData);
+        localStorage.setItem("customPlayerSkinModel", customSkinModel);
     } else {
         localStorage.removeItem("customPlayerSkin");
+        localStorage.removeItem("customPlayerSkinModel");
     }
 }
 
 function loadCustomSkin() {
     customSkinData = localStorage.getItem("customPlayerSkin");
+    customSkinModel =
+        localStorage.getItem("customPlayerSkinModel") === "alex"
+            ? "alex"
+            : "steve";
     return customSkinData;
 }
 
@@ -692,8 +700,10 @@ async function renderSkinCardPreview(canvas, skin) {
 
     try {
         let image;
+        let model = skin.model;
         if (skin.type === "custom") {
             image = await loadImage(customSkinData);
+            model = customSkinModel;
         } else if (skin.type === "builtin") {
             image = await getCachedSkinImage(skin.id, () =>
                 loadImage(skin.src),
@@ -704,7 +714,7 @@ async function renderSkinCardPreview(canvas, skin) {
                 return loadImage(dataUrl);
             });
         }
-        drawSkinPreview(ctx, image, 0, 0, SKIN_PREVIEW_SCALE, skin.model);
+        drawSkinPreview(ctx, image, 0, 0, SKIN_PREVIEW_SCALE, model);
     } catch (err) {
         console.warn(`Failed to render skin preview for ${skin.name}:`, err);
         drawBlackPlayerIcon(ctx, 0, 0, SKIN_PREVIEW_SCALE);
@@ -845,6 +855,17 @@ async function showSkins() {
     populateSkinsCarousel();
     updateSkinsFooter();
     requestAnimationFrame(() => centerSelectedCard("auto"));
+
+    // Detect model for custom skins saved before auto-detection existed
+    if (customSkinData && !localStorage.getItem("customPlayerSkinModel")) {
+        try {
+            const model = detectSkinModel(await loadImage(customSkinData));
+            saveCustomSkin(customSkinData, model);
+            refreshCustomSkinCard();
+        } catch (err) {
+            console.warn("Failed to detect stored custom skin model:", err);
+        }
+    }
 }
 
 document.addEventListener("keydown", (e) => {
@@ -869,7 +890,7 @@ async function applySelectedSkin() {
             alert("Upload a skin file or enter a username first.");
             return;
         }
-        applyPlayerSkin(customSkinData, skin.id, skin.model || "steve");
+        applyPlayerSkin(customSkinData, skin.id, customSkinModel);
     } else if (skin.type === "builtin") {
         applyPlayerSkin(skin.sprite, skin.id, skin.model);
     } else {
@@ -902,8 +923,15 @@ function uploadCustomSkin() {
         }
 
         const reader = new FileReader();
-        reader.onload = (event) => {
-            saveCustomSkin(event.target.result);
+        reader.onload = async (event) => {
+            const dataUrl = event.target.result;
+            let model = "steve";
+            try {
+                model = detectSkinModel(await loadImage(dataUrl));
+            } catch (err) {
+                console.warn("Failed to detect uploaded skin model:", err);
+            }
+            saveCustomSkin(dataUrl, model);
             selectSkin("custom");
             refreshCustomSkinCard();
             updateSkinsFooter();
@@ -926,7 +954,14 @@ async function customSkinFromUsername() {
     }
 
     try {
-        saveCustomSkin(await fetchSkinDataUrl(trimmed));
+        const dataUrl = await fetchSkinDataUrl(trimmed);
+        let model = "steve";
+        try {
+            model = detectSkinModel(await loadImage(dataUrl));
+        } catch (err) {
+            console.warn("Failed to detect downloaded skin model:", err);
+        }
+        saveCustomSkin(dataUrl, model);
         selectSkin("custom");
         refreshCustomSkinCard();
         updateSkinsFooter();

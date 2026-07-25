@@ -69,6 +69,53 @@ function normalizeSkinModel(model) {
     return model === "alex" ? "alex" : "steve";
 }
 
+// Auto-detect Alex (slim) vs Steve (classic) by checking pixels that are only
+// filled on the 4px-wide classic arms. If those regions are fully transparent,
+// the skin is slim. Legacy 64x32 skins are always classic.
+function detectSkinModel(image) {
+    const width = image?.naturalWidth || image?.width || 0;
+    const height = image?.naturalHeight || image?.height || 0;
+    if (!width || !height) return "steve";
+    if (isLegacySkin(image)) return "steve";
+
+    try {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d", { willReadFrequently: true });
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(image, 0, 0);
+
+        // Support HD skins that are a multiple of 64x64
+        const scale = width / 64;
+
+        const hasOpaquePixel = (x, y, w, h) => {
+            const data = ctx.getImageData(
+                Math.round(x * scale),
+                Math.round(y * scale),
+                Math.max(1, Math.round(w * scale)),
+                Math.max(1, Math.round(h * scale)),
+            ).data;
+            for (let i = 3; i < data.length; i += 4) {
+                if (data[i] !== 0) return true;
+            }
+            return false;
+        };
+
+        // Regions present only on the classic model (right + left arm)
+        const isSlim =
+            !hasOpaquePixel(50, 16, 2, 4) ||
+            !hasOpaquePixel(54, 20, 2, 12) ||
+            !hasOpaquePixel(42, 48, 2, 4) ||
+            !hasOpaquePixel(46, 52, 2, 12);
+
+        return isSlim ? "alex" : "steve";
+    } catch (err) {
+        console.warn("Failed to detect skin model:", err);
+        return "steve";
+    }
+}
+
 function drawSkinPreview(ctx, image, baseX, baseY, scale, model = "steve") {
     if (!image?.complete) return;
     ctx.save();
