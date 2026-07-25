@@ -1,56 +1,56 @@
 name: Deploy client to itch.io
 
 on:
-  push:
-    branches:
-      - live
+    push:
+        branches:
+            - live
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+    deploy:
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+            - name: Setup Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: "24"
 
-      - name: Install Client dependencies
-        working-directory: ./Client
-        run: npm ci
+            - name: Install Client dependencies
+              working-directory: ./Client
+              run: npm ci
 
-      - name: Build Client
-        working-directory: ./Client
-        run: npm run build
+            - name: Build Client
+              working-directory: ./Client
+              run: npm run build
 
-      - name: Install Server dependencies
-        working-directory: ./Server
-        run: npm install
+            - name: Install Server dependencies
+              working-directory: ./Server
+              run: npm ci
 
-      - name: Zip Server into dist
-        run: |
-          cd Server
-          zip -r ../Client/dist/server.zip .
+            - name: Zip Server into dist
+              run: |
+                  cd Server
+                  zip -r ../Client/dist/server.zip .
 
-      - name: Check itch file count
-        run: |
-          count=$(find Client/dist -type f | wc -l)
-          echo "dist file count: $count"
-          if [ "$count" -ge 1000 ]; then
-            echo "Error: dist has $count files (itch.io limit is ~1000)"
-            exit 1
-          fi
+            - name: Check itch file count
+              run: |
+                  count=$(find Client/dist -type f | wc -l)
+                  echo "dist file count: $count"
+                  if [ "$count" -ge 1000 ]; then
+                    echo "Error: dist has $count files (itch.io limit is ~1000)"
+                    exit 1
+                  fi
 
-      - name: Deploy dist to itch.io
-        uses: yeslayla/butler-publish-itchio-action@master
-        env:
-          BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
-          ITCH_USER: plekiko
-          ITCH_GAME: minecraft-js
-          CHANNEL: html
-          PACKAGE: ./Client/dist
-        with:
-          args: push ${{ env.PACKAGE }} ${{ env.ITCH_USER }}/${{ env.ITCH_GAME }}:${{ env.CHANNEL }} --if-changed
+            - name: Deploy dist to itch.io
+              uses: yeslayla/butler-publish-itchio-action@master
+              env:
+                  BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
+                  ITCH_USER: plekiko
+                  ITCH_GAME: minecraft-js
+                  CHANNEL: html
+                  PACKAGE: ./Client/dist
+              with:
+                  args: push ${{ env.PACKAGE }} ${{ env.ITCH_USER }}/${{ env.ITCH_GAME }}:${{ env.CHANNEL }} --if-changed
