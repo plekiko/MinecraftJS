@@ -540,6 +540,22 @@ let selectedSkinId = "steve";
 let customSkinData = null;
 let customSkinModel = "steve";
 let playerSkinsLoaded = false;
+let skinCarouselScrollFrame = null;
+let skinCarouselScrollTarget = 0;
+let skinCarouselScrollTime = null;
+let skinCarouselScrollMode = "snap"; // "snap" | "inertia"
+let skinCarouselVelocity = 0;
+let skinCarouselDidDrag = false;
+const skinCarouselDrag = {
+    active: false,
+    pointerId: null,
+    startX: 0,
+    startScroll: 0,
+    lastX: 0,
+    lastTime: 0,
+    samples: [],
+    skinId: null,
+};
 
 function buildBuiltinSkin(entry) {
     const file = typeof entry === "string" ? entry : entry?.file;
@@ -569,10 +585,14 @@ function buildDefaultSkins(config) {
     const builtins = entries.map(buildBuiltinSkin).filter(Boolean);
 
     const steve = builtins.find((skin) => skin.id === "steve");
-    const others = builtins.filter((skin) => skin.id !== "steve");
+    const alex = builtins.find((skin) => skin.id === "alex");
+    const others = builtins.filter(
+        (skin) => skin.id !== "steve" && skin.id !== "alex",
+    );
 
     return [
         ...(steve ? [steve] : []),
+        ...(alex ? [alex] : []),
         { id: "custom", name: "Custom Skin", type: "custom", model: "steve" },
         ...others,
     ];
@@ -725,7 +745,13 @@ function createSkinCard(skin) {
     const card = document.createElement("div");
     card.className = "skin-card";
     card.dataset.skinId = skin.id;
-    card.onclick = () => selectSkin(skin.id);
+    card.onclick = () => {
+        if (skinCarouselDidDrag) {
+            skinCarouselDidDrag = false;
+            return;
+        }
+        selectSkin(skin.id);
+    };
 
     const canvas = document.createElement("canvas");
     canvas.className = "skin-card-preview";
@@ -796,6 +822,15 @@ function updateSkinsFooter() {
     }
 }
 
+function stopSkinCarouselAnimation() {
+    if (skinCarouselScrollFrame !== null) {
+        cancelAnimationFrame(skinCarouselScrollFrame);
+        skinCarouselScrollFrame = null;
+    }
+    skinCarouselScrollTime = null;
+    skinCarouselVelocity = 0;
+}
+
 function selectSkin(skinId, behavior = "smooth") {
     selectedSkinId = skinId;
     updateSkinCardSelection();
@@ -808,9 +843,172 @@ function centerSelectedCard(behavior = "smooth") {
     if (!card) return;
 
     const item = card.closest(".skin-carousel-item") || card;
-    const target =
+    skinCarouselScrollTarget =
         item.offsetLeft - (skinsCarousel.clientWidth - item.offsetWidth) / 2;
-    skinsCarousel.scrollTo({ left: target, behavior });
+    skinCarouselScrollMode = "snap";
+    skinCarouselVelocity = 0;
+
+    if (behavior === "auto") {
+        stopSkinCarouselAnimation();
+        skinsCarousel.scrollLeft = skinCarouselScrollTarget;
+        return;
+    }
+
+    if (skinCarouselScrollFrame === null) {
+        skinCarouselScrollFrame = requestAnimationFrame(animateSkinCarousel);
+    }
+}
+
+function animateSkinCarousel(timestamp) {
+    if (!skinsCarousel) {
+        stopSkinCarouselAnimation();
+        return;
+    }
+
+    const elapsed = skinCarouselScrollTime
+        ? Math.min(timestamp - skinCarouselScrollTime, 50)
+        : 16;
+    skinCarouselScrollTime = timestamp;
+
+    if (skinCarouselScrollMode === "inertia") {
+        skinsCarousel.scrollLeft -= skinCarouselVelocity * elapsed;
+        skinCarouselVelocity *= Math.pow(0.95, elapsed / 16.67);
+
+        const maxScroll = Math.max(
+            0,
+            skinsCarousel.scrollWidth - skinsCarousel.clientWidth,
+        );
+        if (skinsCarousel.scrollLeft <= 0) {
+            skinsCarousel.scrollLeft = 0;
+            skinCarouselVelocity = 0;
+        } else if (skinsCarousel.scrollLeft >= maxScroll) {
+            skinsCarousel.scrollLeft = maxScroll;
+            skinCarouselVelocity = 0;
+        }
+
+        if (Math.abs(skinCarouselVelocity) < 0.02) {
+            stopSkinCarouselAnimation();
+            return;
+        }
+
+        skinCarouselScrollFrame = requestAnimationFrame(animateSkinCarousel);
+        return;
+    }
+
+    const distance = skinCarouselScrollTarget - skinsCarousel.scrollLeft;
+    if (Math.abs(distance) < 0.5) {
+        skinsCarousel.scrollLeft = skinCarouselScrollTarget;
+        stopSkinCarouselAnimation();
+        return;
+    }
+
+    // Keep one continuous animation while held-key repeats update the target.
+    const easing = 1 - Math.pow(0.72, elapsed / 16.67);
+    skinsCarousel.scrollLeft += distance * easing;
+    skinCarouselScrollFrame = requestAnimationFrame(animateSkinCarousel);
+}
+
+function getSkinCarouselDragVelocity() {
+    const now = performance.now();
+    const samples = skinCarouselDrag.samples.filter(
+        (sample) => now - sample.time < 100,
+    );
+    if (samples.length < 2) return 0;
+
+    const first = samples[0];
+    const last = samples[samples.length - 1];
+    const dt = last.time - first.time;
+    if (dt <= 0) return 0;
+    return (last.x - first.x) / dt;
+}
+
+function onSkinCarouselPointerDown(e) {
+    if (!skinsCarousel || e.button !== 0) return;
+    if (e.target.closest("button, a, input, textarea, select, label")) return;
+
+    stopSkinCarouselAnimation();
+    skinCarouselDidDrag = false;
+    skinCarouselDrag.active = true;
+    skinCarouselDrag.pointerId = e.pointerId;
+    skinCarouselDrag.startX = e.clientX;
+    skinCarouselDrag.startScroll = skinsCarousel.scrollLeft;
+    skinCarouselDrag.lastX = e.clientX;
+    skinCarouselDrag.lastTime = performance.now();
+    skinCarouselDrag.skinId =
+        e.target.closest(".skin-card")?.dataset.skinId || null;
+    skinCarouselDrag.samples = [
+        { x: e.clientX, time: skinCarouselDrag.lastTime },
+    ];
+
+    skinsCarousel.classList.add("dragging");
+    skinsCarousel.setPointerCapture(e.pointerId);
+    e.preventDefault();
+}
+
+function onSkinCarouselPointerMove(e) {
+    if (!skinCarouselDrag.active || e.pointerId !== skinCarouselDrag.pointerId) {
+        return;
+    }
+
+    const dx = e.clientX - skinCarouselDrag.startX;
+    if (Math.abs(dx) > 4) skinCarouselDidDrag = true;
+
+    skinsCarousel.scrollLeft = skinCarouselDrag.startScroll - dx;
+
+    const now = performance.now();
+    skinCarouselDrag.samples.push({ x: e.clientX, time: now });
+    if (skinCarouselDrag.samples.length > 8) {
+        skinCarouselDrag.samples.shift();
+    }
+    skinCarouselDrag.lastX = e.clientX;
+    skinCarouselDrag.lastTime = now;
+}
+
+function onSkinCarouselPointerUp(e) {
+    if (!skinCarouselDrag.active || e.pointerId !== skinCarouselDrag.pointerId) {
+        return;
+    }
+
+    skinCarouselDrag.active = false;
+    skinsCarousel.classList.remove("dragging");
+
+    try {
+        skinsCarousel.releasePointerCapture(e.pointerId);
+    } catch (_) {}
+
+    const velocity = getSkinCarouselDragVelocity();
+    skinCarouselDrag.samples = [];
+
+    if (!skinCarouselDidDrag && skinCarouselDrag.skinId) {
+        selectSkin(skinCarouselDrag.skinId);
+        skinCarouselDrag.skinId = null;
+        return;
+    }
+    skinCarouselDrag.skinId = null;
+
+    if (Math.abs(velocity) < 0.05) {
+        skinCarouselVelocity = 0;
+        return;
+    }
+
+    skinCarouselVelocity = Math.max(-4, Math.min(4, velocity));
+    skinCarouselScrollMode = "inertia";
+    if (skinCarouselScrollFrame === null) {
+        skinCarouselScrollFrame = requestAnimationFrame(animateSkinCarousel);
+    }
+}
+
+function setupSkinsCarouselDrag() {
+    if (!skinsCarousel || skinsCarousel.dataset.dragReady === "1") return;
+    skinsCarousel.dataset.dragReady = "1";
+
+    skinsCarousel.addEventListener("pointerdown", onSkinCarouselPointerDown);
+    skinsCarousel.addEventListener("pointermove", onSkinCarouselPointerMove);
+    skinsCarousel.addEventListener("pointerup", onSkinCarouselPointerUp);
+    skinsCarousel.addEventListener("pointercancel", onSkinCarouselPointerUp);
+    skinsCarousel.addEventListener("lostpointercapture", (e) => {
+        if (skinCarouselDrag.active) onSkinCarouselPointerUp(e);
+    });
 }
 
 function moveSkinSelection(direction) {
@@ -852,6 +1050,7 @@ async function showSkins() {
     loadCustomSkin();
 
     if (skinsSelectContainer) skinsSelectContainer.style.display = "flex";
+    setupSkinsCarouselDrag();
     populateSkinsCarousel();
     updateSkinsFooter();
     requestAnimationFrame(() => centerSelectedCard("auto"));
