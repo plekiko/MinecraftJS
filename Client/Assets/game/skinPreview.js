@@ -17,6 +17,34 @@ const SKIN_PREVIEW_OVERLAY_PARTS = [
     { crop: { x: 40, y: 8, width: 8, height: 8 }, pos: { x: 4, y: 0 } }, // head overlay
 ];
 
+// 64x32 skins only store one arm and one leg, so the other side is mirrored
+const LEGACY_SKIN_PREVIEW_PARTS = [
+    { crop: { x: 4, y: 20, width: 4, height: 12 }, pos: { x: 4, y: 20 } }, // left leg
+    {
+        crop: { x: 4, y: 20, width: 4, height: 12 },
+        pos: { x: 8, y: 20 },
+        mirror: true,
+    }, // right leg
+    { crop: { x: 20, y: 20, width: 8, height: 12 }, pos: { x: 4, y: 8 } }, // torso
+    { crop: { x: 44, y: 20, width: 4, height: 12 }, pos: { x: 0, y: 8 } }, // right arm
+    {
+        crop: { x: 44, y: 20, width: 4, height: 12 },
+        pos: { x: 12, y: 8 },
+        mirror: true,
+    }, // left arm
+    { crop: { x: 8, y: 8, width: 8, height: 8 }, pos: { x: 4, y: 0 } }, // head
+];
+// the hat is the only overlay a 64x32 skin has
+const LEGACY_SKIN_PREVIEW_OVERLAY_PARTS = [
+    { crop: { x: 40, y: 8, width: 8, height: 8 }, pos: { x: 4, y: 0 } }, // head overlay
+];
+
+function isLegacySkin(image) {
+    const width = image?.naturalWidth || image?.width || 0;
+    const height = image?.naturalHeight || image?.height || 0;
+    return height > 0 && width >= height * 2;
+}
+
 function drawSkinPreview(ctx, image, baseX, baseY, scale) {
     if (!image?.complete) return;
     ctx.save();
@@ -24,11 +52,31 @@ function drawSkinPreview(ctx, image, baseX, baseY, scale) {
     ctx.imageSmoothingQuality = "low";
     const drawParts = (parts) => {
         for (const part of parts) {
-            const { crop, pos } = part;
+            const { crop, pos, mirror } = part;
             const dx = Math.round(baseX + pos.x * scale);
             const dy = Math.round(baseY + pos.y * scale);
             const dw = Math.round(crop.width * scale);
             const dh = Math.round(crop.height * scale);
+
+            if (mirror) {
+                ctx.save();
+                ctx.translate(dx + dw, dy);
+                ctx.scale(-1, 1);
+                ctx.drawImage(
+                    image,
+                    crop.x,
+                    crop.y,
+                    crop.width,
+                    crop.height,
+                    0,
+                    0,
+                    dw,
+                    dh,
+                );
+                ctx.restore();
+                continue;
+            }
+
             ctx.drawImage(
                 image,
                 crop.x,
@@ -42,7 +90,12 @@ function drawSkinPreview(ctx, image, baseX, baseY, scale) {
             );
         }
     };
-    drawParts(SKIN_PREVIEW_PARTS);
-    drawParts(SKIN_PREVIEW_OVERLAY_PARTS);
+    const legacy = isLegacySkin(image);
+    drawParts(legacy ? LEGACY_SKIN_PREVIEW_PARTS : SKIN_PREVIEW_PARTS);
+    drawParts(
+        legacy
+            ? LEGACY_SKIN_PREVIEW_OVERLAY_PARTS
+            : SKIN_PREVIEW_OVERLAY_PARTS,
+    );
     ctx.restore();
 }
