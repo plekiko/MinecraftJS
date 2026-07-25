@@ -4,11 +4,19 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Minecraft JS</title>
+        <link rel="stylesheet" href="boot.css" />
         <link rel="stylesheet" href="style.css" />
         <link rel="stylesheet" href="menu.css" />
         <link rel="icon" href="Assets/sprites/misc/icon_16x16.png" />
     </head>
     <body oncontextmenu="return false;">
+        <div id="media-boot">
+            <div class="media-boot-inner">
+                <div class="media-boot-title">Loading resources...</div>
+                <div class="media-boot-bar"><div class="media-boot-fill"></div></div>
+                <div class="media-boot-pct">0%</div>
+            </div>
+        </div>
         <div class="chromium-issue-1092080-workaround__wrapper">
             <canvas id="canvas"></canvas>
             <div id="loading">Loading...</div>

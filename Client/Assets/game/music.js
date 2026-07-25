@@ -1,5 +1,6 @@
 import { runtime } from "../utils/runtime.js";
 import { randomRange } from "../utils/classes.js";
+import { resolveAssetUrl } from "../utils/assetBundle.js";
 
 export const musicStartDelayRange = { min: 10, max: 60 };
 export const musicBetweenDelay = { min: 60, max: 180 };
@@ -24,7 +25,9 @@ export const songs = [
 
 export function playRandomSong() {
     let randomSongIndex = randomRange(0, songs.length);
-    let randomSongUrl = "Assets/audio/music/" + songs[randomSongIndex] + ".ogg";
+    let randomSongUrl = resolveAssetUrl(
+        "Assets/audio/music/" + songs[randomSongIndex] + ".ogg",
+    );
 
     musicPlayer.src = randomSongUrl;
     const musicVol = (runtime.game.settings.musicVolume ?? 100) / 100;

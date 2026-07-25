@@ -4,6 +4,7 @@ import { SKIN_PREVIEW_PARTS, detectSkinModel, drawSkinPreview } from "./Assets/g
 import { deleteFromLdb, getFromLdb, ldb } from "./Assets/utils/indexDB.js";
 import { DEBUG_ACTIONS, DEFAULT_KEY_BINDINGS, GAMEPLAY_ACTIONS, REBINDABLE_ACTIONS, getActionLabel, getKeyDisplayName, loadKeyBindings, saveKeyBindings } from "./Assets/utils/keyBindings.js";
 import { downloadWorldSave } from "./buttonUtils.js";
+import { resolveAssetUrl } from "./Assets/utils/assetBundle.js";
 
 export const randomTextElement = document.querySelector(".splash");
 export const menuContainer = document.querySelector(".menu-container");
@@ -283,7 +284,9 @@ export function playRandomMusic() {
 export let music = null;
 
 export function playMusic(track) {
-    music = new Audio(`Assets/audio/music/menu/${track}.mp3`);
+    music = new Audio(
+        resolveAssetUrl(`Assets/audio/music/menu/${track}.mp3`),
+    );
     music.volume = (currentSettings.musicVolume / 100) * 0.3;
     music.play();
     music.addEventListener("ended", () => {
@@ -393,8 +396,9 @@ export async function populateTexturePacks() {
             pack.description || "No description found for this pack";
         packElement.style.display = "flex";
 
-        packImageElement.src =
-            pack.icon || "Assets/sprites/menu/worldPreview.png";
+        packImageElement.src = resolveAssetUrl(
+            pack.icon || "Assets/sprites/menu/worldPreview.png",
+        );
 
         packElement.addEventListener("click", () => {
             selectTexturePack(pack.id, packElement);
@@ -426,15 +430,15 @@ export function selectTexturePack(id, selectedElement) {
 
 export async function getTexturePackIcon(packId) {
     if (packId === "default") {
-        return "Assets/sprites/menu/worldPreview.png";
+        return resolveAssetUrl("Assets/sprites/menu/worldPreview.png");
     }
 
     const texturePackList =
         JSON.parse(localStorage.getItem("texturePackList")) || [];
     const pack = texturePackList.find((p) => p.id === packId);
-    return pack
-        ? pack.icon || "Assets/sprites/menu/worldPreview.png"
-        : "Assets/sprites/menu/worldPreview.png";
+    return resolveAssetUrl(
+        pack?.icon || "Assets/sprites/menu/worldPreview.png",
+    );
 }
 
 export function uploadTexturePack() {
@@ -566,7 +570,7 @@ export function buildBuiltinSkin(entry) {
         name,
         type: "builtin",
         model,
-        src: `${PLAYER_SKINS_DIR}/${file}`,
+        src: resolveAssetUrl(`${PLAYER_SKINS_DIR}/${file}`),
         sprite: `player/${id}`,
     };
 }
@@ -593,7 +597,7 @@ export async function loadPlayerSkins() {
     if (playerSkinsLoaded) return DEFAULT_SKINS;
 
     try {
-        const response = await fetch(PLAYER_SKINS_CONFIG_URL, {
+        const response = await fetch(resolveAssetUrl(PLAYER_SKINS_CONFIG_URL), {
             cache: "no-store",
         });
         if (!response.ok) {
@@ -1636,7 +1640,7 @@ export function updateServerStatus(server, result, container) {
             error === "Pinging..." ? "pinging" : ""
         }">${sanitizeHtml(error)}</span>`;
         serverElement.style.opacity = error === "Pinging..." ? "0.7" : "0.5";
-        serverImageElement.src = "Assets/sprites/menu/worldPreview.png";
+        serverImageElement.src = resolveAssetUrl("Assets/sprites/menu/worldPreview.png");
     } else if (status) {
         statusText = `<span class="world-status">${status.onlinePlayers}/${status.maxPlayers}</span>`;
         statusText += ` - ${parseMotdToHtml(status.motd)}`;
@@ -1657,7 +1661,7 @@ export function updateServerStatus(server, result, container) {
         serverImageElement.src =
             status.icon && status.icon.startsWith("data:image/")
                 ? status.icon
-                : "Assets/sprites/menu/worldPreview.png";
+                : resolveAssetUrl("Assets/sprites/menu/worldPreview.png");
     }
 
     serverIPElement.innerHTML = statusText;
@@ -1797,7 +1801,7 @@ export function renderServers(serverStatuses) {
             }">${sanitizeHtml(error)}</span>`;
             serverElement.style.opacity =
                 error === "Pinging..." ? "0.7" : "0.5";
-            serverImageElement.src = "Assets/sprites/menu/worldPreview.png";
+            serverImageElement.src = resolveAssetUrl("Assets/sprites/menu/worldPreview.png");
         } else if (status) {
             statusText = `<span class="world-status">${status.onlinePlayers}/${status.maxPlayers}</span>`;
             statusText += ` - ${parseMotdToHtml(status.motd)}`;
@@ -1811,7 +1815,7 @@ export function renderServers(serverStatuses) {
                 statusText += ` - <span class="world-status" style="color: ${latencyColor}">${latency}ms</span>`;
             }
             serverElement.style.opacity = "1";
-            serverImageElement.src = "Assets/sprites/menu/worldPreview.png";
+            serverImageElement.src = resolveAssetUrl("Assets/sprites/menu/worldPreview.png");
         }
 
         serverIPElement.innerHTML = statusText;

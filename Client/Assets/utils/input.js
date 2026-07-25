@@ -73,7 +73,7 @@ export class InputHandler {
             this.keys[key] = true; // Keep keys set to true as long as the key is held down
             if (
                 !runtime.game.chat.inChat &&
-                runtime.world.player &&
+                runtime.world?.player &&
                 !runtime.world.player.inventory.isEditingSign
             ) {
                 if (

@@ -5,6 +5,7 @@ import { getItem } from "../game/item.js";
 import { Items } from "../game/items.js";
 import { getFromLdb } from "./indexDB.js";
 import { blockRegistry } from "../world/blockRegistry.js";
+import { resolveAssetUrl } from "./assetBundle.js";
 
 export let texturePackZip = null;
 export let texturePackFiles = null;
@@ -81,7 +82,7 @@ export async function loadVanillaTextures() {
     await Promise.all(
         uniquePaths.map(async (path) => {
             try {
-                const imgUrl = `Assets/sprites/${path}.png`;
+                const imgUrl = resolveAssetUrl(`Assets/sprites/${path}.png`);
                 const img = new Image();
                 img.src = imgUrl;
 
@@ -113,7 +114,7 @@ export async function loadVanillaTextures() {
             } catch (err) {
                 console.warn(`Failed to load vanilla texture ${path}:`, err);
                 vanillaTextureCache[path] = {
-                    url: `Assets/sprites/${path}.png`,
+                    url: resolveAssetUrl(`Assets/sprites/${path}.png`),
                     width: 16,
                     height: 16,
                     originalWidth: 16,
@@ -218,12 +219,10 @@ export async function initializeTextures() {
     await loadTexturePack();
 }
 
-initializeTextures();
-
 export function getSpriteUrl(path, useTexturePack = true) {
     // If undefined is anywhere in the path, return a placeholder
     if (path === undefined || path.includes("undefined")) {
-        return `Assets/sprites/blocks/missing_texture.png`;
+        return resolveAssetUrl(`Assets/sprites/blocks/missing_texture.png`);
     }
 
     if (isBase64(path)) {
@@ -239,7 +238,7 @@ export function getSpriteUrl(path, useTexturePack = true) {
         return vanillaTextureCache[path].url;
     }
 
-    return `Assets/sprites/${path}.png`;
+    return resolveAssetUrl(`Assets/sprites/${path}.png`);
 }
 
 export function getSpriteAverageColor(path) {

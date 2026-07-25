@@ -1,6 +1,7 @@
 import { runtime } from "../utils/runtime.js";
 import { Vector2, randomRange, uuidv4 } from "../utils/classes.js";
 import { BLOCK_SIZE } from "../utils/globals.js";
+import { isMediaPacked, resolveAssetUrl } from "../utils/assetBundle.js";
 
 export const Sounds = Object.freeze({
     Break_Grass: ["dig/grass1", "dig/grass2", "dig/grass3", "dig/grass4"],
@@ -141,27 +142,50 @@ export const audioCtx = new (window.AudioContext || window.webkitAudioContext)()
 export let playingAudio = [];
 export let messySounds = [];
 
+function createPreloadedAudio(url, mime = "audio/ogg") {
+    const audio = new Audio();
+    audio.preload = "auto";
+    // <source type> helps browsers decode blob: URLs
+    if (url.startsWith("blob:") || url.startsWith("data:")) {
+        const source = document.createElement("source");
+        source.src = url;
+        source.type = mime;
+        audio.appendChild(source);
+    } else {
+        audio.src = url;
+    }
+    return audio;
+}
+
 // Preload all sounds at game initialization
 export function preloadSounds() {
     const allSounds = Object.values(Sounds).flat();
     allSounds.forEach((sound) => {
-        const url = `${AUDIO_BASE_URL}${sound}.ogg`;
-        if (!soundCache[url]) {
-            const audio = new Audio(url);
-            audio.preload = "auto";
-            audio.onerror = () => {
-                console.error(`Failed to preload sound: ${url}`);
-                delete soundCache[url]; // Remove failed entries
-            };
-            audio.oncanplaythrough = () => {
-                // Ensure audio is fully loaded before marking as ready
-                soundCache[url] = audio;
-            };
+        const logical = `${AUDIO_BASE_URL}${sound}.ogg`;
+        const url = resolveAssetUrl(logical);
+        if (soundCache[url]) return;
+
+        // Packed build: skip paths that never made it into media.zip
+        if (
+            isMediaPacked() &&
+            !url.startsWith("blob:") &&
+            !url.startsWith("data:")
+        ) {
+            console.warn(`Sound missing from media pack: ${logical}`);
+            return;
         }
+
+        const audio = createPreloadedAudio(url, "audio/ogg");
+        soundCache[url] = audio;
+        audio.onerror = () => {
+            console.warn(`Failed to preload sound: ${logical}`);
+            delete soundCache[url];
+        };
+        audio.load();
     });
 }
 
-// Call this at game startup
+// Call this at game startup (after media.zip is unpacked in production)
 preloadSounds();
 
 // Play a random sound from an array
@@ -227,12 +251,12 @@ export function playSound(sound, volume = 1, pitch = 1, loop = false) {
     const sfxMultiplier = (runtime.game.settings.sfxVolume ?? 100) / 100;
     volume = volume * sfxMultiplier;
 
-    const url = `${AUDIO_BASE_URL}${sound}`;
+    const url = resolveAssetUrl(`${AUDIO_BASE_URL}${sound}`);
     const cachedAudio = soundCache[url];
 
     if (cachedAudio) {
         // Clone the cached audio to allow multiple simultaneous plays
-        const audio = cachedAudio.cloneNode();
+        const audio = cachedAudio.cloneNode(true);
         audio.volume = volume;
         audio.preservesPitch = false;
         audio.webkitPreservesPitch = false;
@@ -252,7 +276,7 @@ export function playSound(sound, volume = 1, pitch = 1, loop = false) {
     } else {
         console.warn(`Sound not preloaded or failed to load: ${url}`);
         // Fallback: attempt to play directly
-        const audio = new Audio(url);
+        const audio = createPreloadedAudio(url, "audio/ogg");
         audio.volume = volume;
         audio.preservesPitch = false;
         audio.webkitPreservesPitch = false;
@@ -286,15 +310,15 @@ export function playPositionalSound(
         return;
     }
 
-    const url = `${AUDIO_BASE_URL}${sound}`;
+    const url = resolveAssetUrl(`${AUDIO_BASE_URL}${sound}`);
     const cachedAudio = soundCache[url];
 
     let audioElem;
     if (cachedAudio) {
-        audioElem = cachedAudio.cloneNode();
+        audioElem = cachedAudio.cloneNode(true);
     } else {
         // console.warn(`Positional sound not preloaded: ${url}`);
-        audioElem = new Audio(url);
+        audioElem = createPreloadedAudio(url, "audio/ogg");
     }
 
     audioElem.preservesPitch = false;

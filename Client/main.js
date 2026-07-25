@@ -7,10 +7,10 @@ runtime.world = null;
 
 drawLoadScreen();
 
-window.onload = async function () {
-    await runtime.game.initGame().catch((error) => {
-        console.error("Failed to initialize game:", error);
-    });
+// Don't use window.onload — game-main awaits media.zip first, so the load
+// event has usually already fired by the time this module runs.
+await runtime.game.initGame().catch((error) => {
+    console.error("Failed to initialize game:", error);
+});
 
-    requestAnimationFrame(() => runtime.game.gameLoop());
-};
+requestAnimationFrame(() => runtime.game.gameLoop());

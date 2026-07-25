@@ -1,8 +1,20 @@
 /**
- * Title-screen entry — loads menu modules and bridges HTML onclick handlers.
+ * Title-screen entry — load media pack, then menu modules and HTML bridges.
  */
-import * as menu from "./menu.js";
-import { playButtonSound, downloadWorldSave } from "./buttonUtils.js";
+import {
+    applyPackedMediaStyles,
+    loadMediaBundle,
+} from "./Assets/utils/assetBundle.js";
+import { createBootLoader } from "./bootLoader.js";
+
+const boot = createBootLoader();
+await loadMediaBundle({ onProgress: (p) => boot.setProgress(p) });
+applyPackedMediaStyles();
+
+const [{ playButtonSound, downloadWorldSave, initButtonCenterImages }, menu] =
+    await Promise.all([import("./buttonUtils.js"), import("./menu.js")]);
+
+initButtonCenterImages();
 
 const htmlApi = {
     playButtonSound,
@@ -49,3 +61,4 @@ const htmlApi = {
 };
 
 Object.assign(window, htmlApi);
+boot.hide();
