@@ -6,7 +6,6 @@ export default [
         ignores: [
             "dist/**",
             "node_modules/**",
-            "scripts/**",
             "Noise/**",
             // Unused stub left in tree
             "Assets/entities/baseEntity.js",
