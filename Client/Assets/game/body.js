@@ -25,6 +25,23 @@ class Body {
     setSprite(sprite) {
         this.sprite = sprite;
 
+        this.image.onerror = () => {
+            // Missing player skin file — fall back to Steve (ignore mob/other sprites)
+            if (!this.sprite.startsWith("player/") || this.sprite === "player/steve") {
+                return;
+            }
+            this.sprite = "player/steve";
+            this.image.src = getSpriteUrl(
+                "entity/player/steve",
+                isEqualToOriginal("entity/player/steve"),
+            );
+            if (typeof localStorage !== "undefined") {
+                localStorage.setItem("playerSkinId", "steve");
+                localStorage.removeItem("playerSkin");
+                localStorage.setItem("playerSkinModel", "steve");
+            }
+        };
+
         this.image.src = getSpriteUrl(
             "entity/" + sprite,
             isEqualToOriginal("entity/" + sprite),

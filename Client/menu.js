@@ -677,6 +677,42 @@ function migrateSkinStorage() {
     }
 }
 
+function ensureActiveSkinExists() {
+    const skinId = localStorage.getItem("playerSkinId") || "steve";
+    const activeSkin = localStorage.getItem("playerSkin");
+
+    if (skinId === "custom") {
+        const hasCustom =
+            !!localStorage.getItem("customPlayerSkin") ||
+            (!!activeSkin && activeSkin.startsWith("data:image"));
+        if (!hasCustom) {
+            applyPlayerSkin(null, "steve", "steve");
+        }
+        return;
+    }
+
+    const skin = DEFAULT_SKINS.find(
+        (entry) => entry.id === skinId && entry.type === "builtin",
+    );
+    if (!skin) {
+        applyPlayerSkin(null, "steve", "steve");
+        return;
+    }
+
+    // Builtin skin selected but stored sprite path is missing/stale
+    if (
+        activeSkin &&
+        !activeSkin.startsWith("data:image") &&
+        activeSkin !== skin.sprite
+    ) {
+        applyPlayerSkin(
+            skin.sprite === "player/steve" ? null : skin.sprite,
+            skin.id,
+            skin.model,
+        );
+    }
+}
+
 function loadImage(src) {
     return new Promise((resolve, reject) => {
         const img = new Image();
@@ -1042,6 +1078,7 @@ async function showSkins() {
     hideMenu();
 
     await loadPlayerSkins();
+    ensureActiveSkinExists();
 
     selectedSkinId = localStorage.getItem("playerSkinId") || "steve";
     if (!DEFAULT_SKINS.some((skin) => skin.id === selectedSkinId)) {
@@ -2272,6 +2309,7 @@ function hideMenu() {
 async function initialize() {
     migrateSkinStorage();
     await loadPlayerSkins();
+    ensureActiveSkinExists();
 
     populateWorlds();
     initializeDefaultTexturePack();

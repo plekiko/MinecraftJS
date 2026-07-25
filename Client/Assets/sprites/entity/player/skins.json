@@ -45,11 +45,6 @@
     "model": "alex"
   },
   {
-    "file": "char.png",
-    "name": "Steve",
-    "model": "steve"
-  },
-  {
     "file": "char1.png",
     "name": "Tennis Steve",
     "model": "steve"
