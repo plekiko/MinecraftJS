@@ -5,9 +5,7 @@ import { getItem } from "@minecraftjs/shared/item.js";
 import { Items } from "@minecraftjs/shared/items.js";
 import { getFromLdb } from "./indexDB.js";
 import { blockRegistry } from "@minecraftjs/shared/blockRegistry.js";
-// Ensure Shared block registry + runtime.getBlock are bound before we scan sprites.
 import "@minecraftjs/shared/blocks.js";
-import "../world/block.js";
 import { resolveAssetUrl } from "./assetBundle.js";
 
 export let texturePackZip = null;
