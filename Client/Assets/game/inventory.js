@@ -1,9 +1,9 @@
 import { runtime } from "../utils/runtime.js";
 import { InventoryItem, InventorySlot } from "./inventoryItem.js";
-import { getItem } from "./item.js";
-import { Items } from "./items.js";
-import { RecipeType } from "./recipe.js";
-import { recipes } from "./recipes.js";
+import { getItem } from "@minecraftjs/shared/item.js";
+import { Items } from "@minecraftjs/shared/items.js";
+import { RecipeType } from "@minecraftjs/shared/recipe.js";
+import { recipes } from "@minecraftjs/shared/recipes.js";
 import { drawSkinPreview } from "./skinPreview.js";
 import { playPositionalSound, playSound } from "./sounds.js";
 import { Vector2, randomRange } from "../utils/classes.js";
@@ -12,7 +12,7 @@ import { input } from "../utils/input.js";
 import { CANVAS, ctx, drawImage, drawRect, drawText, mouseOverPosition } from "../utils/renderer.js";
 import { getSpriteSize, getSpriteUrl, isEqualToOriginal } from "../utils/texturePackLoader.js";
 import { getBlock } from "../world/block.js";
-import { Blocks } from "../world/blocks.js";
+import { Blocks } from "@minecraftjs/shared/blocks.js";
 
 export class Inventory {
     constructor() {

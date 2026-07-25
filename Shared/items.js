@@ -1,5 +1,5 @@
 import { Item, bindItemMap } from "./item.js";
-import { ToolType } from "../utils/globals.js";
+import { ToolType } from "./constants.js";
 
 export const Items = Object.freeze({
     Stick: 0,

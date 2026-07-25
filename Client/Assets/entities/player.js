@@ -6,8 +6,8 @@ import { showDeathScreen } from "../game/deathScreen.js";
 import { Entity, EntityTypes } from "../game/entity.js";
 import { Inventory } from "../game/inventory.js";
 import { InventoryItem } from "../game/inventoryItem.js";
-import { getItem } from "../game/item.js";
-import { Items } from "../game/items.js";
+import { getItem } from "@minecraftjs/shared/item.js";
+import { Items } from "@minecraftjs/shared/items.js";
 import { isLegacySkin } from "../game/skinPreview.js";
 import { Sounds, playPositionalSound, playRandomSoundFromArray, playSound } from "../game/sounds.js";
 import { Vector2, calculateDirection, lerp, randomRange, uuidv4 } from "../utils/classes.js";
@@ -15,7 +15,7 @@ import { BLOCK_SIZE, CHUNK_HEIGHT, INTERACT_DISTANCE, ToolType, multiplayer } fr
 import { input } from "../utils/input.js";
 import { camera, drawText, isColliding, mouseOverPosition } from "../utils/renderer.js";
 import { SpecialType, getBlock } from "../world/block.js";
-import { Blocks } from "../world/blocks.js";
+import { Blocks } from "@minecraftjs/shared/blocks.js";
 import { activeDimension, getDimensionChunks, gotoDimension } from "../world/dimension.js";
 import { createParticleEmitter } from "../world/particleEmitter.js";
 

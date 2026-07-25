@@ -1,8 +1,8 @@
-import { Items } from "../game/items.js";
-import { LootItem, LootTable } from "../game/lootTable.js";
-import { Sounds } from "../game/sounds.js";
-import { ToolType } from "../utils/globals.js";
-import { BlockCategory, BlockType, SpecialType } from "./block.js";
+import { Items } from "./items.js";
+import { LootItem, LootTable } from "./lootTable.js";
+import { Sounds } from "./sounds.js";
+import { ToolType } from "./constants.js";
+import { BlockCategory, BlockType, SpecialType } from "./blockType.js";
 import { blockRegistry } from "./blockRegistry.js";
 
 export const Blocks = Object.freeze({

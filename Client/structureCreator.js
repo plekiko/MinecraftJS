@@ -1,6 +1,6 @@
-import { Blocks, blockTypes } from "./Assets/world/blocks.js";
+import { Blocks, blockTypes } from "@minecraftjs/shared/blocks.js";
 import { getBlock } from "./Assets/world/block.js";
-import { ChestLoot } from "./Assets/world/chestLoot.js";
+import { ChestLoot } from "@minecraftjs/shared/chestLoot.js";
 import { resolveAssetUrl } from "./Assets/utils/assetBundle.js";
 
 // ----- CONFIGURATION -----

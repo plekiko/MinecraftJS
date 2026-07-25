@@ -1,5 +1,5 @@
-import tooloud from "tooloud/dist/tooloud.min.js";
-import { TERRAIN_HEIGHT } from "./globals.js";
+import tooloud from "./tooloud.js";
+import { TERRAIN_HEIGHT } from "./constants.js";
 
 export class Noise {
     constructor(scale = 100, intensity = 1, min = 0) {
@@ -9,14 +9,12 @@ export class Noise {
     }
 
     getNoise(x, y = 0, multiplier = 1) {
-        // Tooloud is used to generate noise based on scaled inputs
         const noiseRaw = tooloud.Perlin.noise(
             x * this.scale * multiplier,
             y * this.scale * multiplier,
             0,
         );
 
-        // Ensure noise is within range and apply intensity and min adjustments
         return noiseRaw * this.intensity + this.min;
     }
 }

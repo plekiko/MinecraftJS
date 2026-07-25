@@ -86,6 +86,11 @@ export default defineConfig({
     publicDir: false,
     base: "./",
     plugins: [packMediaZip()],
+    resolve: {
+        alias: {
+            "@minecraftjs/shared": resolve(__dirname, "../Shared"),
+        },
+    },
     build: {
         outDir: "dist",
         emptyOutDir: true,
@@ -102,8 +107,12 @@ export default defineConfig({
     server: {
         port: 3000,
         open: false,
+        fs: {
+            allow: [resolve(__dirname, "..")],
+        },
     },
     optimizeDeps: {
-        include: ["jszip"],
+        include: ["jszip", "tooloud"],
     },
 });
+

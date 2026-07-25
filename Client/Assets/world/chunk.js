@@ -1,15 +1,15 @@
 import { runtime } from "../utils/runtime.js";
 import { Entities } from "../entities/entities.js";
-import { Items } from "../game/items.js";
-import { LootItem, LootTable } from "../game/lootTable.js";
+import { Items } from "@minecraftjs/shared/items.js";
+import { LootItem, LootTable } from "@minecraftjs/shared/lootTable.js";
 import { playPositionalSound } from "../game/sounds.js";
 import { Vector2, lerpEaseInOut, randomRange } from "../utils/classes.js";
 import { BLOCK_SIZE, CAVES_THRESHOLD, CHUNK_HEIGHT, CHUNK_WIDTH, TERRAIN_HEIGHT, mobSpawnDelay } from "../utils/globals.js";
-import { OverworldBiomes } from "./biome.js";
+import { OverworldBiomes } from "@minecraftjs/shared/biome.js";
 import { Block, getBlock } from "./block.js";
-import { Blocks } from "./blocks.js";
+import { Blocks } from "@minecraftjs/shared/blocks.js";
 import { Dimensions, activeDimension, getDimension, getDimensionChunks } from "./dimension.js";
-import { Trees } from "./trees.js";
+import { Trees } from "@minecraftjs/shared/trees.js";
 
 export class Chunk {
     constructor(

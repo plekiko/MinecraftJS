@@ -2,10 +2,8 @@
  * Dimension ids/state without Blocks/biome imports.
  * Keeps block.js out of the blocks.js init cycle.
  */
-export const Dimensions = Object.freeze({
-    Overworld: 0,
-    Nether: 1,
-});
+export { Dimensions } from "@minecraftjs/shared/dimensions.js";
+import { Dimensions } from "@minecraftjs/shared/dimensions.js";
 
 export let activeDimension = Dimensions.Overworld;
 

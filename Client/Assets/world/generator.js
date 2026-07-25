@@ -1,17 +1,17 @@
 import { runtime } from "../utils/runtime.js";
-import tooloud from "tooloud/dist/tooloud.min.js";
+import tooloud from "@minecraftjs/shared/tooloud.js";
 import { InventoryItem } from "../game/inventoryItem.js";
-import { LootTable } from "../game/lootTable.js";
+import { LootTable } from "@minecraftjs/shared/lootTable.js";
 import { randomRange } from "../utils/classes.js";
 import { BLOCK_SIZE, CHUNK_HEIGHT, CHUNK_WIDTH, RENDER_DISTANCE, multiplayer } from "../utils/globals.js";
 import { camera } from "../utils/renderer.js";
-import { AllBiomes, OverworldBiomes } from "./biome.js";
+import { AllBiomes, OverworldBiomes } from "@minecraftjs/shared/biome.js";
 import { Metadata } from "./block.js";
-import { Blocks } from "./blocks.js";
+import { Blocks } from "@minecraftjs/shared/blocks.js";
 import { Chunk } from "./chunk.js";
 import { activeDimension, dimensions } from "./dimension.js";
 import { loadChunk } from "./saving.js";
-import { Structures } from "./structures.js";
+import { Structures } from "@minecraftjs/shared/structures.js";
 
 export class WorldGenerator {
     constructor(world) {

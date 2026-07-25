@@ -4,7 +4,7 @@ import { Vector2 } from "../utils/classes.js";
 import { BLOCK_SIZE } from "../utils/globals.js";
 import { getSpriteSize, getSpriteUrl } from "../utils/texturePackLoader.js";
 import { getBlock } from "../world/block.js";
-import { Blocks } from "../world/blocks.js";
+import { Blocks } from "@minecraftjs/shared/blocks.js";
 
 export class FallingBlock extends Entity {
     constructor(
