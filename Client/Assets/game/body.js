@@ -223,17 +223,28 @@ class BodyPart {
         this.swingAmplitude = 50;
 
         this._cropCanvas = null;
-        this._cropKey = "";
+        this._cropImage = null;
+        this._cropSrc = "";
+        this._cropRect = null;
     }
 
     getCroppedSprite(image) {
+        // Never cache from an unloaded image, or the blank result sticks
+        if (!image?.complete || !image.naturalWidth) return null;
+
         const { x, y, width, height } = this.spriteCrop;
-        const key = `${image?.src || ""}:${x},${y},${width},${height}`;
+        if (!width || !height) return null;
+
+        const rect = this._cropRect;
         if (
             this._cropCanvas &&
-            this._cropKey === key &&
-            this._cropCanvas.width === width &&
-            this._cropCanvas.height === height
+            this._cropImage === image &&
+            this._cropSrc === image.src &&
+            rect &&
+            rect.x === x &&
+            rect.y === y &&
+            rect.width === width &&
+            rect.height === height
         ) {
             return this._cropCanvas;
         }
@@ -243,7 +254,9 @@ class BodyPart {
         }
         this._cropCanvas.width = width;
         this._cropCanvas.height = height;
-        this._cropKey = key;
+        this._cropImage = image;
+        this._cropSrc = image.src;
+        this._cropRect = { x, y, width, height };
 
         const cropCtx = this._cropCanvas.getContext("2d");
         cropCtx.imageSmoothingEnabled = false;
@@ -323,7 +336,21 @@ class BodyPart {
         // Draw from a pre-cropped canvas so rotation can't bleed adjacent atlas pixels
         // (e.g. left head face sits under the head-bottom face on the skin sheet).
         const cropped = this.getCroppedSprite(img);
-        ctx.drawImage(cropped, destX, destY, destWidth, destHeight);
+        if (cropped) {
+            ctx.drawImage(cropped, destX, destY, destWidth, destHeight);
+        } else {
+            ctx.drawImage(
+                img,
+                this.spriteCrop.x,
+                this.spriteCrop.y,
+                this.spriteCrop.width,
+                this.spriteCrop.height,
+                destX,
+                destY,
+                destWidth,
+                destHeight,
+            );
+        }
 
         if (this.zIndex < 0) {
             ctx.globalAlpha = 0.3;
