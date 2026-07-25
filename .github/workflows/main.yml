@@ -18,6 +18,10 @@ jobs:
               with:
                   node-version: "24"
 
+            - name: Install Shared dependencies
+              working-directory: ./Shared
+              run: npm ci
+
             - name: Install Client dependencies
               working-directory: ./Client
               run: npm ci
