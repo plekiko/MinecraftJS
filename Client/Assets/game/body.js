@@ -71,7 +71,11 @@ class Body {
                 let adjustedLookDirection = lookDirection;
 
                 // Adjust for flipping logic based on body direction or eyes flip
-                if (part.flip || lookDirection < -90 || lookDirection > 90) {
+                if (
+                    (!part.skipLookFlip && part.flip) ||
+                    lookDirection < -90 ||
+                    lookDirection > 90
+                ) {
                     adjustedLookDirection = 180 + lookDirection;
                 }
 
@@ -176,6 +180,7 @@ class BodyPart {
         mainArm = false,
         holdOrigin = { x: 0, y: 0 },
         flip = false,
+        skipLookFlip = false,
     }) {
         this.id = id;
         this.spriteCrop = spriteCrop;
@@ -187,6 +192,7 @@ class BodyPart {
         this.zIndex = zIndex;
 
         this.flip = flip;
+        this.skipLookFlip = skipLookFlip;
         this.flipOrigin = {
             x: flipOrigin.x * (BLOCK_SIZE / 64),
             y: flipOrigin.y * (BLOCK_SIZE / 64),
@@ -255,7 +261,9 @@ class BodyPart {
         let shouldFlip = false;
         // Use exact same flipping logic as before
         if (this.eyes) {
-            shouldFlip = lookDirection < -90 || lookDirection > 90;
+            shouldFlip =
+                !this.skipLookFlip &&
+                (lookDirection < -90 || lookDirection > 90);
         } else {
             shouldFlip = direction < 0;
         }

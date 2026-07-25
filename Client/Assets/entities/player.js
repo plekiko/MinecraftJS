@@ -287,6 +287,8 @@ class Player extends Entity {
 
         this.mutliplayerSyncPlayerState();
 
+        this.applyLimbTextures();
+
         if (this.windowOpen) this.inventory.update();
     }
 
@@ -332,14 +334,48 @@ class Player extends Entity {
     setSkin(skin, model = "steve") {
         this.skinModel = model === "alex" ? "alex" : "steve";
         this.body.setSprite(skin);
-        this.applyArmModel();
+        this.applyLimbTextures();
+    }
+
+    isFacingLeft() {
+        return this.lookDirection < -90 || this.lookDirection > 90;
+    }
+
+    isLegacySkin() {
+        const image = this.body?.image;
+        if (!image) return false;
+        if (typeof isLegacySkin === "function") {
+            return isLegacySkin(image);
+        }
+        const width = image.naturalWidth || image.width || 0;
+        const height = image.naturalHeight || image.height || 0;
+        return height > 0 && width >= height * 2;
+    }
+
+    applyLimbTextures() {
+        if (!this.body?.parts) return;
+        const facingLeft = this.isFacingLeft();
+        const crops = getPlayerLimbCrops(
+            this.skinModel,
+            facingLeft,
+            this.isLegacySkin(),
+        );
+        for (const partName of ["leftArm", "rightArm", "leftLeg", "rightLeg"]) {
+            if (this.body.parts[partName] && crops[partName]) {
+                this.body.parts[partName].spriteCrop = crops[partName];
+            }
+        }
+
+        // Head uses the real left/right side faces instead of mirroring one side
+        if (this.body.parts.head) {
+            this.body.parts.head.spriteCrop = facingLeft
+                ? { x: 16, y: 8, width: 8, height: 8 }
+                : { x: 0, y: 8, width: 8, height: 8 };
+        }
     }
 
     applyArmModel() {
-        if (!this.body?.parts?.leftArm || !this.body?.parts?.rightArm) return;
-        const arms = getPlayerArmCrops(this.skinModel);
-        this.body.parts.leftArm.spriteCrop = arms.leftArm;
-        this.body.parts.rightArm.spriteCrop = arms.rightArm;
+        this.applyLimbTextures();
     }
 
     multiplayerReceivePlayerState(data) {
@@ -358,6 +394,7 @@ class Player extends Entity {
             });
 
             this.lookDirection = data.lookDirection;
+            this.applyLimbTextures();
         }
     }
 
@@ -1841,21 +1878,66 @@ const skinData = localStorage.getItem("playerSkin");
 const skinModel =
     localStorage.getItem("playerSkinModel") === "alex" ? "alex" : "steve";
 
-function getPlayerArmCrops(model) {
-    if (model === "alex") {
+// Foreground limb = OUTER face of the camera-facing side
+// Background limb = INNER face of the far side
+// Note: on the left limbs, west=inner and east=outer (mirrored vs the right limbs)
+function getPlayerLimbCrops(model, facingLeft = false, legacy = false) {
+    const slim = model === "alex" && !legacy;
+
+    const rightArmOuter = { x: 40, y: 20, width: 4, height: 12 };
+    const rightArmInner = {
+        x: slim ? 47 : 48,
+        y: 20,
+        width: 4,
+        height: 12,
+    };
+    const leftArmInner = { x: 32, y: 52, width: 4, height: 12 };
+    const leftArmOuter = {
+        x: slim ? 39 : 40,
+        y: 52,
+        width: 4,
+        height: 12,
+    };
+
+    const rightLegOuter = { x: 0, y: 20, width: 4, height: 12 };
+    const rightLegInner = { x: 8, y: 20, width: 4, height: 12 };
+    const leftLegInner = { x: 16, y: 52, width: 4, height: 12 };
+    const leftLegOuter = { x: 24, y: 52, width: 4, height: 12 };
+
+    // Legacy 64x32 skins only have the right-limb region
+    if (legacy) {
         return {
-            leftArm: { x: 44, y: 20, width: 3, height: 12 },
-            rightArm: { x: 47, y: 20, width: 4, height: 12 },
+            leftArm: rightArmOuter,
+            rightArm: rightArmInner,
+            leftLeg: rightLegOuter,
+            rightLeg: rightLegInner,
         };
     }
+
+    if (facingLeft) {
+        return {
+            leftArm: leftArmOuter,
+            rightArm: rightArmInner,
+            leftLeg: leftLegOuter,
+            rightLeg: rightLegInner,
+        };
+    }
+
     return {
-        leftArm: { x: 44, y: 20, width: 4, height: 12 },
-        rightArm: { x: 48, y: 20, width: 4, height: 12 },
+        leftArm: rightArmOuter,
+        rightArm: leftArmInner,
+        leftLeg: rightLegOuter,
+        rightLeg: leftLegInner,
     };
 }
 
+function getPlayerArmCrops(model) {
+    const crops = getPlayerLimbCrops(model, false, false);
+    return { leftArm: crops.leftArm, rightArm: crops.rightArm };
+}
+
 function createPlayerBody() {
-    const arms = getPlayerArmCrops(skinModel);
+    const limbs = getPlayerLimbCrops(skinModel);
     return new Body({
         sprite: skinData || "player/steve",
         parts: {
@@ -1865,6 +1947,7 @@ function createPlayerBody() {
                 rotationOrigin: { x: 12, y: 32 },
                 zIndex: 1,
                 eyes: true,
+                skipLookFlip: true,
             }),
             torso: new BodyPart({
                 spriteCrop: { x: 16, y: 20, width: 4, height: 12 },
@@ -1872,7 +1955,7 @@ function createPlayerBody() {
             }),
             leftArm: new BodyPart({
                 offset: { x: 0, y: 34 },
-                spriteCrop: arms.leftArm,
+                spriteCrop: limbs.leftArm,
                 zIndex: 2,
                 rotationOrigin: { x: 5, y: 4 },
                 sways: true,
@@ -1880,21 +1963,21 @@ function createPlayerBody() {
                 holdOrigin: { x: 6, y: 35 },
             }),
             rightArm: new BodyPart({
-                spriteCrop: arms.rightArm,
+                spriteCrop: limbs.rightArm,
                 offset: { x: 0, y: 34 },
                 rotationOrigin: { x: 5, y: 4 },
                 zIndex: -2,
                 sways: true,
             }),
             leftLeg: new BodyPart({
-                spriteCrop: { x: 4, y: 20, width: 4, height: 12 },
+                spriteCrop: limbs.leftLeg,
                 offset: { x: 0, y: 74 },
                 rotationOrigin: { x: 5, y: 0 },
                 zIndex: 1,
                 sways: true,
             }),
             rightLeg: new BodyPart({
-                spriteCrop: { x: 8, y: 20, width: 4, height: 12 },
+                spriteCrop: limbs.rightLeg,
                 offset: { x: 0, y: 74 },
                 rotationOrigin: { x: 5, y: 0 },
                 zIndex: -1,
