@@ -1,4 +1,4 @@
-import { Dimensions } from "./dimension.js";
+import { Dimensions } from "./dimensions.js";
 
 export class Structure {
     constructor({

@@ -1,18 +1,18 @@
 import { runtime } from "../utils/runtime.js";
 import { Entities } from "../entities/entities.js";
 import { InventoryItem } from "./inventoryItem.js";
-import { getItem } from "./item.js";
-import { Items } from "./items.js";
+import { getItem } from "@minecraftjs/shared/item.js";
+import { Items } from "@minecraftjs/shared/items.js";
 import { Vector2 } from "../utils/classes.js";
 import { BLOCK_SIZE, CHUNK_WIDTH, multiplayer } from "../utils/globals.js";
 import { CANVAS, drawText } from "../utils/renderer.js";
 import { screenshotNearestChunks } from "../utils/screenshotChunks.js";
-import { AllBiomes } from "../world/biome.js";
+import { AllBiomes } from "@minecraftjs/shared/biome.js";
 import { getBlock } from "../world/block.js";
-import { Blocks } from "../world/blocks.js";
+import { Blocks } from "@minecraftjs/shared/blocks.js";
 import { activeDimension, gotoDimension } from "../world/dimension.js";
 import { currentSave, saveWorld } from "../world/saving.js";
-import { Structures } from "../world/structures.js";
+import { Structures } from "@minecraftjs/shared/structures.js";
 
 export class Chat {
     constructor() {

@@ -1,8 +1,8 @@
 import { InventoryItem } from "./inventoryItem.js";
 import { Items } from "./items.js";
 import { Recipe, RecipeItem, RecipeType } from "./recipe.js";
-import { BlockCategory } from "../world/block.js";
-import { Blocks } from "../world/blocks.js";
+import { BlockCategory } from "./blockType.js";
+import { Blocks } from "./blocks.js";
 
 export const recipes = [
     //#region Planks

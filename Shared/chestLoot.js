@@ -1,5 +1,5 @@
-import { Items } from "../game/items.js";
-import { LootItem, LootTable } from "../game/lootTable.js";
+import { Items } from "./items.js";
+import { LootItem, LootTable } from "./lootTable.js";
 import { Blocks } from "./blocks.js";
 
 export const ChestLoot = Object.freeze({

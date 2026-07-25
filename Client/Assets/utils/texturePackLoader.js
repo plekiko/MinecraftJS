@@ -1,10 +1,13 @@
 import { runtime } from "./runtime.js";
 import JSZip from "jszip";
 import { entityRegistry } from "../entities/entityRegistry.js";
-import { getItem } from "../game/item.js";
-import { Items } from "../game/items.js";
+import { getItem } from "@minecraftjs/shared/item.js";
+import { Items } from "@minecraftjs/shared/items.js";
 import { getFromLdb } from "./indexDB.js";
-import { blockRegistry } from "../world/blockRegistry.js";
+import { blockRegistry } from "@minecraftjs/shared/blockRegistry.js";
+// Ensure Shared block registry + runtime.getBlock are bound before we scan sprites.
+import "@minecraftjs/shared/blocks.js";
+import "../world/block.js";
 import { resolveAssetUrl } from "./assetBundle.js";
 
 export let texturePackZip = null;
@@ -21,17 +24,23 @@ export async function loadVanillaTextures() {
     // Loop through Blocks
     const Blocks = blockRegistry.Blocks;
     const getBlock = runtime.getBlock;
-    for (const blockKey in Blocks) {
-        const block = getBlock(Blocks[blockKey]);
-        if (block?.iconSprite) {
-            spritePaths.push(`blocks/${block.iconSprite}`);
+    if (Blocks && typeof getBlock === "function") {
+        for (const blockKey in Blocks) {
+            const block = getBlock(Blocks[blockKey]);
+            if (block?.iconSprite) {
+                spritePaths.push(`blocks/${block.iconSprite}`);
+            }
         }
+    } else {
+        console.warn(
+            "Block registry not ready during vanilla texture load; skipping block sprites.",
+        );
     }
 
     // Loop through Items
     for (const itemKey in Items) {
         const item = getItem(Items[itemKey]);
-        if (item.sprite) {
+        if (item?.sprite) {
             spritePaths.push(`items/${item.sprite}`);
         }
     }

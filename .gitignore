@@ -4,6 +4,7 @@ Server/server.properties
 .vscode/settings.json
 Server/node_modules
 Client/node_modules
+Shared/node_modules
 Client/dist
 
 .DS_Store

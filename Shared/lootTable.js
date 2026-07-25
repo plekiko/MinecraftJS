@@ -1,5 +1,5 @@
 import { inventoryRegistry } from "./inventoryRegistry.js";
-import { randomRange } from "../utils/mathUtils.js";
+import { randomRange } from "./math.js";
 
 export class LootItem {
     constructor({

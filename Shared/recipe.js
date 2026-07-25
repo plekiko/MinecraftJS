@@ -1,5 +1,3 @@
-import { input } from "../utils/input.js";
-
 export class Recipe {
     constructor({ type, output, input }) {
         this.type = type;
@@ -24,7 +22,6 @@ export class RecipeItem {
         this.blockId = blockId;
         this.itemId = itemId;
         this.blockCategory = blockCategory;
-
         this.count = count;
     }
 }

@@ -1,0 +1,127 @@
+/** Sound path tables only — playback stays on the client. */
+
+export const Sounds = Object.freeze({
+    Break_Grass: ["dig/grass1", "dig/grass2", "dig/grass3", "dig/grass4"],
+    Break_Cloth: ["dig/cloth1", "dig/cloth2", "dig/cloth3", "dig/cloth4"],
+    Break_Gravel: ["dig/gravel1", "dig/gravel2", "dig/gravel3", "dig/gravel4"],
+    Break_Sand: ["dig/sand1", "dig/sand2", "dig/sand3", "dig/sand4"],
+    Break_Snow: ["dig/snow1", "dig/snow2", "dig/snow3", "dig/snow4"],
+    Break_Stone: ["dig/stone1", "dig/stone2", "dig/stone3", "dig/stone4"],
+    Break_Wood: ["dig/wood1", "dig/wood2", "dig/wood3", "dig/wood4"],
+    Break_Glass: ["dig/glass1", "dig/glass2", "dig/glass3"],
+
+    Breaking_Grass: [
+        "step/grass1",
+        "step/grass2",
+        "step/grass3",
+        "step/grass4",
+        "step/grass5",
+        "step/grass6",
+    ],
+
+    Breaking_Cloth: [
+        "step/cloth1",
+        "step/cloth2",
+        "step/cloth3",
+        "step/cloth4",
+    ],
+
+    Breaking_Gravel: [
+        "step/gravel1",
+        "step/gravel2",
+        "step/gravel3",
+        "step/gravel4",
+    ],
+
+    Breaking_Sand: [
+        "step/sand1",
+        "step/sand2",
+        "step/sand3",
+        "step/sand4",
+        "step/sand5",
+    ],
+
+    Breaking_Snow: ["step/snow1", "step/snow2", "step/snow3", "step/snow4"],
+    Breaking_Stone: [
+        "step/stone1",
+        "step/stone2",
+        "step/stone3",
+        "step/stone4",
+        "step/stone5",
+        "step/stone6",
+    ],
+
+    Breaking_Wood: [
+        "step/wood1",
+        "step/wood2",
+        "step/wood3",
+        "step/wood4",
+        "step/wood5",
+        "step/wood6",
+    ],
+
+    Water_Enter: ["liquid/splash", "liquid/splash2"],
+
+    // Mobs
+    Pig_Say: ["mobs/pig/say1", "mobs/pig/say2", "mobs/pig/say3"],
+    Pig_Step: [
+        "mobs/pig/step1",
+        "mobs/pig/step2",
+        "mobs/pig/step3",
+        "mobs/pig/step4",
+        "mobs/pig/step5",
+    ],
+
+    Cow_Say: [
+        "mobs/cow/say1",
+        "mobs/cow/say2",
+        "mobs/cow/say3",
+        "mobs/cow/say4",
+    ],
+
+    Cow_Step: [
+        "mobs/cow/step1",
+        "mobs/cow/step2",
+        "mobs/cow/step3",
+        "mobs/cow/step4",
+    ],
+
+    Cow_Hurt: ["mobs/cow/hurt1", "mobs/cow/hurt2", "mobs/cow/hurt3"],
+
+    Zombie_Say: ["mobs/zombie/say1", "mobs/zombie/say2", "mobs/zombie/say3"],
+    Zombie_Step: [
+        "mobs/zombie/step1",
+        "mobs/zombie/step2",
+        "mobs/zombie/step3",
+        "mobs/zombie/step4",
+        "mobs/zombie/step5",
+    ],
+
+    Zombie_Hurt: ["mobs/zombie/hurt1", "mobs/zombie/hurt2"],
+
+    Sheep_Say: ["mobs/sheep/say1", "mobs/sheep/say2", "mobs/sheep/say3"],
+    Sheep_Step: [
+        "mobs/sheep/step1",
+        "mobs/sheep/step2",
+        "mobs/sheep/step3",
+        "mobs/sheep/step4",
+        "mobs/sheep/step5",
+    ],
+
+    // Player
+    Player_Hurt: ["player/hit1", "player/hit2", "player/hit3"],
+    Player_Eat: ["player/eat1", "player/eat2", "player/eat3"],
+
+    Explosion: ["tnt/explode1", "tnt/explode2", "tnt/explode3", "tnt/explode4"],
+    TNT_Fuse: ["tnt/fuse"],
+    Creeper_Hurt: [
+        "mobs/creeper/hurt1",
+        "mobs/creeper/hurt2",
+        "mobs/creeper/hurt3",
+        "mobs/creeper/hurt4",
+    ],
+
+    // Blocks
+    Wood_Click: ["blocks/wood_click"],
+    Fizz: ["blocks/fizz"],
+});

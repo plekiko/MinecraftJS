@@ -1,6 +1,6 @@
 import { runtime } from "../utils/runtime.js";
 import { Entity, EntityTypes } from "../game/entity.js";
-import { getItem } from "../game/item.js";
+import { getItem } from "@minecraftjs/shared/item.js";
 import { Vector2, arePropsEqual, uuidv4 } from "../utils/classes.js";
 import { BLOCK_SIZE } from "../utils/globals.js";
 import { getSpriteSize, getSpriteUrl } from "../utils/texturePackLoader.js";

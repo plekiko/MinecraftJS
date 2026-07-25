@@ -1,4 +1,4 @@
-import { ToolType } from "../utils/globals.js";
+import { ToolType } from "./constants.js";
 
 export class Item {
     constructor({
