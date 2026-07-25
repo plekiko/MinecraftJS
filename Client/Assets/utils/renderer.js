@@ -92,7 +92,7 @@ export function hexToRgb(hex) {
 }
 
 export function mouseOverPosition(x, y, sizeX, sizeY, world = false) {
-    const mousePos = runtime.world
+    const mousePos = world
         ? input.getMouseWorldPosition()
         : input.getMousePosition();
 
