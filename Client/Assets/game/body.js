@@ -221,7 +221,37 @@ class BodyPart {
         this.swingProgress = 0;
         this.swingSpeed = 10;
         this.swingAmplitude = 50;
+
+        this._cropCanvas = null;
+        this._cropKey = "";
     }
+
+    getCroppedSprite(image) {
+        const { x, y, width, height } = this.spriteCrop;
+        const key = `${image?.src || ""}:${x},${y},${width},${height}`;
+        if (
+            this._cropCanvas &&
+            this._cropKey === key &&
+            this._cropCanvas.width === width &&
+            this._cropCanvas.height === height
+        ) {
+            return this._cropCanvas;
+        }
+
+        if (!this._cropCanvas) {
+            this._cropCanvas = document.createElement("canvas");
+        }
+        this._cropCanvas.width = width;
+        this._cropCanvas.height = height;
+        this._cropKey = key;
+
+        const cropCtx = this._cropCanvas.getContext("2d");
+        cropCtx.imageSmoothingEnabled = false;
+        cropCtx.clearRect(0, 0, width, height);
+        cropCtx.drawImage(image, x, y, width, height, 0, 0, width, height);
+        return this._cropCanvas;
+    }
+
     getSwayRotation(speed, grounded) {
         const oscillation = Math.sin(
             Date.now() / (grounded ? this.swaySpeed : this.swaySpeed * 5) +
@@ -252,6 +282,7 @@ class BodyPart {
         }
 
         ctx.save();
+        ctx.imageSmoothingEnabled = false;
         ctx.filter = `brightness(${brightness})`;
 
         // Step 1: Translate to the initial position
@@ -284,41 +315,26 @@ class BodyPart {
         const spriteSize = getSpriteSize(this.ownSpriteMap || this.sprite);
         const baseSize = spriteSize.width || 16;
         const scaleFactor = BLOCK_SIZE / baseSize;
-        const destWidth = this.spriteCrop.width * scaleFactor;
-        const destHeight = this.spriteCrop.height * scaleFactor;
+        const destWidth = Math.round(this.spriteCrop.width * scaleFactor);
+        const destHeight = Math.round(this.spriteCrop.height * scaleFactor);
+        const destX = Math.round(-destWidth / (scaleFactor * 2));
+        const destY = Math.round(-destHeight / (scaleFactor * 2));
 
-        ctx.drawImage(
-            img,
-            this.spriteCrop.x,
-            this.spriteCrop.y,
-            this.spriteCrop.width,
-            this.spriteCrop.height,
-            -destWidth / (scaleFactor * 2),
-            -destHeight / (scaleFactor * 2),
-            destWidth,
-            destHeight,
-        );
+        // Draw from a pre-cropped canvas so rotation can't bleed adjacent atlas pixels
+        // (e.g. left head face sits under the head-bottom face on the skin sheet).
+        const cropped = this.getCroppedSprite(img);
+        ctx.drawImage(cropped, destX, destY, destWidth, destHeight);
 
         if (this.zIndex < 0) {
             ctx.globalAlpha = 0.3;
             ctx.fillStyle = "black";
-            ctx.fillRect(
-                -destWidth / (scaleFactor * 2),
-                -destHeight / (scaleFactor * 2),
-                destWidth,
-                destHeight,
-            );
+            ctx.fillRect(destX, destY, destWidth, destHeight);
         }
 
         if (flashingColor) {
             ctx.globalAlpha = 0.4;
             ctx.fillStyle = flashingColor;
-            ctx.fillRect(
-                -destWidth / (scaleFactor * 2),
-                -destHeight / (scaleFactor * 2),
-                destWidth,
-                destHeight,
-            );
+            ctx.fillRect(destX, destY, destWidth, destHeight);
             ctx.globalAlpha = 1;
         }
 
