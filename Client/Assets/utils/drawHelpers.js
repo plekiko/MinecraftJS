@@ -19,11 +19,12 @@ export function drawSimpleImage({
 
     ctx.globalAlpha = opacity;
 
-    const shouldCrop = crop.width > 0 && crop.height > 0;
-    const sourceWidth = shouldCrop ? crop.width : image.width;
-    const sourceHeight = shouldCrop ? crop.height : image.height;
-    const sourceX = shouldCrop ? crop.x : 0;
-    const sourceY = shouldCrop ? crop.y : 0;
+    const safeCrop = crop ?? { x: 0, y: 0, width: 0, height: 0 };
+    const shouldCrop = safeCrop.width > 0 && safeCrop.height > 0;
+    const sourceWidth = shouldCrop ? safeCrop.width : image.width;
+    const sourceHeight = shouldCrop ? safeCrop.height : image.height;
+    const sourceX = shouldCrop ? safeCrop.x : 0;
+    const sourceY = shouldCrop ? safeCrop.y : 0;
 
     const drawWidth = width || sourceWidth * scale;
     const drawHeight = height || sourceHeight * scale;
