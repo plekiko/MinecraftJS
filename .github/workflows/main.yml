@@ -3,7 +3,7 @@ name: Deploy client to itch.io
 on:
     push:
         branches:
-            - live
+            - live-test
 
 jobs:
     deploy:
@@ -53,7 +53,7 @@ jobs:
               env:
                   BUTLER_CREDENTIALS: ${{ secrets.BUTLER_CREDENTIALS }}
                   ITCH_USER: plekiko
-                  ITCH_GAME: minecraft-js
+                  ITCH_GAME: minecraft-js-test-server
                   CHANNEL: html
                   PACKAGE: ./Client/dist
               with:
