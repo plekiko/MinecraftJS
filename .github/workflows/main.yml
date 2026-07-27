@@ -1,4 +1,4 @@
-name: Deploy client to itch.io
+name: Deploy client to itch.io - TEST SERVER
 
 on:
     push:
