@@ -496,7 +496,7 @@ export const blockTypes = [
             }),
         ]),
 
-        // transparent: true,   
+        // transparent: true,
     }),
 
     //#endregion
@@ -1057,7 +1057,7 @@ export const blockTypes = [
         blockId: 700,
         sprite: "sign_stand",
         wallSprite: "sign_hang",
-        iconSprite: "../items/sign",
+        iconSprite: "sign_item",
         name: "Sign",
         hardness: 2.6,
         toolType: ToolType.Axe,
@@ -2235,6 +2235,8 @@ export const blockTypes = [
     //#endregion
 ];
 
-export const blockMap = new Map(blockTypes.map((block) => [block.blockId, block]));
+export const blockMap = new Map(
+    blockTypes.map((block) => [block.blockId, block])
+);
 blockRegistry.Blocks = Blocks;
 blockRegistry.blockMap = blockMap;
